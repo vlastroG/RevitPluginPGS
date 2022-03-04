@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+	<AddIn Type="Application">
+		<Name>MS</Name>
+		<Assembly>D:\Строганов В.Г\REVIT\! C#_Plug-ins\MS\bin\x64\Debug\MS.dll</Assembly>
+		<AddInId>
+			5364EFFC-7B51-439F-BF3E-57E70C4EA891
+		</AddInId>
+		<FullClassName>MS.Main</FullClassName>
+		<Text>Make world better</Text>
+		<Description>PGS plugin for Revit</Description>
+		<VendorId>Vlastro and Doni</VendorId>
+		<Publisher>Vlastro</Publisher>
+		<VendorDescription>Bim</VendorDescription>
+		<VisibilityMode>AlwaysVisible</VisibilityMode>
+	</AddIn>
+</RevitAddIns>
