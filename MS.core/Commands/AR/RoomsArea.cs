@@ -7,7 +7,7 @@ using Autodesk.Revit.UI;
 
 
 
-namespace MS
+namespace MS.core
 {
     [Transaction(TransactionMode.Manual)]
     [Regeneration(RegenerationOption.Manual)]

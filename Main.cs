@@ -5,6 +5,8 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media.Imaging;
+
 
 namespace MS
 {
@@ -19,16 +21,31 @@ namespace MS
         {
             // Create Ribbon tab
 
-            application.CreateRibbonTab("PGS-BIM");
-
             var path = Assembly.GetExecutingAssembly().Location;
-            PushButtonData button = new PushButtonData("RoomsArea", "Квартирография", path, "MS.RoomsArea");
-            PushButtonData button2 = new PushButtonData("Test", "Test", path, "MS.RoomsArea");
 
-            RibbonPanel panel = application.CreateRibbonPanel("PGS-BIM", "Раздел АР2");
+            // Создание вкладки в ленте
+            application.CreateRibbonTab("PGS-BIM");
+            // Инфо раздел
+            RibbonPanel panelGeneral = application.CreateRibbonPanel("PGS-BIM", "Общее");
+            // Раздел АР
+            RibbonPanel panelAR = application.CreateRibbonPanel("PGS-BIM", "Раздел АР");
+            // Раздел СС
+            RibbonPanel panelSS = application.CreateRibbonPanel("PGS-BIM", "Раздел СС");
 
-            panel.AddItem(button);
-            panel.AddItem(button2);
+            PushButtonData btnInfo = new PushButtonData("Info", "Info", path, "MS.Info");
+
+            PushButtonData btnRmArea = new PushButtonData("RoomsArea", "Квартирография", path, "MS.RoomsArea");
+            PushButtonData btnRmFinishing = new PushButtonData("RoomsFinishing", "Отделка", path, "MS.RoomsFinishing");
+
+            PushButtonData btnNumerator = new PushButtonData("Numerator", "Маркировка", path, "MS.Numerator");
+
+
+            panelGeneral.AddItem(btnInfo);
+
+            panelAR.AddItem(btnRmArea);
+            panelAR.AddItem(btnRmFinishing);
+
+            panelSS.AddItem(btnNumerator);
 
             return Result.Succeeded;
         }
