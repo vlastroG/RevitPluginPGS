@@ -23,10 +23,12 @@ namespace MS
 
             var path = Assembly.GetExecutingAssembly().Location;
             PushButtonData button = new PushButtonData("RoomsArea", "Квартирография", path, "MS.RoomsArea");
+            PushButtonData button2 = new PushButtonData("Test", "Test", path, "MS.RoomsArea");
 
-            RibbonPanel panel = application.CreateRibbonPanel("PGS-BIM", "Раздел АР");
+            RibbonPanel panel = application.CreateRibbonPanel("PGS-BIM", "Раздел АР2");
 
             panel.AddItem(button);
+            panel.AddItem(button2);
 
             return Result.Succeeded;
         }
