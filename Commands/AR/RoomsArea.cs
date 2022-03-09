@@ -28,14 +28,16 @@ namespace MS
             Document doc = commandData.Application.ActiveUIDocument.Document;
 
 
-            FilteredElementCollector newRoomFilter = new FilteredElementCollector(doc, doc.ActiveView.Id);
 
-            string paramRoomName = "Имя";
-            string paramRoomApartmentNumber = "АР_НомерКвартиры";
-            string paramRoomSquare = "Площадь";
-            string paramRoomComment = "Комментарии";
-            string paramRoomType = "АР_ТипПомещения";
+            // Фильтр для помещений в активном виде
+            FilteredElementCollector newActiveViewFilterElements = new FilteredElementCollector(doc, doc.ActiveView.Id);
+
+            string paramRoomName = "Имя";//не зависит от шаблона. Зависит только от языка интерфейса.
+            string paramRoomSquare = "Площадь"; //не зависит от шаблона. Зависит только от языка интерфейса.
+            string paramRoomComment = "Комментарии"; //не зависит от шаблона. Зависит только от языка интерфейса.
             string paramRoomCountOfLivingRooms = "АР_КолвоКомнат";
+            string paramRoomApartmentNumber = "АР_НомерКвартиры";
+            string paramRoomType = "АР_ТипПомещения";
             string paramRoomAreaCoeff = "АР_КоэффПлощади";
             string paramApartmAreaAll = "АР_ПлощКвОбщая";
             string paramApartmArea = "АР_ПлощКвартиры";
@@ -50,9 +52,14 @@ namespace MS
 
             switch (projTemp)
             {
-                case "pgs":
-                    break;
                 case "adsk":
+                    paramRoomApartmentNumber = "ADSK_Номер квартиры";
+                    paramRoomType = "ADSK_Тип помещения";
+                    paramRoomCountOfLivingRooms = "ADSK_Количество комнат";
+                    paramRoomAreaCoeff = "ADSK_Коэффициент площади";
+                    paramApartmArea = "ADSK_Площадь квартиры";
+                    paramApartmLive = "ADSK_Площадь квартиры жилая";
+                    paramApartmAreaAll = "ADSK_Площадь квартиры общая";
                     break;
                 default:
                     break;
@@ -61,8 +68,36 @@ namespace MS
             Transaction trans = new Transaction(doc);
             trans.Start("PGS_Flatography");
 
+
             // Инициализация коллекции всех помещений в открытом проекте
-            ICollection<Element> AllRooms = newRoomFilter.OfCategory(BuiltInCategory.OST_Rooms).WhereElementIsNotElementType().ToElements();
+            ICollection<Element> Rooms = newActiveViewFilterElements
+                .OfCategory(BuiltInCategory.OST_Rooms)
+                .WhereElementIsNotElementType()
+                .ToElements();
+
+            List<Element> __rooms_list = new List<Element>();
+            foreach (var room in Rooms)
+            {
+                if (room.LookupParameter(paramRoomApartmentNumber).AsValueString().Contains('0')
+                    || room.LookupParameter(paramRoomApartmentNumber).AsValueString().Contains('1')
+                    || room.LookupParameter(paramRoomApartmentNumber).AsValueString().Contains('2')
+                    || room.LookupParameter(paramRoomApartmentNumber).AsValueString().Contains('3')
+                    || room.LookupParameter(paramRoomApartmentNumber).AsValueString().Contains('4')
+                    || room.LookupParameter(paramRoomApartmentNumber).AsValueString().Contains('5')
+                    || room.LookupParameter(paramRoomApartmentNumber).AsValueString().Contains('6')
+                    || room.LookupParameter(paramRoomApartmentNumber).AsValueString().Contains('7')
+                    || room.LookupParameter(paramRoomApartmentNumber).AsValueString().Contains('8')
+                    || room.LookupParameter(paramRoomApartmentNumber).AsValueString().Contains('9')
+                    )
+                {
+                    __rooms_list.Add(room);
+                }
+            }
+
+            Element[] AllRooms = __rooms_list.ToArray();
+            //ICollection<Element> RoomsForCalculating = new ICollection<Element>();
+
+
 
             // Инициализация списка всех значений параметра помещения АР_ТипПомещения
             List<double> ListOfAllValuesOfParameterTypeOfRoom = new List<double>();
