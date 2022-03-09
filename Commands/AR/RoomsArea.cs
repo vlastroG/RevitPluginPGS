@@ -14,7 +14,7 @@ namespace MS
     public class RoomsArea : IExternalCommand
     {
         /// <summary>
-        /// Выполнение команды
+        /// Расчитывает площади помещений и квартир с учетом коэффициентов, и принадлежности к жилой/нежилой зоне. 
         /// </summary>
         /// <param name="commandData"></param>
         /// <param name="message"></param>
@@ -24,7 +24,7 @@ namespace MS
         {
 
             Document doc = commandData.Application.ActiveUIDocument.Document;
-            FilteredElementCollector newRoomFilter = new FilteredElementCollector(doc);
+            FilteredElementCollector newRoomFilter = new FilteredElementCollector(doc, doc.ActiveView.Id);
             Transaction trans = new Transaction(doc);
             trans.Start("PGS_Flatography");
 
