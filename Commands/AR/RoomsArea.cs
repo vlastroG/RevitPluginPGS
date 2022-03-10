@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Drawing;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Forms;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
@@ -27,10 +29,6 @@ namespace MS
 
             Document doc = commandData.Application.ActiveUIDocument.Document;
 
-
-
-            // Фильтр для помещений в активном виде
-            FilteredElementCollector newActiveViewFilterElements = new FilteredElementCollector(doc, doc.ActiveView.Id);
 
             string paramRoomName = "Имя";//не зависит от шаблона. Зависит только от языка интерфейса.
             string paramRoomSquare = "Площадь"; //не зависит от шаблона. Зависит только от языка интерфейса.
@@ -65,6 +63,32 @@ namespace MS
                     break;
             }
 
+            var all_project_rooms = false;
+
+
+
+            DialogResult dialogResult = MessageBox.Show("Расчитывать площади помещений во всем проекте?", "Выбор диапазона расчета", MessageBoxButtons.YesNo);
+            if (dialogResult == DialogResult.Yes)
+            {
+                all_project_rooms = true;
+            }
+            else if (dialogResult == DialogResult.No)
+            {
+                all_project_rooms = false;
+            }
+
+            FilteredElementCollector newActiveViewFilterElements;
+            if (all_project_rooms)
+            {
+                newActiveViewFilterElements = new FilteredElementCollector(doc);
+            }
+            else
+            {
+
+                // Фильтр для помещений в активном виде
+                newActiveViewFilterElements = new FilteredElementCollector(doc, doc.ActiveView.Id);
+            }
+
             Transaction trans = new Transaction(doc);
             trans.Start("PGS_Flatography");
 
@@ -92,14 +116,14 @@ namespace MS
                 //Исключение помещений с изначально не заданным параметром номера квартиры.
                 //Если номер был задан, но потом его стерли, то такие помещения сгруппируются в одну квартиру и тоже посчитаются.
                 //На расчет нужных помещений с заполненными параметрами это не повлияет.
-                if (!ReferenceEquals(__apartment_number, null)) 
+                if (!ReferenceEquals(__apartment_number, null))
                 {
                     __rooms_list.Add(room);
                 }
             }
 
             Element[] AllRooms = __rooms_list.ToArray();
-           
+
             // Инициализация списка всех значений параметра помещения АР_ТипПомещения
             List<double> ListOfAllValuesOfParameterTypeOfRoom = new List<double>();
 
