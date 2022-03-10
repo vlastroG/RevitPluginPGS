@@ -75,30 +75,31 @@ namespace MS
                 .WhereElementIsNotElementType()
                 .ToElements();
 
+            string __apartment_number;
+            string __default = "value_not_found";
+
             List<Element> __rooms_list = new List<Element>();
             foreach (var room in Rooms)
             {
-                if (room.LookupParameter(paramRoomApartmentNumber).AsValueString().Contains('0')
-                    || room.LookupParameter(paramRoomApartmentNumber).AsValueString().Contains('1')
-                    || room.LookupParameter(paramRoomApartmentNumber).AsValueString().Contains('2')
-                    || room.LookupParameter(paramRoomApartmentNumber).AsValueString().Contains('3')
-                    || room.LookupParameter(paramRoomApartmentNumber).AsValueString().Contains('4')
-                    || room.LookupParameter(paramRoomApartmentNumber).AsValueString().Contains('5')
-                    || room.LookupParameter(paramRoomApartmentNumber).AsValueString().Contains('6')
-                    || room.LookupParameter(paramRoomApartmentNumber).AsValueString().Contains('7')
-                    || room.LookupParameter(paramRoomApartmentNumber).AsValueString().Contains('8')
-                    || room.LookupParameter(paramRoomApartmentNumber).AsValueString().Contains('9')
-                    )
+                try
+                {
+                    __apartment_number = room.LookupParameter(paramRoomApartmentNumber).AsValueString();
+                }
+                catch (Exception)
+                {
+                    __apartment_number = __default;
+                }
+                //Исключение помещений с изначально не заданным параметром номера квартиры.
+                //Если номер был задан, но потом его стерли, то такие помещения сгруппируются в одну квартиру и тоже посчитаются.
+                //На расчет нужных помещений с заполненными параметрами это не повлияет.
+                if (!ReferenceEquals(__apartment_number, null)) 
                 {
                     __rooms_list.Add(room);
                 }
             }
 
             Element[] AllRooms = __rooms_list.ToArray();
-            //ICollection<Element> RoomsForCalculating = new ICollection<Element>();
-
-
-
+           
             // Инициализация списка всех значений параметра помещения АР_ТипПомещения
             List<double> ListOfAllValuesOfParameterTypeOfRoom = new List<double>();
 
