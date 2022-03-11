@@ -134,7 +134,8 @@ namespace MS
             string[] ArrayOfLivingRoomsNames = {
                 "комната",
                 "гостиная",
-                "спальня" };
+                "спальня",
+                "помещение"};
             string[] ArrayOfUnLivingRoomsNamesType1 = {
                 "кухня",
                 "столовая",
