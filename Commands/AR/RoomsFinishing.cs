@@ -19,7 +19,7 @@ namespace MS
     {
         public Result Execute(
             ExternalCommandData commandData,
-            ref string message, 
+            ref string message,
             ElementSet elements)
         {
             UIApplication uiapp = commandData.Application;
@@ -68,6 +68,8 @@ namespace MS
 
                 int i = 0;
 
+                string testOut = "";
+                StringBuilder sb = new StringBuilder();
                 foreach (IList<BoundarySegment> loop in loops)
                 {
                     n = loop.Count;
@@ -78,6 +80,7 @@ namespace MS
                     //  DotOrColon(n));
 
                     int j = 0;
+
 
                     foreach (BoundarySegment seg in loop)
                     {
@@ -93,12 +96,37 @@ namespace MS
                               seg.GetCurve());
                         }
 
+                        ElementId eTypeId = e.GetTypeId();
+
+                        ElementType type = doc.GetElement(eTypeId) as ElementType;
+
+
+                        try
+                        {
+                            sb.Append(type.LookupParameter("Имя типа").AsString());
+
+
+                        }
+                        catch (Exception)
+                        {
+
+                            throw;
+                        }
+
                         //Debug.Print(
                         //  "    Segment {0}: {1} element {2} returned by {3}",
                         //  j++, CurveString(seg.Curve),
                         //  ElementDescription(e), s);
+
                     }
                 }
+                testOut = sb.ToString();
+                Transaction trans = new Transaction(doc);
+                trans.Start("PGS_RoomsFinishing");
+
+                room.LookupParameter("Отделка потолка").Set(testOut);
+
+                trans.Commit();
             }
             return Result.Succeeded;
         }
