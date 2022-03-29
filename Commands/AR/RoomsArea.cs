@@ -132,28 +132,40 @@ namespace MS
 
             // Список названий названий помещений для определения их типа
             string[] ArrayOfLivingRoomsNames = {
-                "комната",
                 "гостиная",
-                "спальня",
-                "помещение"};
+                "детская",
+                "жилая комната",
+                "комната",
+                "помещение",
+                "спальня"};
             string[] ArrayOfUnLivingRoomsNamesType1 = {
-                "кухня",
+                "бельевая",
+                "богодельня",
+                "ванная",
+                "ванная с санузом",
+                "встроенный шкаф",
+                "гардероб", 
+                "гардеробная",
+                "душевая",    
+                "коридор",           
+                "кухня",                
+                "кухня-ниша",
+                "кухня-столовая",
+                "кухня-гостиная",
+                "лестница",
+                "лестница внутриквартирная",
+                "офисное помещение",
+                "постирочная",
+                "прихожая",     
+                "санузел",
+                "совмещенный санузел",
                 "столовая",
                 "с.у.",
                 "с/у",
-                "ванная с санузом",
-                "санузел",
-                "ванная",
-                "душевая",
-                "офисное помещение",
-                "богодельня",
-                "холл",
-                "коридор",
-                "прихожая",
-                "гардероб",
-                "тамбур",
-                "лестница",
-                "кухня-столовая"};
+                "туалет",
+                "холл",                  
+                "отапливаемая кладовая",
+                "тамбур"};
             string[] ArrayOfUnLivingRoomsNamesType2 = {
                 "лоджия" };
             string[] ArrayOfUnLivingRoomsNamesType3 = {
@@ -164,6 +176,9 @@ namespace MS
                 "лестничная клетка",
                 "лифтовая шахта",
                 "лифтовый холл" };
+            string[] ArrayOfUnLivingRoomsNamesType5 = {
+                "холодная кладовая",
+                "веранда"};
 
 
             // Обработка значений параметров всех помещений:
@@ -219,6 +234,11 @@ namespace MS
                 else if (Array.Exists(ArrayOfUnLivingRoomsNamesType4, element => element == RoomName))
                 {
                     Room.LookupParameter(paramRoomType).Set(5);
+                    Room.LookupParameter(paramRoomAreaCoeff).Set(1);
+                }
+                else if (Array.Exists(ArrayOfUnLivingRoomsNamesType5, element => element == RoomName))
+                {
+                    Room.LookupParameter(paramRoomType).Set(4);
                     Room.LookupParameter(paramRoomAreaCoeff).Set(1);
                 }
             }
