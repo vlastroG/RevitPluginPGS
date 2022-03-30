@@ -66,8 +66,6 @@ namespace MS
 
             var all_project_rooms = false;
 
-
-
             DialogResult dialogResult = MessageBox.Show("Расчитывать площади помещений во всем проекте?", "Выбор диапазона расчета", MessageBoxButtons.YesNoCancel);
             if (dialogResult == DialogResult.Yes)
             {

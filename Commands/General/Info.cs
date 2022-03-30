@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace MS
 {
@@ -15,7 +16,14 @@ namespace MS
     {
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
-            throw new NotImplementedException();
+            var messagebox = MessageBox.Show(
+                "Плагин содержит основные команды" +
+                "\nдля проектировщиков ПГС Проект." +
+                "\n" +
+                "\nДля подробной информации обратитесь в BIM-отдел.",
+                "Информация");
+
+            return Result.Succeeded;
         }
     }
 }
