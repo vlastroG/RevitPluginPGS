@@ -63,11 +63,12 @@ namespace MS
                     break;
             }
 
+
             var all_project_rooms = false;
 
 
 
-            DialogResult dialogResult = MessageBox.Show("Расчитывать площади помещений во всем проекте?", "Выбор диапазона расчета", MessageBoxButtons.YesNo);
+            DialogResult dialogResult = MessageBox.Show("Расчитывать площади помещений во всем проекте?", "Выбор диапазона расчета", MessageBoxButtons.YesNoCancel);
             if (dialogResult == DialogResult.Yes)
             {
                 all_project_rooms = true;
@@ -75,6 +76,10 @@ namespace MS
             else if (dialogResult == DialogResult.No)
             {
                 all_project_rooms = false;
+            }
+            else if (dialogResult == DialogResult.Cancel)
+            {
+                return Result.Cancelled;
             }
 
             FilteredElementCollector newActiveViewFilterElements;
@@ -144,11 +149,11 @@ namespace MS
                 "ванная",
                 "ванная с санузом",
                 "встроенный шкаф",
-                "гардероб", 
+                "гардероб",
                 "гардеробная",
-                "душевая",    
-                "коридор",           
-                "кухня",                
+                "душевая",
+                "коридор",
+                "кухня",
                 "кухня-ниша",
                 "кухня-столовая",
                 "кухня-гостиная",
@@ -156,14 +161,14 @@ namespace MS
                 "лестница внутриквартирная",
                 "офисное помещение",
                 "постирочная",
-                "прихожая",     
+                "прихожая",
                 "санузел",
                 "совмещенный санузел",
                 "столовая",
                 "с.у.",
                 "с/у",
                 "туалет",
-                "холл",                  
+                "холл",
                 "отапливаемая кладовая",
                 "тамбур"};
             string[] ArrayOfUnLivingRoomsNamesType2 = {
@@ -190,8 +195,8 @@ namespace MS
                 string RoomApartmentNumber = Room.LookupParameter(paramRoomApartmentNumber).AsString();
                 string RoomSquare = Room.LookupParameter(paramRoomSquare).AsValueString();
                 string RoomComment = Room.LookupParameter(paramRoomComment).AsString();
-                double RoomTypeOf = Room.LookupParameter(paramRoomType).AsDouble();
-                double RoomCountOfLivingRooms = Room.LookupParameter(paramRoomCountOfLivingRooms).AsDouble();
+                int RoomTypeOf = Room.LookupParameter(paramRoomType).AsInteger();
+                int RoomCountOfLivingRooms = Room.LookupParameter(paramRoomCountOfLivingRooms).AsInteger();
 
                 ListOfAllValuesOfParameterTypeOfRoom.Add(RoomTypeOf);
                 ListOfAllValuesOfParameterNumberOfApartment.Add(RoomApartmentNumber);
@@ -248,9 +253,9 @@ namespace MS
             var ListOfUniqueApartmentNumbers = ListOfAllValuesOfParameterNumberOfApartment.Distinct();
 
             // Инициализация списка количества жилых помещений по квартирам
-            List<double> ListOfCountOfLivingRoomsInApartment = new List<double>();
+            List<int> ListOfCountOfLivingRoomsInApartment = new List<int>();
             // Инициализация переменной количества жилых помещений в квартире
-            double CountOfLivingRoomsInApartment;
+            int CountOfLivingRoomsInApartment;
 
             foreach (var ApartmentNumber in ListOfUniqueApartmentNumbers)
             {
@@ -258,7 +263,7 @@ namespace MS
                 foreach (var Room in AllRooms)
                 {
                     if ((Room.LookupParameter(paramRoomApartmentNumber).AsString() == ApartmentNumber)
-                        && (Room.LookupParameter(paramRoomType).AsDouble() == 1))
+                        && (Room.LookupParameter(paramRoomType).AsInteger() == 1))
                     {
                         ListOfLivingRoomsInApartment.Add(Room);
                     }
@@ -268,7 +273,7 @@ namespace MS
             }
 
             // Создание словаря количества жилых комнат на основе номеров квартир
-            Dictionary<string, double> DictionaryOfApartmentNumberAndLivingRoomsCount = new Dictionary<string, double>();
+            Dictionary<string, int> DictionaryOfApartmentNumberAndLivingRoomsCount = new Dictionary<string, int>();
             for (int i = 0; i < ListOfUniqueApartmentNumbers.Count(); i++)
             {
                 try
@@ -290,7 +295,7 @@ namespace MS
             string CurrentNumberOfApartment;
             foreach (var Room in AllRooms)
             {
-                if (Room.LookupParameter(paramRoomType).AsDouble() == 1)
+                if (Room.LookupParameter(paramRoomType).AsInteger() == 1)
                 {
                     ListOfAllLivingRooms.Add(Room);
                 }
@@ -337,7 +342,7 @@ namespace MS
             List<Element> ListOfAllLivingAndUnlivingRooms = new List<Element>();
             foreach (var Room in AllRooms)
             {
-                if (Room.LookupParameter(paramRoomType).AsDouble() < 3)
+                if (Room.LookupParameter(paramRoomType).AsInteger() < 3)
                 {
                     ListOfAllLivingAndUnlivingRooms.Add(Room);
                 }
@@ -389,7 +394,7 @@ namespace MS
                 {
                     if ((Room.LookupParameter(paramRoomApartmentNumber).AsString()
                         == Apartment.ToString())
-                        && (Room.LookupParameter(paramRoomType).AsDouble()
+                        && (Room.LookupParameter(paramRoomType).AsInteger()
                         == 3))
                     {
                         double RoomLodjArea = (Room.LookupParameter(paramRoomSquare).AsDouble()
@@ -399,7 +404,7 @@ namespace MS
                     }
                     else if ((Room.LookupParameter(paramRoomApartmentNumber).AsString()
                         == Apartment.ToString())
-                        && (Room.LookupParameter(paramRoomType).AsDouble()
+                        && (Room.LookupParameter(paramRoomType).AsInteger()
                         == 4))
                     {
                         double RoomBalkonArea = (Room.LookupParameter(paramRoomSquare).AsDouble()
@@ -409,7 +414,7 @@ namespace MS
                     }
                     else if ((Room.LookupParameter(paramRoomApartmentNumber).AsString()
                         == Apartment.ToString())
-                        && (Room.LookupParameter(paramRoomType).AsDouble()
+                        && (Room.LookupParameter(paramRoomType).AsInteger()
                         == 5))
                     {
                         double RoomTotalArea = (Room.LookupParameter(paramRoomSquare).AsDouble()
