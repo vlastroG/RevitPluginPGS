@@ -59,6 +59,8 @@ namespace MS
                     paramApartmLive = "ADSK_Площадь квартиры жилая";
                     paramApartmAreaAll = "ADSK_Площадь квартиры общая";
                     break;
+                case "":
+                    return Result.Cancelled;
                 default:
                     break;
             }
