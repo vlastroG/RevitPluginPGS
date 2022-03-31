@@ -43,6 +43,8 @@ namespace MS
             RibbonPanel panelAR = application.CreateRibbonPanel("PGS-BIM", "Раздел АР");
             // Раздел СС
             RibbonPanel panelSS = application.CreateRibbonPanel("PGS-BIM", "Раздел СС");
+            // Раздел FUN
+            RibbonPanel panelFun = application.CreateRibbonPanel("PGS-BIM", "FUN");
 
             // Info command
             PushButtonData btnInfo = new PushButtonData("Info", "Info", path, "MS.Info");
@@ -79,6 +81,13 @@ namespace MS
             btnNumerator.LargeImage = btnNumeratorImage;
 
 
+            // Fun command
+            PushButtonData btnFun = new PushButtonData("Fun", "Fun", path, "MS.Commands.Fun.Picture");
+            Uri btnFunImagePath = new Uri(@"D:\Строганов В.Г\REVIT\! C#_Plug-ins\MS\Images\Icons\AR\RoomsFinishing.png");
+            BitmapImage btnFunImage = new BitmapImage(btnFunImagePath);
+            btnFun.LargeImage = btnFunImage;
+            btnFun.ToolTip = "Fun picture";
+
             // General panel
             panelGeneral.AddItem(btnInfo);
             panelGeneral.AddItem(btnSelection);
@@ -90,6 +99,8 @@ namespace MS
             // SS panel
             panelSS.AddItem(btnNumerator);
 
+            // Fun panel
+            panelFun.AddItem(btnFun);
 
         }
     }
