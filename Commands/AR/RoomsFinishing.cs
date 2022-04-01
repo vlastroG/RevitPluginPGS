@@ -121,12 +121,15 @@ namespace MS
                     }
                 }
                 testOut = sb.ToString();
-                Transaction trans = new Transaction(doc);
-                trans.Start("PGS_RoomsFinishing");
 
-                room.LookupParameter("Отделка потолка").Set(testOut);
+                using (Transaction trans = new Transaction(doc))
+                {
+                    trans.Start("PGS_RoomsFinishing");
 
-                trans.Commit();
+                    room.LookupParameter("Отделка потолка").Set(testOut);
+
+                    trans.Commit();
+                }
             }
             return Result.Succeeded;
         }
