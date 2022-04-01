@@ -2,12 +2,9 @@
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
-using System;
-using System.Collections;
+using MS.Utilites;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MS
 {
@@ -17,16 +14,40 @@ namespace MS
     {
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
-            FilterSelectByClick(commandData.Application.ActiveUIDocument);
+            // Выбор помещений рамкой на текущем виде
+            SelectByBuiltInCategory(
+                commandData.Application.ActiveUIDocument,
+                BuiltInCategory.OST_Walls,
+                "Выберите помещения.");
 
             return Result.Succeeded;
         }
-        public void FilterSelectByClick(UIDocument uIDocument)
+
+        /// <summary>
+        /// Выбор элементов рамкой по заданной категории
+        /// </summary>
+        /// <param name="uIDocument">Активный документ</param>
+        /// <param name="category">Встроенная категория для выбора</param>
+        /// <param name="message">Подсказка для пользователя</param>
+        private void SelectByBuiltInCategory(UIDocument uIDocument, BuiltInCategory category, string message)
+        {
+            UIDocument uidoc = uIDocument;
+
+            var filter = new SelectionBuiltInCategoryFilter(category);
+
+            IList<Element> elements = uidoc.Selection.PickElementsByRectangle(filter, message);
+        }
+
+        /// <summary>
+        /// Старый метод выбора элементов
+        /// </summary>
+        /// <param name="uIDocument"></param>
+        private void FilterSelectByClick(UIDocument uIDocument)
         {
             UIDocument uidoc = uIDocument;
             Document doc = uidoc.Document;
-
-            Reference refer = uidoc.Selection.PickObject(ObjectType.Element, "Выберите элемент для назначения категории фильтру."); //Pick an object by which Category you will filter
+            //Pick an object by which Category you will filter
+            Reference refer = uidoc.Selection.PickObject(ObjectType.Element, "Выберите элемент для назначения категории фильтру.");
 
             IList<Element> elements = uidoc.Selection.PickElementsByRectangle();
 
@@ -36,6 +57,6 @@ namespace MS
                 .ToList());
         }
 
-        
+
     }
 }
