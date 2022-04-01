@@ -7,9 +7,7 @@ using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Microsoft.VisualBasic;
-
-
-
+using static MS.Utilites.UserInput;
 
 namespace MS
 {
@@ -17,6 +15,79 @@ namespace MS
     [Regeneration(RegenerationOption.Manual)]
     public class RoomsArea : IExternalCommand
     {
+        /// <summary>
+        /// Список названий помещений с типом комнаты 1 и коэффициентом площади 1
+        /// </summary>
+        private readonly string[] ArrayOfLivingRoomsNames = {
+                "гостиная",
+                "детская",
+                "жилая комната",
+                "комната",
+                "помещение",
+                "спальня"};
+
+        /// <summary>
+        /// Список названий помещений с типом комнаты 2 и коэффициентом площади 1
+        /// </summary>
+        private readonly string[] ArrayOfUnLivingRoomsNamesType1 = {
+                "бельевая",
+                "богодельня",
+                "ванная",
+                "ванная с санузом",
+                "встроенный шкаф",
+                "гардероб",
+                "гардеробная",
+                "душевая",
+                "коридор",
+                "кухня",
+                "кухня-ниша",
+                "кухня-столовая",
+                "кухня-гостиная",
+                "лестница",
+                "лестница внутриквартирная",
+                "офисное помещение",
+                "постирочная",
+                "прихожая",
+                "санузел",
+                "совмещенный санузел",
+                "столовая",
+                "с.у.",
+                "с/у",
+                "туалет",
+                "холл",
+                "отапливаемая кладовая",
+                "тамбур"};
+
+        /// <summary>
+        /// Список названий помещений с типом комнаты 3 и коэффициентом площади 0.5
+        /// </summary>
+        private readonly string[] ArrayOfUnLivingRoomsNamesType2 = {
+                "лоджия" };
+
+        /// <summary>
+        /// Список названий помещений с типом комнаты 4 и коэффициентом площади 0.3
+        /// </summary>
+        private readonly string[] ArrayOfUnLivingRoomsNamesType3 = {
+                "балкон",
+                "терраса" };
+
+        /// <summary>
+        /// Список названий помещений с типом комнаты 5 и коэффициентом площади 1
+        /// </summary>
+        private readonly string[] ArrayOfUnLivingRoomsNamesType4 = {
+                "вестибюль",
+                "лестничная клетка",
+                "лифтовая шахта",
+                "лифтовый холл" };
+
+        /// <summary>
+        /// Список названий помещений с типом комнаты 4 и коэффициентом площади 1
+        /// </summary>
+        private readonly string[] ArrayOfUnLivingRoomsNamesType5 = {
+                "холодная кладовая",
+                "веранда"};
+
+
         /// <summary>
         /// Расчитывает площади помещений и квартир с учетом коэффициентов, и принадлежности к жилой/нежилой зоне. 
         /// </summary>
@@ -28,7 +99,6 @@ namespace MS
         {
 
             Document doc = commandData.Application.ActiveUIDocument.Document;
-
 
             string paramRoomName = "Имя";//не зависит от шаблона. Зависит только от языка интерфейса.
             string paramRoomSquare = "Площадь"; //не зависит от шаблона. Зависит только от языка интерфейса.
@@ -42,11 +112,10 @@ namespace MS
             string paramApartmLive = "АР_ПлощКвЖилая";
 
 
-            var projTemp = Interaction.InputBox(
-                "Проект выполнен в шаблоне PGS или ADSK?\nВведите \'ADSK' или \'PGS\'."
-                , "Указание текущего шаблона"
-                , "PGS")
-                .ToLower();
+            var projTemp = GetStringFromUser(
+                "Указание текущего шаблона",
+                "Проект выполнен в шаблоне PGS или ADSK?\nВведите \'ADSK' или \'PGS\'.",
+                "PGS");
 
             switch (projTemp)
             {
@@ -67,8 +136,10 @@ namespace MS
 
 
             var all_project_rooms = false;
+            var dialogResult = YesNoCancelInput(
+                "Выбор диапазона расчета",
+                "Расчитывать площади помещений во всем проекте?");
 
-            DialogResult dialogResult = MessageBox.Show("Расчитывать площади помещений во всем проекте?", "Выбор диапазона расчета", MessageBoxButtons.YesNoCancel);
             if (dialogResult == DialogResult.Yes)
             {
                 all_project_rooms = true;
@@ -135,57 +206,7 @@ namespace MS
             // Инициализация списка всех значений параметра помещения АР_НомерКвартиры
             List<string> ListOfAllValuesOfParameterNumberOfApartment = new List<string>();
 
-            // Список названий названий помещений для определения их типа
-            string[] ArrayOfLivingRoomsNames = {
-                "гостиная",
-                "детская",
-                "жилая комната",
-                "комната",
-                "помещение",
-                "спальня"};
-            string[] ArrayOfUnLivingRoomsNamesType1 = {
-                "бельевая",
-                "богодельня",
-                "ванная",
-                "ванная с санузом",
-                "встроенный шкаф",
-                "гардероб",
-                "гардеробная",
-                "душевая",
-                "коридор",
-                "кухня",
-                "кухня-ниша",
-                "кухня-столовая",
-                "кухня-гостиная",
-                "лестница",
-                "лестница внутриквартирная",
-                "офисное помещение",
-                "постирочная",
-                "прихожая",
-                "санузел",
-                "совмещенный санузел",
-                "столовая",
-                "с.у.",
-                "с/у",
-                "туалет",
-                "холл",
-                "отапливаемая кладовая",
-                "тамбур"};
-            string[] ArrayOfUnLivingRoomsNamesType2 = {
-                "лоджия" };
-            string[] ArrayOfUnLivingRoomsNamesType3 = {
-                "балкон",
-                "терраса" };
-            string[] ArrayOfUnLivingRoomsNamesType4 = {
-                "вестибюль",
-                "лестничная клетка",
-                "лифтовая шахта",
-                "лифтовый холл" };
-            string[] ArrayOfUnLivingRoomsNamesType5 = {
-                "холодная кладовая",
-                "веранда"};
-
-
+        
             // Обработка значений параметров всех помещений:
             // по значению параметра paramRoomComment и paramRoomName назначаются значения параметров paramRoomType и paramRoomAreaCoeff.
             // Также в списки добавляются значения параметров paramRoomType и paramRoomApartmentNumber

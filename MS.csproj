@@ -79,6 +79,7 @@
     <Compile Include="Commands\SS\Numerator.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utilites\UserInput.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="SolutionItems\MS.addin" />
@@ -106,5 +107,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
