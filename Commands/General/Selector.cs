@@ -3,6 +3,7 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
 using MS.Utilites;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -15,28 +16,26 @@ namespace MS
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             // Выбор помещений рамкой на текущем виде
-            SelectByBuiltInCategory(
-                commandData.Application.ActiveUIDocument,
-                BuiltInCategory.OST_Walls,
-                "Выберите помещения.");
+            UIDocument uidoc = commandData.Application.ActiveUIDocument;
+
+            var filter = new SelectionRoomFilter();
+
+            List<Element> selectedElements = null;
+            try
+            {
+                //selectedElements = uidoc.Selection.PickElementsByRectangle(filter, "Выберите помещения.").ToList();
+                selectedElements = uidoc.Selection.PickElementsByRectangle(filter, "Выберите помещения.").ToList();
+            }
+            catch (OperationCanceledException e)
+            {
+                return Result.Cancelled;
+            }
+
+            uidoc.Selection.SetElementIds(selectedElements.Select(it => it.Id).ToList());
 
             return Result.Succeeded;
         }
 
-        /// <summary>
-        /// Выбор элементов рамкой по заданной категории
-        /// </summary>
-        /// <param name="uIDocument">Активный документ</param>
-        /// <param name="category">Встроенная категория для выбора</param>
-        /// <param name="message">Подсказка для пользователя</param>
-        private void SelectByBuiltInCategory(UIDocument uIDocument, BuiltInCategory category, string message)
-        {
-            UIDocument uidoc = uIDocument;
-
-            var filter = new SelectionBuiltInCategoryFilter(category);
-
-            IList<Element> elements = uidoc.Selection.PickElementsByRectangle(filter, message);
-        }
 
         /// <summary>
         /// Старый метод выбора элементов
@@ -56,7 +55,5 @@ namespace MS
                 .Select(x => x.Id)
                 .ToList());
         }
-
-
     }
 }

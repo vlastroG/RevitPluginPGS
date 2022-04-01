@@ -50,7 +50,7 @@ namespace MS
             btnInfo.ToolTip = "Выбор элементов по заданной категории. Категория берется из первого выбранного элемента, затем рамкой выбираются все элементы заданной категории";
 
             // Selection command
-            PushButtonData btnSelection = new PushButtonData("Selection", "Выбор", path, "MS.Selector");
+            PushButtonData btnSelection = new PushButtonData("Selection", "Выбор\nпомещений", path, "MS.Selector");
             Uri btnSelectionImagePath = new Uri(@"D:\Строганов В.Г\REVIT\! C#_Plug-ins\MS\Images\Icons\General\Selection.png");
             BitmapImage btnSelectionImage = new BitmapImage(btnSelectionImagePath);
             btnSelection.LargeImage = btnSelectionImage;
@@ -86,11 +86,12 @@ namespace MS
 
             // General panel
             panelGeneral.AddItem(btnInfo);
-            panelGeneral.AddItem(btnSelection);
+            //panelGeneral.AddItem(btnSelection);
 
             // AR panel
             panelAR.AddItem(btnRmArea);
             panelAR.AddItem(btnRmFinishing);
+            panelAR.AddItem(btnSelection);
 
             // SS panel
             panelSS.AddItem(btnNumerator);
