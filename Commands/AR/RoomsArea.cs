@@ -1,12 +1,10 @@
-﻿using System;
-using System.Drawing;
+﻿using Autodesk.Revit.Attributes;
+using Autodesk.Revit.DB;
+using Autodesk.Revit.UI;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
-using Autodesk.Revit.Attributes;
-using Autodesk.Revit.DB;
-using Autodesk.Revit.UI;
-using Microsoft.VisualBasic;
 using static MS.Utilites.UserInput;
 
 namespace MS
