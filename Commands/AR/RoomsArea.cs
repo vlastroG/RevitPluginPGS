@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using static MS.Utilites.UserInput;
+using MS.GUI.AR;
 
 namespace MS
 {
@@ -109,11 +110,15 @@ namespace MS
             string paramApartmArea = "АР_ПлощКвартиры";
             string paramApartmLive = "АР_ПлощКвЖилая";
 
+            InputRoomsArea inputForm = new InputRoomsArea();
+            inputForm.ShowDialog();
 
-            var projTemp = GetStringFromUser(
-                "Указание текущего шаблона",
-                "Проект выполнен в шаблоне PGS или ADSK?\nВведите \'ADSK' или \'PGS\'.",
-                "PGS");
+
+            var projTemp = inputForm.RevitTemplate;
+            //var projTemp = GetStringFromUser(
+            //    "Указание текущего шаблона",
+            //    "Проект выполнен в шаблоне PGS или ADSK?\nВведите \'ADSK' или \'PGS\'.",
+            //    "PGS");
 
             switch (projTemp)
             {
@@ -133,23 +138,23 @@ namespace MS
             }
 
 
-            var all_project_rooms = false;
-            var dialogResult = YesNoCancelInput(
-                "Выбор диапазона расчета",
-                "Расчитывать площади помещений во всем проекте?");
+            var all_project_rooms = inputForm.AllProjCalc;
+            //var dialogResult = YesNoCancelInput(
+            //    "Выбор диапазона расчета",
+            //    "Расчитывать площади помещений во всем проекте?");
 
-            if (dialogResult == DialogResult.Yes)
-            {
-                all_project_rooms = true;
-            }
-            else if (dialogResult == DialogResult.No)
-            {
-                all_project_rooms = false;
-            }
-            else if (dialogResult == DialogResult.Cancel)
-            {
-                return Result.Cancelled;
-            }
+            //if (dialogResult == DialogResult.Yes)
+            //{
+            //    all_project_rooms = true;
+            //}
+            //else if (dialogResult == DialogResult.No)
+            //{
+            //    all_project_rooms = false;
+            //}
+            //else if (dialogResult == DialogResult.Cancel)
+            //{
+            //    return Result.Cancelled;
+            //}
 
             FilteredElementCollector newActiveViewFilterElements;
             if (all_project_rooms)
