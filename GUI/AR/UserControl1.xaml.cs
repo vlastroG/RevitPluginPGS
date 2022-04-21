@@ -35,12 +35,12 @@ namespace MS.GUI.AR
 
         private void tempPGS_Checked(object sender, RoutedEventArgs e)
         {
-            RevitTemplate = "PGS";
+            RevitTemplate = "pgs";
         }
 
         private void tempADSK_Checked(object sender, RoutedEventArgs e)
         {
-            RevitTemplate = "ADSK";
+            RevitTemplate = "adsk";
         }
 
         /*--------------------calc_scale_choice---------------------------*/
@@ -65,6 +65,16 @@ namespace MS.GUI.AR
         private void threeDecimal_Checked(object sender, RoutedEventArgs e)
         {
             AreaRound = 3;
+        }
+
+        private void Execute_Click(object sender, RoutedEventArgs e)
+        {
+            DialogResult = true;
+        }
+
+        private void Cancel_Click(object sender, RoutedEventArgs e)
+        {
+            DialogResult = false;
         }
     }
 }

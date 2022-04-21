@@ -112,9 +112,13 @@ namespace MS
 
             InputRoomsArea inputForm = new InputRoomsArea();
             inputForm.ShowDialog();
+            if (inputForm.DialogResult == false)
+            {
+                return Result.Cancelled;
+            }
 
 
-            var projTemp = inputForm.RevitTemplate;
+            var projTemp = inputForm.RevitTemplate.ToLower();
             //var projTemp = GetStringFromUser(
             //    "Указание текущего шаблона",
             //    "Проект выполнен в шаблоне PGS или ADSK?\nВведите \'ADSK' или \'PGS\'.",
