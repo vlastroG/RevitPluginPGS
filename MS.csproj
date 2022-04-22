@@ -125,7 +125,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Diagrams\" />
+  </ItemGroup>
   <ItemGroup>
     <Page Include="GUI\AR\UserControl1.xaml">
       <SubType>Designer</SubType>
