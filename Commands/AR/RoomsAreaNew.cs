@@ -175,7 +175,8 @@ namespace MS.Commands.AR
                 string __apartment_number;
                 //Значение параметра номера квартиры для назначения по дефолту в случае ошибки
                 string __default = "value_not_found";
-                              
+
+                // Очистка списка помещений от незаполненного параметра
                 for (var i = 0; i < Rooms.Count; i++)
                 {
                     try
@@ -187,9 +188,8 @@ namespace MS.Commands.AR
                         __apartment_number = __default;
                     }
                     //Исключение помещений (замена на null) с изначально не заданным параметром номера квартиры.
-                    //Если номер был задан, но потом его стерли, то такие помещения сгруппируются в одну квартиру и тоже посчитаются.
-                    //На расчет нужных помещений с заполненными параметрами это не повлияет.
-                    if (ReferenceEquals(__apartment_number, null))
+                    //Если номер был задан, но потом его стерли, то такие помещения также заменяются на null.
+                    if (String.IsNullOrEmpty(__apartment_number))
                     {
                         Rooms[i] = null;
                     }
@@ -197,29 +197,29 @@ namespace MS.Commands.AR
                 //Очистка списка помещений от null
                 Rooms.RemoveAll(r => r == null);
 
-
                 // Инициализация списка всех значений параметра помещения АР_ТипПомещения
                 List<double> ListOfAllValuesOfParameterTypeOfRoom = new List<double>();
 
                 // Инициализация списка всех значений параметра помещения АР_НомерКвартиры
                 List<string> ListOfAllValuesOfParameterNumberOfApartment = new List<string>();
 
-
                 // Обработка значений параметров всех помещений:
                 // по значению параметра paramRoomComment и paramRoomName назначаются значения параметров paramRoomType и paramRoomAreaCoeff.
-                // Также в списки добавляются значения параметров paramRoomType и paramRoomApartmentNumber
+                // Также в списки добавляются значения RoomTypeOf    и RoomApartmentNumber
+                //                          параметров paramRoomType и paramRoomApartmentNumber соответственно.
+                string RoomName;
+                string RoomComment;
+                int RoomTypeOf;
+                string RoomApartmentNumber;
                 foreach (var Room in Rooms)
                 {
-                    string RoomName = Room.LookupParameter(paramRoomName).AsString().ToLower();
-                    string RoomApartmentNumber = Room.LookupParameter(paramRoomApartmentNumber).AsString();
-                    //Неиспользуемая переменная, удалить после успешной отладки:
-                    //string RoomSquare__ = Room.LookupParameter(paramRoomSquare).AsValueString();
-                    string RoomComment = Room.LookupParameter(paramRoomComment).AsString();
-                    int RoomTypeOf = Room.LookupParameter(paramRoomType).AsInteger();
-                    //Неиспользуемая переменная, удалить после успешной отладки:
-                    //int RoomCountOfLivingRooms = Room.LookupParameter(paramRoomCountOfLivingRooms).AsInteger();
+                    RoomName = Room.LookupParameter(paramRoomName).AsString().ToLower();
+                    RoomComment = Room.LookupParameter(paramRoomComment).AsString();
 
+                    RoomTypeOf = Room.LookupParameter(paramRoomType).AsInteger();
                     ListOfAllValuesOfParameterTypeOfRoom.Add(RoomTypeOf);
+
+                    RoomApartmentNumber = Room.LookupParameter(paramRoomApartmentNumber).AsString();
                     ListOfAllValuesOfParameterNumberOfApartment.Add(RoomApartmentNumber);
 
                     if (RoomComment == "нежилая")
@@ -275,22 +275,22 @@ namespace MS.Commands.AR
 
                 // Инициализация списка количества жилых помещений по квартирам
                 List<int> ListOfCountOfLivingRoomsInApartment = new List<int>();
-                // Инициализация переменной количества жилых помещений в квартире
-                int CountOfLivingRoomsInApartment;
 
+                // Инициализация переменной количества жилых помещений в квартире
+                int CountOfLivingRoomsInApartment = 0;
+                //Заполнение списка количества жилых помещений по квартирам
                 foreach (var ApartmentNumber in ListOfUniqueApartmentNumbers)
                 {
-                    List<Element> ListOfLivingRoomsInApartment = new List<Element>();
                     foreach (var Room in Rooms)
                     {
                         if ((Room.LookupParameter(paramRoomApartmentNumber).AsString() == ApartmentNumber)
                             && (Room.LookupParameter(paramRoomType).AsInteger() == 1))
                         {
-                            ListOfLivingRoomsInApartment.Add(Room);
+                            CountOfLivingRoomsInApartment++;
                         }
                     }
-                    CountOfLivingRoomsInApartment = ListOfLivingRoomsInApartment.Count();
                     ListOfCountOfLivingRoomsInApartment.Add(CountOfLivingRoomsInApartment);
+                    CountOfLivingRoomsInApartment = 0;
                 }
 
                 // Создание словаря количества жилых комнат на основе номеров квартир
