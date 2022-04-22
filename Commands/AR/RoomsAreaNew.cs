@@ -324,7 +324,7 @@ namespace MS.Commands.AR
 
                 // Назначение параметра количества жилых комнат жилым помещениям
                 string CurrentNumberOfApartment;
-                foreach (var Room in Rooms)
+                foreach (var Room in ListOfAllLivingAndUnlivingRooms)
                 {
                     if (Room.LookupParameter(paramRoomType).AsInteger() == 1)
                     {
