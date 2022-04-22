@@ -206,6 +206,9 @@ namespace MS.Commands.AR
                 // Список жилых и нежилых помещений
                 List<Element> ListOfAllLivingAndUnlivingRooms = new List<Element>();
 
+                // Инициализация списка всех жилых комнат в проекте
+                List<Element> ListOfAllLivingRooms = new List<Element>();
+
                 // Обработка значений параметров всех помещений:
                 // по значению параметра paramRoomComment и paramRoomName назначаются значения параметров типа помещения и коэффициента площади.
                 // Также в списки добавляются значения RoomTypeOf    и RoomApartmentNumber
@@ -277,6 +280,12 @@ namespace MS.Commands.AR
                     {
                         ListOfAllLivingAndUnlivingRooms.Add(Room);
                     }
+
+                    // Заполнение списка жилых помещений
+                    if (Room.LookupParameter(paramRoomType).AsInteger() == 1)
+                    {
+                        ListOfAllLivingRooms.Add(Room);
+                    }
                 }
 
                 // Получение списка уникальных номеров квартир в проекте
@@ -319,17 +328,12 @@ namespace MS.Commands.AR
                 }
                 /*------------------------Создание словаря номеров квартир и количества жилых помещений в них (окончание)----------------------*/
 
-                // Инициализация списка всех жилых комнат в проекте
-                List<Element> ListOfAllLivingRooms = new List<Element>();
+
 
                 // Назначение параметра количества жилых комнат жилым помещениям
                 string CurrentNumberOfApartment;
-                foreach (var Room in ListOfAllLivingAndUnlivingRooms)
+                foreach (var Room in ListOfAllLivingRooms)
                 {
-                    if (Room.LookupParameter(paramRoomType).AsInteger() == 1)
-                    {
-                        ListOfAllLivingRooms.Add(Room);
-                    }
                     CurrentNumberOfApartment = Room.LookupParameter(paramRoomApartmentNumber).AsString();
 
                     Room.LookupParameter(paramRoomCountOfLivingRooms).Set(DictionaryOfApartmentNumberAndLivingRoomsCount[CurrentNumberOfApartment]);
