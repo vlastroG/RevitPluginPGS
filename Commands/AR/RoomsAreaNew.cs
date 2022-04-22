@@ -203,10 +203,14 @@ namespace MS.Commands.AR
                 // Инициализация списка всех значений параметра помещения АР_НомерКвартиры
                 List<string> ListOfAllValuesOfParameterNumberOfApartment = new List<string>();
 
+                // Список жилых и нежилых помещений
+                List<Element> ListOfAllLivingAndUnlivingRooms = new List<Element>();
+
                 // Обработка значений параметров всех помещений:
                 // по значению параметра paramRoomComment и paramRoomName назначаются значения параметров типа помещения и коэффициента площади.
                 // Также в списки добавляются значения RoomTypeOf    и RoomApartmentNumber
                 //                          параметров paramRoomType и paramRoomApartmentNumber соответственно.
+                // Также заполняется список жилых и нежилых помещений
                 int RoomTypeOf;
                 string RoomName;
                 string RoomComment;
@@ -266,6 +270,12 @@ namespace MS.Commands.AR
                     {
                         Room.LookupParameter(paramRoomType).Set(4);
                         Room.LookupParameter(paramRoomAreaCoeff).Set(1);
+                    }
+
+                    //Заполнение списка жилых и нежилых помещений
+                    if (Room.LookupParameter(paramRoomType).AsInteger() < 3)
+                    {
+                        ListOfAllLivingAndUnlivingRooms.Add(Room);
                     }
                 }
 
@@ -366,16 +376,6 @@ namespace MS.Commands.AR
                 }
                 /*-----------------------------------------------------------------------------------------------------------------------*/
 
-
-                // Список жилых и нежилых помещений
-                List<Element> ListOfAllLivingAndUnlivingRooms = new List<Element>();
-                foreach (var Room in Rooms)
-                {
-                    if (Room.LookupParameter(paramRoomType).AsInteger() < 3)
-                    {
-                        ListOfAllLivingAndUnlivingRooms.Add(Room);
-                    }
-                }
 
                 // Список общих площадей квартир
                 List<double> ListOfLivingAndUnlivingAreaOfRooms = new List<double>();
