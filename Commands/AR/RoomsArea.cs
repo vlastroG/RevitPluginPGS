@@ -350,8 +350,8 @@ namespace MS
                     {
                         if (Room.LookupParameter(paramRoomApartmentNumber).AsString() == Apartment.ToString())
                         {
-                            double RoomArea = Room.LookupParameter(paramRoomSquare).AsDouble() * footSquare;
-                            OneApartmentArea = Math.Round(OneApartmentArea + RoomArea, round_decimals);
+                            double RoomArea = Math.Round(Math.Round(Room.LookupParameter(paramRoomSquare).AsDouble() * footSquare, round_decimals), round_decimals);
+                            OneApartmentArea = OneApartmentArea + RoomArea;
                         }
                     }
                     ListOfLivingAreasOfApartments.Add(OneApartmentArea);
@@ -399,8 +399,8 @@ namespace MS
                     {
                         if (Room.LookupParameter(paramRoomApartmentNumber).AsString() == Apartment.ToString())
                         {
-                            double RoomUnlivAndLivArea = Room.LookupParameter(paramRoomSquare).AsDouble() * footSquare;
-                            OneApartmentUnlivingAndLivingArea = Math.Round(OneApartmentUnlivingAndLivingArea + RoomUnlivAndLivArea, round_decimals);
+                            double RoomUnlivAndLivArea = Math.Round(Math.Round(Room.LookupParameter(paramRoomSquare).AsDouble() * footSquare, round_decimals), round_decimals);
+                            OneApartmentUnlivingAndLivingArea = OneApartmentUnlivingAndLivingArea + RoomUnlivAndLivArea;
                         }
                     }
                     ListOfLivingAndUnlivingAreaOfRooms.Add(OneApartmentUnlivingAndLivingArea);
@@ -443,9 +443,13 @@ namespace MS
                             && (Room.LookupParameter(paramRoomType).AsInteger()
                             == 3))
                         {
-                            double RoomLodjArea = (Room.LookupParameter(paramRoomSquare).AsDouble()
-                                * footSquare)
-                                * Room.LookupParameter(paramRoomAreaCoeff).AsDouble();
+                            double RoomLodjArea = Math.Round(
+                                Math.Round(
+                                Room.LookupParameter(paramRoomSquare).AsDouble()
+                                * footSquare,
+                                round_decimals)
+                                * Room.LookupParameter(paramRoomAreaCoeff).AsDouble(),
+                                round_decimals);
                             OneApartmentLodjArea = OneApartmentLodjArea + RoomLodjArea;
                         }
                         else if ((Room.LookupParameter(paramRoomApartmentNumber).AsString()
@@ -453,9 +457,13 @@ namespace MS
                             && (Room.LookupParameter(paramRoomType).AsInteger()
                             == 4))
                         {
-                            double RoomBalkonArea = Room.LookupParameter(paramRoomSquare).AsDouble()
-                                * footSquare
-                                * Room.LookupParameter(paramRoomAreaCoeff).AsDouble();
+                            double RoomBalkonArea = Math.Round(
+                                Math.Round(
+                                Room.LookupParameter(paramRoomSquare).AsDouble()
+                                * footSquare,
+                                round_decimals)
+                                * Room.LookupParameter(paramRoomAreaCoeff).AsDouble(),
+                                round_decimals);
                             OneApartmentBalkonArea = OneApartmentBalkonArea + RoomBalkonArea;
                         }
                         else if ((Room.LookupParameter(paramRoomApartmentNumber).AsString()
@@ -463,12 +471,16 @@ namespace MS
                             && (Room.LookupParameter(paramRoomType).AsInteger()
                             == 5))
                         {
-                            double RoomTotalArea = Room.LookupParameter(paramRoomSquare).AsDouble()
-                                * footSquare
-                                * Room.LookupParameter(paramRoomAreaCoeff).AsDouble();
+                            double RoomTotalArea = Math.Round(
+                                Math.Round(
+                                Room.LookupParameter(paramRoomSquare).AsDouble()
+                                * footSquare,
+                                round_decimals)
+                                * Room.LookupParameter(paramRoomAreaCoeff).AsDouble(),
+                                round_decimals);
                             OneApartmentTotalFiveArea = OneApartmentTotalFiveArea + RoomTotalArea;
                         }
-                        OneApartmentColdTotalArea = Math.Round(OneApartmentLodjArea + OneApartmentBalkonArea + OneApartmentTotalFiveArea, round_decimals);
+                        OneApartmentColdTotalArea = OneApartmentLodjArea + OneApartmentBalkonArea + OneApartmentTotalFiveArea;
                     }
                     ListOfAreasOfUnlivColdRooms.Add(OneApartmentColdTotalArea);
                 }
