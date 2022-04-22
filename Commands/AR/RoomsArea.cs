@@ -351,7 +351,7 @@ namespace MS
                         if (Room.LookupParameter(paramRoomApartmentNumber).AsString() == Apartment.ToString())
                         {
                             double RoomArea = Room.LookupParameter(paramRoomSquare).AsDouble() * footSquare;
-                            OneApartmentArea = OneApartmentArea + RoomArea;
+                            OneApartmentArea = Math.Round(OneApartmentArea + RoomArea, round_decimals);
                         }
                     }
                     ListOfLivingAreasOfApartments.Add(OneApartmentArea);
@@ -361,16 +361,24 @@ namespace MS
                 Dictionary<string, double> DictionaryOfApartmentNumberAndLivingArea = new Dictionary<string, double>();
                 for (int i = 0; i < ListOfUniqueApartmentNumbers.Count(); i++)
                 {
-                    DictionaryOfApartmentNumberAndLivingArea.Add(ListOfUniqueApartmentNumbers.ToArray()[i], ListOfLivingAreasOfApartments.ToArray()[i]);
+                    DictionaryOfApartmentNumberAndLivingArea
+                        .Add(
+                        ListOfUniqueApartmentNumbers.ToArray()[i],
+                        ListOfLivingAreasOfApartments.ToArray()[i]);
                 }
 
+                /*-----------------------------------------------------------------------------------------------------------------------*/
                 // Назначение жилой площади помещениям в квартирах
                 foreach (var Room in ListOfAllLivingRooms)
                 {
                     string ApartmentNumber = Room.LookupParameter(paramRoomApartmentNumber).AsString();
-                    double AreaFromDictionaryNumberAndArea = Math.Round(DictionaryOfApartmentNumberAndLivingArea[ApartmentNumber] / footSquare, round_decimals);
+                    double AreaFromDictionaryNumberAndArea =
+                                                DictionaryOfApartmentNumberAndLivingArea[ApartmentNumber] / footSquare;
+
                     Room.LookupParameter(paramApartmLive).Set(AreaFromDictionaryNumberAndArea);
                 }
+                /*-----------------------------------------------------------------------------------------------------------------------*/
+
 
                 // Список жилых и нежилых помещений
                 List<Element> ListOfAllLivingAndUnlivingRooms = new List<Element>();
@@ -392,7 +400,7 @@ namespace MS
                         if (Room.LookupParameter(paramRoomApartmentNumber).AsString() == Apartment.ToString())
                         {
                             double RoomUnlivAndLivArea = Room.LookupParameter(paramRoomSquare).AsDouble() * footSquare;
-                            OneApartmentUnlivingAndLivingArea = OneApartmentUnlivingAndLivingArea + RoomUnlivAndLivArea;
+                            OneApartmentUnlivingAndLivingArea = Math.Round(OneApartmentUnlivingAndLivingArea + RoomUnlivAndLivArea, round_decimals);
                         }
                     }
                     ListOfLivingAndUnlivingAreaOfRooms.Add(OneApartmentUnlivingAndLivingArea);
@@ -407,14 +415,18 @@ namespace MS
                         ListOfLivingAndUnlivingAreaOfRooms.ToArray()[i]);
                 }
 
+                /*-----------------------------------------------------------------------------------------------------------------------*/
                 // Назначение общай (жилая+нежилая) площади помещениям в квартирах
                 foreach (var Room in ListOfAllLivingAndUnlivingRooms)
                 {
                     string ApartmentNumber = Room.LookupParameter(paramRoomApartmentNumber).AsString();
                     double AreaFromDictionaryOfNumberAndLivUnlivArea =
-                        Math.Round(DictionaryOfApartmentNumberAndLivingAndUnlivingArea[ApartmentNumber] / footSquare, round_decimals);
+                        DictionaryOfApartmentNumberAndLivingAndUnlivingArea[ApartmentNumber] / footSquare;
+
                     Room.LookupParameter(paramApartmArea).Set(AreaFromDictionaryOfNumberAndLivUnlivArea);
                 }
+                /*-----------------------------------------------------------------------------------------------------------------------*/
+
 
                 // Список площадей из типов помещений 3, 4, 5 
                 List<double> ListOfAreasOfUnlivColdRooms = new List<double>();
@@ -432,7 +444,7 @@ namespace MS
                             == 3))
                         {
                             double RoomLodjArea = (Room.LookupParameter(paramRoomSquare).AsDouble()
-                                * Math.Pow(0.3048, 2))
+                                * footSquare)
                                 * Room.LookupParameter(paramRoomAreaCoeff).AsDouble();
                             OneApartmentLodjArea = OneApartmentLodjArea + RoomLodjArea;
                         }
@@ -456,7 +468,7 @@ namespace MS
                                 * Room.LookupParameter(paramRoomAreaCoeff).AsDouble();
                             OneApartmentTotalFiveArea = OneApartmentTotalFiveArea + RoomTotalArea;
                         }
-                        OneApartmentColdTotalArea = OneApartmentLodjArea + OneApartmentBalkonArea + OneApartmentTotalFiveArea;
+                        OneApartmentColdTotalArea = Math.Round(OneApartmentLodjArea + OneApartmentBalkonArea + OneApartmentTotalFiveArea, round_decimals);
                     }
                     ListOfAreasOfUnlivColdRooms.Add(OneApartmentColdTotalArea);
                 }
@@ -475,16 +487,20 @@ namespace MS
                     DictionaryOfApartmentNumberAndTotalArea.Add(ListOfUniqueApartmentNumbers.ToArray()[i], ListOfTotalAreas.ToArray()[i]);
                 }
 
+                /*-----------------------------------------------------------------------------------------------------------------------*/
                 // Назначение общей площади (отапливаемые жилые и нежилые помещения и неотапливаемые помещения) помещениям в квартирах
                 foreach (var Apartment in ListOfUniqueApartmentNumbers)
                 {
                     foreach (var Room in AllRooms)
                     {
                         string ApartmentNumberLast = Room.LookupParameter(paramRoomApartmentNumber).AsString();
-                        double TotalAreaAll = Math.Round(DictionaryOfApartmentNumberAndTotalArea[ApartmentNumberLast] / footSquare, round_decimals);
+                        double TotalAreaAll = DictionaryOfApartmentNumberAndTotalArea[ApartmentNumberLast] / footSquare;
+
                         Room.LookupParameter(paramApartmAreaAll).Set(TotalAreaAll);
                     }
                 }
+                /*-----------------------------------------------------------------------------------------------------------------------*/
+
 
                 trans.Commit();
             }
