@@ -337,7 +337,7 @@ namespace MS.Commands.AR
 
                 // Получение жилой площади квартир 
                 // Инициализация списка жилой площади квартир
-                List<Double> ListOfLivingAreasOfApartments = new List<double>();
+                List<double> ListOfLivingAreasOfApartments = new List<double>();
 
                 // Расчет жилых площадей квартир
                 foreach (var Apartment in ListOfUniqueApartmentNumbers)
