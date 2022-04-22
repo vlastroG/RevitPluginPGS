@@ -99,6 +99,7 @@
     <Compile Include="Utilites\UserInput.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Diagrams\RoomsAreaAlgorithm.drawio" />
     <None Include="packages.config" />
     <None Include="SolutionItems\MS.addin" />
   </ItemGroup>
@@ -125,9 +126,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Diagrams\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Page Include="GUI\AR\UserControl1.xaml">
       <SubType>Designer</SubType>
