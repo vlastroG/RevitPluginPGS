@@ -98,7 +98,7 @@ namespace MS.Commands.AR
         /// <returns></returns>
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
-
+            /*---------------------------------------Ввод входных данных (начало)--------------------------------------------------------------*/
             Document doc = commandData.Application.ActiveUIDocument.Document;
 
             string paramRoomName = "Имя";//не зависит от шаблона. Зависит только от языка интерфейса.
@@ -112,6 +112,7 @@ namespace MS.Commands.AR
             string paramApartmArea = "АР_ПлощКвартиры";
             string paramApartmLive = "АР_ПлощКвЖилая";
 
+            //Вывод окна входных данных
             InputRoomsArea inputForm = new InputRoomsArea();
             inputForm.ShowDialog();
             if (inputForm.DialogResult == false)
@@ -119,13 +120,10 @@ namespace MS.Commands.AR
                 return Result.Cancelled;
             }
 
-
+            //Выбор шаблона, на котором сделан проект
             var projTemp = inputForm.RevitTemplate.ToLower();
-            //var projTemp = GetStringFromUser(
-            //    "Указание текущего шаблона",
-            //    "Проект выполнен в шаблоне PGS или ADSK?\nВведите \'ADSK' или \'PGS\'.",
-            //    "PGS");
 
+            //Назначение названий параметров для квартирографии в соответствии с выбранным шаблоном
             switch (projTemp)
             {
                 case "adsk":
@@ -143,26 +141,14 @@ namespace MS.Commands.AR
                     break;
             }
 
+            // Выбор диапазона подсчета площадей.
+            // Подсчет площадей помещений во всем проекте, если true, и только видимые на виде, если false
+            var all_project_rooms = inputForm.AllProjCalc;
 
-            var all_project_rooms = inputForm.AllProjCalc; //подсчет площадей помещений во всем проекте, если true, и только видимые на виде, если false
-            var round_decimals = inputForm.AreaRound; //число знаков после запятой для округления щначения площадей помещений
-            //var dialogResult = YesNoCancelInput(
-            //    "Выбор диапазона расчета",
-            //    "Расчитывать площади помещений во всем проекте?");
+            //Назначение числа знаков после запятой для округления значения площадей помещений
+            var round_decimals = inputForm.AreaRound;
 
-            //if (dialogResult == DialogResult.Yes)
-            //{
-            //    all_project_rooms = true;
-            //}
-            //else if (dialogResult == DialogResult.No)
-            //{
-            //    all_project_rooms = false;
-            //}
-            //else if (dialogResult == DialogResult.Cancel)
-            //{
-            //    return Result.Cancelled;
-            //}
-
+            // Создание фильтра в соответствии с заданным диапазоном - весь проект/активный вид
             FilteredElementCollector newActiveViewFilterElements;
             if (all_project_rooms)
             {
@@ -170,46 +156,47 @@ namespace MS.Commands.AR
             }
             else
             {
-
                 // Фильтр для помещений в активном виде
                 newActiveViewFilterElements = new FilteredElementCollector(doc, doc.ActiveView.Id);
             }
+            /*---------------------------------------Ввод входных данных (окончание)-----------------------------------------------------------*/
 
             using (Transaction trans = new Transaction(doc))
             {
                 trans.Start("PGS_Flatography");
 
-
                 // Инициализация коллекции всех помещений в открытом проекте
-                ICollection<Element> Rooms = newActiveViewFilterElements
+                List<Element> Rooms = newActiveViewFilterElements
                     .OfCategory(BuiltInCategory.OST_Rooms)
                     .WhereElementIsNotElementType()
-                    .ToElements();
+                    .ToElements().ToList();
 
+                //Значение параметра номера квартиры
                 string __apartment_number;
+                //Значение параметра номера квартиры для назначения по дефолту в случае ошибки
                 string __default = "value_not_found";
-
-                List<Element> __rooms_list = new List<Element>();
-                foreach (var room in Rooms)
+                              
+                for (var i = 0; i < Rooms.Count; i++)
                 {
                     try
                     {
-                        __apartment_number = room.LookupParameter(paramRoomApartmentNumber).AsValueString();
+                        __apartment_number = Rooms[i].LookupParameter(paramRoomApartmentNumber).AsValueString();
                     }
                     catch (Exception)
                     {
                         __apartment_number = __default;
                     }
-                    //Исключение помещений с изначально не заданным параметром номера квартиры.
+                    //Исключение помещений (замена на null) с изначально не заданным параметром номера квартиры.
                     //Если номер был задан, но потом его стерли, то такие помещения сгруппируются в одну квартиру и тоже посчитаются.
                     //На расчет нужных помещений с заполненными параметрами это не повлияет.
-                    if (!ReferenceEquals(__apartment_number, null))
+                    if (ReferenceEquals(__apartment_number, null))
                     {
-                        __rooms_list.Add(room);
+                        Rooms[i] = null;
                     }
                 }
+                //Очистка списка помещений от null
+                Rooms.RemoveAll(r => r == null);
 
-                Element[] AllRooms = __rooms_list.ToArray();
 
                 // Инициализация списка всех значений параметра помещения АР_ТипПомещения
                 List<double> ListOfAllValuesOfParameterTypeOfRoom = new List<double>();
@@ -221,7 +208,7 @@ namespace MS.Commands.AR
                 // Обработка значений параметров всех помещений:
                 // по значению параметра paramRoomComment и paramRoomName назначаются значения параметров paramRoomType и paramRoomAreaCoeff.
                 // Также в списки добавляются значения параметров paramRoomType и paramRoomApartmentNumber
-                foreach (var Room in AllRooms)
+                foreach (var Room in Rooms)
                 {
                     string RoomName = Room.LookupParameter(paramRoomName).AsString().ToLower();
                     string RoomApartmentNumber = Room.LookupParameter(paramRoomApartmentNumber).AsString();
@@ -294,7 +281,7 @@ namespace MS.Commands.AR
                 foreach (var ApartmentNumber in ListOfUniqueApartmentNumbers)
                 {
                     List<Element> ListOfLivingRoomsInApartment = new List<Element>();
-                    foreach (var Room in AllRooms)
+                    foreach (var Room in Rooms)
                     {
                         if ((Room.LookupParameter(paramRoomApartmentNumber).AsString() == ApartmentNumber)
                             && (Room.LookupParameter(paramRoomType).AsInteger() == 1))
@@ -327,7 +314,7 @@ namespace MS.Commands.AR
 
                 // Назначение параметра количества жилых комнат жилым помещениям
                 string CurrentNumberOfApartment;
-                foreach (var Room in AllRooms)
+                foreach (var Room in Rooms)
                 {
                     if (Room.LookupParameter(paramRoomType).AsInteger() == 1)
                     {
@@ -382,7 +369,7 @@ namespace MS.Commands.AR
 
                 // Список жилых и нежилых помещений
                 List<Element> ListOfAllLivingAndUnlivingRooms = new List<Element>();
-                foreach (var Room in AllRooms)
+                foreach (var Room in Rooms)
                 {
                     if (Room.LookupParameter(paramRoomType).AsInteger() < 3)
                     {
@@ -436,7 +423,7 @@ namespace MS.Commands.AR
                     double OneApartmentLodjArea = 0;
                     double OneApartmentTotalFiveArea = 0;
                     double OneApartmentColdTotalArea = 0;
-                    foreach (var Room in AllRooms)
+                    foreach (var Room in Rooms)
                     {
                         if ((Room.LookupParameter(paramRoomApartmentNumber).AsString()
                             == Apartment.ToString())
@@ -503,7 +490,7 @@ namespace MS.Commands.AR
                 // Назначение общей площади (отапливаемые жилые и нежилые помещения и неотапливаемые помещения) помещениям в квартирах
                 foreach (var Apartment in ListOfUniqueApartmentNumbers)
                 {
-                    foreach (var Room in AllRooms)
+                    foreach (var Room in Rooms)
                     {
                         string ApartmentNumberLast = Room.LookupParameter(paramRoomApartmentNumber).AsString();
                         double TotalAreaAll = DictionaryOfApartmentNumberAndTotalArea[ApartmentNumberLast] / footSquare;
