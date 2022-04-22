@@ -84,6 +84,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands\AR\RoomsArea.cs" />
+    <Compile Include="Commands\AR\RoomsAreaNew.cs" />
     <Compile Include="Commands\AR\RoomsFinishing.cs" />
     <Compile Include="Commands\Fun\Picture.cs" />
     <Compile Include="Commands\General\Info.cs" />
