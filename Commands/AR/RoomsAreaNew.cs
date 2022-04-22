@@ -204,12 +204,12 @@ namespace MS.Commands.AR
                 List<string> ListOfAllValuesOfParameterNumberOfApartment = new List<string>();
 
                 // Обработка значений параметров всех помещений:
-                // по значению параметра paramRoomComment и paramRoomName назначаются значения параметров paramRoomType и paramRoomAreaCoeff.
+                // по значению параметра paramRoomComment и paramRoomName назначаются значения параметров типа помещения и коэффициента площади.
                 // Также в списки добавляются значения RoomTypeOf    и RoomApartmentNumber
                 //                          параметров paramRoomType и paramRoomApartmentNumber соответственно.
+                int RoomTypeOf;
                 string RoomName;
                 string RoomComment;
-                int RoomTypeOf;
                 string RoomApartmentNumber;
                 foreach (var Room in Rooms)
                 {
@@ -269,14 +269,13 @@ namespace MS.Commands.AR
                     }
                 }
 
-
                 // Получение списка уникальных номеров квартир в проекте
                 var ListOfUniqueApartmentNumbers = ListOfAllValuesOfParameterNumberOfApartment.Distinct();
 
                 // Инициализация списка количества жилых помещений по квартирам
                 List<int> ListOfCountOfLivingRoomsInApartment = new List<int>();
 
-                // Инициализация переменной количества жилых помещений в квартире
+                /*-------------------------Создание словаря номеров квартир и количества жилых помещений в них (начало)------------------------*/
                 int CountOfLivingRoomsInApartment = 0;
                 //Заполнение списка количества жилых помещений по квартирам
                 foreach (var ApartmentNumber in ListOfUniqueApartmentNumbers)
@@ -308,6 +307,7 @@ namespace MS.Commands.AR
                         throw;
                     }
                 }
+                /*------------------------Создание словаря номеров квартир и количества жилых помещений в них (окончание)----------------------*/
 
                 // Инициализация списка всех жилых комнат в проекте
                 List<Element> ListOfAllLivingRooms = new List<Element>();
@@ -325,8 +325,8 @@ namespace MS.Commands.AR
                     Room.LookupParameter(paramRoomCountOfLivingRooms).Set(DictionaryOfApartmentNumberAndLivingRoomsCount[CurrentNumberOfApartment]);
                 }
 
-                // получение жилой площади квартир ///////////////////////////////////////////////////////////////////
-                // Инициализация списка жилой площади квартир           
+                // Получение жилой площади квартир 
+                // Инициализация списка жилой площади квартир
                 List<Double> ListOfLivingAreasOfApartments = new List<double>();
 
                 // Расчет жилых площадей квартир
