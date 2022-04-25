@@ -196,13 +196,7 @@ namespace MS.Commands.AR
                 }
                 //Очистка списка помещений от null
                 Rooms.RemoveAll(r => r == null);
-
-                // Инициализация списка всех значений параметра помещения АР_ТипПомещения
-                List<double> ListOfAllValuesOfParameterTypeOfRoom = new List<double>();
-
-                // Инициализация списка всех значений параметра помещения АР_НомерКвартиры
-                List<string> ListOfAllValuesOfParameterNumberOfApartment = new List<string>();
-
+                               
                 // Список жилых и нежилых помещений
                 List<Element> ListOfAllLivingAndUnlivingRooms = new List<Element>();
 
@@ -227,11 +221,9 @@ namespace MS.Commands.AR
                     RoomComment = Room.LookupParameter(paramRoomComment).AsString();
 
                     RoomTypeOf = Room.LookupParameter(paramRoomType).AsInteger();
-                    ListOfAllValuesOfParameterTypeOfRoom.Add(RoomTypeOf);
-
+          
                     RoomApartmentNumber = Room.LookupParameter(paramRoomApartmentNumber).AsString();
-                    ListOfAllValuesOfParameterNumberOfApartment.Add(RoomApartmentNumber);
-
+             
                     if (RoomComment == "нежилая")
                     {
                         Room.LookupParameter(paramRoomType).Set(2);
@@ -308,7 +300,7 @@ namespace MS.Commands.AR
                 }
 
                 // Получение списка уникальных номеров квартир в проекте
-                var ListOfUniqueApartmentNumbers = ListOfAllValuesOfParameterNumberOfApartment.Distinct();
+                var ListOfUniqueApartmentNumbers = DictionaryOfApartmentNumberAndLivingRoomsCount.Keys;
 
                 // Назначение параметра количества жилых комнат жилым помещениям
                 string CurrentNumberOfApartment;
