@@ -196,7 +196,7 @@ namespace MS.Commands.AR
                 }
                 //Очистка списка помещений от null
                 Rooms.RemoveAll(r => r == null);
-                               
+
                 // Список жилых и нежилых помещений
                 List<Element> ListOfAllLivingAndUnlivingRooms = new List<Element>();
 
@@ -205,6 +205,9 @@ namespace MS.Commands.AR
 
                 // Создание словаря количества жилых комнат на основе номеров квартир
                 Dictionary<string, int> DictionaryOfApartmentNumberAndLivingRoomsCount = new Dictionary<string, int>();
+
+                // Создание словаря номер квартиры -> жилая площадь квартиры
+                Dictionary<string, double> DictionaryOfApartmentNumberAndLivingArea = new Dictionary<string, double>();
 
                 // Обработка значений параметров всех помещений:
                 // по значению параметра paramRoomComment и paramRoomName назначаются значения параметров типа помещения и коэффициента площади.
@@ -221,9 +224,9 @@ namespace MS.Commands.AR
                     RoomComment = Room.LookupParameter(paramRoomComment).AsString();
 
                     RoomTypeOf = Room.LookupParameter(paramRoomType).AsInteger();
-          
+
                     RoomApartmentNumber = Room.LookupParameter(paramRoomApartmentNumber).AsString();
-             
+
                     if (RoomComment == "нежилая")
                     {
                         Room.LookupParameter(paramRoomType).Set(2);
@@ -279,7 +282,9 @@ namespace MS.Commands.AR
                     // Заполнение списка жилых помещений
                     if (Room.LookupParameter(paramRoomType).AsInteger() == 1)
                     {
+                        // Заполнение списка жилых комнат
                         ListOfAllLivingRooms.Add(Room);
+
                         // Заполнение словаря количества жилых комнат по номерам квартир
                         if (DictionaryOfApartmentNumberAndLivingRoomsCount.ContainsKey(RoomApartmentNumber))
                         {
@@ -296,7 +301,11 @@ namespace MS.Commands.AR
                                 throw new ArgumentNullException(nameof(Room));
                             }
                         }
+
+                        // Заполнение словаря количества жилых комнат по номерам квартир
+
                     }
+
                 }
 
                 // Получение списка уникальных номеров квартир в проекте
@@ -308,12 +317,15 @@ namespace MS.Commands.AR
                 {
                     CurrentNumberOfApartment = Room.LookupParameter(paramRoomApartmentNumber).AsString();
 
-                    Room.LookupParameter(paramRoomCountOfLivingRooms).Set(DictionaryOfApartmentNumberAndLivingRoomsCount[CurrentNumberOfApartment]);
+                    Room.LookupParameter(paramRoomCountOfLivingRooms)
+                        .Set(DictionaryOfApartmentNumberAndLivingRoomsCount[CurrentNumberOfApartment]);
                 }
 
+                //???????????????????????????????????????????????????  начало
                 // Получение жилой площади квартир 
                 // Инициализация списка жилой площади квартир
                 List<double> ListOfLivingAreasOfApartments = new List<double>();
+
 
                 // Расчет жилых площадей квартир
                 foreach (var Apartment in ListOfUniqueApartmentNumbers)
@@ -330,8 +342,8 @@ namespace MS.Commands.AR
                     ListOfLivingAreasOfApartments.Add(OneApartmentArea);
                 }
 
-                // Создание словаря номер квартиры -> жилая площадь квартиры
-                Dictionary<string, double> DictionaryOfApartmentNumberAndLivingArea = new Dictionary<string, double>();
+                //// Создание словаря номер квартиры -> жилая площадь квартиры
+                //Dictionary<string, double> DictionaryOfApartmentNumberAndLivingArea = new Dictionary<string, double>();
                 for (int i = 0; i < ListOfUniqueApartmentNumbers.Count(); i++)
                 {
                     DictionaryOfApartmentNumberAndLivingArea
@@ -339,6 +351,7 @@ namespace MS.Commands.AR
                         ListOfUniqueApartmentNumbers.ToArray()[i],
                         ListOfLivingAreasOfApartments.ToArray()[i]);
                 }
+                //???????????????????????????????????? окончание
 
                 /*-----------------------------------------------------------------------------------------------------------------------*/
                 // Назначение жилой площади помещениям в квартирах
