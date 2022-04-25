@@ -57,7 +57,7 @@ namespace MS
 
 
             // RoomsAreaPGS command
-            PushButtonData btnRmArea = new PushButtonData("RoomsArea", "Квартирография\nPGS_temp", path, "MS.RoomsArea");
+            PushButtonData btnRmArea = new PushButtonData("RoomsAreaNew", "Квартирография\nPGS_temp", path, "MS.Commands.AR.RoomsAreaNew");
             Uri btnRmAreaImagePath = new Uri(@"D:\Строганов В.Г\REVIT\! C#_Plug-ins\MS\Images\Icons\AR\RoomsArea.png");
             BitmapImage btnRmAreaImage = new BitmapImage(btnRmAreaImagePath);
             btnRmArea.LargeImage = btnRmAreaImage;
