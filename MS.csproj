@@ -83,6 +83,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commands\AR\Models\Apartment.cs" />
     <Compile Include="Commands\AR\RoomsArea.cs" />
     <Compile Include="Commands\AR\RoomsAreaNew.cs" />
     <Compile Include="Commands\AR\RoomsFinishing.cs" />
