@@ -14,7 +14,7 @@ namespace MS.Commands.AR.Models
         /// <summary>
         /// Список всех помещений квартиры
         /// </summary>
-        private List<Room> _rooms = new List<Room>();
+        private readonly List<Room> _rooms = new List<Room>();
 
         /// <summary>
         /// Коэффициент для перевода квадратных футов в квадратные метры
