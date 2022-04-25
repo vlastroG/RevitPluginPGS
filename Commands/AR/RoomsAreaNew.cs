@@ -209,6 +209,9 @@ namespace MS.Commands.AR
                 // Инициализация списка всех жилых комнат в проекте
                 List<Element> ListOfAllLivingRooms = new List<Element>();
 
+                // Создание словаря количества жилых комнат на основе номеров квартир
+                Dictionary<string, int> DictionaryOfApartmentNumberAndLivingRoomsCount = new Dictionary<string, int>();
+
                 // Обработка значений параметров всех помещений:
                 // по значению параметра paramRoomComment и paramRoomName назначаются значения параметров типа помещения и коэффициента площади.
                 // Также в списки добавляются значения RoomTypeOf    и RoomApartmentNumber
@@ -285,50 +288,27 @@ namespace MS.Commands.AR
                     if (Room.LookupParameter(paramRoomType).AsInteger() == 1)
                     {
                         ListOfAllLivingRooms.Add(Room);
+                        // Заполнение словаря количества жилых комнат по номерам квартир
+                        if (DictionaryOfApartmentNumberAndLivingRoomsCount.ContainsKey(RoomApartmentNumber))
+                        {
+                            DictionaryOfApartmentNumberAndLivingRoomsCount[RoomApartmentNumber]++;
+                        }
+                        else
+                        {
+                            try
+                            {
+                                DictionaryOfApartmentNumberAndLivingRoomsCount.Add(RoomApartmentNumber, 1);
+                            }
+                            catch (ArgumentNullException)
+                            {
+                                throw new ArgumentNullException(nameof(Room));
+                            }
+                        }
                     }
                 }
 
                 // Получение списка уникальных номеров квартир в проекте
                 var ListOfUniqueApartmentNumbers = ListOfAllValuesOfParameterNumberOfApartment.Distinct();
-
-                // Инициализация списка количества жилых помещений по квартирам
-                List<int> ListOfCountOfLivingRoomsInApartment = new List<int>();
-
-                /*-------------------------Создание словаря номеров квартир и количества жилых помещений в них (начало)------------------------*/
-                int CountOfLivingRoomsInApartment = 0;
-                //Заполнение списка количества жилых помещений по квартирам
-                foreach (var ApartmentNumber in ListOfUniqueApartmentNumbers)
-                {
-                    foreach (var Room in Rooms)
-                    {
-                        if ((Room.LookupParameter(paramRoomApartmentNumber).AsString() == ApartmentNumber)
-                            && (Room.LookupParameter(paramRoomType).AsInteger() == 1))
-                        {
-                            CountOfLivingRoomsInApartment++;
-                        }
-                    }
-                    ListOfCountOfLivingRoomsInApartment.Add(CountOfLivingRoomsInApartment);
-                    CountOfLivingRoomsInApartment = 0;
-                }
-
-                // Создание словаря количества жилых комнат на основе номеров квартир
-                Dictionary<string, int> DictionaryOfApartmentNumberAndLivingRoomsCount = new Dictionary<string, int>();
-                for (int i = 0; i < ListOfUniqueApartmentNumbers.Count(); i++)
-                {
-                    try
-                    {
-                        DictionaryOfApartmentNumberAndLivingRoomsCount.Add(
-                            ListOfUniqueApartmentNumbers.ToArray()[i],
-                            ListOfCountOfLivingRoomsInApartment.ToArray()[i]);
-                    }
-                    catch (ArgumentNullException)
-                    {
-                        throw;
-                    }
-                }
-                /*------------------------Создание словаря номеров квартир и количества жилых помещений в них (окончание)----------------------*/
-
-
 
                 // Назначение параметра количества жилых комнат жилым помещениям
                 string CurrentNumberOfApartment;
