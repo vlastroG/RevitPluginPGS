@@ -93,7 +93,7 @@ namespace MS.Commands.AR.Models
             foreach (var room in rooms)
             {
                 area += Math.Round(room.get_Parameter(BuiltInParameter.ROOM_AREA)
-                                       .AsDouble() * _footSquare, round_decimals) / _footSquare;
+                                       .AsDouble() * _footSquare, round_decimals, MidpointRounding.AwayFromZero) / _footSquare;
             }
             return area;
         }
@@ -111,7 +111,7 @@ namespace MS.Commands.AR.Models
             foreach (var room in rooms)
             {
                 area += Math.Round(room.get_Parameter(BuiltInParameter.ROOM_AREA)
-                                       .AsDouble() * _footSquare, round_decimals) / _footSquare;
+                                       .AsDouble() * _footSquare, round_decimals, MidpointRounding.AwayFromZero) / _footSquare;
             }
             return area;
         }
@@ -133,14 +133,14 @@ namespace MS.Commands.AR.Models
                 {
                     area += Math.Round(
                                        Math.Round(room.get_Parameter(BuiltInParameter.ROOM_AREA)
-                                                      .AsDouble() * _footSquare, round_decimals)
+                                                      .AsDouble() * _footSquare, round_decimals, MidpointRounding.AwayFromZero)
                                                   * room.LookupParameter(nameof_param_coeff).AsDouble(),
-                                       round_decimals) / _footSquare;
+                                       round_decimals, MidpointRounding.AwayFromZero) / _footSquare;
                 }
                 else
                 {
                     area += Math.Round(room.get_Parameter(BuiltInParameter.ROOM_AREA)
-                                           .AsDouble() * _footSquare, round_decimals) / _footSquare;
+                                           .AsDouble() * _footSquare, round_decimals, MidpointRounding.AwayFromZero) / _footSquare;
                 }
             }
             return area;
