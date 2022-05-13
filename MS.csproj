@@ -91,7 +91,7 @@
   <ItemGroup>
     <Compile Include="Commands\AR\MasonryMesh.cs" />
     <Compile Include="Commands\AR\Models\Apartment.cs" />
-    <Compile Include="Commands\AR\RoomsArea.cs" />
+    <Compile Include="Commands\AR\Archive\RoomsArea.cs" />
     <Compile Include="Commands\AR\RoomsAreaNew.cs" />
     <Compile Include="Commands\AR\RoomsFinishing.cs" />
     <Compile Include="Commands\Fun\Picture.cs" />
@@ -134,9 +134,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Commands\AR\Archive\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Page Include="GUI\AR\UserControl1.xaml">
       <SubType>Designer</SubType>
