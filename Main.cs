@@ -50,10 +50,16 @@ namespace MS
             btnInfo.ToolTip = "Выбор элементов по заданной категории. Категория берется из первого выбранного элемента, затем рамкой выбираются все элементы заданной категории";
 
             // Selection command
-            PushButtonData btnSelection = new PushButtonData("Selection", "Выбор\nпомещений", path, "MS.Selector");
+            PushButtonData btnSelection = new PushButtonData("Selection", "Выбор\nпомещений", path, "MS.Commands.AR.MasonryMesh");
             Uri btnSelectionImagePath = new Uri(@"D:\Строганов В.Г\REVIT\! C#_Plug-ins\MS\Images\Icons\General\Selection.png");
             BitmapImage btnSelectionImage = new BitmapImage(btnSelectionImagePath);
             btnSelection.LargeImage = btnSelectionImage;
+
+            // MasonryMesh command
+            PushButtonData btnMasonryMesh = new PushButtonData("MasonryMesh", "Выбор\nпомещений", path, "MS.Selector");
+            Uri btnMasonryMeshImagePath = new Uri(@"D:\Строганов В.Г\REVIT\! C#_Plug-ins\MS\Images\Icons\General\Selection.png");
+            BitmapImage btnMasonryMeshImage = new BitmapImage(btnMasonryMeshImagePath);
+            btnMasonryMesh.LargeImage = btnMasonryMeshImage;
 
 
             // RoomsAreaPGS command
@@ -92,6 +98,7 @@ namespace MS
             panelAR.AddItem(btnRmArea);
             panelAR.AddItem(btnRmFinishing);
             panelAR.AddItem(btnSelection);
+            panelAR.AddItem(btnMasonryMesh);
 
             // SS panel
             panelSS.AddItem(btnNumerator);

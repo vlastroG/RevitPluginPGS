@@ -15,7 +15,15 @@ namespace MS.Commands.AR
     {
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
-            throw new NotImplementedException();
+            Document doc = commandData.Application.ActiveUIDocument.Document;
+
+            Wall wall = doc.GetElement("3095440") as Wall;
+
+            List<Element> list_doors_windows = (List<Element>)wall.FindInserts(true, false, false, false).Select(i => doc.GetElement(i));
+
+            var door = list_doors_windows[0];
+
+            return Result.Succeeded;
         }
     }
 }
