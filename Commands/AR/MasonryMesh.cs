@@ -20,7 +20,7 @@ namespace MS.Commands.AR
             Wall wall = doc.GetElement("3095440") as Wall;
 
             List<Element> list_doors_windows = (List<Element>)wall.FindInserts(true, false, false, false).Select(i => doc.GetElement(i));
-
+            //тест
             var door = list_doors_windows[0];
 
             return Result.Succeeded;
