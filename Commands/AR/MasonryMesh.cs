@@ -16,11 +16,19 @@ namespace MS.Commands.AR
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             Document doc = commandData.Application.ActiveUIDocument.Document;
+            UIDocument uidoc = commandData.Application.ActiveUIDocument;
 
-            Wall wall = doc.GetElement("3095440") as Wall;
+            string par_name__MeshRowCount = "Арм.ОчереднАрмирРядовКладки";//Определить параметр для фильтрации
 
-            List<Element> list_doors_windows = (List<Element>)wall.FindInserts(true, false, false, false).Select(i => doc.GetElement(i));
-            //тест
+            // Выбор всех однослойных стен в проекте, у которых значение параметра КоличествоАрмируемыхРядов >= 1.
+            var filter = new FilteredElementCollector(doc);
+            var walls = filter.OfCategory(BuiltInCategory.OST_Walls).WhereElementIsNotElementType().ToElements().Select(e => e as Wall).Where(w => w.WallType.GetCompoundStructure().LayerCount == 1).Where(w => w.LookupParameter(par_name__MeshRowCount).AsDouble() >= 1);
+
+
+            Wall wall = walls.FirstOrDefault();
+
+            var list_doors_windows = wall.FindInserts(true, true, true, true).Select(i => doc.GetElement(i)).ToList();
+
             var door = list_doors_windows[0];
 
             return Result.Succeeded;
