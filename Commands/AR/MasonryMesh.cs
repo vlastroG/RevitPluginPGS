@@ -20,14 +20,30 @@ namespace MS.Commands.AR
 
             string par_name__MeshRowCount = "Арм.ОчереднАрмирРядовКладки";//Определить параметр для фильтрации
 
+            Guid guid = Guid.Parse("42795f38-352d-44c6-b739-4a97d0f765db");
             // Выбор всех однослойных стен в проекте, у которых значение параметра КоличествоАрмируемыхРядов >= 1.
             var filter = new FilteredElementCollector(doc);
-            var walls = filter.OfCategory(BuiltInCategory.OST_Walls).WhereElementIsNotElementType().ToElements().Select(e => e as Wall).Where(w => w.WallType.GetCompoundStructure().LayerCount == 1).Where(w => w.LookupParameter(par_name__MeshRowCount).AsDouble() >= 1);
+            var walls = filter
+                .OfCategory(BuiltInCategory.OST_Walls)
+                .WhereElementIsNotElementType()
+                .ToElements()
+                .Select(e => e as Wall)
+                .Where(w => w.WallType.GetCompoundStructure().LayerCount == 1)
+                .Where(w => w.WallType.get_Parameter(guid).AsDouble() >= 1);
+            //.Where(w => w.LookupParameter(par_name__MeshRowCount).AsDouble() >= 1);
 
+            //foreach (var wall in walls)
+            //{
+
+
+            //}
 
             Wall wall = walls.FirstOrDefault();
+            var list_doors_windows = wall
+                .FindInserts(true, true, true, true)
+                .Select(i => doc.GetElement(i))
+                .ToList();
 
-            var list_doors_windows = wall.FindInserts(true, true, true, true).Select(i => doc.GetElement(i)).ToList();
 
             var door = list_doors_windows[0];
 
