@@ -55,6 +55,12 @@ namespace MS
             BitmapImage btnSelectionImage = new BitmapImage(btnSelectionImagePath);
             btnSelection.LargeImage = btnSelectionImage;
 
+            // MasonryMesh command
+            PushButtonData btnMasonryMesh = new PushButtonData("MasonryMesh", "Кладочная\nсетка", path, "MS.Commands.AR.MasonryMesh");
+            Uri btnMasonryMeshImagePath = new Uri(@"D:\Строганов В.Г\REVIT\! C#_Plug-ins\MS\Images\Icons\General\Selection.png");
+            BitmapImage btnMasonryMeshImage = new BitmapImage(btnMasonryMeshImagePath);
+            btnMasonryMesh.LargeImage = btnMasonryMeshImage;
+
 
             // RoomsAreaPGS command
             PushButtonData btnRmArea = new PushButtonData("RoomsAreaNew", "Квартирография\nPGS_temp", path, "MS.Commands.AR.RoomsAreaNew");
@@ -92,6 +98,7 @@ namespace MS
             panelAR.AddItem(btnRmArea);
             panelAR.AddItem(btnRmFinishing);
             panelAR.AddItem(btnSelection);
+            panelAR.AddItem(btnMasonryMesh);
 
             // SS panel
             panelSS.AddItem(btnNumerator);

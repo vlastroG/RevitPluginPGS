@@ -1,12 +1,11 @@
 ﻿using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
+using MS.Commands.AR.Models;
+using MS.GUI.AR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Forms;
-using static MS.Utilites.UserInput;
-using MS.GUI.AR;
 
 namespace MS.Commands.AR
 {
@@ -86,8 +85,6 @@ namespace MS.Commands.AR
                 "холодная кладовая",
                 "веранда"};
 
-        private readonly double footSquare = 0.3048 * 0.3048;
-
 
         /// <summary>
         /// Расчитывает площади помещений и квартир с учетом коэффициентов, и принадлежности к жилой/нежилой зоне. 
@@ -101,9 +98,11 @@ namespace MS.Commands.AR
             /*---------------------------------------Ввод входных данных (начало)--------------------------------------------------------------*/
             Document doc = commandData.Application.ActiveUIDocument.Document;
 
-            string paramRoomName = "Имя";//не зависит от шаблона. Зависит только от языка интерфейса.
-            string paramRoomSquare = "Площадь"; //не зависит от шаблона. Зависит только от языка интерфейса.
-            string paramRoomComment = "Комментарии"; //не зависит от шаблона. Зависит только от языка интерфейса.
+            List<Apartment> _apartments = new List<Apartment>();
+
+            //string paramRoomName = "Имя";//не зависит от шаблона. Зависит только от языка интерфейса.
+            //string paramRoomSquare = "Площадь"; //не зависит от шаблона. Зависит только от языка интерфейса.
+            //string paramRoomComment = "Комментарии"; //не зависит от шаблона. Зависит только от языка интерфейса.
             string paramRoomCountOfLivingRooms = "АР_КолвоКомнат";
             string paramRoomApartmentNumber = "АР_НомерКвартиры";
             string paramRoomType = "АР_ТипПомещения";
@@ -163,8 +162,9 @@ namespace MS.Commands.AR
 
             using (Transaction trans = new Transaction(doc))
             {
-                trans.Start("PGS_Flatography");
+                trans.Start("ПГС квартирография");
 
+                /*---------------------------------------------Получение списка помещений для обработки (начало)-----------------------------*/
                 // Инициализация коллекции всех помещений в открытом проекте
                 List<Element> Rooms = newActiveViewFilterElements
                     .OfCategory(BuiltInCategory.OST_Rooms)
@@ -173,8 +173,6 @@ namespace MS.Commands.AR
 
                 //Значение параметра номера квартиры
                 string __apartment_number;
-                //Значение параметра номера квартиры для назначения по дефолту в случае ошибки
-                string __default = "value_not_found";
 
                 // Очистка списка помещений от незаполненного параметра
                 for (var i = 0; i < Rooms.Count; i++)
@@ -185,7 +183,7 @@ namespace MS.Commands.AR
                     }
                     catch (Exception)
                     {
-                        __apartment_number = __default;
+                        throw new ArgumentException(Rooms[i].get_Parameter(BuiltInParameter.ID_PARAM).ToString());
                     }
                     //Исключение помещений (замена на null) с изначально не заданным параметром номера квартиры.
                     //Если номер был задан, но потом его стерли, то такие помещения также заменяются на null.
@@ -197,34 +195,20 @@ namespace MS.Commands.AR
                 //Очистка списка помещений от null
                 Rooms.RemoveAll(r => r == null);
 
-                // Список жилых и нежилых помещений
-                List<Element> ListOfAllLivingAndUnlivingRooms = new List<Element>();
+                /*---------------------------------------------Получение списка помещений для обработки (окончание)-----------------------------*/
 
-                // Инициализация списка всех жилых комнат в проекте
-                List<Element> ListOfAllLivingRooms = new List<Element>();
-
-                // Создание словаря количества жилых комнат на основе номеров квартир
-                Dictionary<string, int> DictionaryOfApartmentNumberAndLivingRoomsCount = new Dictionary<string, int>();
-
-                // Создание словаря номер квартиры -> жилая площадь квартиры
-                Dictionary<string, double> DictionaryOfApartmentNumberAndLivingArea = new Dictionary<string, double>();
-
+                /*-------------------------------Назначение "типа комнаты" и "коэффициента площади", создание квартир (начало)---------------------*/
                 // Обработка значений параметров всех помещений:
-                // по значению параметра paramRoomComment и paramRoomName назначаются значения параметров типа помещения и коэффициента площади.
+                // по значению параметра Комментарии и Имя комнаты назначаются значения параметров "тип комнаты" и "коэффициента площади".
                 // Также в списки добавляются значения RoomTypeOf    и RoomApartmentNumber
                 //                          параметров paramRoomType и paramRoomApartmentNumber соответственно.
-                // Также заполняется список жилых и нежилых помещений
-                int RoomTypeOf;
                 string RoomName;
                 string RoomComment;
                 string RoomApartmentNumber;
                 foreach (var Room in Rooms)
                 {
-                    RoomName = Room.LookupParameter(paramRoomName).AsString().ToLower();
-                    RoomComment = Room.LookupParameter(paramRoomComment).AsString();
-
-                    RoomTypeOf = Room.LookupParameter(paramRoomType).AsInteger();
-
+                    RoomName = Room.get_Parameter(BuiltInParameter.ROOM_NAME).AsString().ToLower();
+                    RoomComment = Room.get_Parameter(BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS).AsString();
                     RoomApartmentNumber = Room.LookupParameter(paramRoomApartmentNumber).AsString();
 
                     if (RoomComment == "нежилая")
@@ -273,225 +257,42 @@ namespace MS.Commands.AR
                         Room.LookupParameter(paramRoomAreaCoeff).Set(1);
                     }
 
-                    //Заполнение списка жилых и нежилых помещений
-                    if (Room.LookupParameter(paramRoomType).AsInteger() < 3)
+                    //Создание квартир и добавление в них помещений
+                    if (_apartments.Where(a => a.Number == RoomApartmentNumber).Count() == 0)
                     {
-                        ListOfAllLivingAndUnlivingRooms.Add(Room);
+                        var apartment = new Apartment(RoomApartmentNumber);
+                        apartment.AddRoom(Room as Autodesk.Revit.DB.Architecture.Room, paramRoomApartmentNumber);
+                        _apartments.Add(apartment);
                     }
-
-                    // Заполнение списка жилых помещений
-                    if (Room.LookupParameter(paramRoomType).AsInteger() == 1)
+                    else
                     {
-                        // Заполнение списка жилых комнат
-                        ListOfAllLivingRooms.Add(Room);
-
-                        // Заполнение словаря количества жилых комнат по номерам квартир
-                        if (DictionaryOfApartmentNumberAndLivingRoomsCount.ContainsKey(RoomApartmentNumber))
-                        {
-                            DictionaryOfApartmentNumberAndLivingRoomsCount[RoomApartmentNumber]++;
-                        }
-                        else
-                        {
-                            try
-                            {
-                                DictionaryOfApartmentNumberAndLivingRoomsCount.Add(RoomApartmentNumber, 1);
-                            }
-                            catch (ArgumentNullException)
-                            {
-                                throw new ArgumentNullException(nameof(Room));
-                            }
-                        }
-
-                        // Заполнение словаря количества жилых комнат по номерам квартир
-
-                    }
-
-                }
-
-                // Получение списка уникальных номеров квартир в проекте
-                var ListOfUniqueApartmentNumbers = DictionaryOfApartmentNumberAndLivingRoomsCount.Keys;
-
-                // Назначение параметра количества жилых комнат жилым помещениям
-                string CurrentNumberOfApartment;
-                foreach (var Room in ListOfAllLivingRooms)
-                {
-                    CurrentNumberOfApartment = Room.LookupParameter(paramRoomApartmentNumber).AsString();
-
-                    Room.LookupParameter(paramRoomCountOfLivingRooms)
-                        .Set(DictionaryOfApartmentNumberAndLivingRoomsCount[CurrentNumberOfApartment]);
-                }
-
-                //???????????????????????????????????????????????????  начало
-                // Получение жилой площади квартир 
-                // Инициализация списка жилой площади квартир
-                List<double> ListOfLivingAreasOfApartments = new List<double>();
-
-
-                // Расчет жилых площадей квартир
-                foreach (var Apartment in ListOfUniqueApartmentNumbers)
-                {
-                    double OneApartmentArea = 0;
-                    foreach (var Room in ListOfAllLivingRooms)
-                    {
-                        if (Room.LookupParameter(paramRoomApartmentNumber).AsString() == Apartment.ToString())
-                        {
-                            double RoomArea = Math.Round(Math.Round(Room.LookupParameter(paramRoomSquare).AsDouble() * footSquare, round_decimals), round_decimals);
-                            OneApartmentArea = OneApartmentArea + RoomArea;
-                        }
-                    }
-                    ListOfLivingAreasOfApartments.Add(OneApartmentArea);
-                }
-
-                //// Создание словаря номер квартиры -> жилая площадь квартиры
-                //Dictionary<string, double> DictionaryOfApartmentNumberAndLivingArea = new Dictionary<string, double>();
-                for (int i = 0; i < ListOfUniqueApartmentNumbers.Count(); i++)
-                {
-                    DictionaryOfApartmentNumberAndLivingArea
-                        .Add(
-                        ListOfUniqueApartmentNumbers.ToArray()[i],
-                        ListOfLivingAreasOfApartments.ToArray()[i]);
-                }
-                //???????????????????????????????????? окончание
-
-                /*-----------------------------------------------------------------------------------------------------------------------*/
-                // Назначение жилой площади помещениям в квартирах
-                foreach (var Room in ListOfAllLivingRooms)
-                {
-                    string ApartmentNumber = Room.LookupParameter(paramRoomApartmentNumber).AsString();
-                    double AreaFromDictionaryNumberAndArea =
-                                                DictionaryOfApartmentNumberAndLivingArea[ApartmentNumber] / footSquare;
-
-                    Room.LookupParameter(paramApartmLive).Set(AreaFromDictionaryNumberAndArea);
-                }
-                /*-----------------------------------------------------------------------------------------------------------------------*/
-
-
-                // Список общих площадей квартир
-                List<double> ListOfLivingAndUnlivingAreaOfRooms = new List<double>();
-                foreach (var Apartment in ListOfUniqueApartmentNumbers)
-                {
-                    double OneApartmentUnlivingAndLivingArea = 0;
-                    foreach (var Room in ListOfAllLivingAndUnlivingRooms)
-                    {
-                        if (Room.LookupParameter(paramRoomApartmentNumber).AsString() == Apartment.ToString())
-                        {
-                            double RoomUnlivAndLivArea = Math.Round(Math.Round(Room.LookupParameter(paramRoomSquare).AsDouble() * footSquare, round_decimals), round_decimals);
-                            OneApartmentUnlivingAndLivingArea = OneApartmentUnlivingAndLivingArea + RoomUnlivAndLivArea;
-                        }
-                    }
-                    ListOfLivingAndUnlivingAreaOfRooms.Add(OneApartmentUnlivingAndLivingArea);
-                }
-
-                // Словарь номеров квартир -> площади жилых и нежилых помещений
-                Dictionary<string, double> DictionaryOfApartmentNumberAndLivingAndUnlivingArea = new Dictionary<string, double>();
-                for (int i = 0; i < ListOfUniqueApartmentNumbers.Count(); i++)
-                {
-                    DictionaryOfApartmentNumberAndLivingAndUnlivingArea.Add(
-                        ListOfUniqueApartmentNumbers.ToArray()[i],
-                        ListOfLivingAndUnlivingAreaOfRooms.ToArray()[i]);
-                }
-
-                /*-----------------------------------------------------------------------------------------------------------------------*/
-                // Назначение общай (жилая+нежилая) площади помещениям в квартирах
-                foreach (var Room in ListOfAllLivingAndUnlivingRooms)
-                {
-                    string ApartmentNumber = Room.LookupParameter(paramRoomApartmentNumber).AsString();
-                    double AreaFromDictionaryOfNumberAndLivUnlivArea =
-                        DictionaryOfApartmentNumberAndLivingAndUnlivingArea[ApartmentNumber] / footSquare;
-
-                    Room.LookupParameter(paramApartmArea).Set(AreaFromDictionaryOfNumberAndLivUnlivArea);
-                }
-                /*-----------------------------------------------------------------------------------------------------------------------*/
-
-
-                // Список площадей из типов помещений 3, 4, 5 
-                List<double> ListOfAreasOfUnlivColdRooms = new List<double>();
-                foreach (var Apartment in ListOfUniqueApartmentNumbers)
-                {
-                    double OneApartmentBalkonArea = 0;
-                    double OneApartmentLodjArea = 0;
-                    double OneApartmentTotalFiveArea = 0;
-                    double OneApartmentColdTotalArea = 0;
-                    foreach (var Room in Rooms)
-                    {
-                        if ((Room.LookupParameter(paramRoomApartmentNumber).AsString()
-                            == Apartment.ToString())
-                            && (Room.LookupParameter(paramRoomType).AsInteger()
-                            == 3))
-                        {
-                            double RoomLodjArea = Math.Round(
-                                Math.Round(
-                                Room.LookupParameter(paramRoomSquare).AsDouble()
-                                * footSquare,
-                                round_decimals)
-                                * Room.LookupParameter(paramRoomAreaCoeff).AsDouble(),
-                                round_decimals);
-                            OneApartmentLodjArea = OneApartmentLodjArea + RoomLodjArea;
-                        }
-                        else if ((Room.LookupParameter(paramRoomApartmentNumber).AsString()
-                            == Apartment.ToString())
-                            && (Room.LookupParameter(paramRoomType).AsInteger()
-                            == 4))
-                        {
-                            double RoomBalkonArea = Math.Round(
-                                Math.Round(
-                                Room.LookupParameter(paramRoomSquare).AsDouble()
-                                * footSquare,
-                                round_decimals)
-                                * Room.LookupParameter(paramRoomAreaCoeff).AsDouble(),
-                                round_decimals);
-                            OneApartmentBalkonArea = OneApartmentBalkonArea + RoomBalkonArea;
-                        }
-                        else if ((Room.LookupParameter(paramRoomApartmentNumber).AsString()
-                            == Apartment.ToString())
-                            && (Room.LookupParameter(paramRoomType).AsInteger()
-                            == 5))
-                        {
-                            double RoomTotalArea = Math.Round(
-                                Math.Round(
-                                Room.LookupParameter(paramRoomSquare).AsDouble()
-                                * footSquare,
-                                round_decimals)
-                                * Room.LookupParameter(paramRoomAreaCoeff).AsDouble(),
-                                round_decimals);
-                            OneApartmentTotalFiveArea = OneApartmentTotalFiveArea + RoomTotalArea;
-                        }
-                        OneApartmentColdTotalArea = OneApartmentLodjArea + OneApartmentBalkonArea + OneApartmentTotalFiveArea;
-                    }
-                    ListOfAreasOfUnlivColdRooms.Add(OneApartmentColdTotalArea);
-                }
-
-                // Список ИТОГОВЫХ общих площадей квартир 
-                List<double> ListOfTotalAreas = new List<double>();
-                for (int i = 0; i < ListOfUniqueApartmentNumbers.Count(); i++)
-                {
-                    ListOfTotalAreas.Add(ListOfAreasOfUnlivColdRooms.ToArray()[i] + ListOfLivingAndUnlivingAreaOfRooms.ToArray()[i]);
-                }
-
-                // Словарь номеров квартир и площадей жилых и нежилых помещений вместе с неотапливаемыми
-                Dictionary<string, double> DictionaryOfApartmentNumberAndTotalArea = new Dictionary<string, double>();
-                for (int i = 0; i < ListOfUniqueApartmentNumbers.Count(); i++)
-                {
-                    DictionaryOfApartmentNumberAndTotalArea.Add(ListOfUniqueApartmentNumbers.ToArray()[i], ListOfTotalAreas.ToArray()[i]);
-                }
-
-                /*-----------------------------------------------------------------------------------------------------------------------*/
-                // Назначение общей площади (отапливаемые жилые и нежилые помещения и неотапливаемые помещения) помещениям в квартирах
-                foreach (var Apartment in ListOfUniqueApartmentNumbers)
-                {
-                    foreach (var Room in Rooms)
-                    {
-                        string ApartmentNumberLast = Room.LookupParameter(paramRoomApartmentNumber).AsString();
-                        double TotalAreaAll = DictionaryOfApartmentNumberAndTotalArea[ApartmentNumberLast] / footSquare;
-
-                        Room.LookupParameter(paramApartmAreaAll).Set(TotalAreaAll);
+                        var apartment = _apartments.Find(a => a.Number == RoomApartmentNumber);
+                        apartment.AddRoom(Room as Autodesk.Revit.DB.Architecture.Room, paramRoomApartmentNumber);
                     }
                 }
-                /*-----------------------------------------------------------------------------------------------------------------------*/
+                /*----------------------------------Назначение "типа комнаты" и "коэффициента площади", создание квартир (окончание)------------*/
 
+                // Назначение значений площадей (жилая, отапливаемая, приведенная) и количества комнат жилым помещениям в квартирах
+                foreach (var apartment in _apartments)
+                {
+                    var area_live = apartment.GetAreaLiving(paramRoomType, round_decimals);
+                    var area_heated = apartment.GetAreaHeated(paramRoomType, round_decimals);
+                    var area_total = apartment.GetAreaTotalCoeff(paramRoomType, paramRoomAreaCoeff, round_decimals);
+                    var room_liv_count = apartment.GetLivingRooms(paramRoomType).Count;
+                    foreach (var room in apartment.Rooms)
+                    {
+                        room.LookupParameter(paramApartmLive).Set(area_live);
+                        room.LookupParameter(paramApartmArea).Set(area_heated);
+                        room.LookupParameter(paramApartmAreaAll).Set(area_total);
+                        room.LookupParameter(paramRoomCountOfLivingRooms).Set(room_liv_count);
+                    }
+                }
 
                 trans.Commit();
             }
+
+
+
             return Result.Succeeded;
 
         }
