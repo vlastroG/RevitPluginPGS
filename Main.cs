@@ -39,8 +39,10 @@ namespace MS
             RibbonPanel panelAR = application.CreateRibbonPanel("PGS-BIM", "Раздел АР");
             // Раздел СС
             RibbonPanel panelSS = application.CreateRibbonPanel("PGS-BIM", "Раздел СС");
+            // Раздел ОВиК
+            RibbonPanel panelOVVK = application.CreateRibbonPanel("PGS-BIM", "Раздел ОВиК");
             // Раздел FUN
-            RibbonPanel panelFun = application.CreateRibbonPanel("PGS-BIM", "FUN");
+            // RibbonPanel panelFun = application.CreateRibbonPanel("PGS-BIM", "FUN");
 
             // Info command
             PushButtonData btnInfo = new PushButtonData("Info", "Info", path, "MS.Info");
@@ -82,13 +84,19 @@ namespace MS
             BitmapImage btnNumeratorImage = new BitmapImage(btnNumeratorImagePath);
             btnNumerator.LargeImage = btnNumeratorImage;
 
+            // ОВиК Numerator command
+            PushButtonData btnPipelineFittings = new PushButtonData("PipelineFittings", "Арматура\nтрубопроводов", path, "MS.Commands.MEP.PipelineFittings");
+            Uri btnPipelineFittingsImagePath = new Uri(@"D:\Строганов В.Г\REVIT\! C#_Plug-ins\MS\Images\Icons\General\Info.png");
+            BitmapImage btnPipelineFittingsImage = new BitmapImage(btnPipelineFittingsImagePath);
+            btnPipelineFittings.LargeImage = btnPipelineFittingsImage;
+
 
             // Fun command
-            PushButtonData btnFun = new PushButtonData("Fun", "Fun", path, "MS.Commands.Fun.Picture");
-            Uri btnFunImagePath = new Uri(@"D:\Строганов В.Г\REVIT\! C#_Plug-ins\MS\Images\Icons\AR\RoomsFinishing.png");
-            BitmapImage btnFunImage = new BitmapImage(btnFunImagePath);
-            btnFun.LargeImage = btnFunImage;
-            btnFun.ToolTip = "Fun picture";
+            //PushButtonData btnFun = new PushButtonData("Fun", "Fun", path, "MS.Commands.Fun.Picture");
+            //Uri btnFunImagePath = new Uri(@"D:\Строганов В.Г\REVIT\! C#_Plug-ins\MS\Images\Icons\AR\RoomsFinishing.png");
+            //BitmapImage btnFunImage = new BitmapImage(btnFunImagePath);
+            //btnFun.LargeImage = btnFunImage;
+            //btnFun.ToolTip = "Fun picture";
 
             // General panel
             panelGeneral.AddItem(btnInfo);
@@ -102,6 +110,9 @@ namespace MS
 
             // SS panel
             panelSS.AddItem(btnNumerator);
+
+            // ОВиК panel
+            panelOVVK.AddItem(btnPipelineFittings);
 
             // Fun panel
             //panelFun.AddItem(btnFun);
