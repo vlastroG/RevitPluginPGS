@@ -1,5 +1,6 @@
 ﻿using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.Architecture;
 using Autodesk.Revit.UI;
 using System;
 using System.Collections.Generic;
@@ -22,17 +23,23 @@ namespace MS.Commands.MEP
 
             var filter = new FilteredElementCollector(doc);
 
-            var pipe_accessories = filter
-                .OfCategory(BuiltInCategory.OST_PipeAccessory)
+            var rooms = filter
+                .OfCategory(BuiltInCategory.OST_Rooms)
                 .WhereElementIsNotElementType()
                 .ToElements()
-                .Select(e => e as FamilyInstance);
+                .ToList();
+
+            //var pipe_accessories = filter
+            //    .OfCategory(BuiltInCategory.OST_PipeAccessory)
+            //    .WhereElementIsNotElementType()
+            //    .ToElements()
+            //    .Select(e => e as FamilyInstance);
 
 
-            foreach (var pipe_acc in pipe_accessories)
-            {
-                var t = pipe_acc;
-            }
+            //foreach (var pipe_acc in pipe_accessories)
+            //{
+            //    var t = pipe_acc;
+            //}
 
             return Result.Succeeded;
         }
