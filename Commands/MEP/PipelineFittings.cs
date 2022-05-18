@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static MS.Utilites.WorkWithGeometry;
 
 namespace MS.Commands.MEP
 {
@@ -16,29 +17,51 @@ namespace MS.Commands.MEP
     {
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
-
-
             Document doc = commandData.Application.ActiveUIDocument.Document;
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
 
-            var filter = new FilteredElementCollector(doc);
+            var filter_pipe_acs = new FilteredElementCollector(doc);
+            var pipe_accessories = filter_pipe_acs
+                .OfCategory(BuiltInCategory.OST_PipeAccessory)
+                .WhereElementIsNotElementType()
+                .ToElements()
+                .Select(e => e as FamilyInstance);
 
-            IList<Element> links = filter
+            var filter_links = new FilteredElementCollector(doc);
+            IList<Element> links = filter_links
                                    .OfCategory(BuiltInCategory.OST_RvtLinks)
                                    .WhereElementIsNotElementType()
                                    .ToElements();
 
-            foreach (Element link in links)
+            foreach (var pipe_acs in pipe_accessories)
             {
-                var revit_link = link as RevitLinkInstance;
-                var linked_doc = revit_link.GetLinkDocument();
-                var room_filter = new FilteredElementCollector(linked_doc);
-                var linked_rooms = room_filter
-                    .OfCategory(BuiltInCategory.OST_Rooms)
-                    .WhereElementIsNotElementType()
-                    .ToElements();
+                Solid pipe_acs_solid = SolidFromBoundingBox(pipe_acs.get_BoundingBox(doc.ActiveView));
+
+                foreach (Element link in links)
+                {
+                    var revit_link = link as RevitLinkInstance;
+
+                    Transform transform = revit_link.GetTransform();
+                    if (!transform.AlmostEqual(Transform.Identity))
+                    {
+                        pipe_acs_solid = SolidUtils
+                            .CreateTransformed(pipe_acs_solid, transform.Inverse);
+                    }
+                    ElementIntersectsSolidFilter filter_intersects
+                      = new ElementIntersectsSolidFilter(pipe_acs_solid);
+
+                    var linked_doc = revit_link.GetLinkDocument();
+                    var room_filter = new FilteredElementCollector(linked_doc);
+                    var room = room_filter
+                        .OfCategory(BuiltInCategory.OST_Walls)
+                        .WhereElementIsNotElementType()
+                        .ToElements();
+
+                }
 
             }
+
+
 
             //Solid solid = GetSolid(e);
 
@@ -85,11 +108,7 @@ namespace MS.Commands.MEP
             //    .ToElements()
             //    .ToList();
 
-            //var pipe_accessories = filter
-            //    .OfCategory(BuiltInCategory.OST_PipeAccessory)
-            //    .WhereElementIsNotElementType()
-            //    .ToElements()
-            //    .Select(e => e as FamilyInstance);
+
 
 
             //foreach (var pipe_acc in pipe_accessories)
