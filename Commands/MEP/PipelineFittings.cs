@@ -23,11 +23,67 @@ namespace MS.Commands.MEP
 
             var filter = new FilteredElementCollector(doc);
 
-            var rooms = filter
-                .OfCategory(BuiltInCategory.OST_Rooms)
-                .WhereElementIsNotElementType()
-                .ToElements()
-                .ToList();
+            IList<Element> links = filter
+                                   .OfCategory(BuiltInCategory.OST_RvtLinks)
+                                   .WhereElementIsNotElementType()
+                                   .ToElements();
+
+            foreach (Element link in links)
+            {
+                var revit_link = link as RevitLinkInstance;
+                var linked_doc = revit_link.GetLinkDocument();
+                var room_filter = new FilteredElementCollector(linked_doc);
+                var linked_rooms = room_filter
+                    .OfCategory(BuiltInCategory.OST_Rooms)
+                    .WhereElementIsNotElementType()
+                    .ToElements();
+
+            }
+
+            //Solid solid = GetSolid(e);
+
+            //foreach (RevitLinkInstance i in links)
+            //{
+            //    // GetTransform or GetTotalTransform or what?
+            //    Transform transform = i.GetTransform();
+            //    if (!transform.AlmostEqual(Transform.Identity))
+            //    {
+            //        solid = SolidUtils.CreateTransformed(
+            //          solid, transform.Inverse);
+            //    }
+            //    ElementIntersectsSolidFilter filter_intersector
+            //      = new ElementIntersectsSolidFilter(solid);
+
+            //    FilteredElementCollector intersecting
+            //      = new FilteredElementCollector(i.GetLinkDocument())
+            //        .WherePasses(filter_intersector);
+            //}
+
+            //foreach (Element element in links)
+            //{
+            //    Document linked_doc = element.Document;
+            //foreach (Element linked_doc_elem in linked_doc)
+            //{
+            //    if (linkedDoc.Title.Equals(linkType.Name))
+            //    {
+            //        FilteredElementCollector collLinked = new FilteredElementCollector(linkedDoc);
+            //        IList<Element> linkedWalls = collLinked.OfClass(typeof(Wall)).WherePasses(filter).ToElements();
+            //        if (linkedWalls.Count != 0)
+            //        {
+            //            foreach (Element eleWall in linkedWalls)
+            //            {
+            //                walls.Add(eleWall);
+            //            }
+            //        }
+            //    }
+            //}
+            //}
+
+            //var rooms = filter
+            //    .OfCategory(BuiltInCategory.OST_Rooms)
+            //    .WhereElementIsNotElementType()
+            //    .ToElements()
+            //    .ToList();
 
             //var pipe_accessories = filter
             //    .OfCategory(BuiltInCategory.OST_PipeAccessory)
