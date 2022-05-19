@@ -15,7 +15,35 @@ namespace MS.Commands.MEP
     [Regeneration(RegenerationOption.Manual)]
     public class PipelineFittings : IExternalCommand
     {
+        public List<FamilyInstance> GetElementsInTheRoom(Room room, Document doc)
+        {
+            List<FamilyInstance> elementsInTheRoom = new List<FamilyInstance>();
+            SpatialElementGeometryCalculator calculator = new SpatialElementGeometryCalculator(doc);
+            SpatialElementGeometryResults results = calculator.CalculateSpatialElementGeometry(room); // compute the room geometry 
+            Solid roomSolid = results.GetGeometry(); // get the solid representing the room's geometry
+
+            elementsInTheRoom = new FilteredElementCollector(doc).OfClass(typeof(FamilyInstance)).WherePasses(new ElementIntersectsSolidFilter(roomSolid)).Cast<FamilyInstance>().ToList();
+            return elementsInTheRoom;
+        }
+
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
+        {
+            Document doc = commandData.Application.ActiveUIDocument.Document;
+            UIDocument uidoc = commandData.Application.ActiveUIDocument;
+
+            var filter_links = new FilteredElementCollector(doc);
+            var linked_docs = filter_links
+                .OfCategory(BuiltInCategory.OST_RvtLinks)
+                .WhereElementIsNotElementType()
+                .ToElements();
+
+            foreach (var link in linked_docs)
+            {
+
+            }
+        }
+
+        public Result Execute1(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             Document doc = commandData.Application.ActiveUIDocument.Document;
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
@@ -28,8 +56,12 @@ namespace MS.Commands.MEP
                 .Select(e => e as FamilyInstance);
 
             var filter_links = new FilteredElementCollector(doc);
+            //IList<Element> links = filter_links
+            //                       .OfCategory(BuiltInCategory.OST_RvtLinks)
+            //                       .WhereElementIsNotElementType()
+            //                       .ToElements(); 
             IList<Element> links = filter_links
-                                   .OfCategory(BuiltInCategory.OST_RvtLinks)
+                                   .OfCategory(BuiltInCategory.OST_Walls)
                                    .WhereElementIsNotElementType()
                                    .ToElements();
 
@@ -39,22 +71,24 @@ namespace MS.Commands.MEP
 
                 foreach (Element link in links)
                 {
-                    var revit_link = link as RevitLinkInstance;
+                    //var revit_link = link as RevitLinkInstance;
 
-                    Transform transform = revit_link.GetTransform();
-                    if (!transform.AlmostEqual(Transform.Identity))
-                    {
-                        pipe_acs_solid = SolidUtils
-                            .CreateTransformed(pipe_acs_solid, transform.Inverse);
-                    }
+                    //Transform transform = revit_link.GetTransform();
+                    //if (!transform.AlmostEqual(Transform.Identity))
+                    //{
+                    //    pipe_acs_solid = SolidUtils
+                    //        .CreateTransformed(pipe_acs_solid, transform.Inverse);
+                    //}
                     ElementIntersectsSolidFilter filter_intersects
                       = new ElementIntersectsSolidFilter(pipe_acs_solid);
 
-                    var linked_doc = revit_link.GetLinkDocument();
-                    var room_filter = new FilteredElementCollector(linked_doc);
-                    var room = room_filter
+                    //var linked_doc = revit_link.GetLinkDocument();
+                    //var room_filter = new FilteredElementCollector(linked_doc);
+                    //var room = room_filter
+                    var walls = filter_links
                         .OfCategory(BuiltInCategory.OST_Walls)
                         .WhereElementIsNotElementType()
+                        .WherePasses(filter_intersects)
                         .ToElements();
 
                 }
