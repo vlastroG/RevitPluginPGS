@@ -15,16 +15,8 @@ namespace MS.Commands.MEP
     [Regeneration(RegenerationOption.Manual)]
     public class PipelineFittings : IExternalCommand
     {
-        public List<FamilyInstance> GetElementsInTheRoom(Room room, Document doc)
-        {
-            List<FamilyInstance> elementsInTheRoom = new List<FamilyInstance>();
-            SpatialElementGeometryCalculator calculator = new SpatialElementGeometryCalculator(doc);
-            SpatialElementGeometryResults results = calculator.CalculateSpatialElementGeometry(room); // compute the room geometry 
-            Solid roomSolid = results.GetGeometry(); // get the solid representing the room's geometry
+        private readonly Guid guid_par_apartment_number = Guid.Parse("10fb72de-237e-4b9c-915b-8849b8907695");// Guid параметра НомерКвартиры
 
-            elementsInTheRoom = new FilteredElementCollector(doc).OfClass(typeof(FamilyInstance)).WherePasses(new ElementIntersectsSolidFilter(roomSolid)).Cast<FamilyInstance>().ToList();
-            return elementsInTheRoom;
-        }
 
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
@@ -37,119 +29,71 @@ namespace MS.Commands.MEP
                 .WhereElementIsNotElementType()
                 .ToElements();
 
-            foreach (var link in linked_docs)
-            {
-
-            }
-        }
-
-        public Result Execute1(ExternalCommandData commandData, ref string message, ElementSet elements)
-        {
-            Document doc = commandData.Application.ActiveUIDocument.Document;
-            UIDocument uidoc = commandData.Application.ActiveUIDocument;
-
             var filter_pipe_acs = new FilteredElementCollector(doc);
             var pipe_accessories = filter_pipe_acs
                 .OfCategory(BuiltInCategory.OST_PipeAccessory)
                 .WhereElementIsNotElementType()
-                .ToElements()
-                .Select(e => e as FamilyInstance);
+                .ToElements();
 
-            var filter_links = new FilteredElementCollector(doc);
-            //IList<Element> links = filter_links
-            //                       .OfCategory(BuiltInCategory.OST_RvtLinks)
-            //                       .WhereElementIsNotElementType()
-            //                       .ToElements(); 
-            IList<Element> links = filter_links
-                                   .OfCategory(BuiltInCategory.OST_Walls)
-                                   .WhereElementIsNotElementType()
-                                   .ToElements();
-
-            foreach (var pipe_acs in pipe_accessories)
+            using (Transaction trans_renew = new Transaction(doc))
             {
-                Solid pipe_acs_solid = SolidFromBoundingBox(pipe_acs.get_BoundingBox(doc.ActiveView));
+                trans_renew.Start("Арматура труб обнуление");
 
-                foreach (Element link in links)
+                foreach (var pipe_acs in pipe_accessories)
                 {
-                    //var revit_link = link as RevitLinkInstance;
-
-                    //Transform transform = revit_link.GetTransform();
-                    //if (!transform.AlmostEqual(Transform.Identity))
-                    //{
-                    //    pipe_acs_solid = SolidUtils
-                    //        .CreateTransformed(pipe_acs_solid, transform.Inverse);
-                    //}
-                    ElementIntersectsSolidFilter filter_intersects
-                      = new ElementIntersectsSolidFilter(pipe_acs_solid);
-
-                    //var linked_doc = revit_link.GetLinkDocument();
-                    //var room_filter = new FilteredElementCollector(linked_doc);
-                    //var room = room_filter
-                    var walls = filter_links
-                        .OfCategory(BuiltInCategory.OST_Walls)
-                        .WhereElementIsNotElementType()
-                        .WherePasses(filter_intersects)
-                        .ToElements();
-
+                    pipe_acs.get_Parameter(guid_par_apartment_number).Set(String.Empty);
                 }
 
+                trans_renew.Commit();
             }
 
+            foreach (var link in linked_docs)
+            {
+                using (Transaction trans = new Transaction(doc))
+                {
+                    trans.Start("Амратура труб в квартирах");
 
+                    var linked_instance = link as RevitLinkInstance;
+                    var room_filter = new FilteredElementCollector(linked_instance.GetLinkDocument());
+                    var rooms = room_filter
+                           .OfCategory(BuiltInCategory.OST_Rooms)
+                           .WhereElementIsNotElementType()
+                           .Select(e => e as Room);
 
-            //Solid solid = GetSolid(e);
+                    if (rooms != null)
+                    {
+                        foreach (var room in rooms)
+                        {
+                            SpatialElementGeometryCalculator calculator = new SpatialElementGeometryCalculator(doc);
+                            SpatialElementGeometryResults results = calculator.CalculateSpatialElementGeometry(room);
+                            Solid room_solid = results.GetGeometry();
 
-            //foreach (RevitLinkInstance i in links)
-            //{
-            //    // GetTransform or GetTotalTransform or what?
-            //    Transform transform = i.GetTransform();
-            //    if (!transform.AlmostEqual(Transform.Identity))
-            //    {
-            //        solid = SolidUtils.CreateTransformed(
-            //          solid, transform.Inverse);
-            //    }
-            //    ElementIntersectsSolidFilter filter_intersector
-            //      = new ElementIntersectsSolidFilter(solid);
+                            Transform transform = linked_instance.GetTransform();
+                            if (!transform.AlmostEqual(Transform.Identity))
+                            {
+                                room_solid = SolidUtils
+                                    .CreateTransformed(room_solid, transform);
+                            }
 
-            //    FilteredElementCollector intersecting
-            //      = new FilteredElementCollector(i.GetLinkDocument())
-            //        .WherePasses(filter_intersector);
-            //}
+                            var pipe_acs_in_room = new FilteredElementCollector(doc)
+                                .OfCategory(BuiltInCategory.OST_PipeAccessory)
+                                .WherePasses(new ElementIntersectsSolidFilter(room_solid))
+                                .Cast<FamilyInstance>()
+                                .ToList();
 
-            //foreach (Element element in links)
-            //{
-            //    Document linked_doc = element.Document;
-            //foreach (Element linked_doc_elem in linked_doc)
-            //{
-            //    if (linkedDoc.Title.Equals(linkType.Name))
-            //    {
-            //        FilteredElementCollector collLinked = new FilteredElementCollector(linkedDoc);
-            //        IList<Element> linkedWalls = collLinked.OfClass(typeof(Wall)).WherePasses(filter).ToElements();
-            //        if (linkedWalls.Count != 0)
-            //        {
-            //            foreach (Element eleWall in linkedWalls)
-            //            {
-            //                walls.Add(eleWall);
-            //            }
-            //        }
-            //    }
-            //}
-            //}
+                            foreach (var pipe_acs in pipe_acs_in_room)
+                            {
+                                var fam_inst = pipe_acs as FamilyInstance;
+                                fam_inst
+                                    .get_Parameter(guid_par_apartment_number)
+                                    .Set(room.get_Parameter(guid_par_apartment_number).AsValueString());
+                            }
+                        }
+                    }
 
-            //var rooms = filter
-            //    .OfCategory(BuiltInCategory.OST_Rooms)
-            //    .WhereElementIsNotElementType()
-            //    .ToElements()
-            //    .ToList();
-
-
-
-
-            //foreach (var pipe_acc in pipe_accessories)
-            //{
-            //    var t = pipe_acc;
-            //}
-
+                    trans.Commit();
+                }
+            }
             return Result.Succeeded;
         }
     }
