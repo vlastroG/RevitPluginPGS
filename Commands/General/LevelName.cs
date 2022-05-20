@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace MS.Commands.General
@@ -17,7 +18,20 @@ namespace MS.Commands.General
         {
             Document doc = commandData.Application.ActiveUIDocument.Document;
 
+            var levels_filter = new FilteredElementCollector(doc);
+            var levels = levels_filter
+                .OfCategory(BuiltInCategory.OST_Levels)
+                .WhereElementIsNotElementType()
+                .ToElements();
 
+            foreach (var level in levels)
+            {
+                var level_name = level.get_Parameter(BuiltInParameter.DATUM_TEXT).AsValueString();
+                Regex regex = new Regex(@"\d+.\d+)$");
+
+                StringBuilder sb = new StringBuilder();
+
+            }
 
             return Result.Succeeded;
         }
