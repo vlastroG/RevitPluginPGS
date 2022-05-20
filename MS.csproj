@@ -91,7 +91,7 @@
   <ItemGroup>
     <Compile Include="Commands\AR\MasonryMesh.cs" />
     <Compile Include="Commands\AR\Models\Apartment.cs" />
-    <Compile Include="Commands\AR\Archive\RoomsArea.cs" />
+    <Compile Include="Commands\Archive\RoomsArea.cs" />
     <Compile Include="Commands\AR\RoomsAreaNew.cs" />
     <Compile Include="Commands\AR\RoomsFinishing.cs" />
     <Compile Include="Commands\Fun\Picture.cs" />
@@ -107,6 +107,7 @@
     <Compile Include="Utilites\SelectionRoomFilter.cs" />
     <Compile Include="Utilites\UserInput.cs" />
     <Compile Include="Utilites\WorkWithGeometry.cs" />
+    <Compile Include="Utilites\WorkWithPath.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Diagrams\RoomsAreaAlgorithm.drawio" />
