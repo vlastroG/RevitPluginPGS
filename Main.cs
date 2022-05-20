@@ -54,7 +54,7 @@ namespace MS
             btnInfo.LargeImage = btnInfoImage;
             btnInfo.ToolTip = "Выбор элементов по заданной категории. Категория берется из первого выбранного элемента, затем рамкой выбираются все элементы заданной категории";
 
-            // Selection command
+            // SelectionRooms command
             PushButtonData btnSelection = new PushButtonData("Selection", "Выбор\nпомещений", path, "MS.Selector");
             Uri btnSelectionImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Selection.png");
             BitmapImage btnSelectionImage = new BitmapImage(btnSelectionImagePath);
@@ -72,6 +72,12 @@ namespace MS
             Uri btnRmAreaImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\RoomsArea.png");
             BitmapImage btnRmAreaImage = new BitmapImage(btnRmAreaImagePath);
             btnRmArea.LargeImage = btnRmAreaImage;
+
+            // ComplexApartmentNumber command
+            PushButtonData btnCmplxAprtNum = new PushButtonData("ComplexAprtmntNmbr", "Составные номера\nквартир", path, "MS.Commands.AR.ComplexAprtmntNmbr");
+            Uri btnCmplxAprtNumImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            BitmapImage btnCmplxAprtNumImage = new BitmapImage(btnCmplxAprtNumImagePath);
+            btnCmplxAprtNum.LargeImage = btnCmplxAprtNumImage;
 
 
             // RoomsFinishingCommand
@@ -103,10 +109,10 @@ namespace MS
 
             // General panel
             panelGeneral.AddItem(btnInfo);
-            //panelGeneral.AddItem(btnSelection);
 
             // AR panel
             panelAR.AddItem(btnRmArea);
+            panelAR.AddItem(btnCmplxAprtNum);
             //panelAR.AddItem(btnRmFinishing);
             panelAR.AddItem(btnSelection);
             panelAR.AddItem(btnMasonryMesh);
