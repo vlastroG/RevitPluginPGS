@@ -48,7 +48,6 @@ namespace MS.Commands.AR
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             Document doc = commandData.Application.ActiveUIDocument.Document;
-            UIDocument uidoc = commandData.Application.ActiveUIDocument;
 
             var rooms_filter = new FilteredElementCollector(doc);
             var rooms = rooms_filter
