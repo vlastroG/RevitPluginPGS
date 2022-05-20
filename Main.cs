@@ -75,17 +75,17 @@ namespace MS
 
 
             // RoomsFinishingCommand
-            PushButtonData btnRmFinishing = new PushButtonData("RoomsFinishing", "Отделка", path, "MS.RoomsFinishing");
-            Uri btnRmFinishingImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\RoomsFinishing.png");
-            BitmapImage btnRmFinishingImage = new BitmapImage(btnRmFinishingImagePath);
-            btnRmFinishing.LargeImage = btnRmFinishingImage;
+            //PushButtonData btnRmFinishing = new PushButtonData("RoomsFinishing", "Отделка", path, "MS.RoomsFinishing");
+            //Uri btnRmFinishingImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\RoomsFinishing.png");
+            //BitmapImage btnRmFinishingImage = new BitmapImage(btnRmFinishingImagePath);
+            //btnRmFinishing.LargeImage = btnRmFinishingImage;
 
 
             // SS Numerator command
-            PushButtonData btnNumerator = new PushButtonData("Numerator", "Маркировка", path, "MS.Numerator");
-            Uri btnNumeratorImagePath = new Uri(assembly_dir + @"\Images\Icons\SS\СС.png");
-            BitmapImage btnNumeratorImage = new BitmapImage(btnNumeratorImagePath);
-            btnNumerator.LargeImage = btnNumeratorImage;
+            //PushButtonData btnNumerator = new PushButtonData("Numerator", "Маркировка", path, "MS.Numerator");
+            //Uri btnNumeratorImagePath = new Uri(assembly_dir + @"\Images\Icons\SS\СС.png");
+            //BitmapImage btnNumeratorImage = new BitmapImage(btnNumeratorImagePath);
+            //btnNumerator.LargeImage = btnNumeratorImage;
 
             // ОВиК Numerator command
             PushButtonData btnPipelineFittings = new PushButtonData("PipelineFittings", "Арматура\nтрубопроводов", path, "MS.Commands.MEP.PipelineFittings");
