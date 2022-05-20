@@ -91,6 +91,7 @@
     <Compile Include="Commands\AR\RoomsFinishing.cs" />
     <Compile Include="Commands\Fun\Picture.cs" />
     <Compile Include="Commands\General\Info.cs" />
+    <Compile Include="Commands\General\LevelName.cs" />
     <Compile Include="Commands\General\Selector.cs" />
     <Compile Include="Commands\MEP\PipelineFittings.cs" />
     <Compile Include="Commands\SS\Numerator.cs" />
