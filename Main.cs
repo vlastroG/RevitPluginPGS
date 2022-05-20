@@ -41,7 +41,7 @@ namespace MS
             // Раздел АР
             RibbonPanel panelAR = application.CreateRibbonPanel("PGS-BIM", "Раздел АР");
             // Раздел СС
-            RibbonPanel panelSS = application.CreateRibbonPanel("PGS-BIM", "Раздел СС");
+            // RibbonPanel panelSS = application.CreateRibbonPanel("PGS-BIM", "Раздел СС");
             // Раздел ОВиК
             RibbonPanel panelOVVK = application.CreateRibbonPanel("PGS-BIM", "Раздел ОВиК");
             // Раздел FUN
@@ -107,12 +107,12 @@ namespace MS
 
             // AR panel
             panelAR.AddItem(btnRmArea);
-            panelAR.AddItem(btnRmFinishing);
+            //panelAR.AddItem(btnRmFinishing);
             panelAR.AddItem(btnSelection);
             panelAR.AddItem(btnMasonryMesh);
 
             // SS panel
-            panelSS.AddItem(btnNumerator);
+            // panelSS.AddItem(btnNumerator);
 
             // ОВиК panel
             panelOVVK.AddItem(btnPipelineFittings);
