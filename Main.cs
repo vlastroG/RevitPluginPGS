@@ -52,7 +52,14 @@ namespace MS
             Uri btnInfoImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
             BitmapImage btnInfoImage = new BitmapImage(btnInfoImagePath);
             btnInfo.LargeImage = btnInfoImage;
-            btnInfo.ToolTip = "Выбор элементов по заданной категории. Категория берется из первого выбранного элемента, затем рамкой выбираются все элементы заданной категории";
+
+
+            // LevelName command
+            PushButtonData btnLevelName = new PushButtonData("LevelName", "Отметки\nуровней", path, "MS.Commands.General.LevelName");
+            Uri btnLevelNameImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            BitmapImage btnLevelNameImage = new BitmapImage(btnLevelNameImagePath);
+            btnLevelName.LargeImage = btnLevelNameImage;
+
 
             // SelectionRooms command
             PushButtonData btnSelection = new PushButtonData("Selection", "Выбор\nпомещений", path, "MS.Selector");
@@ -109,6 +116,7 @@ namespace MS
 
             // General panel
             panelGeneral.AddItem(btnInfo);
+            panelGeneral.AddItem(btnLevelName);
 
             // AR panel
             panelAR.AddItem(btnRmArea);
