@@ -27,5 +27,22 @@ namespace MS.Utilites
 
             return doc_proj_section;
         }
+
+
+        /// <summary>
+        /// Преобразовывает double в string в формате +/-0.0000
+        /// </summary>
+        /// <param name="d_number">double значение</param>
+        /// <returns>Возвращаемая строка в формате +/-0.0000</returns>
+        public static string GetStringFromDouble(double d_number)
+        {
+            var str = d_number.ToString().Replace(',', '.');
+            if (d_number >= 0)
+            {
+                str = '+' + str;
+            }
+
+            return str;
+        }
     }
 }
