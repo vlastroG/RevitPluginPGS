@@ -16,7 +16,32 @@ namespace MS.Commands.AR
         private double _mm_in_foot = 304.8;
 
         /// <summary>
-        /// Подсчет кладочной сетки в стенах
+        /// Guid параметра Арм.ОчереднАрмирРядовКладки у стен
+        /// </summary>
+        private readonly Guid guid_par_mesh_rows_count = Guid.Parse("42795f38-352d-44c6-b739-4a97d0f765db");
+
+        /// <summary>
+        /// Guid параметра Рзм.Ширинау проемов
+        /// </summary>
+        private readonly Guid guid_par_width = Guid.Parse("8f2e4f93-9472-4941-a65d-0ac468fd6a5d");
+
+        /// <summary>
+        /// Guid параметра Рзм.Высота у проемов
+        /// </summary>
+        private readonly Guid guid_par_height = Guid.Parse("da753fe3-ecfa-465b-9a2c-02f55d0c2ff1");
+
+        /// <summary>
+        /// Guid параметра ДлинаКладочнойСетки у стены
+        /// </summary>
+        private readonly BuiltInParameter guid_par_mesh_length = BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS;
+        //private readonly Guid guid_par_mesh_length = Guid.Parse("");
+
+        /// <summary>
+        /// Подсчет кладочной сетки в стенах и его назначение в параметр ДлинаКладочнойСетки
+        /// Сейчас заполняется параметр Комментарии.
+        /// Для релиза изменить свойство guid_par_mesh_length - для длины кладочной сетки
+        /// и guid_par_mesh_rows_count - для количества армируемых рядов.
+        /// После нужно скорректировать назначение параметра в транзакции (116 line)
         /// </summary>
         /// <param name="commandData"></param>
         /// <param name="message"></param>
@@ -28,12 +53,6 @@ namespace MS.Commands.AR
             Document doc = commandData.Application.ActiveUIDocument.Document;
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
 
-            //string par_name__MeshRowCount = "Арм.ОчереднАрмирРядовКладки";//Определить параметр для фильтрации
-
-            Guid guid_par_mesh_rows_count = Guid.Parse("42795f38-352d-44c6-b739-4a97d0f765db");// Guid параметра Арм.ОчереднАрмирРядовКладки
-            Guid guid_par_width = Guid.Parse("8f2e4f93-9472-4941-a65d-0ac468fd6a5d");// Guid параметра Рзм.Ширина
-            Guid guid_par_height = Guid.Parse("da753fe3-ecfa-465b-9a2c-02f55d0c2ff1");// Guid параметра Рзм.Высота
-            //Guid guid_par_mesh_length = Guid.Parse("b396979f-903a-49fd-a897-2c9f256d978d");// Guid параметра ДлинаКладочнойСетки
 
             // Выбор всех однослойных стен в проекте, у которых значение параметра КоличествоАрмируемыхРядов >= 1.
             var filter = new FilteredElementCollector(doc);
@@ -94,8 +113,7 @@ namespace MS.Commands.AR
                     trans.Start("Подсчет кладочной сетки");
                     try
                     {
-                        //wall.get_Parameter(guid_par_mesh_length).Set(mesh_length_total);
-                        wall.LookupParameter("Арм.ДлинаКладСеткиПМ").Set(mesh_length_total);
+                        wall.get_Parameter(guid_par_mesh_length).Set(mesh_length_total.ToString());
                     }
                     catch (NullReferenceException)
                     {

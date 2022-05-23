@@ -15,9 +15,19 @@ namespace MS.Commands.MEP
     [Regeneration(RegenerationOption.Manual)]
     public class PipelineFittings : IExternalCommand
     {
-        private readonly Guid guid_par_apartment_number = Guid.Parse("10fb72de-237e-4b9c-915b-8849b8907695");// Guid параметра НомерКвартиры
+        /// <summary>
+        /// Guid параметра НомерКвартиры
+        /// </summary>
+        private readonly Guid guid_par_apartment_number = Guid.Parse("10fb72de-237e-4b9c-915b-8849b8907695");
 
 
+        /// <summary>
+        /// Назначение номера квартиры (из помещений в связях) арматуре трубопроводов, которая расположена в ней.
+        /// </summary>
+        /// <param name="commandData"></param>
+        /// <param name="message"></param>
+        /// <param name="elements"></param>
+        /// <returns></returns>
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             Document doc = commandData.Application.ActiveUIDocument.Document;
@@ -35,6 +45,7 @@ namespace MS.Commands.MEP
                 .WhereElementIsNotElementType()
                 .ToElements();
 
+            // Обнуление значений номеров квартир у арматуры трубопроводов
             using (Transaction trans_renew = new Transaction(doc))
             {
                 trans_renew.Start("Арматура труб обнуление");
@@ -49,6 +60,7 @@ namespace MS.Commands.MEP
 
             foreach (var link in linked_docs)
             {
+                //Назначение номеров квартир арматуре трубопроводов
                 using (Transaction trans = new Transaction(doc))
                 {
                     trans.Start("Амратура труб в квартирах");
@@ -68,6 +80,8 @@ namespace MS.Commands.MEP
                             SpatialElementGeometryResults results = calculator.CalculateSpatialElementGeometry(room);
                             Solid room_solid = results.GetGeometry();
 
+                            //Изначально solid создается по координатам из связанного файла.
+                            //Если связь перемещена, то solid необходимо переместить в эту позицию:
                             Transform transform = linked_instance.GetTransform();
                             if (!transform.AlmostEqual(Transform.Identity))
                             {
