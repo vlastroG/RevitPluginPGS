@@ -104,6 +104,7 @@
     <Compile Include="Utilites\UserInput.cs" />
     <Compile Include="Utilites\WorkWithGeometry.cs" />
     <Compile Include="Utilites\WorkWithPath.cs" />
+    <Compile Include="Utilites\WorkWithString.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Diagrams\RoomsAreaAlgorithm.drawio" />
