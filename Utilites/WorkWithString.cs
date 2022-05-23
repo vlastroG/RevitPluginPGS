@@ -36,7 +36,7 @@ namespace MS.Utilites
         /// <returns>Возвращаемая строка в формате +/-0.0000</returns>
         public static string GetStringFromDouble(double d_number)
         {
-            var str = d_number.ToString().Replace(',', '.');
+            var str = d_number.ToString("0.000").Replace(',', '.');
             if (d_number >= 0)
             {
                 str = '+' + str;
