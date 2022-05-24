@@ -88,10 +88,10 @@ namespace MS
 
 
             // RoomsFinishingCommand
-            //PushButtonData btnRmFinishing = new PushButtonData("RoomsFinishing", "Отделка", path, "MS.RoomsFinishing");
-            //Uri btnRmFinishingImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\RoomsFinishing.png");
-            //BitmapImage btnRmFinishingImage = new BitmapImage(btnRmFinishingImagePath);
-            //btnRmFinishing.LargeImage = btnRmFinishingImage;
+            PushButtonData btnRmFinishing = new PushButtonData("RoomsFinishing\nDebug", "Отделка\nDebug", path, "MS.Utilites.GetBoundarySegmentElement");
+            Uri btnRmFinishingImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\RoomsFinishing.png");
+            BitmapImage btnRmFinishingImage = new BitmapImage(btnRmFinishingImagePath);
+            btnRmFinishing.LargeImage = btnRmFinishingImage;
 
 
             // SS Numerator command
@@ -121,7 +121,7 @@ namespace MS
             // AR panel
             panelAR.AddItem(btnRmArea);
             panelAR.AddItem(btnCmplxAprtNum);
-            //panelAR.AddItem(btnRmFinishing);
+            panelAR.AddItem(btnRmFinishing);
             panelAR.AddItem(btnSelection);
             panelAR.AddItem(btnMasonryMesh);
 
