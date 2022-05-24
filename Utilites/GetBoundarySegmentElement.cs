@@ -12,7 +12,8 @@ using BoundarySegment = Autodesk.Revit.DB.BoundarySegment;
 
 namespace MS.Utilites
 {
-    [Transaction(TransactionMode.ReadOnly)]
+    [Transaction(TransactionMode.Manual)]
+    [Regeneration(RegenerationOption.Manual)]
     public class GetBoundarySegmentElement : IExternalCommand
     {
         /// <summary>
@@ -300,21 +301,11 @@ namespace MS.Utilites
 
                 int n = loops.Count;
 
-                //Debug.Print(
-                //  "Room {0} has {1} loop{2}{3}",
-                //  room.Name, n, PluralSuffix(n),
-                //  DotOrColon(n));
-
                 int i = 0;
 
                 foreach (IList<BoundarySegment> loop in loops)
                 {
                     n = loop.Count;
-
-                    //Debug.Print(
-                    //  "  Loop {0} has {1} segment{2}{3}",
-                    //  i++, n, PluralSuffix(n),
-                    //  DotOrColon(n));
 
                     int j = 0;
 
@@ -331,11 +322,6 @@ namespace MS.Utilites
                             e = GetElementByRay(uiapp, doc, view3d,
                               seg.GetCurve());
                         }
-
-                        //Debug.Print(
-                        //  "    Segment {0}: {1} element {2} returned by {3}",
-                        //  j++, CurveString(seg.GetCurve()),
-                        //  ElementDescription(e), s);
                     }
                 }
             }
