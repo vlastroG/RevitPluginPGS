@@ -86,6 +86,12 @@ namespace MS
             BitmapImage btnCmplxAprtNumImage = new BitmapImage(btnCmplxAprtNumImagePath);
             btnCmplxAprtNum.LargeImage = btnCmplxAprtNumImage;
 
+            // OpeningsArea command
+            PushButtonData btnOpeningsArea = new PushButtonData("OpeningsArea", "Площадь проемов\nв помещениях", path, "MS.Commands.AR.OpeningsArea");
+            Uri btnOpeningsAreaImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            BitmapImage btnOpeningsAreaImage = new BitmapImage(btnOpeningsAreaImagePath);
+            btnOpeningsArea.LargeImage = btnOpeningsAreaImage;
+
 
             // RoomsFinishingCommand
             PushButtonData btnRmFinishing = new PushButtonData("RoomsFinishing\nDebug", "Отделка\nDebug", path, "MS.Utilites.GetBoundarySegmentElement");
@@ -121,6 +127,7 @@ namespace MS
             // AR panel
             panelAR.AddItem(btnRmArea);
             panelAR.AddItem(btnCmplxAprtNum);
+            panelAR.AddItem(btnOpeningsArea);
             panelAR.AddItem(btnRmFinishing);
             panelAR.AddItem(btnSelection);
             panelAR.AddItem(btnMasonryMesh);
