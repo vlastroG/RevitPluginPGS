@@ -94,7 +94,7 @@ namespace MS
 
 
             // RoomsFinishingCommand
-            PushButtonData btnRmFinishing = new PushButtonData("RoomsFinishing\nDebug", "Отделка\nDebug", path, "MS.Utilites.GetBoundarySegmentElement");
+            PushButtonData btnRmFinishing = new PushButtonData("RoomsFinishing\nDebug", "Отделка\n(Beta)", path, "MS.Utilites.GetBoundarySegmentElement");
             Uri btnRmFinishingImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\RoomsFinishing.png");
             BitmapImage btnRmFinishingImage = new BitmapImage(btnRmFinishingImagePath);
             btnRmFinishing.LargeImage = btnRmFinishingImage;
