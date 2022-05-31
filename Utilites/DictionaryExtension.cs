@@ -1,9 +1,5 @@
 ﻿using Autodesk.Revit.DB;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MS.Utilites
 {
@@ -19,7 +15,14 @@ namespace MS.Utilites
         public static void MapIncrease(
     this IDictionary<ElementId, double> map, ElementId key, double value)
         {
-            map[key] += value;
+            if (map.ContainsKey(key))
+            {
+                map[key] += value;
+            }
+            else
+            {
+                map[key] = value;
+            }
         }
     }
 }
