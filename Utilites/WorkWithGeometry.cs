@@ -1,9 +1,6 @@
 ﻿using Autodesk.Revit.DB;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MS.Utilites
 {
@@ -73,7 +70,7 @@ namespace MS.Utilites
         };
 
         /// <summary>
-        /// Расчитывает площадь прямоугольного проема, выполненного загружаемым семейством.
+        /// Расчитывает площадь прямоугольного проема в размерах ревита (футах), выполненного загружаемым семейством.
         /// Расчитывается по экземпляру/типу
         /// по параметрам:
         ///               "Высота",           "Ширина";
@@ -88,7 +85,6 @@ namespace MS.Utilites
         public static double GetOpeningArea(Document doc, FamilyInstance opening)
         {
             var opening_type = doc.GetElement(opening.get_Parameter(BuiltInParameter.ELEM_TYPE_PARAM).AsElementId());
-            var element = opening;
 
             Parameter par_width = null;
             Parameter par_height = null;
@@ -111,7 +107,7 @@ namespace MS.Utilites
                 {
                     var w = par_width.AsDouble();
                     var h = par_height.AsDouble();
-                    opening_area = w * h * _sqFeetToMeters;
+                    opening_area = w * h;
                     break;
                 }
             }
