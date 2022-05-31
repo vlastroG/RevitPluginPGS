@@ -21,7 +21,7 @@ namespace MS.Commands.AR
         /// <summary>
         /// Название стадии, в которой подсчитываются площади проемов
         /// </summary>
-        private static readonly string _phase = "Новая конструкция";
+        private static string _phase = "Новая конструкция";
 
         /// <summary>
         /// Опции подсчета сегментов границ помещений
@@ -29,6 +29,13 @@ namespace MS.Commands.AR
         private static readonly SpatialElementBoundaryOptions _boundaryOptions = new SpatialElementBoundaryOptions();
 
 
+        /// <summary>
+        /// Подсчет и назначение площадей проемов в параметр помещения "ПлощадьПроемов"
+        /// </summary>
+        /// <param name="commandData"></param>
+        /// <param name="message"></param>
+        /// <param name="elements"></param>
+        /// <returns></returns>
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             UIApplication uiapp = commandData.Application;
@@ -36,6 +43,13 @@ namespace MS.Commands.AR
             Document doc = uidoc.Document;
 
             Dictionary<ElementId, double> _dict_roomId_openingsArea = new Dictionary<ElementId, double>();
+
+            var user_input = UserInput.GetStringFromUser("Выбор стадии", "Введите стадию для расчета площадей:", _phase);
+            if (user_input.Length == 0)
+            {
+                return Result.Cancelled;
+            }
+            _phase = user_input;
 
             var filter_rooms = new FilteredElementCollector(doc);
             var rooms = filter_rooms
@@ -115,7 +129,6 @@ namespace MS.Commands.AR
 
                 trans.Commit();
             }
-
             return Result.Succeeded;
         }
     }
