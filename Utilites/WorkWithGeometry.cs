@@ -114,5 +114,20 @@ namespace MS.Utilites
 
             return opening_area;
         }
+
+        /// <summary>
+        /// Расчитывает площадь стены постоянной высоты (прямоугольной на фасаде)
+        /// </summary>
+        /// <param name="wall">Стена для расчета</param>
+        /// <returns>Площадь в единицах Revit - футах</returns>
+        public static double GetRectangWallArea(Wall wall)
+        {
+            var length = wall.get_Parameter(BuiltInParameter.CURVE_ELEM_LENGTH).AsDouble();
+            var height = wall.get_Parameter(BuiltInParameter.WALL_USER_HEIGHT_PARAM).AsDouble();
+
+            var wall_area = length * height;
+
+            return wall_area;
+        }
     }
 }

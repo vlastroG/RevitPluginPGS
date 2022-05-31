@@ -44,6 +44,8 @@ namespace MS.Commands.AR
 
             Dictionary<ElementId, double> _dict_roomId_openingsArea = new Dictionary<ElementId, double>();
 
+            SpatialElementGeometryCalculator calculator = new SpatialElementGeometryCalculator(doc);
+
             var user_input = UserInput.GetStringFromUser("Выбор стадии", "Введите стадию для расчета площадей:", _phase);
             if (user_input.Length == 0)
             {
@@ -73,6 +75,17 @@ namespace MS.Commands.AR
                 .WhereElementIsNotElementType()
                 .ToElements()
                 .Where(d => d.get_Parameter(BuiltInParameter.PHASE_CREATED).AsValueString() == _phase);
+
+            var filter_glass_wall = new FilteredElementCollector(doc);
+            var glass_walls_id_list = filter_glass_wall
+                .OfCategory(BuiltInCategory.OST_Walls)
+                .WhereElementIsNotElementType()
+                .ToElements()
+                .Where(w => w.get_Parameter(BuiltInParameter.PHASE_CREATED).AsValueString() == _phase)
+                .Where(w => (w as Wall).CurtainGrid != null)
+                .Select(w => w.Id).ToList();
+
+            var glass_walls = new FilteredElementCollector(doc, glass_walls_id_list);
 
             var openings = doors.Concat(windows);
             var phaseOfRooms = doc.GetElement(rooms.FirstOrDefault().get_Parameter(BuiltInParameter.ROOM_PHASE).AsElementId()) as Phase;
@@ -106,6 +119,8 @@ namespace MS.Commands.AR
                         room_area = _dict_roomId_openingsArea[room.Id];
                     }
 
+                    List<ElementId> glass_walls_in_rooms_ids = new List<ElementId>();
+
                     var circuits = room.GetBoundarySegments(_boundaryOptions);
                     foreach (var circuit in circuits)
                     {
@@ -119,11 +134,41 @@ namespace MS.Commands.AR
                                     || (el_bound is Wall
                                     && (el_bound as Wall).CurtainGrid != null))
                                 {
+                                    if (el_bound is Wall && (el_bound as Wall).CurtainGrid != null)
+                                    {
+                                        glass_walls_in_rooms_ids.Add(el_bound.Id);
+                                    }
                                     room_area += (room.UnboundedHeight) * (bound.GetCurve().Length);
                                 }
                             }
                         }
                     }
+
+                    SpatialElementGeometryResults results = calculator.CalculateSpatialElementGeometry(room);
+                    Solid room_solid = results.GetGeometry();
+
+                    foreach (var glass_wall in glass_walls.Cast<Wall>())
+                    {
+                        var wall_curve = (glass_wall.Location as LocationCurve).Curve;
+                        var wall_curve_start = wall_curve.GetEndPoint(0);
+                        var wall_curve_end = wall_curve.GetEndPoint(1);
+                        var wall_curve_normal = (wall_curve_end - wall_curve_start).Normalize();
+
+                        //var s = new SolidOptions(); 
+                        //Создать Solid, по осевой линни витража с отступом от нее в обе стороны на 300~ мм
+                        //    и проверить на пересечение с солидом помещения
+                    }
+
+                    var glass_walls_in_room = glass_walls
+                                .WherePasses(new ElementIntersectsSolidFilter(room_solid))
+                                .Where(w => !glass_walls_id_list.Contains(w.Id)).Cast<Wall>();
+
+                    foreach (var glass_wall in glass_walls_in_room)
+                    {
+                        var glass_wall_area = WorkWithGeometry.GetRectangWallArea(glass_wall);
+                        room_area += glass_wall_area;
+                    }
+
                     room.get_Parameter(_parOpeningsArea).Set(room_area);
                 }
 
