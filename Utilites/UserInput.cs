@@ -12,13 +12,12 @@ namespace MS.Utilites
         /// <param name="message">Сообщение для пользователя</param>
         /// <param name="defaultValue">Значение по умолчанию</param>
         /// <returns>Строка от пользователя в lower case</returns>
-        internal static string GetStringFromUser(string header, string message,  string defaultValue)
+        internal static string GetStringFromUser(string header, string message, string defaultValue)
         {
             var stringFromUser = Interaction.InputBox(
                 message,
                 header,
-                defaultValue)
-                .ToLower();
+                defaultValue);
 
             return stringFromUser;
         }
@@ -32,8 +31,8 @@ namespace MS.Utilites
         internal static DialogResult YesNoCancelInput(string header, string message)
         {
             DialogResult dialogResult = MessageBox.Show(
-                message, 
-                header, 
+                message,
+                header,
                 MessageBoxButtons.YesNoCancel);
 
             return dialogResult;
