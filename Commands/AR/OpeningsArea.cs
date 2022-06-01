@@ -53,6 +53,13 @@ namespace MS.Commands.AR
             }
             _phase = user_input;
 
+            View3D view3d
+              = new FilteredElementCollector(doc)
+                .OfClass(typeof(View3D))
+                .Cast<View3D>()
+                .FirstOrDefault<View3D>(
+                  e => e.Name.Equals("{3D}"));
+
             var filter_rooms = new FilteredElementCollector(doc);
             var rooms = filter_rooms
                 .OfCategory(BuiltInCategory.OST_Rooms)
@@ -77,15 +84,17 @@ namespace MS.Commands.AR
                 .Where(d => d.get_Parameter(BuiltInParameter.PHASE_CREATED).AsValueString() == _phase);
 
             var filter_glass_wall = new FilteredElementCollector(doc);
-            var glass_walls_id_list = filter_glass_wall
+            var glass_walls = filter_glass_wall
                 .OfCategory(BuiltInCategory.OST_Walls)
                 .WhereElementIsNotElementType()
                 .ToElements()
                 .Where(w => w.get_Parameter(BuiltInParameter.PHASE_CREATED).AsValueString() == _phase)
                 .Where(w => (w as Wall).CurtainGrid != null)
-                .Select(w => w.Id).ToList();
+                .ToList();
 
-            var glass_walls = new FilteredElementCollector(doc, glass_walls_id_list);
+            //var glass_walls = new FilteredElementCollector(doc, glass_walls_id_list);
+
+            SolidCurveIntersectionOptions solid_curve_intersect_opt = new SolidCurveIntersectionOptions();
 
             var openings = doors.Concat(windows);
             var phaseOfRooms = doc.GetElement(rooms.FirstOrDefault().get_Parameter(BuiltInParameter.ROOM_PHASE).AsElementId()) as Phase;
@@ -130,15 +139,27 @@ namespace MS.Commands.AR
                             if (el_bound != null)
                             {
                                 var el_bound_type_name = el_bound.GetType().Name;
-                                if (el_bound_type_name == "ModelLine"
-                                    || (el_bound is Wall
-                                    && (el_bound as Wall).CurtainGrid != null))
+                                if (el_bound_type_name == "ModelLine")
                                 {
-                                    if (el_bound is Wall && (el_bound as Wall).CurtainGrid != null)
+                                    var curtain_wall_behind_modelline = WorkWithGeometry
+                                        .GetElementByRay_switch(
+                                        uiapp,
+                                        doc,
+                                        view3d,
+                                        bound.GetCurve(), true);
+
+                                    var curtain_wall_before_modelline = WorkWithGeometry
+                                        .GetElementByRay_switch(
+                                        uiapp,
+                                        doc,
+                                        view3d,
+                                        bound.GetCurve(), false);
+
+                                    if (curtain_wall_behind_modelline == null
+                                        && curtain_wall_before_modelline == null)
                                     {
-                                        glass_walls_in_rooms_ids.Add(el_bound.Id);
+                                        room_area += (room.UnboundedHeight) * (bound.GetCurve().Length);
                                     }
-                                    room_area += (room.UnboundedHeight) * (bound.GetCurve().Length);
                                 }
                             }
                         }
@@ -147,26 +168,27 @@ namespace MS.Commands.AR
                     SpatialElementGeometryResults results = calculator.CalculateSpatialElementGeometry(room);
                     Solid room_solid = results.GetGeometry();
 
-                    foreach (var glass_wall in glass_walls.Cast<Wall>())
+                    foreach (var glass_wall in glass_walls)
                     {
+                        XYZ z_vector = XYZ.BasisZ;
                         var wall_curve = (glass_wall.Location as LocationCurve).Curve;
-                        var wall_curve_start = wall_curve.GetEndPoint(0);
-                        var wall_curve_end = wall_curve.GetEndPoint(1);
-                        var wall_curve_normal = (wall_curve_end - wall_curve_start).Normalize();
+                        var wall_curve_center = wall_curve.Evaluate(0.5, true);
+                        Transform moving_up = Transform.CreateTranslation(z_vector);
+                        Transform rotation = Transform.CreateRotationAtPoint(z_vector, 90, wall_curve_center);
+                        Transform curve_trans = moving_up.Multiply(rotation);
 
-                        //var s = new SolidOptions(); 
-                        //Создать Solid, по осевой линни витража с отступом от нее в обе стороны на 300~ мм
-                        //    и проверить на пересечение с солидом помещения
-                    }
+                        var wall_trans_curve = wall_curve.CreateTransformed(curve_trans);
 
-                    var glass_walls_in_room = glass_walls
-                                .WherePasses(new ElementIntersectsSolidFilter(room_solid))
-                                .Where(w => !glass_walls_id_list.Contains(w.Id)).Cast<Wall>();
+                        SolidCurveIntersection curve_room_intersect = room_solid
+                            .IntersectWithCurve(
+                            wall_trans_curve,
+                            solid_curve_intersect_opt);
 
-                    foreach (var glass_wall in glass_walls_in_room)
-                    {
-                        var glass_wall_area = WorkWithGeometry.GetRectangWallArea(glass_wall);
-                        room_area += glass_wall_area;
+                        if (curve_room_intersect.SegmentCount > 0)
+                        {
+                            var glass_wall_area = WorkWithGeometry.GetRectangWallArea(glass_wall as Wall);
+                            room_area += glass_wall_area;
+                        }
                     }
 
                     room.get_Parameter(_parOpeningsArea).Set(room_area);
