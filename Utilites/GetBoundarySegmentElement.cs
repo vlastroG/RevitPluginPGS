@@ -9,6 +9,7 @@ using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
 using Autodesk.Revit.DB.Architecture;
 using BoundarySegment = Autodesk.Revit.DB.BoundarySegment;
+using static MS.Utilites.WorkWithGeometry;
 
 namespace MS.Utilites
 {
@@ -142,22 +143,22 @@ namespace MS.Utilites
         /// Return direction turning 90 degrees 
         /// left from given input vector.
         /// </summary>
-        public XYZ GetLeftDirection(XYZ direction)
-        {
-            double x = -direction.Y;
-            double y = direction.X;
-            double z = direction.Z;
-            return new XYZ(x, y, z);
-        }
+        //public XYZ _GetLeftDirection(XYZ direction)
+        //{
+        //    double x = -direction.Y;
+        //    double y = direction.X;
+        //    double z = direction.Z;
+        //    return new XYZ(x, y, z);
+        //}
 
         /// <summary>
         /// Return direction turning 90 degrees 
         /// right from given input vector.
         /// </summary>
-        public XYZ GetRightDirection(XYZ direction)
-        {
-            return GetLeftDirection(direction.Negate());
-        }
+        //public XYZ _GetRightDirection(XYZ direction)
+        //{
+        //    return GetLeftDirection(direction.Negate());
+        //}
 
         /// <summary>
         /// Return the neighbouring BIM element generating 
@@ -165,93 +166,93 @@ namespace MS.Utilites
         /// is oriented counter-clockwise around the room
         /// if part of an interior loop, and vice versa.
         /// </summary>
-        public Element GetElementByRay(
-          UIApplication app,
-          Document doc,
-          View3D view3d,
-          Curve c)
-        {
-            Element boundaryElement = null;
+        //public Element _GetElementByRay(
+        //  UIApplication app,
+        //  Document doc,
+        //  View3D view3d,
+        //  Curve c)
+        //{
+        //    Element boundaryElement = null;
 
-            // Tolerances
+        //    // Tolerances
 
-            const double minTolerance = 0.00000001;
-            const double maxTolerance = 0.01;
+        //    const double minTolerance = 0.00000001;
+        //    const double maxTolerance = 0.01;
 
-            // Height of ray above room level:
-            // ray starts from one foot above room level
+        //    // Height of ray above room level:
+        //    // ray starts from one foot above room level
 
-            const double elevation = 1;
+        //    const double elevation = 1;
 
-            // Ray starts not directly from the room border
-            // but from a point offset slightly into it.
+        //    // Ray starts not directly from the room border
+        //    // but from a point offset slightly into it.
 
-            const double stepInRoom = 0.1;
+        //    const double stepInRoom = 0.1;
 
-            // We could use Line.Direction if Curve c is a 
-            // Line, but since c also might be an Arc, we 
-            // calculate direction like this:
+        //    // We could use Line.Direction if Curve c is a 
+        //    // Line, but since c also might be an Arc, we 
+        //    // calculate direction like this:
 
-            XYZ lineDirection
-              = (c.GetEndPoint(1) - c.GetEndPoint(0))
-                .Normalize();
+        //    XYZ lineDirection
+        //      = (c.GetEndPoint(1) - c.GetEndPoint(0))
+        //        .Normalize();
 
-            XYZ upDir = elevation * XYZ.BasisZ;
+        //    XYZ upDir = elevation * XYZ.BasisZ;
 
-            // Assume that the room is on the left side of 
-            // the room boundary curve and wall on the right.
-            // This is valid for both outer and inner room 
-            // boundaries (outer are counter-clockwise, inner 
-            // are clockwise). Start point is slightly inside 
-            // the room, one foot above room level.
+        //    // Assume that the room is on the left side of 
+        //    // the room boundary curve and wall on the right.
+        //    // This is valid for both outer and inner room 
+        //    // boundaries (outer are counter-clockwise, inner 
+        //    // are clockwise). Start point is slightly inside 
+        //    // the room, one foot above room level.
 
-            XYZ toRoomVec = stepInRoom * GetLeftDirection(
-              lineDirection);
+        //    XYZ toRoomVec = stepInRoom * GetLeftDirection(
+        //      lineDirection);
 
-            XYZ pointBottomInRoom = c.Evaluate(0.5, true)
-              + toRoomVec;
+        //    XYZ pointBottomInRoom = c.Evaluate(0.5, true)
+        //      + toRoomVec;
 
-            XYZ startPoint = pointBottomInRoom + upDir;
+        //    XYZ startPoint = pointBottomInRoom + upDir;
 
-            // We are searching for walls only
+        //    // We are searching for walls only
 
-            ElementFilter wallFilter
-              = new ElementCategoryFilter(
-                BuiltInCategory.OST_Walls);
+        //    ElementFilter wallFilter
+        //      = new ElementCategoryFilter(
+        //        BuiltInCategory.OST_Walls);
 
-            ReferenceIntersector intersector
-              = new ReferenceIntersector(wallFilter,
-                FindReferenceTarget.Element, view3d);
+        //    ReferenceIntersector intersector
+        //      = new ReferenceIntersector(wallFilter,
+        //        FindReferenceTarget.Element, view3d);
 
-            // We don't want to find elements in linked files
+        //    // We don't want to find elements in linked files
 
-            intersector.FindReferencesInRevitLinks = false;
+        //    intersector.FindReferencesInRevitLinks = false;
 
-            XYZ toWallDir = GetRightDirection(
-              lineDirection);
+        //    XYZ toWallDir = GetRightDirection(
+        //      lineDirection);
 
-            ReferenceWithContext context = intersector
-              .FindNearest(startPoint, toWallDir);
+        //    ReferenceWithContext context = intersector
+        //      .FindNearest(startPoint, toWallDir);
 
-            Reference closestReference = null;
+        //    Reference closestReference = null;
 
-            if (context != null)
-            {
-                if ((context.Proximity > minTolerance)
-                  && (context.Proximity < maxTolerance
-                    + stepInRoom))
-                {
-                    closestReference = context.GetReference();
+        //    if (context != null)
+        //    {
+        //        if ((context.Proximity > minTolerance)
+        //          && (context.Proximity < maxTolerance
+        //            + stepInRoom))
+        //        {
+        //            closestReference = context.GetReference();
 
-                    if (closestReference != null)
-                    {
-                        boundaryElement = doc.GetElement(
-                          closestReference);
-                    }
-                }
-            }
-            return boundaryElement;
-        }
+        //            if (closestReference != null)
+        //            {
+        //                boundaryElement = doc.GetElement(
+        //                  closestReference);
+        //            }
+        //        }
+        //    }
+        //    return boundaryElement;
+        //}
 
         public Result Execute(
           ExternalCommandData commandData,

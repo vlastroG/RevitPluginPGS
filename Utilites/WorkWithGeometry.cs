@@ -1,6 +1,9 @@
 ﻿using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.Architecture;
+using Autodesk.Revit.UI;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace MS.Utilites
 {
@@ -128,6 +131,334 @@ namespace MS.Utilites
             var wall_area = length * height;
 
             return wall_area;
+        }
+
+        /// <summary>
+        /// Return direction turning 90 degrees 
+        /// left from given input vector.
+        /// </summary>
+        private static XYZ GetLeftDirection(XYZ direction)
+        {
+            double x = -direction.Y;
+            double y = direction.X;
+            double z = direction.Z;
+            return new XYZ(x, y, z);
+        }
+
+        /// <summary>
+        /// Return direction turning 90 degrees 
+        /// right from given input vector.
+        /// </summary>
+        private static XYZ GetRightDirection(XYZ direction)
+        {
+            return GetLeftDirection(direction.Negate());
+        }
+
+        /// <summary>
+        /// Return the neighbouring BIM element generating 
+        /// the given room boundary curve c, assuming it
+        /// is oriented counter-clockwise around the room
+        /// if part of an interior loop, and vice versa.
+        /// </summary>
+        public static Element GetElementByRay(
+          UIApplication app,
+          Document doc,
+          View3D view3d,
+          Curve c)
+        {
+            Element boundaryElement = null;
+
+            // Tolerances
+
+            const double minTolerance = 0.00000001;
+            const double maxTolerance = 0.01;
+
+            // Height of ray above room level:
+            // ray starts from one foot above room level
+
+            const double elevation = 1;
+
+            // Ray starts not directly from the room border
+            // but from a point offset slightly into it.
+
+            const double stepInRoom = 0.1;
+
+            // We could use Line.Direction if Curve c is a 
+            // Line, but since c also might be an Arc, we 
+            // calculate direction like this:
+
+            XYZ lineDirection
+              = (c.GetEndPoint(1) - c.GetEndPoint(0))
+                .Normalize();
+
+            XYZ upDir = elevation * XYZ.BasisZ;
+
+            // Assume that the room is on the left side of 
+            // the room boundary curve and wall on the right.
+            // This is valid for both outer and inner room 
+            // boundaries (outer are counter-clockwise, inner 
+            // are clockwise). Start point is slightly inside 
+            // the room, one foot above room level.
+
+            XYZ toRoomVec = stepInRoom * GetLeftDirection(
+              lineDirection);
+
+            XYZ pointBottomInRoom = c.Evaluate(0.5, true)
+              + toRoomVec;
+
+            XYZ startPoint = pointBottomInRoom + upDir;
+
+            // We are searching for walls only
+
+            ElementFilter wallFilter
+              = new ElementCategoryFilter(
+                BuiltInCategory.OST_Walls);
+
+            ReferenceIntersector intersector
+              = new ReferenceIntersector(wallFilter,
+                FindReferenceTarget.Element, view3d);
+
+            // We don't want to find elements in linked files
+
+            intersector.FindReferencesInRevitLinks = false;
+
+            XYZ toWallDir = GetRightDirection(
+              lineDirection);
+
+            ReferenceWithContext context = intersector
+              .FindNearest(startPoint, toWallDir);
+
+            Reference closestReference = null;
+
+            if (context != null)
+            {
+                if ((context.Proximity > minTolerance)
+                  && (context.Proximity < maxTolerance
+                    + stepInRoom))
+                {
+                    closestReference = context.GetReference();
+
+                    if (closestReference != null)
+                    {
+                        boundaryElement = doc.GetElement(
+                          closestReference);
+                    }
+                }
+            }
+            return boundaryElement;
+        }
+
+        /// <summary>
+        /// Возвращает помещения, найденные через пересечение геометрии помещения и отрезка,
+        /// построенного как смещенная вверх (относительно заданной линии) нормаль,
+        /// продленная в обе стороны от заданной линии, 
+        /// Метод сделан специально для нахождения помещений, находящихся возле витража.
+        /// </summary>
+        //public static List<Room> GetRoomByRay(
+        //  UIApplication app,
+        //  Document doc,
+        //  View3D view3d,
+        //  Curve c)
+        //{
+        //    List<Room> rooms = null;
+
+        //    // Tolerances
+
+        //    const double minTolerance = 0.00000001;
+        //    const double maxTolerance = 0.01;
+
+        //    // Height of ray above room level:
+        //    // ray starts from one foot above room level
+
+        //    const double elevation = 1;
+
+        //    // Ray starts not directly from the room border
+        //    // but from a point offset slightly into it.
+
+        //    const double stepInRoom = 0.1;
+
+        //    // We could use Line.Direction if Curve c is a 
+        //    // Line, but since c also might be an Arc, we 
+        //    // calculate direction like this:
+
+        //    XYZ lineDirection
+        //      = (c.GetEndPoint(1) - c.GetEndPoint(0))
+        //        .Normalize();
+
+        //    XYZ upDir = elevation * XYZ.BasisZ;
+
+        //    // Assume that the room is on the left side of 
+        //    // the room boundary curve and wall on the right.
+        //    // This is valid for both outer and inner room 
+        //    // boundaries (outer are counter-clockwise, inner 
+        //    // are clockwise). Start point is slightly inside 
+        //    // the room, one foot above room level.
+
+        //    XYZ toRoomVec = stepInRoom * GetLeftDirection(
+        //      lineDirection);
+
+        //    XYZ pointBottomInRoom = c.Evaluate(0.5, true)
+        //      + toRoomVec;
+
+        //    XYZ startPoint = pointBottomInRoom + upDir;
+
+        //    // We are searching for walls only
+
+        //    ElementFilter roomfilter
+        //      = new ElementCategoryFilter(
+        //        BuiltInCategory.);
+
+        //    ReferenceIntersector intersector
+        //      = new ReferenceIntersector(roomfilter,
+        //        FindReferenceTarget.Element, view3d);
+
+        //    // We don't want to find elements in linked files
+
+        //    intersector.FindReferencesInRevitLinks = false;
+        //    intersector.
+
+        //    XYZ toWallDir = GetRightDirection(
+        //      lineDirection);
+
+        //    ReferenceWithContext context = intersector
+        //      .FindNearest(startPoint, toWallDir);
+
+        //    Reference closestReference = null;
+
+        //    if (context != null)
+        //    {
+        //        if ((context.Proximity > minTolerance)
+        //          && (context.Proximity < maxTolerance
+        //            + stepInRoom))
+        //        {
+        //            closestReference = context.GetReference();
+
+        //            if (closestReference != null)
+        //            {
+        //                rooms = doc.GetElement(
+        //                  closestReference);
+        //            }
+        //        }
+        //    }
+        //    return rooms;
+        //}
+
+        /// <summary>
+        /// Return the neighbouring BIM element generating 
+        /// the given room boundary curve c, assuming it
+        /// is oriented counter-clockwise around the room
+        /// if part of an interior loop, and vice versa.
+        /// </summary>
+        public static Element GetElementByRay_switch(
+          UIApplication app,
+          Document doc,
+          View3D view3d,
+          Curve c,
+          bool isLeft)
+        {
+            Element boundaryElement = null;
+
+            // Tolerances
+
+            const double minTolerance = 0.00000001;
+            const double maxTolerance = 0.01;
+
+            // Height of ray above room level:
+            // ray starts from one foot above room level
+
+            const double elevation = 1;
+
+            // Ray starts not directly from the room border
+            // but from a point offset slightly into it.
+
+            const double stepInRoom = 0.1;
+
+            // We could use Line.Direction if Curve c is a 
+            // Line, but since c also might be an Arc, we 
+            // calculate direction like this:
+
+            XYZ lineDirection
+              = (c.GetEndPoint(1) - c.GetEndPoint(0))
+                .Normalize();
+
+            XYZ upDir = elevation * XYZ.BasisZ;
+
+            // Assume that the room is on the left side of 
+            // the room boundary curve and wall on the right.
+            // This is valid for both outer and inner room 
+            // boundaries (outer are counter-clockwise, inner 
+            // are clockwise). Start point is slightly inside 
+            // the room, one foot above room level.
+
+            XYZ toRoomVec;
+            if (isLeft)
+            {
+                toRoomVec = stepInRoom * GetLeftDirection(
+                  lineDirection);
+            }
+            else
+            {
+                toRoomVec = stepInRoom * GetRightDirection(
+                lineDirection);
+            }
+
+            XYZ pointBottomInRoom = c.Evaluate(0.5, true)
+              + toRoomVec;
+
+            XYZ startPoint = pointBottomInRoom + upDir;
+
+            // We are searching for walls only
+
+            //ElementFilter wallFilter
+            //  = new ElementCategoryFilter(
+            //    BuiltInCategory.OST_Walls);
+
+            ElementMulticategoryFilter multicategoryFilter
+                 = new ElementMulticategoryFilter(new Collection<BuiltInCategory> {
+                     BuiltInCategory.OST_CurtainWallMullions, 
+                     BuiltInCategory.OST_CurtainWallPanels});
+
+            ReferenceIntersector intersector
+              = new ReferenceIntersector(multicategoryFilter,
+                FindReferenceTarget.Element, view3d);
+
+            // We don't want to find elements in linked files
+
+            intersector.FindReferencesInRevitLinks = false;
+
+            XYZ toWallDir;
+            if (isLeft)
+            {
+                toWallDir = GetRightDirection(
+                  lineDirection);
+            }
+            else
+            {
+                toWallDir = GetLeftDirection(
+                  lineDirection);
+            }
+
+            ReferenceWithContext context = intersector
+              .FindNearest(startPoint, toWallDir);
+
+            Reference closestReference = null;
+
+            if (context != null)
+            {
+                if ((context.Proximity > minTolerance)
+                  && (context.Proximity < maxTolerance
+                    + stepInRoom))
+                {
+                    closestReference = context.GetReference();
+
+                    if (closestReference != null)
+                    {
+                        boundaryElement = doc.GetElement(
+                          closestReference);
+                    }
+                }
+            }
+            return boundaryElement;
         }
     }
 }
