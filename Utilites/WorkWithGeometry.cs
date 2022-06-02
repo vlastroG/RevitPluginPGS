@@ -137,7 +137,7 @@ namespace MS.Utilites
         /// Return direction turning 90 degrees 
         /// left from given input vector.
         /// </summary>
-        private static XYZ GetLeftDirection(XYZ direction)
+        public static XYZ GetLeftDirection(XYZ direction)
         {
             double x = -direction.Y;
             double y = direction.X;
@@ -149,7 +149,7 @@ namespace MS.Utilites
         /// Return direction turning 90 degrees 
         /// right from given input vector.
         /// </summary>
-        private static XYZ GetRightDirection(XYZ direction)
+        public static XYZ GetRightDirection(XYZ direction)
         {
             return GetLeftDirection(direction.Negate());
         }
@@ -361,7 +361,7 @@ namespace MS.Utilites
             // Tolerances
 
             const double minTolerance = 0.00000001;
-            const double maxTolerance = 0.01;
+            const double maxTolerance = 1;
 
             // Height of ray above room level:
             // ray starts from one foot above room level
@@ -415,8 +415,13 @@ namespace MS.Utilites
 
             ElementMulticategoryFilter multicategoryFilter
                  = new ElementMulticategoryFilter(new Collection<BuiltInCategory> {
-                     BuiltInCategory.OST_CurtainWallMullions, 
-                     BuiltInCategory.OST_CurtainWallPanels});
+                     BuiltInCategory.OST_CurtainWallMullions,
+                     BuiltInCategory.OST_CurtainWallPanels,
+                     BuiltInCategory.OST_Walls,
+                     BuiltInCategory.OST_Columns,
+                     BuiltInCategory.OST_Roofs,
+                     BuiltInCategory.OST_Floors,
+                 BuiltInCategory.OST_Rooms});
 
             ReferenceIntersector intersector
               = new ReferenceIntersector(multicategoryFilter,

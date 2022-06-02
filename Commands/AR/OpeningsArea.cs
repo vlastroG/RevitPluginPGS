@@ -28,6 +28,13 @@ namespace MS.Commands.AR
         /// </summary>
         private static readonly SpatialElementBoundaryOptions _boundaryOptions = new SpatialElementBoundaryOptions();
 
+        /// <summary>
+        /// Допуск на поиск витражей возле комнат.
+        /// Допуск означает максимальное расстояние от середины оси витража
+        /// до границы геометрии помещения.
+        /// </summary>
+        private static readonly double _curtain_wall_intersect_tolerance = 2;
+
 
         /// <summary>
         /// Подсчет и назначение площадей проемов в параметр помещения "ПлощадьПроемов"
@@ -162,6 +169,7 @@ namespace MS.Commands.AR
                                     }
                                 }
                             }
+
                         }
                     }
 
@@ -172,16 +180,34 @@ namespace MS.Commands.AR
                     {
                         XYZ z_vector = XYZ.BasisZ;
                         var wall_curve = (glass_wall.Location as LocationCurve).Curve;
+                        //var wall_curve_direction = (wall_curve.GetEndPoint(1) - wall_curve.GetEndPoint(0))
+                        //    .Normalize();
+
+                        //var toLeftVector = _curtain_wall_intersect_tolerance
+                        //    * WorkWithGeometry.GetLeftDirection(wall_curve_direction);
+                        //var toRightVector = _curtain_wall_intersect_tolerance
+                        //    * WorkWithGeometry.GetRightDirection(wall_curve_direction);
+
                         var wall_curve_center = wall_curve.Evaluate(0.5, true);
+
+                        //var startPoint = wall_curve_center + toLeftVector;
+                        //var endPoint = wall_curve_center + toRightVector;
+                        var scale = _curtain_wall_intersect_tolerance / wall_curve.Length;
+
                         Transform moving_up = Transform.CreateTranslation(z_vector);
                         Transform rotation = Transform.CreateRotationAtPoint(z_vector, 90, wall_curve_center);
                         Transform curve_trans = moving_up.Multiply(rotation);
 
+                        Transform x = Transform.Identity;
+                        x = x.ScaleBasis(_curtain_wall_intersect_tolerance / wall_curve.Length);
+                        x.Origin = wall_curve_center;
                         var wall_trans_curve = wall_curve.CreateTransformed(curve_trans);
+                        var wall_trans_curve_final = wall_trans_curve.CreateTransformed(x);
+                        // Заменить поворот на смещение прямой вдоль нормали на 1 фут в обе стороны
 
                         SolidCurveIntersection curve_room_intersect = room_solid
                             .IntersectWithCurve(
-                            wall_trans_curve,
+                            wall_trans_curve_final,
                             solid_curve_intersect_opt);
 
                         if (curve_room_intersect.SegmentCount > 0)
