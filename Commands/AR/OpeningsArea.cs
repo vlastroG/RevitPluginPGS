@@ -67,6 +67,7 @@ namespace MS.Commands.AR
                 .FirstOrDefault<View3D>(
                   e => e.Name.Equals("{3D}"));
 
+
             var filter_rooms = new FilteredElementCollector(doc);
             var rooms = filter_rooms
                 .OfCategory(BuiltInCategory.OST_Rooms)
@@ -180,34 +181,36 @@ namespace MS.Commands.AR
                     {
                         XYZ z_vector = XYZ.BasisZ;
                         var wall_curve = (glass_wall.Location as LocationCurve).Curve;
-                        //var wall_curve_direction = (wall_curve.GetEndPoint(1) - wall_curve.GetEndPoint(0))
-                        //    .Normalize();
+                        var wall_curve_direction = (wall_curve.GetEndPoint(1) - wall_curve.GetEndPoint(0))
+                            .Normalize();
 
-                        //var toLeftVector = _curtain_wall_intersect_tolerance
-                        //    * WorkWithGeometry.GetLeftDirection(wall_curve_direction);
-                        //var toRightVector = _curtain_wall_intersect_tolerance
-                        //    * WorkWithGeometry.GetRightDirection(wall_curve_direction);
+                        var toLeftVector = _curtain_wall_intersect_tolerance
+                            * WorkWithGeometry.GetLeftDirection(wall_curve_direction);
+                        var toRightVector = _curtain_wall_intersect_tolerance
+                            * WorkWithGeometry.GetRightDirection(wall_curve_direction);
 
                         var wall_curve_center = wall_curve.Evaluate(0.5, true);
 
-                        //var startPoint = wall_curve_center + toLeftVector;
-                        //var endPoint = wall_curve_center + toRightVector;
-                        var scale = _curtain_wall_intersect_tolerance / wall_curve.Length;
+                        var startPoint = wall_curve_center + toLeftVector + z_vector;
+                        var endPoint = wall_curve_center + toRightVector + z_vector;
+                        //Transform moving_up = Transform.CreateTranslation(z_vector);
 
-                        Transform moving_up = Transform.CreateTranslation(z_vector);
-                        Transform rotation = Transform.CreateRotationAtPoint(z_vector, 90, wall_curve_center);
-                        Transform curve_trans = moving_up.Multiply(rotation);
+                        var curve_intersect = Line.CreateBound(startPoint, endPoint) as Curve;
+                        //var scale = _curtain_wall_intersect_tolerance / wall_curve.Length;
 
-                        Transform x = Transform.Identity;
-                        x = x.ScaleBasis(_curtain_wall_intersect_tolerance / wall_curve.Length);
-                        x.Origin = wall_curve_center;
-                        var wall_trans_curve = wall_curve.CreateTransformed(curve_trans);
-                        var wall_trans_curve_final = wall_trans_curve.CreateTransformed(x);
+                        //Transform rotation = Transform.CreateRotationAtPoint(z_vector, 90, wall_curve_center);
+                        //Transform curve_trans = moving_up.Multiply(rotation);
+
+                        //Transform x = Transform.Identity;
+                        //x = x.ScaleBasis(_curtain_wall_intersect_tolerance / wall_curve.Length);
+                        //x.Origin = wall_curve_center;
+                        //var wall_trans_curve = wall_curve.CreateTransformed(curve_trans);
+                        //var wall_trans_curve_final = wall_trans_curve.CreateTransformed(x);
                         // Заменить поворот на смещение прямой вдоль нормали на 1 фут в обе стороны
 
                         SolidCurveIntersection curve_room_intersect = room_solid
                             .IntersectWithCurve(
-                            wall_trans_curve_final,
+                            curve_intersect,
                             solid_curve_intersect_opt);
 
                         if (curve_room_intersect.SegmentCount > 0)
