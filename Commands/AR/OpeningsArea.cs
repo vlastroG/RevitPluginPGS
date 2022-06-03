@@ -179,34 +179,10 @@ namespace MS.Commands.AR
 
                     foreach (var glass_wall in glass_walls)
                     {
-                        XYZ z_vector = XYZ.BasisZ;
                         var wall_curve = (glass_wall.Location as LocationCurve).Curve;
-                        var wall_curve_direction = (wall_curve.GetEndPoint(1) - wall_curve.GetEndPoint(0))
-                            .Normalize();
+                        var curve_intersect = WorkWithGeometry
+                            .CreateNormalCenterCurve(wall_curve, 1, _curtain_wall_intersect_tolerance);
 
-                        var toLeftVector = _curtain_wall_intersect_tolerance
-                            * WorkWithGeometry.GetLeftDirection(wall_curve_direction);
-                        var toRightVector = _curtain_wall_intersect_tolerance
-                            * WorkWithGeometry.GetRightDirection(wall_curve_direction);
-
-                        var wall_curve_center = wall_curve.Evaluate(0.5, true);
-
-                        var startPoint = wall_curve_center + toLeftVector + z_vector;
-                        var endPoint = wall_curve_center + toRightVector + z_vector;
-                        //Transform moving_up = Transform.CreateTranslation(z_vector);
-
-                        var curve_intersect = Line.CreateBound(startPoint, endPoint) as Curve;
-                        //var scale = _curtain_wall_intersect_tolerance / wall_curve.Length;
-
-                        //Transform rotation = Transform.CreateRotationAtPoint(z_vector, 90, wall_curve_center);
-                        //Transform curve_trans = moving_up.Multiply(rotation);
-
-                        //Transform x = Transform.Identity;
-                        //x = x.ScaleBasis(_curtain_wall_intersect_tolerance / wall_curve.Length);
-                        //x.Origin = wall_curve_center;
-                        //var wall_trans_curve = wall_curve.CreateTransformed(curve_trans);
-                        //var wall_trans_curve_final = wall_trans_curve.CreateTransformed(x);
-                        // Заменить поворот на смещение прямой вдоль нормали на 1 фут в обе стороны
 
                         SolidCurveIntersection curve_room_intersect = room_solid
                             .IntersectWithCurve(

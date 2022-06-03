@@ -134,6 +134,38 @@ namespace MS.Utilites
         }
 
         /// <summary>
+        /// Создает отрезок (Curve), перпендикулярный направлению заданной кривой (Curve)
+        /// длиной 2*sideIndent футов, центр которого находится над центром заданной кривой (Curve),
+        /// смещенный на zMove футов вверх (если zMove положительно).
+        /// Направление заданной кривой расчитывается как вектор,
+        /// направленный из начальной точки заданной кривой в конечную.
+        /// </summary>
+        /// <param name="baseCurve">Заданная кривая</param>
+        /// <param name="zMove">Смещение вверх</param>
+        /// <param name="sideIndent">Отступ в сторону</param>
+        /// <returns></returns>
+        public static Curve CreateNormalCenterCurve(Curve baseCurve, double zMove, double sideIndent)
+        {
+            XYZ z_vector = new XYZ(0, 0, zMove);
+            var baseCurve_direction = (baseCurve.GetEndPoint(1) - baseCurve.GetEndPoint(0))
+                .Normalize();
+
+            var toLeftVector = sideIndent
+                * WorkWithGeometry.GetLeftDirection(baseCurve_direction);
+            var toRightVector = sideIndent
+                * WorkWithGeometry.GetRightDirection(baseCurve_direction);
+
+            var baseCurve_center = baseCurve.Evaluate(0.5, true);
+
+            var startPoint = baseCurve_center + toLeftVector + z_vector;
+            var endPoint = baseCurve_center + toRightVector + z_vector;
+
+            var normalCurve = Line.CreateBound(startPoint, endPoint) as Curve;
+
+            return normalCurve;
+        }
+
+        /// <summary>
         /// Return direction turning 90 degrees 
         /// left from given input vector.
         /// </summary>
