@@ -40,6 +40,8 @@ namespace MS
             RibbonPanel panelGeneral = application.CreateRibbonPanel("PGS-BIM", "Общее");
             // Раздел АР
             RibbonPanel panelAR = application.CreateRibbonPanel("PGS-BIM", "Раздел АР");
+            // Раздел КР
+            RibbonPanel panelKR = application.CreateRibbonPanel("PGS-BIM", "Раздел КР");
             // Раздел СС
             // RibbonPanel panelSS = application.CreateRibbonPanel("PGS-BIM", "Раздел СС");
             // Раздел ОВиК
@@ -100,6 +102,13 @@ namespace MS
             btnRmFinishing.LargeImage = btnRmFinishingImage;
 
 
+            // StairReinforcement command
+            PushButtonData stairRnfrcmtCmd = new PushButtonData("StairReinforcement", "Армирование\nлестниц", path, "MS.Commands.KR.StairReinforcement");
+            Uri stairRnfrcmtCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\KR\StairRnfrcmt.png");
+            BitmapImage stairRnfrcmtCmdImage = new BitmapImage(stairRnfrcmtCmdImagePath);
+            stairRnfrcmtCmd.LargeImage = stairRnfrcmtCmdImage;
+
+
             // SS Numerator command
             //PushButtonData btnNumerator = new PushButtonData("Numerator", "Маркировка", path, "MS.Numerator");
             //Uri btnNumeratorImagePath = new Uri(assembly_dir + @"\Images\Icons\SS\СС.png");
@@ -131,6 +140,9 @@ namespace MS
             panelAR.AddItem(btnRmFinishing);
             panelAR.AddItem(btnSelection);
             panelAR.AddItem(btnMasonryMesh);
+
+            // KR panel
+            panelKR.AddItem(stairRnfrcmtCmd);
 
             // SS panel
             // panelSS.AddItem(btnNumerator);

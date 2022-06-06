@@ -94,6 +94,7 @@
     <Compile Include="Commands\General\Info.cs" />
     <Compile Include="Commands\General\LevelName.cs" />
     <Compile Include="Commands\General\Selector.cs" />
+    <Compile Include="Commands\KR\StairReinforcement.cs" />
     <Compile Include="Commands\MEP\PipelineFittings.cs" />
     <Compile Include="Commands\SS\Numerator.cs" />
     <Compile Include="GUI\AR\UserControl1.xaml.cs">
@@ -146,6 +147,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Diagrams\TextFile1.txt" />
+    <EmbeddedResource Include="Images\Icons\KR\StairRnfrcmt.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
