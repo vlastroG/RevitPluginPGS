@@ -281,10 +281,9 @@ namespace MS.Utilites
         }
 
         /// <summary>
-        /// Return the neighbouring BIM element generating 
-        /// the given room boundary curve c, assuming it
-        /// is oriented counter-clockwise around the room
-        /// if part of an interior loop, and vice versa.
+        /// Возвращает элемент, найденный через пересечение геометрии этого элемента и отрезка,
+        /// построенного как смещенная вверх (относительно заданной линии) нормаль,
+        /// продленная на равное расстояние в обе стороны от заданной линии.
         /// </summary>
         public static Element GetElementByRay_switch(
           UIApplication app,
@@ -344,12 +343,7 @@ namespace MS.Utilites
 
             XYZ startPoint = pointBottomInRoom + upDir;
 
-            // We are searching for walls only
-
-            //ElementFilter wallFilter
-            //  = new ElementCategoryFilter(
-            //    BuiltInCategory.OST_Walls);
-
+            // Категории элементов, которые могут возвращаться методом
             ElementMulticategoryFilter multicategoryFilter
                  = new ElementMulticategoryFilter(new Collection<BuiltInCategory> {
                      BuiltInCategory.OST_CurtainWallMullions,
