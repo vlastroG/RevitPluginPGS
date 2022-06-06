@@ -77,20 +77,6 @@ namespace MS.Commands.AR
                 .Where(r => (r as Room).Area > 0)
                 .ToArray();
 
-            var filter_windows = new FilteredElementCollector(doc);
-            var windows = filter_windows
-                .OfCategory(BuiltInCategory.OST_Windows)
-                .WhereElementIsNotElementType()
-                .ToElements()
-                .Where(w => w.get_Parameter(BuiltInParameter.PHASE_CREATED).AsValueString() == _phase);
-
-            var filter_doors = new FilteredElementCollector(doc);
-            var doors = filter_doors
-                .OfCategory(BuiltInCategory.OST_Doors)
-                .WhereElementIsNotElementType()
-                .ToElements()
-                .Where(d => d.get_Parameter(BuiltInParameter.PHASE_CREATED).AsValueString() == _phase);
-
             var filter_glass_wall = new FilteredElementCollector(doc);
             var glass_walls = filter_glass_wall
                 .OfCategory(BuiltInCategory.OST_Walls)
@@ -100,7 +86,27 @@ namespace MS.Commands.AR
                 .Where(w => (w as Wall).CurtainGrid != null)
                 .ToList();
 
-            //var glass_walls = new FilteredElementCollector(doc, glass_walls_id_list);
+            var filter_windows = new FilteredElementCollector(doc);
+            var windows = filter_windows
+                .OfCategory(BuiltInCategory.OST_Windows)
+                .WhereElementIsNotElementType()
+                .ToElements()
+                .Where(w => w.get_Parameter(BuiltInParameter.PHASE_CREATED).AsValueString() == _phase)
+                .Where(w => (
+                    doc.GetElement(
+                    w.get_Parameter(BuiltInParameter.HOST_ID_PARAM).AsElementId()) as Wall)
+                    .CurtainGrid == null);
+
+            var filter_doors = new FilteredElementCollector(doc);
+            var doors = filter_doors
+                .OfCategory(BuiltInCategory.OST_Doors)
+                .WhereElementIsNotElementType()
+                .ToElements()
+                .Where(d => d.get_Parameter(BuiltInParameter.PHASE_CREATED).AsValueString() == _phase)
+                .Where(d => (
+                    doc.GetElement(
+                    d.get_Parameter(BuiltInParameter.HOST_ID_PARAM).AsElementId()) as Wall)
+                    .CurtainGrid == null);
 
             SolidCurveIntersectionOptions solid_curve_intersect_opt = new SolidCurveIntersectionOptions();
 

@@ -450,10 +450,13 @@ namespace MS.Utilites
                      BuiltInCategory.OST_CurtainWallMullions,
                      BuiltInCategory.OST_CurtainWallPanels,
                      BuiltInCategory.OST_Walls,
+                     BuiltInCategory.OST_Doors,
+                     BuiltInCategory.OST_Windows,
                      BuiltInCategory.OST_Columns,
+                     BuiltInCategory.OST_GenericModel,
                      BuiltInCategory.OST_Roofs,
                      BuiltInCategory.OST_Floors,
-                 BuiltInCategory.OST_Rooms});
+                     BuiltInCategory.OST_Rooms});
 
             ReferenceIntersector intersector
               = new ReferenceIntersector(multicategoryFilter,
