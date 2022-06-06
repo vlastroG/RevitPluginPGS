@@ -7,7 +7,7 @@ namespace MS.Utilites
     /// <summary>
     /// Фильтр выбора элементов по заданной встроенной категории
     /// </summary>
-    internal class SelectionRoomFilter : ISelectionFilter
+    internal class SelectionFilterRooms : ISelectionFilter
     {
         public bool AllowElement(Element elem)
         {

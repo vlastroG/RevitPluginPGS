@@ -265,7 +265,7 @@ namespace MS.Utilites
             Document doc = uidoc.Document;
             Selection sel = uidoc.Selection;
 
-            var filter_rooms = new SelectionRoomFilter();
+            var filter_rooms = new SelectionFilterRooms();
             var rooms = uidoc.Selection.PickElementsByRectangle(filter_rooms, "Выберите 1 помещение.").Select(e => e as Room).ToList();
 
             if (1 != rooms.Count)

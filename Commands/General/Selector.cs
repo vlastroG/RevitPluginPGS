@@ -13,12 +13,19 @@ namespace MS
     [Regeneration(RegenerationOption.Manual)]
     public class Selector : IExternalCommand
     {
+        /// <summary>
+        /// Выбирает помещения рамкой на текущем виде
+        /// </summary>
+        /// <param name="commandData"></param>
+        /// <param name="message"></param>
+        /// <param name="elements"></param>
+        /// <returns></returns>
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             // Выбор помещений рамкой на текущем виде
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
 
-            var filter = new SelectionRoomFilter();
+            var filter = new SelectionFilterRooms();
 
             List<Element> selectedElements = null;
             try
