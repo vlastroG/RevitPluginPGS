@@ -4,6 +4,7 @@ using Autodesk.Revit.DB.Architecture;
 using Autodesk.Revit.UI;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -39,9 +40,12 @@ namespace MS.Commands.MEP
                 .WhereElementIsNotElementType()
                 .ToElements();
 
-            var filter_pipe_acs = new FilteredElementCollector(doc);
-            var pipe_accessories = filter_pipe_acs
-                .OfCategory(BuiltInCategory.OST_PipeAccessory)
+            var filter_pipe_stuff = new FilteredElementCollector(doc);
+            var pipe_stuff_categories = new ElementMulticategoryFilter(new Collection<BuiltInCategory> {
+                     BuiltInCategory.OST_PipeAccessory,
+                     BuiltInCategory.OST_MechanicalEquipment});
+
+            var pipe_stuff = filter_pipe_stuff.WherePasses(pipe_stuff_categories)
                 .WhereElementIsNotElementType()
                 .ToElements();
 
@@ -50,7 +54,7 @@ namespace MS.Commands.MEP
             {
                 trans_renew.Start("Арматура труб обнуление");
 
-                foreach (var pipe_acs in pipe_accessories)
+                foreach (var pipe_acs in pipe_stuff)
                 {
                     pipe_acs.get_Parameter(guid_par_apartment_number).Set(String.Empty);
                 }
@@ -90,7 +94,7 @@ namespace MS.Commands.MEP
                             }
 
                             var pipe_acs_in_room = new FilteredElementCollector(doc)
-                                .OfCategory(BuiltInCategory.OST_PipeAccessory)
+                                .WherePasses(pipe_stuff_categories)
                                 .WherePasses(new ElementIntersectsSolidFilter(room_solid))
                                 .Cast<FamilyInstance>()
                                 .ToList();
