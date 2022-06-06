@@ -61,7 +61,8 @@ namespace MS.Commands.AR
                 .WhereElementIsNotElementType()
                 .ToElements()
                 .Select(e => e as Wall)
-                .Where(w => w.WallType.GetCompoundStructure().LayerCount == 1)
+                .Where(w => w.WallType.GetCompoundStructure() != null
+                         && w.WallType.GetCompoundStructure().LayerCount == 1)
                 .Where(w => w.get_Parameter(guid_par_mesh_rows_count).HasValue == true
                          && w.get_Parameter(guid_par_mesh_rows_count).AsDouble() >= 1);
 

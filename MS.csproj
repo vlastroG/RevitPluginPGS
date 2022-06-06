@@ -87,6 +87,7 @@
     <Compile Include="Commands\AR\MasonryMesh.cs" />
     <Compile Include="Commands\AR\Models\Apartment.cs" />
     <Compile Include="Commands\Archive\RoomsArea.cs" />
+    <Compile Include="Commands\AR\OpeningsArea.cs" />
     <Compile Include="Commands\AR\RoomsAreaNew.cs" />
     <Compile Include="Commands\AR\RoomsFinishing.cs" />
     <Compile Include="Commands\Fun\Picture.cs" />
@@ -100,6 +101,8 @@
     </Compile>
     <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utilites\DictionaryExtension.cs" />
+    <Compile Include="Utilites\GetBoundarySegmentElement.cs" />
     <Compile Include="Utilites\SelectionRoomFilter.cs" />
     <Compile Include="Utilites\UserInput.cs" />
     <Compile Include="Utilites\WorkWithGeometry.cs" />
