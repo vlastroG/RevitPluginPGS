@@ -2,7 +2,7 @@
 <RevitAddIns>
 	<AddIn Type="Application">
 		<Name>MS</Name>
-		<Assembly>D:\Строганов В.Г\REVIT\! C#_Plug-ins\MS\bin\x64\Debug\MS.dll</Assembly>
+		<Assembly>C:\Users\stroganov.vg\source\repos\RevitPluginPGS\bin\Debug\MS.dll</Assembly>
 		<AddInId>
 			5364EFFC-7B51-439F-BF3E-57E70C4EA891
 		</AddInId>
@@ -11,7 +11,7 @@
 		<Description>PGS plugin for Revit</Description>
 		<VendorId>Vlastro and Doni</VendorId>
 		<Publisher>Vlastro</Publisher>
-		<VendorDescription>Bim</VendorDescription>
+		<VendorDescription>Обратитесь в BIM отдел PGS.</VendorDescription>
 		<VisibilityMode>AlwaysVisible</VisibilityMode>
 	</AddIn>
 </RevitAddIns>
