@@ -20,25 +20,7 @@ namespace MS.Commands.KR
             Document doc = commandData.Application.ActiveUIDocument.Document;
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
 
-            //Reference faceRef = uidoc.Selection.PickObject(ObjectType.Face, new SelectionFilterPlanarFaces(doc), "Please pick a planar face to set the work plane. ESC for cancel.");
-            //GeometryObject geoObject = doc.GetElement(faceRef).GetGeometryObjectFromReference(faceRef);
-            //PlanarFace planarFace = geoObject as PlanarFace;
 
-            Reference edgeRef = uidoc.Selection.PickObject(ObjectType.Edge, new SelectionFilterEdges(doc), "Please pick an edge to set the work plane. ESC for cancel.");
-            GeometryObject geoObjectEdge = doc.GetElement(edgeRef).GetGeometryObjectFromReference(edgeRef);
-            Edge edge = geoObjectEdge as Edge;
-
-            //var bounds = planarFace.EdgeLoops.get_Item(0);
-
-            //foreach (Edge edge in bounds)
-            //{
-            //    var curve = edge.AsCurve();
-            //    var origin = curve.Evaluate(0.5, true);
-            //    var start = curve.GetEndPoint(0);
-            //    var end = curve.GetEndPoint(1);
-            //    var direction = (curve.GetEndPoint(1) - curve.GetEndPoint(0)).Normalize();
-
-            //}
 
 
             return Result.Succeeded;
