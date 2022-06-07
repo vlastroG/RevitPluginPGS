@@ -5,7 +5,7 @@ using Autodesk.Revit.UI.Selection;
 namespace MS.Utilites
 {
     /// <summary>
-    /// Фильтр выбора элементов по заданной встроенной категории
+    /// Фильтр выбора помещений
     /// </summary>
     internal class SelectionFilterRooms : ISelectionFilter
     {
