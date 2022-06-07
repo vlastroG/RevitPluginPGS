@@ -9,14 +9,14 @@ using System.Threading.Tasks;
 namespace MS.Utilites
 {
     /// <summary>
-    /// Фильтр выбора элементов по заданному классу Revit API
+    /// Фильтр выбора элементов по заданной категории Revit API
     /// </summary>
-    /// <typeparam name="T">Заданный класс Revit</typeparam>
-    public class SelectionFilterElementsOfClass<T> : ISelectionFilter
+    /// <typeparam name="T">Заданная категория Revit</typeparam>
+    public class SelectionFilterElementsOfCategory<T> : ISelectionFilter where T : Category
     {
         public bool AllowElement(Element elem)
         {
-            return elem is T;
+            return elem.Category is T;
         }
 
         public bool AllowReference(Reference reference, XYZ position)
