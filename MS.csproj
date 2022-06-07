@@ -107,6 +107,7 @@
     <Compile Include="Utilites\SelectionFilterEdges.cs" />
     <Compile Include="Utilites\SelectionFilterPlanarFaces.cs" />
     <Compile Include="Utilites\SelectionFilterRooms.cs" />
+    <Compile Include="Utilites\SelectionFilterElementsOfClass.cs" />
     <Compile Include="Utilites\UserInput.cs" />
     <Compile Include="Utilites\WorkWithGeometry.cs" />
     <Compile Include="Utilites\WorkWithPath.cs" />
