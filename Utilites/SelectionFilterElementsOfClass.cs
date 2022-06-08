@@ -12,16 +12,52 @@ namespace MS.Utilites
     /// Фильтр выбора элементов по заданной категории Revit API
     /// </summary>
     /// <typeparam name="T">Заданная категория Revit</typeparam>
-    public class SelectionFilterElementsOfCategory<T> : ISelectionFilter where T : Category
+    public class SelectionFilterElementsOfCategory<TElementClass> : ISelectionFilter where TElementClass : Element
     {
+        private BuiltInCategory _builtInCategory;
+
+        private bool _addFilterByElementClass;
+
+
+        public SelectionFilterElementsOfCategory(BuiltInCategory BuiltInCategory, bool AddFilterByElementClass)
+        {
+            _builtInCategory = BuiltInCategory;
+            _addFilterByElementClass = AddFilterByElementClass;
+        }
+
+
         public bool AllowElement(Element elem)
         {
-            return elem.Category is T;
+            if (elem is null)
+                return false;
+
+            //if (!(elem is FamilyInstance)) 
+            //    return false;
+
+            BuiltInCategory builtInCategory = (BuiltInCategory)GetCategoryIdAsInteger(elem);
+
+            if (_addFilterByElementClass)
+            {
+                if (builtInCategory == _builtInCategory || elem is TElementClass)
+                    return true;
+            }
+            else
+            {
+                if (builtInCategory == _builtInCategory)
+                    return true;
+            }
+
+            return false;
         }
 
         public bool AllowReference(Reference reference, XYZ position)
         {
             return true;
+        }
+
+        private int GetCategoryIdAsInteger(Element element)
+        {
+            return element?.Category?.Id.IntegerValue ?? 0;
         }
     }
 }

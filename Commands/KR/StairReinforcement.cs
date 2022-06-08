@@ -21,7 +21,7 @@ namespace MS.Commands.KR
             Document doc = commandData.Application.ActiveUIDocument.Document;
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
 
-            var filter = new SelectionFilterElementsOfCategory<BuiltInCategory>();
+            var filter = new SelectionFilterElementsOfCategory<Stairs>(BuiltInCategory.OST_Stairs, true);
 
             List<Element> selectedElements = null;
             try
