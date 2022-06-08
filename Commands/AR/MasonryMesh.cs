@@ -21,7 +21,12 @@ namespace MS.Commands.AR
         private readonly Guid guid_par_mesh_rows_count = Guid.Parse("42795f38-352d-44c6-b739-4a97d0f765db");
 
         /// <summary>
-        /// Guid параметра Рзм.Ширинау проемов
+        /// Guid параметра О_Этаж для фильтрации стен
+        /// </summary>
+        private readonly Guid guid_par_level_number = Guid.Parse("9eabf56c-a6cd-4b5c-a9d0-e9223e19ea3f");
+
+        /// <summary>
+        /// Guid параметра Рзм.Ширина у проемов
         /// </summary>
         private readonly Guid guid_par_width = Guid.Parse("8f2e4f93-9472-4941-a65d-0ac468fd6a5d");
 
@@ -114,7 +119,7 @@ namespace MS.Commands.AR
                     trans.Start("Подсчет кладочной сетки");
                     try
                     {
-                        wall.get_Parameter(guid_par_mesh_length).Set(mesh_length_total.ToString());
+                        wall.get_Parameter(guid_par_mesh_length).Set(mesh_length_total);
                     }
                     catch (NullReferenceException)
                     {
