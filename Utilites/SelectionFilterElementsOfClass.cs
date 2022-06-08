@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MS.Utilites;
 
 namespace MS.Utilites
 {
@@ -34,7 +35,7 @@ namespace MS.Utilites
             //if (!(elem is FamilyInstance)) 
             //    return false;
 
-            BuiltInCategory builtInCategory = (BuiltInCategory)GetCategoryIdAsInteger(elem);
+            BuiltInCategory builtInCategory = (BuiltInCategory)WorkWithParameters.GetCategoryIdAsInteger(elem);
 
             if (_addFilterByElementClass)
             {
@@ -53,11 +54,6 @@ namespace MS.Utilites
         public bool AllowReference(Reference reference, XYZ position)
         {
             return true;
-        }
-
-        private int GetCategoryIdAsInteger(Element element)
-        {
-            return element?.Category?.Id.IntegerValue ?? 0;
         }
     }
 }
