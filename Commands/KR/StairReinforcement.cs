@@ -16,23 +16,37 @@ namespace MS.Commands.KR
     [Regeneration(RegenerationOption.Manual)]
     public class StairReinforcement : IExternalCommand
     {
+        /// <summary>
+        /// Армирование лестничного марша
+        /// </summary>
+        /// <param name="commandData"></param>
+        /// <param name="message"></param>
+        /// <param name="elements"></param>
+        /// <returns></returns>
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             Document doc = commandData.Application.ActiveUIDocument.Document;
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
 
+            // Фильтр выбора лестниц, созданных инструментом "лестницы",
+            // загружаемым семейством или моделью в контексте категории "лестницы".
             var filter = new SelectionFilterElementsOfCategory<Stairs>(BuiltInCategory.OST_Stairs, true);
-
+            // Выбранные элементы - лестницы
             List<Element> selectedElements = null;
             try
             {
-                //selectedElements = uidoc.Selection.PickElementsByRectangle(filter, "Выберите помещения.").ToList();
                 selectedElements = uidoc.Selection.PickObjects(ObjectType.Element, filter, "Выберите лестницы.").Select(e => doc.GetElement(e.ElementId)).ToList();
             }
             catch (OperationCanceledException e)
             {
                 return Result.Cancelled;
             }
+
+            // Тестовый выбор первой лестницы из списка
+            var testStair = selectedElements.FirstOrDefault();
+            var stair = new StairModel(testStair);
+
+
 
             string test = "test";
 

@@ -94,6 +94,7 @@
     <Compile Include="Commands\General\Info.cs" />
     <Compile Include="Commands\General\LevelName.cs" />
     <Compile Include="Commands\General\Selector.cs" />
+    <Compile Include="Commands\KR\StairModel.cs" />
     <Compile Include="Commands\KR\StairReinforcement.cs" />
     <Compile Include="Commands\MEP\PipelineFittings.cs" />
     <Compile Include="Commands\SS\Numerator.cs" />
@@ -110,6 +111,7 @@
     <Compile Include="Utilites\SelectionFilterElementsOfClass.cs" />
     <Compile Include="Utilites\UserInput.cs" />
     <Compile Include="Utilites\WorkWithGeometry.cs" />
+    <Compile Include="Utilites\WorkWithParameters.cs" />
     <Compile Include="Utilites\WorkWithPath.cs" />
     <Compile Include="Utilites\WorkWithString.cs" />
   </ItemGroup>
