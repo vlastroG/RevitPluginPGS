@@ -11,7 +11,7 @@
 		<Description>PGS plugin for Revit</Description>
 		<VendorId>Vlastro and Doni</VendorId>
 		<Publisher>Vlastro</Publisher>
-		<VendorDescription>Обратитесь в BIM отдел PGS.</VendorDescription>
+		<VendorDescription>Нажмите "Показать подробности" и пришлите скриншот в BIM отдел Строганову В.Г.</VendorDescription>
 		<VisibilityMode>AlwaysVisible</VisibilityMode>
 	</AddIn>
 </RevitAddIns>
