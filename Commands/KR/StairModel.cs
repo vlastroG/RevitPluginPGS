@@ -9,20 +9,40 @@ using System.Threading.Tasks;
 
 namespace MS.Commands.KR
 {
+    /// <summary>
+    /// Вспомогательный класс для армирования лестничных маршей.
+    /// В конструктор подается элемент валидной категории (Лестницы, Каркас несущий),
+    /// из которого получается геометрия лестничных маршей.
+    /// Элемент для обработки должен помимо валидной категории быть замоделирован так,
+    /// чтобы лестничные марши НЕ были соединены с площадкой.
+    /// </summary>
     internal class StairModel
     {
-        public Solid StairSolid;
-
+        /// <summary>
+        /// Список валидных категорий элемента, который подается в конструктор для получения геометрии.
+        /// </summary>
         private readonly List<BuiltInCategory> _validCategories = new List<BuiltInCategory>()
         {
             BuiltInCategory.OST_Stairs,
             BuiltInCategory.OST_StructuralFraming
         };
 
+        /// <summary>
+        /// Список лестничных маршей, полученных из элемента. Может содержать 1 или 2 элемента.
+        /// </summary>
         private readonly List<Solid> _stairSolids = new List<Solid>();
 
+        /// <summary>
+        /// Опции для получения геометрии элемента лестницы - низкий уровень детализации.
+        /// </summary>
         private static readonly Options _options = new Options() { DetailLevel = ViewDetailLevel.Coarse };
 
+
+        /// <summary>
+        /// Конструктор модели лестницы для армирования.
+        /// </summary>
+        /// <param name="element">Элемент валидной категории для получения геометрии лестницы.</param>
+        /// <exception cref="ArgumentException">Исключение, если категория подаваемого элемента невалидная.</exception>
         public StairModel(Element element)
         {
             // Валидация входного элемента
@@ -64,9 +84,6 @@ namespace MS.Commands.KR
                     }
                 }
             }
-
-            var t = 0;
-
         }
     }
 }
