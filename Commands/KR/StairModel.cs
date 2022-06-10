@@ -13,6 +13,12 @@ namespace MS.Commands.KR
     {
         public Solid StairSolid;
 
+        private readonly List<BuiltInCategory> _validCategories = new List<BuiltInCategory>()
+        {
+            BuiltInCategory.OST_Stairs,
+            BuiltInCategory.OST_StructuralFraming
+        };
+
         private readonly List<Solid> _stairSolids = new List<Solid>();
 
         private static readonly Options _options = new Options() { DetailLevel = ViewDetailLevel.Coarse };
@@ -21,8 +27,8 @@ namespace MS.Commands.KR
         {
             // Валидация входного элемента
             if (!(element is Stairs)
-                && (BuiltInCategory)WorkWithParameters.GetCategoryIdAsInteger(element)
-                != BuiltInCategory.OST_Stairs)
+                && !_validCategories.Contains(
+                    (BuiltInCategory)WorkWithParameters.GetCategoryIdAsInteger(element)))
             {
                 throw new ArgumentException(nameof(element));
             }
@@ -45,7 +51,8 @@ namespace MS.Commands.KR
                             allProtoGeoSolids.Add(solid);
                         }
                     }
-                    allProtoGeoSolids.Sort((s1, s2) => s1.Volume.CompareTo(s2.Volume));
+                    allProtoGeoSolids.Sort((s1, s2) => s1.Faces.Size.CompareTo(s2.Faces.Size));
+                    allProtoGeoSolids.Reverse();
 
                     if (allProtoGeoSolids.Count == 1)
                     {

@@ -30,7 +30,12 @@ namespace MS.Commands.KR
 
             // Фильтр выбора лестниц, созданных инструментом "лестницы",
             // загружаемым семейством или моделью в контексте категории "лестницы".
-            var filter = new SelectionFilterElementsOfCategory<Stairs>(BuiltInCategory.OST_Stairs, true);
+            List<BuiltInCategory> categoryList = new List<BuiltInCategory>()
+            {
+                BuiltInCategory.OST_Stairs,
+                BuiltInCategory.OST_StructuralFraming
+            };
+            var filter = new SelectionFilterElementsOfCategory<Stairs>(categoryList, true);
             // Выбранные элементы - лестницы
             List<Element> selectedElements = null;
             try

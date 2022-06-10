@@ -15,12 +15,12 @@ namespace MS.Utilites
     /// <typeparam name="T">Заданная категория Revit</typeparam>
     public class SelectionFilterElementsOfCategory<TElementClass> : ISelectionFilter where TElementClass : Element
     {
-        private BuiltInCategory _builtInCategory;
+        private List<BuiltInCategory> _builtInCategory;
 
         private bool _addFilterByElementClass;
 
 
-        public SelectionFilterElementsOfCategory(BuiltInCategory BuiltInCategory, bool AddFilterByElementClass)
+        public SelectionFilterElementsOfCategory(List<BuiltInCategory> BuiltInCategory, bool AddFilterByElementClass)
         {
             _builtInCategory = BuiltInCategory;
             _addFilterByElementClass = AddFilterByElementClass;
@@ -39,12 +39,12 @@ namespace MS.Utilites
 
             if (_addFilterByElementClass)
             {
-                if (builtInCategory == _builtInCategory || elem is TElementClass)
+                if (_builtInCategory.Contains(builtInCategory) || elem is TElementClass)
                     return true;
             }
             else
             {
-                if (builtInCategory == _builtInCategory)
+                if (_builtInCategory.Contains(builtInCategory))
                     return true;
             }
 
