@@ -94,7 +94,8 @@
     <Compile Include="Commands\General\Info.cs" />
     <Compile Include="Commands\General\LevelName.cs" />
     <Compile Include="Commands\General\Selector.cs" />
-    <Compile Include="Commands\KR\StairModel.cs" />
+    <Compile Include="Commands\KR\Models\StairFlight.cs" />
+    <Compile Include="Commands\KR\Models\StairModel.cs" />
     <Compile Include="Commands\KR\StairReinforcement.cs" />
     <Compile Include="Commands\MEP\PipelineFittings.cs" />
     <Compile Include="Commands\SS\Numerator.cs" />
@@ -103,7 +104,8 @@
     </Compile>
     <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utilites\DictionaryExtension.cs" />
+    <Compile Include="Utilites\ExtensionDictionary.cs" />
+    <Compile Include="Utilites\ExtensionPlanarFace.cs" />
     <Compile Include="Utilites\GetBoundarySegmentElement.cs" />
     <Compile Include="Utilites\SelectionFilterEdges.cs" />
     <Compile Include="Utilites\SelectionFilterPlanarFaces.cs" />
