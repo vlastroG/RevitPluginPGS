@@ -1,5 +1,6 @@
 ﻿using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Architecture;
+using MS.Commands.KR.Models;
 using MS.Utilites;
 using System;
 using System.Collections.Generic;
@@ -16,7 +17,7 @@ namespace MS.Commands.KR
     /// Элемент для обработки должен помимо валидной категории быть замоделирован так,
     /// чтобы лестничные марши НЕ были соединены с площадкой.
     /// </summary>
-    internal class StairModel
+    internal sealed class StairModel
     {
         /// <summary>
         /// Список валидных категорий элемента, который подается в конструктор для получения геометрии.
@@ -30,7 +31,12 @@ namespace MS.Commands.KR
         /// <summary>
         /// Список лестничных маршей, полученных из элемента. Может содержать 1 или 2 элемента.
         /// </summary>
-        private readonly List<Solid> _stairSolids = new List<Solid>();
+        private readonly List<Solid> _stairFlightSolids = new List<Solid>();
+
+        /// <summary>
+        /// Список лестничных маршей
+        /// </summary>
+        private readonly List<StairFlight> _stairFlights = new List<StairFlight>();
 
         /// <summary>
         /// Опции для получения геометрии элемента лестницы - низкий уровень детализации.
@@ -45,6 +51,23 @@ namespace MS.Commands.KR
         /// <exception cref="ArgumentException">Исключение, если категория подаваемого элемента невалидная.</exception>
         public StairModel(Element element)
         {
+            StairValidation(element);
+
+            ClearAllGeometryData();
+
+            FillStairSolidsList(element);
+
+            FillStairFlightList(_stairFlightSolids);
+        }
+
+
+        /// <summary>
+        /// Валидация элемента, из которого берется геометрия для создания StairModel.
+        /// </summary>
+        /// <param name="element">Элемент для валидации.</param>
+        /// <exception cref="ArgumentException">Элемент для сздания StairModel не валидный.</exception>
+        private void StairValidation(Element element)
+        {
             // Валидация входного элемента
             if (!(element is Stairs)
                 && !_validCategories.Contains(
@@ -52,7 +75,18 @@ namespace MS.Commands.KR
             {
                 throw new ArgumentException(nameof(element));
             }
+        }
 
+        /// <summary>
+        /// Заполняет список solid лестничных маршей данной лестницы.
+        /// Из элемента получаются solid, имеющие ненулевой объем,
+        /// далее этот локальный список сортируется по количеству surface.
+        /// В заполняемый список solid лестничных маршей попадают первые 2,
+        /// имеющие наибольшее количество surface.
+        /// </summary>
+        /// <param name="element">Элемент лестницы для анализа.</param>
+        private void FillStairSolidsList(Element element)
+        {
             GeometryElement geoElement = element.get_Geometry(_options);
 
             foreach (GeometryObject geoObject in geoElement)
@@ -76,14 +110,40 @@ namespace MS.Commands.KR
 
                     if (allProtoGeoSolids.Count == 1)
                     {
-                        _stairSolids.Add(allProtoGeoSolids.First());
+                        _stairFlightSolids.Add(allProtoGeoSolids.First());
                     }
                     else if (allProtoGeoSolids.Count >= 2)
                     {
-                        _stairSolids.AddRange(allProtoGeoSolids.GetRange(0, 2));
+                        _stairFlightSolids.AddRange(allProtoGeoSolids.GetRange(0, 2));
+                    }
+                    else
+                    {
+                        throw new ArgumentException(nameof(allProtoGeoSolids));
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Заполняет список моделей лестничных маршей.
+        /// </summary>
+        /// <param name="solids">Лестничные марши.</param>
+        private void FillStairFlightList(List<Solid> solids)
+        {
+            foreach (var solid in solids)
+            {
+                StairFlight stairFlight = new StairFlight(solid);
+                _stairFlights.Add(stairFlight);
+            }
+        }
+
+        /// <summary>
+        /// Очистка списков элементов геометрии с предыдущей команды.
+        /// </summary>
+        private void ClearAllGeometryData()
+        {
+            _stairFlightSolids.Clear();
+            _stairFlightSolids.Clear();
         }
     }
 }
