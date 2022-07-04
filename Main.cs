@@ -102,6 +102,13 @@ namespace MS
             btnRmFinishing.LargeImage = btnRmFinishingImage;
 
 
+            // MaterialColorsCommand
+            PushButtonData btnMaterialColors = new PushButtonData("MaterialColors", "Обновить\nцвета", path, "MS.Commands.AR.MaterialColors");
+            Uri btnMaterialColorsImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\materialColors.png");
+            BitmapImage btnMaterialColorsImage = new BitmapImage(btnMaterialColorsImagePath);
+            btnMaterialColors.LargeImage = btnMaterialColorsImage;
+
+
             // StairReinforcement command
             PushButtonData stairRnfrcmtCmd = new PushButtonData("StairReinforcement", "Армирование\nлестниц", path, "MS.Commands.KR.StairReinforcement");
             Uri stairRnfrcmtCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\KR\StairRnfrcmt.png");
@@ -140,6 +147,7 @@ namespace MS
             panelAR.AddItem(btnRmFinishing);
             panelAR.AddItem(btnSelection);
             panelAR.AddItem(btnMasonryMesh);
+            panelAR.AddItem(btnMaterialColors);
 
             // KR panel
             panelKR.AddItem(stairRnfrcmtCmd);

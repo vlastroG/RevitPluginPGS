@@ -67,6 +67,9 @@
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Drawing.Common, Version=6.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.Drawing.Common.6.0.0\lib\net461\System.Drawing.Common.dll</HintPath>
+    </Reference>
     <Reference Include="System.Runtime, Version=4.1.1.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>packages\System.Runtime.4.3.1\lib\net462\System.Runtime.dll</HintPath>
       <Private>True</Private>
@@ -85,6 +88,7 @@
   <ItemGroup>
     <Compile Include="Commands\AR\ComplexAprtmntNmbr.cs" />
     <Compile Include="Commands\AR\MasonryMesh.cs" />
+    <Compile Include="Commands\AR\MaterialColors.cs" />
     <Compile Include="Commands\AR\Models\Apartment.cs" />
     <Compile Include="Commands\Archive\RoomsArea.cs" />
     <Compile Include="Commands\AR\OpeningsArea.cs" />
@@ -147,7 +151,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Images\AR\MaterialColors\" />
+  </ItemGroup>
   <ItemGroup>
     <Page Include="GUI\AR\UserControl1.xaml">
       <SubType>Designer</SubType>
@@ -159,6 +165,9 @@
     <Content Include="Images\Content\Alt_symbols.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <EmbeddedResource Include="Images\Icons\AR\materialColors.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="Images\Icons\KR\StairRnfrcmt.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>

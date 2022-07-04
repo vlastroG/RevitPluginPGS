@@ -2,6 +2,7 @@
 using Autodesk.Revit.DB.Architecture;
 using Autodesk.Revit.UI;
 using System;
+using System.Drawing;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
@@ -400,5 +401,36 @@ namespace MS.Utilites
             return boundaryElement;
         }
 
+        /// <summary>
+        /// Создает прямоугольник с заданной заливкой rgb, шириной и высотой;
+        /// после чего сохраняет его как растровое изображение с заданным разрешением dpi
+        /// по заданному пути.
+        /// </summary>
+        /// <param name="width">Ширина прямоугольника.</param>
+        /// <param name="height">Высота прямоугольника.</param>
+        /// <param name="dpi">Плотность пикселей на дюйм.</param>
+        /// <param name="path">Путь к файлу.</param>
+        public static void CreateColoredRectanglePng(
+            int width,
+            int height,
+            float dpi,
+            int red,
+            int green,
+            int blue,
+            string @path)
+        {
+            int zero = 0; // Прямоугольник создается в начале координат изображения.
+
+            using (Bitmap b = new Bitmap(width, height))
+            {
+                b.SetResolution(dpi, dpi);
+                using (Graphics g = Graphics.FromImage(b))
+                {
+                    Brush brush = new SolidBrush(System.Drawing.Color.FromArgb(red, green, blue));
+                    g.FillRectangle(brush, new System.Drawing.Rectangle(zero, zero, width, height));
+                }
+                b.Save("test.png", System.Drawing.Imaging.ImageFormat.Png);
+            }
+        }
     }
 }
