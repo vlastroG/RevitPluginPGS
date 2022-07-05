@@ -144,13 +144,13 @@ namespace MS
             panelAR.AddItem(btnRmArea);
             panelAR.AddItem(btnCmplxAprtNum);
             panelAR.AddItem(btnOpeningsArea);
-            panelAR.AddItem(btnRmFinishing);
+            //panelAR.AddItem(btnRmFinishing); // в разработке, нужно указать названия параметров
             panelAR.AddItem(btnSelection);
-            panelAR.AddItem(btnMasonryMesh);
+            //panelAR.AddItem(btnMasonryMesh); // в разработке, нужно указать названия параметров
             panelAR.AddItem(btnMaterialColors);
 
             // KR panel
-            panelKR.AddItem(stairRnfrcmtCmd);
+            //panelKR.AddItem(stairRnfrcmtCmd); // в разработке (сырая)
 
             // SS panel
             // panelSS.AddItem(btnNumerator);
