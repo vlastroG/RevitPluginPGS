@@ -110,6 +110,7 @@
     <Compile Include="Utilites\WorkWithString.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Diagrams\Copy of Algorhytm check lintels.drawio" />
     <None Include="Diagrams\RoomsAreaAlgorithm.drawio" />
     <None Include="packages.config" />
     <None Include="SolutionItems\MS.addin" />
