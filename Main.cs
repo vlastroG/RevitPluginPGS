@@ -146,7 +146,7 @@ namespace MS
             panelAR.AddItem(btnOpeningsArea);
             //panelAR.AddItem(btnRmFinishing); // в разработке, нужно указать названия параметров
             panelAR.AddItem(btnSelection);
-            //panelAR.AddItem(btnMasonryMesh); // в разработке, нужно указать названия параметров
+            panelAR.AddItem(btnMasonryMesh);
             panelAR.AddItem(btnMaterialColors);
 
             // KR panel
