@@ -5,6 +5,7 @@ using System;
 using System.Drawing;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 
 namespace MS.Utilites
 {
@@ -417,7 +418,8 @@ namespace MS.Utilites
             int red,
             int green,
             int blue,
-            string @path)
+            string @dirPath,
+            string @filePath)
         {
             int zero = 0; // Прямоугольник создается в начале координат изображения.
 
@@ -429,7 +431,8 @@ namespace MS.Utilites
                     Brush brush = new SolidBrush(System.Drawing.Color.FromArgb(red, green, blue));
                     g.FillRectangle(brush, new System.Drawing.Rectangle(zero, zero, width, height));
                 }
-                b.Save("test.png", System.Drawing.Imaging.ImageFormat.Png);
+                Directory.CreateDirectory(@dirPath);
+                b.Save(@filePath, System.Drawing.Imaging.ImageFormat.Png);
             }
         }
     }

@@ -151,9 +151,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Images\AR\MaterialColors\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Page Include="GUI\AR\UserControl1.xaml">
       <SubType>Designer</SubType>
@@ -165,7 +163,7 @@
     <Content Include="Images\Content\Alt_symbols.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <EmbeddedResource Include="Images\Icons\AR\materialColors.png">
+    <EmbeddedResource Include="Images\Icons\AR\MaterialColors.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="Images\Icons\KR\StairRnfrcmt.png">

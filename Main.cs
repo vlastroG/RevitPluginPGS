@@ -104,7 +104,7 @@ namespace MS
 
             // MaterialColorsCommand
             PushButtonData btnMaterialColors = new PushButtonData("MaterialColors", "Обновить\nцвета", path, "MS.Commands.AR.MaterialColors");
-            Uri btnMaterialColorsImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\materialColors.png");
+            Uri btnMaterialColorsImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\MaterialColors.png");
             BitmapImage btnMaterialColorsImage = new BitmapImage(btnMaterialColorsImagePath);
             btnMaterialColors.LargeImage = btnMaterialColorsImage;
 
