@@ -41,13 +41,12 @@ namespace MS
             // Раздел АР
             RibbonPanel panelAR = application.CreateRibbonPanel("PGS-BIM", "Раздел АР");
             // Раздел КР
-            RibbonPanel panelKR = application.CreateRibbonPanel("PGS-BIM", "Раздел КР");
+            //RibbonPanel panelKR = application.CreateRibbonPanel("PGS-BIM", "Раздел КР");
             // Раздел СС
             // RibbonPanel panelSS = application.CreateRibbonPanel("PGS-BIM", "Раздел СС");
             // Раздел ОВиК
             RibbonPanel panelOVVK = application.CreateRibbonPanel("PGS-BIM", "Раздел ОВиК");
-            // Раздел FUN
-            // RibbonPanel panelFun = application.CreateRibbonPanel("PGS-BIM", "FUN");
+
 
             // Info command
             PushButtonData btnInfo = new PushButtonData("Info", "Info", path, "MS.Info");
@@ -129,13 +128,6 @@ namespace MS
             btnPipelineFittings.LargeImage = btnPipelineFittingsImage;
 
 
-            // Fun command
-            //PushButtonData btnFun = new PushButtonData("Fun", "Fun", path, "MS.Commands.Fun.Picture");
-            //Uri btnFunImagePath = new Uri(@"D:\Строганов В.Г\REVIT\! C#_Plug-ins\MS\Images\Icons\AR\RoomsFinishing.png");
-            //BitmapImage btnFunImage = new BitmapImage(btnFunImagePath);
-            //btnFun.LargeImage = btnFunImage;
-            //btnFun.ToolTip = "Fun picture";
-
             // General panel
             panelGeneral.AddItem(btnInfo);
             panelGeneral.AddItem(btnLevelName);
@@ -157,10 +149,6 @@ namespace MS
 
             // ОВиК panel
             panelOVVK.AddItem(btnPipelineFittings);
-
-            // Fun panel
-            //panelFun.AddItem(btnFun);
-
         }
     }
 }
