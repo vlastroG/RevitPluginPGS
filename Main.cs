@@ -40,12 +40,13 @@ namespace MS
             RibbonPanel panelGeneral = application.CreateRibbonPanel("PGS-BIM", "Общее");
             // Раздел АР
             RibbonPanel panelAR = application.CreateRibbonPanel("PGS-BIM", "Раздел АР");
+            // Раздел КР
+            //RibbonPanel panelKR = application.CreateRibbonPanel("PGS-BIM", "Раздел КР");
             // Раздел СС
             // RibbonPanel panelSS = application.CreateRibbonPanel("PGS-BIM", "Раздел СС");
             // Раздел ОВиК
             RibbonPanel panelOVVK = application.CreateRibbonPanel("PGS-BIM", "Раздел ОВиК");
-            // Раздел FUN
-            // RibbonPanel panelFun = application.CreateRibbonPanel("PGS-BIM", "FUN");
+
 
             // Info command
             PushButtonData btnInfo = new PushButtonData("Info", "Info", path, "MS.Info");
@@ -100,6 +101,20 @@ namespace MS
             btnRmFinishing.LargeImage = btnRmFinishingImage;
 
 
+            // MaterialColorsCommand
+            PushButtonData btnMaterialColors = new PushButtonData("MaterialColors", "Обновить\nцвета", path, "MS.Commands.AR.MaterialColors");
+            Uri btnMaterialColorsImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\MaterialColors.png");
+            BitmapImage btnMaterialColorsImage = new BitmapImage(btnMaterialColorsImagePath);
+            btnMaterialColors.LargeImage = btnMaterialColorsImage;
+
+
+            // StairReinforcement command
+            PushButtonData stairRnfrcmtCmd = new PushButtonData("StairReinforcement", "Армирование\nлестниц", path, "MS.Commands.KR.StairReinforcement");
+            Uri stairRnfrcmtCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\KR\StairRnfrcmt.png");
+            BitmapImage stairRnfrcmtCmdImage = new BitmapImage(stairRnfrcmtCmdImagePath);
+            stairRnfrcmtCmd.LargeImage = stairRnfrcmtCmdImage;
+
+
             // SS Numerator command
             //PushButtonData btnNumerator = new PushButtonData("Numerator", "Маркировка", path, "MS.Numerator");
             //Uri btnNumeratorImagePath = new Uri(assembly_dir + @"\Images\Icons\SS\СС.png");
@@ -113,13 +128,6 @@ namespace MS
             btnPipelineFittings.LargeImage = btnPipelineFittingsImage;
 
 
-            // Fun command
-            //PushButtonData btnFun = new PushButtonData("Fun", "Fun", path, "MS.Commands.Fun.Picture");
-            //Uri btnFunImagePath = new Uri(@"D:\Строганов В.Г\REVIT\! C#_Plug-ins\MS\Images\Icons\AR\RoomsFinishing.png");
-            //BitmapImage btnFunImage = new BitmapImage(btnFunImagePath);
-            //btnFun.LargeImage = btnFunImage;
-            //btnFun.ToolTip = "Fun picture";
-
             // General panel
             panelGeneral.AddItem(btnInfo);
             panelGeneral.AddItem(btnLevelName);
@@ -128,19 +136,19 @@ namespace MS
             panelAR.AddItem(btnRmArea);
             panelAR.AddItem(btnCmplxAprtNum);
             panelAR.AddItem(btnOpeningsArea);
-            panelAR.AddItem(btnRmFinishing);
+            //panelAR.AddItem(btnRmFinishing); // в разработке, нужно указать названия параметров
             panelAR.AddItem(btnSelection);
             panelAR.AddItem(btnMasonryMesh);
+            panelAR.AddItem(btnMaterialColors);
+
+            // KR panel
+            //panelKR.AddItem(stairRnfrcmtCmd); // в разработке (сырая)
 
             // SS panel
             // panelSS.AddItem(btnNumerator);
 
             // ОВиК panel
             panelOVVK.AddItem(btnPipelineFittings);
-
-            // Fun panel
-            //panelFun.AddItem(btnFun);
-
         }
     }
 }

@@ -3,6 +3,7 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using System;
 using System.Linq;
+using System.Windows;
 
 namespace MS.Commands.AR
 {
@@ -16,12 +17,12 @@ namespace MS.Commands.AR
         private double _mm_in_foot = 304.8;
 
         /// <summary>
-        /// Guid параметра Арм.ОчереднАрмирРядовКладки у стен
+        /// Guid параметра КоличествоАрмируемыхРядов у стен
         /// </summary>
-        private readonly Guid guid_par_mesh_rows_count = Guid.Parse("42795f38-352d-44c6-b739-4a97d0f765db");
+        private readonly Guid guid_par_mesh_rows_count = Guid.Parse("fb502bf5-cbd4-416b-8ce1-cbf2ac40c3b6");
 
         /// <summary>
-        /// Guid параметра Рзм.Ширинау проемов
+        /// Guid параметра Рзм.Ширина у проемов
         /// </summary>
         private readonly Guid guid_par_width = Guid.Parse("8f2e4f93-9472-4941-a65d-0ac468fd6a5d");
 
@@ -31,10 +32,10 @@ namespace MS.Commands.AR
         private readonly Guid guid_par_height = Guid.Parse("da753fe3-ecfa-465b-9a2c-02f55d0c2ff1");
 
         /// <summary>
-        /// Guid параметра ДлинаКладочнойСетки у стены
+        /// Guid параметра ПлощадьКладочнойСетки у стены
         /// </summary>
-        private readonly BuiltInParameter guid_par_mesh_length = BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS;
-        //private readonly Guid guid_par_mesh_length = Guid.Parse("");
+        private readonly Guid guid_par_mesh_length = Guid.Parse("7f925503-538c-43f3-9e75-aa7a3f43eb0e");
+        //private readonly BuiltInParameter guid_par_mesh_length = BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS;
 
         /// <summary>
         /// Подсчет кладочной сетки в стенах и его назначение в параметр ДлинаКладочнойСетки
@@ -70,12 +71,16 @@ namespace MS.Commands.AR
             double mesh_length_in_openings = 0;
             double wall_height = 0;
             double wall_length = 0;
+            double wall_width = 0;
             double mesh_length_total = 0;
+            double mesh_area_total = 0;
+            int calculatedWallsCount = 0;
             foreach (var wall in walls)
             {
                 mesh_rows_in_wall = wall.get_Parameter(guid_par_mesh_rows_count).AsDouble();
                 wall_height = wall.get_Parameter(BuiltInParameter.WALL_USER_HEIGHT_PARAM).AsDouble() * _mm_in_foot;
                 wall_length = wall.get_Parameter(BuiltInParameter.CURVE_ELEM_LENGTH).AsDouble() * _mm_in_foot;
+                wall_width = wall.WallType.get_Parameter(BuiltInParameter.WALL_ATTR_WIDTH_PARAM).AsDouble() * _mm_in_foot;
 
                 var list_openings = wall
                     .FindInserts(true, true, true, true)
@@ -108,22 +113,28 @@ namespace MS.Commands.AR
                 }
 
                 mesh_length_total = mesh_rows_in_wall * wall_length - mesh_length_in_openings;
+                mesh_area_total = (mesh_length_total / _mm_in_foot) * (wall_width / _mm_in_foot);
 
                 using (Transaction trans = new Transaction(doc))
                 {
                     trans.Start("Подсчет кладочной сетки");
                     try
                     {
-                        wall.get_Parameter(guid_par_mesh_length).Set(mesh_length_total.ToString());
+                        wall.get_Parameter(guid_par_mesh_length).Set(mesh_area_total);
+                        calculatedWallsCount++;
                     }
                     catch (NullReferenceException)
                     {
-                        throw new ArgumentNullException($"{nameof(mesh_length_total)} guid of param mesh_length is failed.");
+                        throw new ArgumentNullException($"{nameof(mesh_area_total)} guid of param mesh_length is failed.");
                     }
 
                     trans.Commit();
                 }
             }
+            if (calculatedWallsCount == 0)
+                MessageBox.Show($"Обработано {calculatedWallsCount} стен.");
+            else
+                MessageBox.Show($"Площадь кладочной сетки подсчитана в м.кв.\nОбработано {calculatedWallsCount} стен.");
 
             return Result.Succeeded;
         }

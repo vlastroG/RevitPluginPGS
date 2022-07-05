@@ -67,6 +67,9 @@
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Drawing.Common, Version=6.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>packages\System.Drawing.Common.6.0.0\lib\net461\System.Drawing.Common.dll</HintPath>
+    </Reference>
     <Reference Include="System.Runtime, Version=4.1.1.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>packages\System.Runtime.4.3.1\lib\net462\System.Runtime.dll</HintPath>
       <Private>True</Private>
@@ -85,15 +88,18 @@
   <ItemGroup>
     <Compile Include="Commands\AR\ComplexAprtmntNmbr.cs" />
     <Compile Include="Commands\AR\MasonryMesh.cs" />
+    <Compile Include="Commands\AR\MaterialColors.cs" />
     <Compile Include="Commands\AR\Models\Apartment.cs" />
     <Compile Include="Commands\Archive\RoomsArea.cs" />
     <Compile Include="Commands\AR\OpeningsArea.cs" />
     <Compile Include="Commands\AR\RoomsAreaNew.cs" />
     <Compile Include="Commands\AR\RoomsFinishing.cs" />
-    <Compile Include="Commands\Fun\Picture.cs" />
     <Compile Include="Commands\General\Info.cs" />
     <Compile Include="Commands\General\LevelName.cs" />
     <Compile Include="Commands\General\Selector.cs" />
+    <Compile Include="Commands\KR\Models\StairFlight.cs" />
+    <Compile Include="Commands\KR\Models\StairModel.cs" />
+    <Compile Include="Commands\KR\StairReinforcement.cs" />
     <Compile Include="Commands\MEP\PipelineFittings.cs" />
     <Compile Include="Commands\SS\Numerator.cs" />
     <Compile Include="GUI\AR\UserControl1.xaml.cs">
@@ -101,11 +107,16 @@
     </Compile>
     <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utilites\DictionaryExtension.cs" />
+    <Compile Include="Utilites\ExtensionDictionary.cs" />
+    <Compile Include="Utilites\ExtensionPlanarFace.cs" />
     <Compile Include="Utilites\GetBoundarySegmentElement.cs" />
-    <Compile Include="Utilites\SelectionRoomFilter.cs" />
+    <Compile Include="Utilites\SelectionFilterEdges.cs" />
+    <Compile Include="Utilites\SelectionFilterPlanarFaces.cs" />
+    <Compile Include="Utilites\SelectionFilterRooms.cs" />
+    <Compile Include="Utilites\SelectionFilterElementsOfClass.cs" />
     <Compile Include="Utilites\UserInput.cs" />
     <Compile Include="Utilites\WorkWithGeometry.cs" />
+    <Compile Include="Utilites\WorkWithParameters.cs" />
     <Compile Include="Utilites\WorkWithPath.cs" />
     <Compile Include="Utilites\WorkWithString.cs" />
   </ItemGroup>
@@ -113,7 +124,9 @@
     <None Include="Diagrams\Copy of Algorhytm check lintels.drawio" />
     <None Include="Diagrams\RoomsAreaAlgorithm.drawio" />
     <None Include="packages.config" />
-    <None Include="SolutionItems\MS.addin" />
+    <EmbeddedResource Include="SolutionItems\MS.addin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Images\Icons\AR\RoomsArea.png">
@@ -147,6 +160,15 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Diagrams\TextFile1.txt" />
+    <Content Include="Images\Content\Alt_symbols.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <EmbeddedResource Include="Images\Icons\AR\MaterialColors.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Images\Icons\KR\StairRnfrcmt.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
