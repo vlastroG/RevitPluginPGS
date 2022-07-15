@@ -16,10 +16,19 @@ namespace MS.Commands.AR
     [Regeneration(RegenerationOption.Manual)]
     public class MaterialColors : IExternalCommand
     {
-        private string _parName = "Изображение типоразмера материала";
+        /// <summary>
+        /// Guid параметра для изображения типоразмеров материалов
+        /// </summary>
+        private readonly Guid _guid_par_colors_img = Guid.Parse("924e3bb2-a048-449f-916f-31093a3aa7a3");
 
+        /// <summary>
+        /// Название временной папки
+        /// </summary>
         private string _dirName = @"\MaterialColors_deleteThis\";
 
+        /// <summary>
+        /// Путь к временной папке
+        /// </summary>
         private string dirPath = String.Empty;
 
 
@@ -57,12 +66,12 @@ namespace MS.Commands.AR
                         int green = color.Green;
                         int blue = color.Blue;
 
-                        if (elem.LookupParameter(_parName) != null
-                            && elem.LookupParameter(_parName).AsElementId().IntegerValue > 1)
+                        if (elem.get_Parameter(_guid_par_colors_img) != null
+                            && elem.get_Parameter(_guid_par_colors_img).AsElementId().IntegerValue > 1)
                         {
                             try
                             {
-                                ElementId imgId = elem.LookupParameter(_parName).AsElementId();
+                                ElementId imgId = elem.get_Parameter(_guid_par_colors_img).AsElementId();
                                 var _color = (doc.GetElement(imgId) as ImageType).GetImage().GetPixel(1, 1);
                                 var r = _color.R;
                                 var g = _color.G;
@@ -99,7 +108,7 @@ namespace MS.Commands.AR
                         var _imageType = ImageType.Create(
                             doc,
                             opt);
-                        elem.LookupParameter(_parName).Set(_imageType.Id);
+                        elem.get_Parameter(_guid_par_colors_img).Set(_imageType.Id);
                         updateMaterials++;
                     }
                 }
