@@ -18,7 +18,9 @@ namespace MS.Commands.AR
     {
         private string _parName = "Изображение типоразмера материала";
 
-        private string _dirName = "MaterialColors_deleteThis";
+        private string _dirName = @"\MaterialColors_deleteThis\";
+
+        private string dirPath = String.Empty;
 
 
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
@@ -76,8 +78,8 @@ namespace MS.Commands.AR
                             }
                         }
 
-                        string @dirPath = @_dirName;
-                        string @filePath = @dirPath + @"\" + @materialName + ".png";
+                        dirPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @_dirName;
+                        string @filePath = @dirPath + @materialName + ".png";
 
                         WorkWithGeometry.CreateColoredRectanglePng(
                             width,
@@ -89,12 +91,14 @@ namespace MS.Commands.AR
                             dirPath,
                             filePath);
 
+                        ImageTypeOptions opt = new ImageTypeOptions(
+                                @filePath,
+                                false,
+                                ImageTypeSource.Import);
+
                         var _imageType = ImageType.Create(
                             doc,
-                            new ImageTypeOptions(
-                                path: filePath,
-                                true,
-                                ImageTypeSource.Import));
+                            opt);
                         elem.LookupParameter(_parName).Set(_imageType.Id);
                         updateMaterials++;
                     }
@@ -106,13 +110,12 @@ namespace MS.Commands.AR
 
                 trans.Commit();
             }
-            string rvtDirPath = new FileInfo(doc.PathName).DirectoryName;
-            string _fullDitName = rvtDirPath + @"\" + _dirName;
+
 
             if (updateMaterials == 0)
                 MessageBox.Show($"Обновлено {updateMaterials} материалов.");
             else
-                MessageBox.Show($"Обновлено {updateMaterials} материалов.\n\nМожете удалить временную папку\n{_fullDitName}\nи ее содержимое.");
+                MessageBox.Show($"Обновлено {updateMaterials} материалов.\n\nМожете удалить временную папку\n{dirPath}\nи ее содержимое.");
 
             return Result.Succeeded;
         }
