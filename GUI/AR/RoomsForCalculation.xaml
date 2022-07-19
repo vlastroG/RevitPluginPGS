@@ -1,0 +1,26 @@
+﻿<Window x:Class="MS.GUI.AR.RoomsForCalculation"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:MS.GUI.AR"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" MaxWidth="800" MinWidth="600"  MaxHeight="1000" MinHeight="450" Width="600" Height="449" >
+    <Grid Background="#FFFFFEFE" Margin="0,0,0,0">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="77*"/>
+            <ColumnDefinition Width="523*"/>
+        </Grid.ColumnDefinitions>
+        <TextBlock HorizontalAlignment="Left" Margin="-90,6,0,0" TextWrapping="Wrap" VerticalAlignment="Top" RenderTransformOrigin="-3.064,-6.579" Width="780" TextAlignment="Center" Grid.ColumnSpan="2"><Run Language="ru-ru" Text="Помещения для расчета"/></TextBlock>
+        <Grid Grid.ColumnSpan="2">
+            <DataGrid x:Name="RoomDtosList" Margin="0,30,0,0" AutoGenerateColumns="False" IsSynchronizedWithCurrentItem="{x:Null}">
+                <DataGrid.Columns>
+                    <DataGridCheckBoxColumn Binding="{Binding Path = DoWallAreaCalculation}" IsReadOnly="False" Header="Считать" MinWidth="60" MaxWidth="60"/>
+                    <DataGridTextColumn Binding="{Binding Path = Number}" IsReadOnly="True" Header="Номер" MinWidth="60" MaxWidth="60"/>
+                    <DataGridTextColumn Binding="{Binding Path = Name}" IsReadOnly="True" Header="Имя" Width="*"/>
+                    <DataGridTextColumn Binding="{Binding Path = Level}" IsReadOnly="True" Header="Уровень" MinWidth="150" MaxWidth="150"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+    </Grid>
+</Window>

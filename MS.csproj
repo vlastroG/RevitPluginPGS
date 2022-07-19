@@ -91,6 +91,7 @@
     <Compile Include="Commands\AR\MaterialColors.cs" />
     <Compile Include="Commands\AR\Models\Apartment.cs" />
     <Compile Include="Commands\Archive\RoomsArea.cs" />
+    <Compile Include="Commands\AR\Models\RoomDto.cs" />
     <Compile Include="Commands\AR\OpeningsArea.cs" />
     <Compile Include="Commands\AR\RoomsAreaNew.cs" />
     <Compile Include="Commands\AR\RoomsFinishing.cs" />
@@ -102,6 +103,9 @@
     <Compile Include="Commands\KR\StairReinforcement.cs" />
     <Compile Include="Commands\MEP\PipelineFittings.cs" />
     <Compile Include="Commands\SS\Numerator.cs" />
+    <Compile Include="GUI\AR\RoomsForCalculation.xaml.cs">
+      <DependentUpon>RoomsForCalculation.xaml</DependentUpon>
+    </Compile>
     <Compile Include="GUI\AR\UserControl1.xaml.cs">
       <DependentUpon>UserControl1.xaml</DependentUpon>
     </Compile>
@@ -153,6 +157,10 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <Page Include="GUI\AR\RoomsForCalculation.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="GUI\AR\UserControl1.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

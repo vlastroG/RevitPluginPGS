@@ -2,6 +2,8 @@
 using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Architecture;
 using Autodesk.Revit.UI;
+using MS.Commands.AR.Models;
+using MS.GUI.AR;
 using MS.Utilites;
 using System;
 using System.Collections.Generic;
@@ -77,6 +79,11 @@ namespace MS.Commands.AR
                 .Where(r => (r as Room).Area > 0)
                 .ToArray();
 
+            List<RoomDto> roomsDto = rooms.Select(r => new Models.RoomDto(r as Room)).ToList();
+            //Вывод окна входных данных
+            RoomsForCalculation inputForm = new RoomsForCalculation(roomsDto);
+            inputForm.ShowDialog();
+
             var filter_glass_wall = new FilteredElementCollector(doc);
             var glass_walls = filter_glass_wall
                 .OfCategory(BuiltInCategory.OST_Walls)
@@ -92,10 +99,13 @@ namespace MS.Commands.AR
                 .WhereElementIsNotElementType()
                 .ToElements()
                 .Where(w => w.get_Parameter(BuiltInParameter.PHASE_CREATED).AsValueString() == _phase)
-                .Where(w => (
-                    doc.GetElement(
-                    w.get_Parameter(BuiltInParameter.HOST_ID_PARAM).AsElementId()) as Wall)
-                    .CurtainGrid == null);
+                .Where(w => (w as FamilyInstance).Host is Wall
+                        && ((w as FamilyInstance).Host as Wall).CurtainGrid == null);
+
+            //.Where(w => (
+            //    doc.GetElement(
+            //    w.get_Parameter(BuiltInParameter.HOST_ID_PARAM).AsElementId()) as Wall)
+            //    .CurtainGrid == null);
 
             var filter_doors = new FilteredElementCollector(doc);
             var doors = filter_doors
@@ -103,10 +113,14 @@ namespace MS.Commands.AR
                 .WhereElementIsNotElementType()
                 .ToElements()
                 .Where(d => d.get_Parameter(BuiltInParameter.PHASE_CREATED).AsValueString() == _phase)
-                .Where(d => (
-                    doc.GetElement(
-                    d.get_Parameter(BuiltInParameter.HOST_ID_PARAM).AsElementId()) as Wall)
-                    .CurtainGrid == null);
+                .Where(w => (w as FamilyInstance).Host is Wall
+                        && ((w as FamilyInstance).Host as Wall).CurtainGrid == null);
+
+
+            //.Where(d => (
+            //    doc.GetElement(
+            //    d.get_Parameter(BuiltInParameter.HOST_ID_PARAM).AsElementId()) as Wall)
+            //    .CurtainGrid == null);
 
             SolidCurveIntersectionOptions solid_curve_intersect_opt = new SolidCurveIntersectionOptions();
 
@@ -136,7 +150,7 @@ namespace MS.Commands.AR
 
                 foreach (Room room in rooms)
                 {
-                    double room_area = 0;
+                    double room_area = 0; 
                     if (_dict_roomId_openingsArea.ContainsKey(room.Id))
                     {
                         room_area = _dict_roomId_openingsArea[room.Id];
