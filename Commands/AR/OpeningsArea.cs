@@ -2,7 +2,7 @@
 using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Architecture;
 using Autodesk.Revit.UI;
-using MS.Commands.AR.Models;
+using MS.Commands.AR.DTO;
 using MS.GUI.AR;
 using MS.Utilites;
 using System;
@@ -88,7 +88,7 @@ namespace MS.Commands.AR
                     roomDto.DoOpeningsAreaCalculation = false;
             }
             //Вывод окна входных данных
-            OpeningsLintels inputForm = new RoomsForCalculation(roomsDto);
+            RoomsForCalculation inputForm = new RoomsForCalculation(roomsDto);
             inputForm.ShowDialog();
 
             if (inputForm.DialogResult == false)

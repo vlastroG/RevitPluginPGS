@@ -93,6 +93,12 @@ namespace MS
             BitmapImage btnOpeningsAreaImage = new BitmapImage(btnOpeningsAreaImagePath);
             btnOpeningsArea.LargeImage = btnOpeningsAreaImage;
 
+            // MarkLintelsInOpenings command
+            PushButtonData btnMarkLintelsInOpenings = new PushButtonData("MarkLintelsInOpenings", "Маркировать перемычки\nокон и дверей", path, "MS.Commands.AR.MarkLintelsInOpenings");
+            Uri btnMarkLintelsInOpeningsImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            BitmapImage btnMarkLintelsInOpeningsImage = new BitmapImage(btnMarkLintelsInOpeningsImagePath);
+            btnMarkLintelsInOpenings.LargeImage = btnMarkLintelsInOpeningsImage;
+
 
             // RoomsFinishingCommand
             PushButtonData btnRmFinishing = new PushButtonData("RoomsFinishing\nDebug", "Отделка\n(Beta)", path, "MS.Utilites.GetBoundarySegmentElement");
@@ -136,6 +142,7 @@ namespace MS
             panelAR.AddItem(btnRmArea);
             panelAR.AddItem(btnCmplxAprtNum);
             panelAR.AddItem(btnOpeningsArea);
+            panelAR.AddItem(btnMarkLintelsInOpenings);
             //panelAR.AddItem(btnRmFinishing); // в разработке, нужно указать названия параметров
             panelAR.AddItem(btnSelection);
             panelAR.AddItem(btnMasonryMesh);

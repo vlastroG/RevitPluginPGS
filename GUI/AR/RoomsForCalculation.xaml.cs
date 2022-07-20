@@ -1,4 +1,4 @@
-﻿using MS.Commands.AR.Models;
+﻿using MS.Commands.AR.DTO;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
@@ -6,9 +6,9 @@ using System.Windows.Controls;
 namespace MS.GUI.AR
 {
     /// <summary>
-    /// Interaction logic for OpeningsLintels.xaml
+    /// Interaction logic for RoomsForCalculation.xaml
     /// </summary>
-    public partial class OpeningsLintels : Window
+    public partial class RoomsForCalculation : Window
     {
         private List<RoomDto> _rooms;
 
@@ -18,7 +18,7 @@ namespace MS.GUI.AR
         }
 
 
-        public OpeningsLintels(List<RoomDto> rooms)
+        public RoomsForCalculation(List<RoomDto> rooms)
         {
             _rooms = rooms;
             InitializeComponent();

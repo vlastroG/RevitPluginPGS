@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MS.Commands.AR.Models
+namespace MS.Commands.AR.DTO
 {
     public class RoomDto
     {
