@@ -208,20 +208,20 @@ namespace MS.Commands.AR
                 foreach (var Room in Rooms)
                 {
                     RoomName = Room.get_Parameter(BuiltInParameter.ROOM_NAME).AsString().ToLower();
-                    RoomComment = Room.get_Parameter(BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS).AsString();
+                    RoomComment = Room.get_Parameter(BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS).AsString().ToLower();
                     RoomApartmentNumber = Room.LookupParameter(paramRoomApartmentNumber).AsString();
 
-                    if (RoomComment == "нежилая")
+                    if (RoomComment.Contains("нежилая"))
                     {
                         Room.LookupParameter(paramRoomType).Set(2);
                         Room.LookupParameter(paramRoomAreaCoeff).Set(1);
                     }
-                    else if (RoomComment == "общий")
+                    else if (RoomComment.Contains("общий"))
                     {
                         Room.LookupParameter(paramRoomType).Set(5);
                         Room.LookupParameter(paramRoomAreaCoeff).Set(1);
                     }
-                    else if (RoomName == "кухня-гостиная")
+                    else if (RoomName.Contains("кухня-гостиная"))
                     {
                         Room.LookupParameter(paramRoomType).Set(1);
                         Room.LookupParameter(paramRoomAreaCoeff).Set(1);

@@ -1,4 +1,5 @@
-﻿using Autodesk.Revit.DB.Architecture;
+﻿using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.Architecture;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,33 +10,88 @@ namespace MS.Commands.AR.Models
 {
     public class RoomDto
     {
-        private Room _room;
+        public Room RoomRevit
+        {
+            get;
+            private set;
+        }
 
 
         public RoomDto(Room room)
         {
-            _room = room;
+            RoomRevit = room;
+            DoOpeningsAreaCalculation = true;
         }
 
-        public bool DoWallAreaCalculation = true;
+        public bool DoOpeningsAreaCalculation { get; set; }
 
         public string Number
         {
             get
             {
-                return _room.Number;
+                if (RoomRevit != null && RoomRevit.IsValidObject)
+                    return RoomRevit.Number;
+                else
+                    return String.Empty;
             }
         }
 
         public string Name
         {
-            get { return _room.Name; }
+            get
+            {
+                if (RoomRevit != null && RoomRevit.IsValidObject)
+                    return RoomRevit.Name;
+                else
+                    return String.Empty;
+            }
 
         }
 
         public string Level
         {
-            get { return _room.Level.Name; }
+            get
+            {
+                if (RoomRevit != null && RoomRevit.IsValidObject)
+                    return RoomRevit.Level.Name;
+                else
+                    return String.Empty;
+            }
+        }
+
+        public string Comment
+        {
+            get
+            {
+                if (RoomRevit != null && RoomRevit.IsValidObject)
+                    return RoomRevit
+                        .get_Parameter(BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS)
+                        .AsValueString();
+                else
+                    return String.Empty;
+            }
+        }
+
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null || !(obj is RoomDto))
+            {
+                return false;
+            }
+            else
+            {
+                RoomDto other = (RoomDto)obj;
+                return EqualsToRoomDto(other);
+            }
+        }
+
+        private bool EqualsToRoomDto(RoomDto rDtoOther)
+        {
+            return rDtoOther.RoomRevit.IsValidObject
+                && Number == rDtoOther.Number
+                && Name == rDtoOther.Name
+                && Level == rDtoOther.Level;
         }
     }
 }

@@ -37,6 +37,8 @@ namespace MS.Commands.AR
         /// </summary>
         private static readonly double _curtain_wall_intersect_tolerance = 2;
 
+        private static List<RoomDto> NotCalculatedRooms = new List<RoomDto>();
+
 
         /// <summary>
         /// Подсчет и назначение площадей проемов в параметр помещения "ПлощадьПроемов"
@@ -71,7 +73,7 @@ namespace MS.Commands.AR
 
 
             var filter_rooms = new FilteredElementCollector(doc);
-            var rooms = filter_rooms
+            var filtered_rooms = filter_rooms
                 .OfCategory(BuiltInCategory.OST_Rooms)
                 .WhereElementIsNotElementType()
                 .ToElements()
@@ -79,10 +81,29 @@ namespace MS.Commands.AR
                 .Where(r => (r as Room).Area > 0)
                 .ToArray();
 
-            List<RoomDto> roomsDto = rooms.Select(r => new Models.RoomDto(r as Room)).ToList();
+            List<RoomDto> roomsDto = filtered_rooms.Select(r => new RoomDto(r as Room)).ToList();
+            foreach (RoomDto roomDto in roomsDto)
+            {
+                if (NotCalculatedRooms.Contains(roomDto))
+                    roomDto.DoOpeningsAreaCalculation = false;
+            }
             //Вывод окна входных данных
-            RoomsForCalculation inputForm = new RoomsForCalculation(roomsDto);
+            OpeningsLintels inputForm = new RoomsForCalculation(roomsDto);
             inputForm.ShowDialog();
+
+            if (inputForm.DialogResult == false)
+            {
+                return Result.Cancelled;
+            }
+
+            Element[] rooms = inputForm.Rooms
+                .Where(rDto => rDto.DoOpeningsAreaCalculation == true)
+                .Select(rDto => rDto.RoomRevit as Element)
+                .ToArray();
+
+            NotCalculatedRooms = inputForm.Rooms
+                .Where(rDto => rDto.DoOpeningsAreaCalculation == false)
+                .ToList();
 
             var filter_glass_wall = new FilteredElementCollector(doc);
             var glass_walls = filter_glass_wall
@@ -150,7 +171,7 @@ namespace MS.Commands.AR
 
                 foreach (Room room in rooms)
                 {
-                    double room_area = 0; 
+                    double room_area = 0;
                     if (_dict_roomId_openingsArea.ContainsKey(room.Id))
                     {
                         room_area = _dict_roomId_openingsArea[room.Id];

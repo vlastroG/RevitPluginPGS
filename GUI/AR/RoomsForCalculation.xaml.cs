@@ -1,30 +1,24 @@
 ﻿using MS.Commands.AR.Models;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace MS.GUI.AR
 {
     /// <summary>
-    /// Interaction logic for RoomsForCalculation.xaml
+    /// Interaction logic for OpeningsLintels.xaml
     /// </summary>
-    public partial class RoomsForCalculation : Window
+    public partial class OpeningsLintels : Window
     {
         private List<RoomDto> _rooms;
 
+        public IReadOnlyCollection<RoomDto> Rooms
+        {
+            get { return _rooms; }
+        }
 
-        public RoomsForCalculation(List<RoomDto> rooms)
+
+        public OpeningsLintels(List<RoomDto> rooms)
         {
             _rooms = rooms;
             InitializeComponent();
@@ -35,6 +29,16 @@ namespace MS.GUI.AR
         private void RoomDtosList_AutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e)
         {
 
+        }
+
+        private void SubmitButton_Click(object sender, RoutedEventArgs e)
+        {
+            DialogResult = true;
+        }
+
+        private void CancelButton_Click(object sender, RoutedEventArgs e)
+        {
+            DialogResult = false;
         }
     }
 }
