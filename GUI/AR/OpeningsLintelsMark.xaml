@@ -6,11 +6,11 @@
              xmlns:local="clr-namespace:MS.GUI.AR"
              mc:Ignorable="d" 
              d:DesignHeight="450" 
-        MaxWidth="510" 
-        MinWidth="510"
+        MaxWidth="650" 
+        MinWidth="650"
         MaxHeight="1000" 
         MinHeight="450" 
-        Width="510" 
+        Width="650" 
         Height="450" >
     <Grid Background="#FFFFFEFE" Margin="0,0,0,0">
         <Grid.ColumnDefinitions>
@@ -43,6 +43,11 @@
                     <DataGridTextColumn Binding="{Binding Path = PgsLintelMark}"
                                         IsReadOnly="False"
                                         Header="PGS__МаркаПеремычки"
+                                        MinWidth="140"
+                                        MaxWidth="140"/>
+                    <DataGridTextColumn Binding="{Binding Path = Mark}"
+                                        IsReadOnly="False"
+                                        Header="Марка (марка проема)"
                                         MinWidth="140"
                                         MaxWidth="140"/>
                     <DataGridTextColumn Binding="{Binding Path = AdskWallWidth}"

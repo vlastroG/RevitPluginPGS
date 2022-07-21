@@ -19,7 +19,12 @@ namespace MS.Commands.AR.DTO
 
         private string _pgsLintelMark;
 
+        private string _openingMark;
+
         private static readonly Dictionary<int, string> _dictLintelMarkByHashCode = new Dictionary<int, string>();
+
+        private static readonly Dictionary<int, string> _dictOpeningMarkByHashCode = new Dictionary<int, string>();
+
 
         public FamilyInstance Opening { get; private set; }
 
@@ -31,7 +36,11 @@ namespace MS.Commands.AR.DTO
                 _pgsLintelMark = opening
                     .get_Parameter(_parPgsLintelMark)
                     .AsValueString();
+                _openingMark = opening
+                    .get_Parameter(BuiltInParameter.ALL_MODEL_MARK)
+                    .AsValueString();
                 _dictLintelMarkByHashCode.AddOrUpdate(GetHashCode(), _pgsLintelMark);
+                _dictOpeningMarkByHashCode.AddOrUpdate(GetHashCode(), _openingMark);
             }
             else
             {
@@ -104,6 +113,19 @@ namespace MS.Commands.AR.DTO
             }
         }
 
+        public string Mark
+        {
+            get
+            {
+                return _openingMark;
+            }
+            set
+            {
+                _openingMark = value;
+                _dictOpeningMarkByHashCode[GetHashCode()] = _openingMark;
+            }
+        }
+
         public static IReadOnlyDictionary<int, string> DictLintelMarkByHashCode
         {
             get
@@ -111,6 +133,16 @@ namespace MS.Commands.AR.DTO
                 return _dictLintelMarkByHashCode;
             }
         }
+
+        public static IReadOnlyDictionary<int, string> DictOpeningMarkByHashCode
+        {
+            get
+            {
+                return _dictOpeningMarkByHashCode;
+            }
+        }
+
+        
 
         private bool ValidateInput(FamilyInstance opening)
         {

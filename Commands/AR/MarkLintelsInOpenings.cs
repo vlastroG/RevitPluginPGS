@@ -60,6 +60,9 @@ namespace MS.Commands.AR
                     opening.Opening
                         .get_Parameter(_parPgsLintelMark)
                         .Set(OpeningDto.DictLintelMarkByHashCode[opening.GetHashCode()]);
+                    opening.Opening
+                        .get_Parameter(BuiltInParameter.ALL_MODEL_MARK)
+                        .Set(OpeningDto.DictOpeningMarkByHashCode[opening.GetHashCode()]);
                 }
 
                 trans.Commit();
