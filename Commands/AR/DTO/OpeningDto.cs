@@ -1,5 +1,7 @@
 ﻿using Autodesk.Revit.DB;
+using MS.Utilites;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,6 +19,8 @@ namespace MS.Commands.AR.DTO
 
         private string _pgsLintelMark;
 
+        private static readonly Dictionary<int, string> _dictLintelMarkByHashCode = new Dictionary<int, string>();
+
         public FamilyInstance Opening { get; private set; }
 
         public OpeningDto(FamilyInstance opening)
@@ -27,6 +31,7 @@ namespace MS.Commands.AR.DTO
                 _pgsLintelMark = opening
                     .get_Parameter(_parPgsLintelMark)
                     .AsValueString();
+                _dictLintelMarkByHashCode.AddOrUpdate(GetHashCode(), _pgsLintelMark);
             }
             else
             {
@@ -65,16 +70,27 @@ namespace MS.Commands.AR.DTO
             {
                 return _pgsLintelMark;
             }
-            set { _pgsLintelMark = value; }
+            set
+            {
+                _pgsLintelMark = value;
+                _dictLintelMarkByHashCode[GetHashCode()] = _pgsLintelMark;
+            }
         }
 
         public string AdskWallWidth
         {
             get
             {
-                return Opening
-                    .get_Parameter(_parAdskWallWidth)
-                    .AsValueString();
+                try
+                {
+                    return Opening
+                        .get_Parameter(_parAdskWallWidth)
+                        .AsValueString();
+                }
+                catch (Exception)
+                {
+                    return "Параметр отсутствует";
+                }
             }
         }
 
@@ -85,6 +101,14 @@ namespace MS.Commands.AR.DTO
                 return Opening
                     .get_Parameter(BuiltInParameter.FAMILY_WIDTH_PARAM)
                     .AsValueString();
+            }
+        }
+
+        public static IReadOnlyDictionary<int, string> DictLintelMarkByHashCode
+        {
+            get
+            {
+                return _dictLintelMarkByHashCode;
             }
         }
 
@@ -105,6 +129,21 @@ namespace MS.Commands.AR.DTO
         public int GetOpeningAndWallWidthHash()
         {
             return (AdskWallWidth + Width).GetHashCode();
+        }
+
+
+        public override int GetHashCode()
+        {
+            return (OpeningCategory + AdskWallWidth + Width).GetHashCode();
+        }
+
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null || !(obj is OpeningDto))
+                return false;
+            else
+                return GetHashCode().Equals(obj.GetHashCode());
         }
     }
 }

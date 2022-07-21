@@ -36,6 +36,7 @@ namespace MS.Commands.AR
                 .WhereElementIsNotElementType()
                 .ToElements()
                 .Select(e => e as FamilyInstance)
+                .Where(f => f.Host != null)
                 .Where(f =>
                 (BuiltInCategory)f.Host.Category.Id.IntegerValue == BuiltInCategory.OST_Walls)
                 .Select(f => new OpeningDto(f))
@@ -54,11 +55,11 @@ namespace MS.Commands.AR
             {
                 trans.Start("Назначить марки перемычек");
 
-                foreach (OpeningDto opening in inputForm.Openings)
+                foreach (OpeningDto opening in openings)
                 {
                     opening.Opening
                         .get_Parameter(_parPgsLintelMark)
-                        .Set(opening.PgsLintelMark);
+                        .Set(OpeningDto.DictLintelMarkByHashCode[opening.GetHashCode()]);
                 }
 
                 trans.Commit();

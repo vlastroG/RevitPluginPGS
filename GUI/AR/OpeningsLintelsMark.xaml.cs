@@ -24,14 +24,14 @@ namespace MS.GUI.AR
         private List<OpeningDto> _openings;
 
 
-        public IReadOnlyCollection<OpeningDto> Openings
-        {
-            get { return _openings; }
-        }
+        //public IReadOnlyCollection<OpeningDto> Openings
+        //{
+        //    get { return _openings; }
+        //}
 
         public OpeningsLintelsMark(List<OpeningDto> openingsDto)
         {
-            _openings = openingsDto;
+            _openings = openingsDto.Distinct().ToList();
             InitializeComponent();
 
             OpeningDtosList.ItemsSource = _openings;

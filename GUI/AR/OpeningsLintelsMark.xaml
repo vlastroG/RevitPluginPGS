@@ -6,11 +6,11 @@
              xmlns:local="clr-namespace:MS.GUI.AR"
              mc:Ignorable="d" 
              d:DesignHeight="450" 
-        MaxWidth="660" 
-        MinWidth="660"
+        MaxWidth="510" 
+        MinWidth="510"
         MaxHeight="1000" 
         MinHeight="450" 
-        Width="660" 
+        Width="510" 
         Height="450" >
     <Grid Background="#FFFFFEFE" Margin="0,0,0,0">
         <Grid.ColumnDefinitions>
@@ -18,13 +18,12 @@
             <ColumnDefinition Width="523*"/>
         </Grid.ColumnDefinitions>
         <TextBlock HorizontalAlignment="Left" 
-                   Margin="0,1,0,0"
+                   Margin="45,1,0,0"
                    TextWrapping="Wrap"
                    VerticalAlignment="Top"
                    RenderTransformOrigin="-3.064,-6.579" 
-                   Width="660" 
-                   TextAlignment="Center" 
-                   Grid.ColumnSpan="2">
+                   Width="400" 
+                   TextAlignment="Center" Grid.Column="1">
             <Run Language="ru-ru" Text="Назначение марок перемычек окнам и дверям"/></TextBlock>
         <Grid Grid.ColumnSpan="2">
             <DataGrid x:Name="OpeningDtosList"
@@ -41,16 +40,6 @@
                                         Header="Категория"
                                         MinWidth="70" 
                                         MaxWidth="70"/>
-                    <DataGridTextColumn Binding="{Binding Path = Level}" 
-                                        IsReadOnly="True" 
-                                        Header="Уровень"
-                                        MinWidth="70"
-                                        MaxWidth="70"/>
-                    <DataGridTextColumn Binding="{Binding Path = AdskMark}"
-                                        IsReadOnly="True" 
-                                        Header="ADSK__Марка" 
-                                        MinWidth="80"
-                                        MaxWidth="80"/>
                     <DataGridTextColumn Binding="{Binding Path = PgsLintelMark}"
                                         IsReadOnly="False"
                                         Header="PGS__МаркаПеремычки"
@@ -68,8 +57,7 @@
                                         MaxWidth="80"/>
                     <DataGridTextColumn IsReadOnly="True"
                                         Header="Проверка"
-                                        MinWidth="70"
-                                        MaxWidth="70"/>
+                                        Width="*"/>
                 </DataGrid.Columns>
             </DataGrid>
             <Button x:Name="Submit" Content="Готово" HorizontalAlignment="Left" VerticalAlignment="Top" RenderTransformOrigin="0.69,0.303" Width="71" Click="SubmitButton_Click"/>
