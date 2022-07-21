@@ -77,30 +77,30 @@ namespace MS.Commands.AR.DTO
             }
         }
 
-        public string AdskWallWidth
+        public double AdskWallWidth
         {
             get
             {
                 try
                 {
-                    return Opening
+                    return Double.Parse(Opening
                         .get_Parameter(_parAdskWallWidth)
-                        .AsValueString();
+                        .AsValueString());
                 }
                 catch (Exception)
                 {
-                    return "Параметр отсутствует";
+                    return 0;
                 }
             }
         }
 
-        public string Width
+        public double Width
         {
             get
             {
-                return Opening
+                return Double.Parse(Opening
                     .get_Parameter(BuiltInParameter.FAMILY_WIDTH_PARAM)
-                    .AsValueString();
+                    .AsValueString());
             }
         }
 
