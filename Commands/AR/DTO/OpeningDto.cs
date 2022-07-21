@@ -146,6 +146,10 @@ namespace MS.Commands.AR.DTO
 
         private bool ValidateInput(FamilyInstance opening)
         {
+            if (opening.Host == null)
+            {
+                return false;
+            }
             BuiltInCategory hostCategory = (BuiltInCategory)opening.Host.Category.Id.IntegerValue;
             BuiltInCategory openingCategory = (BuiltInCategory)opening.Category.Id.IntegerValue;
             if (hostCategory == BuiltInCategory.OST_Walls
