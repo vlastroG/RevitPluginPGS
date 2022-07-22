@@ -1,6 +1,7 @@
 ﻿using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
+using MS.Utilites;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,6 +34,27 @@ namespace MS.Commands.AR
         /// </summary>
         private string _sectionTypeName = "Разрез_Без номера листа";
 
+        /// <summary>
+        /// Смещение области обрезки разреза вниз от центра перемычки
+        /// </summary>
+        private double _offsetBottom = 0.165;
+
+        /// <summary>
+        /// Смещение области обрезки разреза вверх от центра перемычки
+        /// </summary>
+        private double _offsetTop = 1.65;
+
+        /// <summary>
+        /// Смещение области обрезки разреза вправо и влево от центра перемычки
+        /// </summary>
+        private double _offsetLeftRight = 1.2;
+
+
+        /// <summary>
+        /// Смещение дальнего предела секущего диапазона разреза по перемычке
+        /// </summary>
+        private double _offsetFarLimit = 1.5;
+
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             UIApplication uiapp = commandData.Application;
@@ -40,6 +62,15 @@ namespace MS.Commands.AR
             Document doc = uidoc.Document;
 
             int sectionByLintels = 0;
+
+            string sectionTemplateTittle = UserInput.GetStringFromUser(
+                "Шаблон вида для разрезов",
+                "Напишите название шаблона вида для назначения создаваемым разрезам.",
+                "АР_Перемычки");
+            if (sectionTemplateTittle.Length == 0)
+            {
+                return Result.Cancelled;
+            }
 
             FilteredElementCollector sectionTypeFilter = new FilteredElementCollector(doc);
             IList<Element> sectionTypesAll = sectionTypeFilter
@@ -72,6 +103,15 @@ namespace MS.Commands.AR
                 .WhereElementIsNotElementType()
                 .Where(v => (v as View).ViewType == ViewType.Section)
                 .ToArray();
+
+            FilteredElementCollector sectionTemplateFilter = new FilteredElementCollector(doc);
+            var sectionTemplate = sectionTemplateFilter
+                .OfCategory(BuiltInCategory.OST_Views)
+                .WhereElementIsNotElementType()
+                .Cast<View>()
+                .Where(v => v.ViewType == ViewType.Section)
+                .Where(v => v.Title == sectionTemplateTittle)
+                .FirstOrDefault();
 
 
             using (Transaction trans = new Transaction(doc))
@@ -119,15 +159,22 @@ namespace MS.Commands.AR
                         sectionTransform.BasisY = up;
                         sectionTransform.BasisZ = direction;
 
+                        //Min = new XYZ(-3, -3, 0),
+                        //    Max = new XYZ(3, 3, 3),
                         BoundingBoxXYZ boxXYZ = new BoundingBoxXYZ()
                         {
-                            Min = new XYZ(-3, -3, 0),
-                            Max = new XYZ(3, 3, 3),
+                            Min = new XYZ(-_offsetLeftRight, -_offsetBottom, 0),
+                            Max = new XYZ(_offsetLeftRight, _offsetTop, _offsetFarLimit),
                             Transform = sectionTransform,
                             Enabled = true
                         };
                         ViewSection section = ViewSection.CreateSection(doc, sectionTypeId, boxXYZ);
                         section.Name = lintelMark;
+                        if (sectionTemplate != null)
+                        {
+                            section.ViewTemplateId = sectionTemplate.Id;
+                        }
+                        section.get_Parameter(BuiltInParameter.SECTION_COARSER_SCALE_PULLDOWN_METRIC).Set(1);
                         sectionByLintels++;
                     }
                 }
