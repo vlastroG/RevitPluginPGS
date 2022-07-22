@@ -64,9 +64,10 @@ namespace MS.Commands.AR
                     opening.Opening
                         .get_Parameter(BuiltInParameter.ALL_MODEL_MARK)
                         .Set(OpeningDto.DictOpeningMarkByHashCode[opening.GetHashCode()]);
-                    opening.Opening
-                        .get_Parameter(_parMrkMarkConstruction)
-                        .Set(OpeningDto.DictLintelMarkByHashCode[opening.GetHashCode()]);
+                    //opening.Opening
+                    //    .get_Parameter(_parMrkMarkConstruction)
+                    //    .Set(OpeningDto.DictLintelMarkByHashCode[opening.GetHashCode()]);
+                    // Исправить ошибку
                 }
 
                 trans.Commit();
