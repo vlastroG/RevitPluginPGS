@@ -72,6 +72,10 @@ namespace MS.Commands.AR
             {
                 trans.Start("Create section");
 
+                foreach (Element lintel in lintels)
+                {
+
+                }
                 ViewSection section = ViewSection.CreateSection(doc, sectionTypeId, boxXYZ);
 
                 trans.Commit();
