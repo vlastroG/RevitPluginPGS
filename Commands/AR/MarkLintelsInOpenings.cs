@@ -16,7 +16,14 @@ namespace MS.Commands.AR
     [Regeneration(RegenerationOption.Manual)]
     public class MarkLintelsInOpenings : IExternalCommand
     {
+        /// <summary>
+        /// Guid параметра PGS_МаркаПеремычки
+        /// </summary>
         private static readonly Guid _parPgsLintelMark = Guid.Parse("aee96840-3b85-4cb6-a93e-85acee0be8c7");
+        
+        /// <summary>
+        /// Guid параметра Мрк.МаркаКонструкции
+        /// </summary>
         private static readonly Guid _parMrkMarkConstruction = Guid.Parse("5d369dfb-17a2-4ae2-a1a1-bdfc33ba7405");
 
 
@@ -57,16 +64,16 @@ namespace MS.Commands.AR
                 trans.Start("Назначить марки перемычек");
 
                 foreach (OpeningDto opening in openings)
-                {
+                {                    
                     opening.Opening
                         .get_Parameter(_parPgsLintelMark)
                         .Set(OpeningDto.DictLintelMarkByHashCode[opening.GetHashCode()]);
                     opening.Opening
                         .get_Parameter(BuiltInParameter.ALL_MODEL_MARK)
                         .Set(OpeningDto.DictOpeningMarkByHashCode[opening.GetHashCode()]);
-                    //opening.Opening
-                    //    .get_Parameter(_parMrkMarkConstruction)
-                    //    .Set(OpeningDto.DictLintelMarkByHashCode[opening.GetHashCode()]);
+                    opening.Opening
+                        .get_Parameter(_parMrkMarkConstruction)
+                        .Set(OpeningDto.DictLintelMarkByHashCode[opening.GetHashCode()]);
                     // Исправить ошибку
                 }
 
