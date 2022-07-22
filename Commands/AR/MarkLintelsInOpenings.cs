@@ -17,6 +17,7 @@ namespace MS.Commands.AR
     public class MarkLintelsInOpenings : IExternalCommand
     {
         private static readonly Guid _parPgsLintelMark = Guid.Parse("aee96840-3b85-4cb6-a93e-85acee0be8c7");
+        private static readonly Guid _parMrkMarkConstruction = Guid.Parse("5d369dfb-17a2-4ae2-a1a1-bdfc33ba7405");
 
 
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
@@ -63,6 +64,9 @@ namespace MS.Commands.AR
                     opening.Opening
                         .get_Parameter(BuiltInParameter.ALL_MODEL_MARK)
                         .Set(OpeningDto.DictOpeningMarkByHashCode[opening.GetHashCode()]);
+                    opening.Opening
+                        .get_Parameter(_parMrkMarkConstruction)
+                        .Set(OpeningDto.DictLintelMarkByHashCode[opening.GetHashCode()]);
                 }
 
                 trans.Commit();
