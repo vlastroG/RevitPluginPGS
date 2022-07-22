@@ -13,35 +13,33 @@ namespace MS.Commands.AR
     [Regeneration(RegenerationOption.Manual)]
     public class LintelsSections : IExternalCommand
     {
+        /// <summary>
+        /// Guid параметра PGS_МаркаПеремычки
+        /// </summary>
         private static readonly Guid _parLintelMark = Guid.Parse("aee96840-3b85-4cb6-a93e-85acee0be8c7");
 
+        /// <summary>
+        /// Guid параметра Орг.ТипВключатьВСпецификацию
+        /// </summary>
         private static readonly Guid _parIncludeInSchedule = Guid.Parse("45ef1720-9cfe-49a7-b4d7-c67e4f7bd191");
 
+        /// <summary>
+        /// Значение встроенного параметра типа "Описание" для семейств перемычек
+        /// </summary>  
         private string _lintelDescription = "Перемычка";
 
+        /// <summary>
+        /// Значение названия типа разрезов для автоматического создания
+        /// </summary>
         private string _sectionTypeName = "Разрез_Без номера листа";
 
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
-
-
-            //Element.Location - точка размещения(X Y координаты)
-            //FamilyInstance.HandOrientation - вектор вдоль длины перемычки
-            //FamilyInstance.GetSubComponentIds().GetFirst().Location.Z - отметка центра разреза по высоте.
-
             UIApplication uiapp = commandData.Application;
             UIDocument uidoc = uiapp.ActiveUIDocument;
             Document doc = uidoc.Document;
 
-            Transform rotation = Transform.CreateRotation(XYZ.BasisY, 90 * Math.PI / 180);
-
-            BoundingBoxXYZ boxXYZ = new BoundingBoxXYZ()
-            {
-                Min = new XYZ(-3, -3, 0),
-                Max = new XYZ(3, 3, 3),
-                Transform = rotation,
-                Enabled = true
-            };
+            int sectionByLintels = 0;
 
             FilteredElementCollector sectionTypeFilter = new FilteredElementCollector(doc);
             IList<Element> sectionTypesAll = sectionTypeFilter
@@ -65,21 +63,86 @@ namespace MS.Commands.AR
                 .Where(e => e.get_Parameter(_parIncludeInSchedule) != null &&
                             e.get_Parameter(_parIncludeInSchedule).AsInteger() == 1)
                 .Where(e => e.get_Parameter(_parLintelMark) != null &&
-                            !String.IsNullOrEmpty(e.get_Parameter(_parLintelMark).AsValueString()));
+                            !String.IsNullOrEmpty(e.get_Parameter(_parLintelMark).AsValueString()))
+                .Cast<FamilyInstance>();
+
+            FilteredElementCollector sectionsFilter = new FilteredElementCollector(doc);
+            var createdSections = sectionsFilter
+                .OfCategory(BuiltInCategory.OST_Views)
+                .WhereElementIsNotElementType()
+                .Where(v => (v as View).ViewType == ViewType.Section)
+                .ToArray();
 
 
             using (Transaction trans = new Transaction(doc))
             {
-                trans.Start("Create section");
+                trans.Start("Разрезы по перемычкам");
 
-                foreach (Element lintel in lintels)
+                string lintelMark;
+                foreach (FamilyInstance lintel in lintels)
                 {
+                    lintelMark = lintel.get_Parameter(_parLintelMark).AsValueString();
+                    bool isSectionCreated = createdSections.Where(s => s.Name == lintelMark).Count() > 0;
+                    if (isSectionCreated)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        //Element.Location - точка размещения(X Y координаты)
+                        //FamilyInstance.HandOrientation - вектор вдоль длины перемычки
+                        //FamilyInstance.GetSubComponentIds().GetFirst().Location.Z - отметка центра разреза по высоте.
+                        XYZ center;
+                        XYZ direction;
+                        double x = (lintel.Location as LocationPoint).Point.X;
+                        double y = (lintel.Location as LocationPoint).Point.Y;
+                        double z;
+                        try
+                        {
+                            z = (doc.GetElement(lintel.GetSubComponentIds().FirstOrDefault())
+                                                .Location as LocationPoint).Point.Z;
+                        }
+                        catch (ArgumentNullException)
+                        {
+                            TaskDialog.Show("Ошибка", "Не обнаружены вложенные семейства в семействе перемычки." +
+                                $"\nId = {lintel.Id}");
+                            continue;
+                        }
+                        center = new XYZ(x, y, z);
+                        direction = lintel.HandOrientation.Normalize();
+                        XYZ up = XYZ.BasisZ;
+                        XYZ viewDirection = up.CrossProduct(direction);
 
+                        Transform sectionTransform = Transform.Identity;
+                        sectionTransform.Origin = center;
+                        sectionTransform.BasisX = viewDirection;
+                        sectionTransform.BasisY = up;
+                        sectionTransform.BasisZ = direction;
+
+                        BoundingBoxXYZ boxXYZ = new BoundingBoxXYZ()
+                        {
+                            Min = new XYZ(-3, -3, 0),
+                            Max = new XYZ(3, 3, 3),
+                            Transform = sectionTransform,
+                            Enabled = true
+                        };
+                        ViewSection section = ViewSection.CreateSection(doc, sectionTypeId, boxXYZ);
+                        section.Name = lintelMark;
+                        sectionByLintels++;
+                    }
                 }
-                ViewSection section = ViewSection.CreateSection(doc, sectionTypeId, boxXYZ);
 
                 trans.Commit();
             }
+
+            TaskDialog.Show("Разрезы по перемычкам",
+                $"{sectionByLintels} разрезов создано для {lintels.Count()} перемычек." +
+                $"\n\nЕсли это количество не соответствует Вашим ожиданиям," +
+                $"\nто, проверьте, чтобы:" +
+                $"\n1. У семейств перемычек в типе в \"Описании\" было \'Перемычка\';" +
+                $"\n2. В одном из экземпляров для каждого типа перемычек была галочка напротив Орг.ТипВключатьВСпецификацию;" +
+                $"\n3. В этих же экземплярах перемычек был заполнен параметр PGS_МаркаПеремычки." +
+                $"\n\nЕсли разрез по перемычке уже существует, новый создаваться не будет.");
 
             return Result.Succeeded;
         }
