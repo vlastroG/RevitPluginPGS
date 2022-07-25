@@ -12,7 +12,7 @@ namespace MS.Commands.AR
 {
     [Transaction(TransactionMode.Manual)]
     [Regeneration(RegenerationOption.Manual)]
-    public class LintelsSections : IExternalCommand
+    public class CreateSectionsByLintels : IExternalCommand
     {
         /// <summary>
         /// Guid параметра PGS_МаркаПеремычки
