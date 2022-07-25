@@ -30,6 +30,12 @@ namespace MS.Commands.AR.DTO
         private static readonly Guid _parAdskWallWidth = Guid.Parse("9350e48f-842b-4c46-a15d-2e36ab1f352f");
 
         /// <summary>
+        /// Guid параметра Мрк.МаркаКонструкции
+        /// </summary>
+        private static readonly Guid _parMrkMarkConstruction = Guid.Parse("5d369dfb-17a2-4ae2-a1a1-bdfc33ba7405");
+
+
+        /// <summary>
         /// Марка перемычки, берущаяся из PGS_МаркаПеремычки окна или двери
         /// </summary>
         private string _pgsLintelMark;
@@ -138,16 +144,13 @@ namespace MS.Commands.AR.DTO
         {
             get
             {
-                try
+                if (Opening.get_Parameter(_parAdskWallWidth) != null)
                 {
                     return Double.Parse(Opening
                         .get_Parameter(_parAdskWallWidth)
                         .AsValueString());
                 }
-                catch (NullReferenceException)
-                {
-                    return 0;
-                }
+                else return 0;
             }
         }
 
@@ -218,7 +221,10 @@ namespace MS.Commands.AR.DTO
             BuiltInCategory openingCategory = (BuiltInCategory)opening.Category.Id.IntegerValue;
             if (hostCategory == BuiltInCategory.OST_Walls
                 && (openingCategory == BuiltInCategory.OST_Doors
-                 || openingCategory == BuiltInCategory.OST_Windows))
+                 || openingCategory == BuiltInCategory.OST_Windows)
+                 && opening.get_Parameter(_parPgsLintelMark) != null
+                 && opening.get_Parameter(_parMrkMarkConstruction) != null
+                 && opening.Symbol.get_Parameter(_parAdskMarkOfSymbol) != null)
             {
                 return true;
             }
