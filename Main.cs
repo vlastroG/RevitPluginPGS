@@ -100,10 +100,16 @@ namespace MS
             btnMarkLintelsInOpenings.LargeImage = btnMarkLintelsInOpeningsImage;
 
             // LintelsSections command
-            PushButtonData btnLintelsSections = new PushButtonData("LintelsSections", "Разрезы\nпо перемычкам", path, "MS.Commands.AR.LintelsSections");
+            PushButtonData btnLintelsSections = new PushButtonData("LintelsSections", "Разрезы\nпо перемычкам", path, "MS.Commands.AR.CreateSectionsByLintels");
             Uri btnLintelsSectionsImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
             BitmapImage btnLintelsSectionsImage = new BitmapImage(btnLintelsSectionsImagePath);
             btnLintelsSections.LargeImage = btnLintelsSectionsImage;
+
+            // CreateImagesFromSections command
+            PushButtonData btnCreateImagesFromSections = new PushButtonData("CreateImagesFromSections", "Изображения\nпо перемычкам", path, "MS.Commands.AR.CreateImagesFromSections");
+            Uri btnCreateImagesFromSectionsImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            BitmapImage btnCreateImagesFromSectionsImage = new BitmapImage(btnCreateImagesFromSectionsImagePath);
+            btnCreateImagesFromSections.LargeImage = btnCreateImagesFromSectionsImage;
 
 
             // RoomsFinishingCommand
@@ -150,6 +156,7 @@ namespace MS
             panelAR.AddItem(btnOpeningsArea);
             panelAR.AddItem(btnMarkLintelsInOpenings);
             panelAR.AddItem(btnLintelsSections);
+            panelAR.AddItem(btnCreateImagesFromSections);
             //panelAR.AddItem(btnRmFinishing); // в разработке, нужно указать названия параметров
             panelAR.AddItem(btnSelection);
             panelAR.AddItem(btnMasonryMesh);
