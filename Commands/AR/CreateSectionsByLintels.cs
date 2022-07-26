@@ -129,9 +129,6 @@ namespace MS.Commands.AR
                     }
                     else
                     {
-                        //Element.Location - точка размещения(X Y координаты)
-                        //FamilyInstance.HandOrientation - вектор вдоль длины перемычки
-                        //FamilyInstance.GetSubComponentIds().GetFirst().Location.Z - отметка центра разреза по высоте.
                         XYZ center;
                         XYZ direction;
                         double x = (lintel.Location as LocationPoint).Point.X;
@@ -159,8 +156,6 @@ namespace MS.Commands.AR
                         sectionTransform.BasisY = up;
                         sectionTransform.BasisZ = direction;
 
-                        //Min = new XYZ(-3, -3, 0),
-                        //    Max = new XYZ(3, 3, 3),
                         BoundingBoxXYZ boxXYZ = new BoundingBoxXYZ()
                         {
                             Min = new XYZ(-_offsetLeftRight, -_offsetBottom, 0),
@@ -169,7 +164,15 @@ namespace MS.Commands.AR
                             Enabled = true
                         };
                         ViewSection section = ViewSection.CreateSection(doc, sectionTypeId, boxXYZ);
-                        section.Name = lintelMark;
+                        string sectionName = lintelMark + '_' + doc.GetElement(lintel.LevelId).Name;
+                        try
+                        {
+                            section.Name = sectionName;
+                        }
+                        catch (Exception)
+                        {
+                            section.Name = sectionName + Guid.NewGuid().ToString();
+                        }
                         if (sectionTemplate != null)
                         {
                             section.ViewTemplateId = sectionTemplate.Id;

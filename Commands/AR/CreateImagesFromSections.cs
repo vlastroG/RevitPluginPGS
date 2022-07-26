@@ -217,13 +217,18 @@ namespace MS.Commands.AR
                 foreach (FamilyInstance lintel in lintels)
                 {
                     string lintelMarkImg = lintel.get_Parameter(SharedParams.PGS_MarkLintel)
-                        .AsValueString() + ".png";
-                    var lintelImg = lintel.get_Parameter(BuiltInParameter.ALL_MODEL_IMAGE);
+                        .AsValueString() + '_' + doc.GetElement(lintel.LevelId).Name + ".png";
+                    //var lintelImg = lintel.get_Parameter(BuiltInParameter.ALL_MODEL_IMAGE);
+                    var lintelImg = lintel.LookupParameter("PGS_Изображение");
                     if (lintelImg.AsElementId() == null || lintelImg.AsValueString() != lintelMarkImg)
                     {
                         Element img = loadedImgs.Where(i => i.Name == lintelMarkImg).FirstOrDefault();
-                        lintel.get_Parameter(BuiltInParameter.ALL_MODEL_IMAGE).Set(img.Id);
-                        updatedLintels++;
+                        //lintel.get_Parameter(BuiltInParameter.ALL_MODEL_IMAGE).Set(img.Id);
+                        if (img != null)
+                        {
+                            lintel.LookupParameter("PGS_Изображение").Set(img.Id);
+                            updatedLintels++;
+                        }
                     }
                 }
 
@@ -240,7 +245,7 @@ namespace MS.Commands.AR
                 $"\nИзображения назначаются только тем перемычкам," +
                 $"\nу которых задан параметр PGS_МаркаПеремычки" +
                 $"\nи для которых созданы разрезы." +
-                $"\nЕсли название изображения совпадает с PGS_МаркаПеремычки," +
+                $"\nЕсли первое поле названия изображения совпадает с PGS_МаркаПеремычки," +
                 $"\nто переназначаться перемычке оно не будет.",
                 "Изображения перемычек");
 
