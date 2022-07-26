@@ -57,9 +57,6 @@ namespace MS.Commands.AR
             //    .Where(f => f.Symbol.get_Parameter(_parAdskMarkOfSymbol) != null)
             //    .Select(f => new OpeningDto(f))
             //    .ToList();
-            string lintelOn = "ПеремычкаВКЛ";
-            string lintelDescription = "Перемычка";
-            string PGS_MassLintel = "PGS_МассаПеремычки";
             var openings = filter_openings.WherePasses(filtered_categories)
                 .WhereElementIsNotElementType()
                 .ToElements()
@@ -67,7 +64,9 @@ namespace MS.Commands.AR
                 .Where(f => f.Host != null)
                 .Where(f =>
                 (BuiltInCategory)f.Host.Category.Id.IntegerValue == BuiltInCategory.OST_Walls)
-                .Where(f => f.LookupParameter(lintelOn) != null && f.LookupParameter(lintelOn).AsInteger() == 1)
+                .Where(f => f.get_Parameter(_parPgsLintelMark) != null)
+                .Where(f => f.get_Parameter(_parMrkMarkConstruction) != null)
+                .Where(f => f.Symbol.get_Parameter(_parAdskMarkOfSymbol) != null)
                 .ToList();
 
             using (Transaction transMarkOpenings = new Transaction(doc))
@@ -77,17 +76,25 @@ namespace MS.Commands.AR
                 {
                     var lintelId = opening
                         .GetSubComponentIds()
-                     .Where(
+                        .Where(
                              sub => (doc.GetElement(sub) as FamilyInstance).Symbol
                              .get_Parameter(BuiltInParameter.ALL_MODEL_DESCRIPTION)
-                             .AsValueString() == lintelDescription)
-                     .FirstOrDefault();
+                             .AsValueString() == SharedParams.LintelDescription)
+                        .FirstOrDefault();
                     var lintelElem = doc.GetElement(lintelId);
                     var lintelParamAdskMassElem = lintelElem.get_Parameter(SharedParams.ADSK_MassElement);
                     if (lintelParamAdskMassElem != null)
                     {
-                        opening.LookupParameter(PGS_MassLintel)
-                            .Set(lintelElem.get_Parameter(SharedParams.ADSK_MassElement).AsDouble());
+                        try
+                        {
+                            opening.get_Parameter(SharedParams.PGS_MarkLintel)
+                                .Set(lintelElem.get_Parameter(SharedParams.ADSK_MassElement).AsDouble());
+                        }
+                        catch (ArgumentNullException)
+                        {
+                            throw new ArgumentNullException(
+                                $"В экземпляре семейства {opening.Id} отсутствует параметр PGS_МассаПеремычки.");
+                        }
                     }
                 }
                 transMarkOpenings.Commit();
