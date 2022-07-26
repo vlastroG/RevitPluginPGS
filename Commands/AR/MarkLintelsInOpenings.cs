@@ -77,20 +77,17 @@ namespace MS.Commands.AR
                 {
                     var lintelId = opening
                         .GetSubComponentIds()
-                        .Where(
-                                sub => (doc.GetElement(sub) as FamilyInstance)
-                                .get_Parameter(BuiltInParameter.ALL_MODEL_DESCRIPTION)
-                                .AsValueString() == lintelDescription)
-                        .FirstOrDefault();
+                     .Where(
+                             sub => (doc.GetElement(sub) as FamilyInstance).Symbol
+                             .get_Parameter(BuiltInParameter.ALL_MODEL_DESCRIPTION)
+                             .AsValueString() == lintelDescription)
+                     .FirstOrDefault();
                     var lintelElem = doc.GetElement(lintelId);
-                    if (lintelElem != null)
+                    var lintelParamAdskMassElem = lintelElem.get_Parameter(SharedParams.ADSK_MassElement);
+                    if (lintelParamAdskMassElem != null)
                     {
-                        var lintelParamAdskMassElem = lintelElem.get_Parameter(SharedParams.ADSK_MassElement);
-                        if (lintelParamAdskMassElem != null)
-                        {
-                            opening.LookupParameter(PGS_MassLintel)
-                                .Set(lintelElem.get_Parameter(SharedParams.ADSK_MassElement).AsDouble());
-                        }
+                        opening.LookupParameter(PGS_MassLintel)
+                            .Set(lintelElem.get_Parameter(SharedParams.ADSK_MassElement).AsDouble());
                     }
                 }
                 transMarkOpenings.Commit();
