@@ -118,6 +118,7 @@
     </Compile>
     <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Shared\SharedParams.cs" />
     <Compile Include="Utilites\ExtensionDictionary.cs" />
     <Compile Include="Utilites\ExtensionPlanarFace.cs" />
     <Compile Include="Utilites\GetBoundarySegmentElement.cs" />
