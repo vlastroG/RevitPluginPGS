@@ -10,6 +10,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace MS.Commands.AR
 {
@@ -17,27 +18,53 @@ namespace MS.Commands.AR
     [Regeneration(RegenerationOption.Manual)]
     public class MarkLintelsInOpenings : IExternalCommand
     {
-        /// <summary>
-        /// Guid параметра PGS_МаркаПеремычки
-        /// </summary>
-        private static readonly Guid _parPgsLintelMark = Guid.Parse("aee96840-3b85-4cb6-a93e-85acee0be8c7");
-
-        /// <summary>
-        /// Guid параметра Мрк.МаркаКонструкции
-        /// </summary>
-        private static readonly Guid _parMrkMarkConstruction = Guid.Parse("5d369dfb-17a2-4ae2-a1a1-bdfc33ba7405");
-
-        /// <summary>
-        /// Guid параметра ADSK_Марка
-        /// </summary>
-        private static readonly Guid _parAdskMarkOfSymbol = Guid.Parse("2204049c-d557-4dfc-8d70-13f19715e46d");
-
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             UIApplication uiapp = commandData.Application;
             UIDocument uidoc = uiapp.ActiveUIDocument;
             Document doc = uidoc.Document;
 
+            Guid[] _sharedParamsForGenericModel = new Guid[] {
+                SharedParams.Mrk_MarkOfConstruction
+            };
+            if (!SharedParams.IsCategoryOfDocContainsSharedParams(
+                doc,
+                BuiltInCategory.OST_GenericModel,
+                _sharedParamsForGenericModel))
+            {
+                MessageBox.Show("В текущем проекте у категории \"Обобщенные модели\" " +
+                    "отсутствует общий параметр:" +
+                    "\nМрк.МаркаКонструкции",
+                    "Ошибка");
+                return Result.Cancelled;
+            }
+
+            Guid[] _sharedParamsForOpenings = new Guid[] {
+                SharedParams.ADSK_Mark
+            };
+            if (!SharedParams.IsCategoryOfDocContainsSharedParams(
+                doc,
+                BuiltInCategory.OST_Doors,
+                _sharedParamsForOpenings))
+            {
+                MessageBox.Show("В текущем проекте у категории \"Двери\" " +
+                    "отсутствует общий параметр:" +
+                    "\nADSK_Марка",
+                    "Ошибка");
+                return Result.Cancelled;
+            }
+
+            if (!SharedParams.IsCategoryOfDocContainsSharedParams(
+                doc,
+                BuiltInCategory.OST_Windows,
+                _sharedParamsForOpenings))
+            {
+                MessageBox.Show("В текущем проекте у категории \"Окна\"" +
+                    "отсутствует общий параметр:" +
+                    "\nADSK_Марка",
+                    "Ошибка");
+                return Result.Cancelled;
+            }
 
             var filter_openings = new FilteredElementCollector(doc);
             var filtered_categories = new ElementMulticategoryFilter(
@@ -64,9 +91,9 @@ namespace MS.Commands.AR
                 .Where(f => f.Host != null)
                 .Where(f =>
                 (BuiltInCategory)f.Host.Category.Id.IntegerValue == BuiltInCategory.OST_Walls)
-                .Where(f => f.get_Parameter(_parPgsLintelMark) != null)
-                .Where(f => f.get_Parameter(_parMrkMarkConstruction) != null)
-                .Where(f => f.Symbol.get_Parameter(_parAdskMarkOfSymbol) != null)
+                .Where(f => f.get_Parameter(SharedParams.PGS_MarkLintel) != null)
+                .Where(f => f.get_Parameter(SharedParams.Mrk_MarkOfConstruction) != null)
+                .Where(f => f.Symbol.get_Parameter(SharedParams.ADSK_Mark) != null)
                 .ToList();
 
             using (Transaction transMarkOpenings = new Transaction(doc))
@@ -79,7 +106,7 @@ namespace MS.Commands.AR
                         .Where(
                              sub => (doc.GetElement(sub) as FamilyInstance).Symbol
                              .get_Parameter(BuiltInParameter.ALL_MODEL_DESCRIPTION)
-                             .AsValueString() == SharedParams.LintelDescription)
+                             .AsValueString() == SharedValues.LintelDescription)
                         .FirstOrDefault();
                     var lintelElem = doc.GetElement(lintelId);
                     var lintelParamAdskMassElem = lintelElem.get_Parameter(SharedParams.ADSK_MassElement);

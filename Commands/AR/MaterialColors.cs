@@ -9,6 +9,7 @@ using Autodesk.Revit.Attributes;
 using MS.Utilites;
 using System.IO;
 using System.Windows;
+using MS.Shared;
 
 namespace MS.Commands.AR
 {
@@ -16,11 +17,6 @@ namespace MS.Commands.AR
     [Regeneration(RegenerationOption.Manual)]
     public class MaterialColors : IExternalCommand
     {
-        /// <summary>
-        /// Guid параметра для изображения типоразмеров материалов
-        /// </summary>
-        private readonly Guid _guid_par_colors_img = Guid.Parse("924e3bb2-a048-449f-916f-31093a3aa7a3");
-
         /// <summary>
         /// Название временной папки
         /// </summary>
@@ -37,6 +33,21 @@ namespace MS.Commands.AR
             UIApplication uiapp = commandData.Application;
             UIDocument uidoc = uiapp.ActiveUIDocument;
             Document doc = uidoc.Document;
+
+            Guid[] _sharedParamsForCommand = new Guid[] {
+            SharedParams.PGS_ImageTypeMaterial
+            };
+            if (!SharedParams.IsCategoryOfDocContainsSharedParams(
+                doc,
+                BuiltInCategory.OST_Materials,
+                _sharedParamsForCommand))
+            {
+                MessageBox.Show("В текущем проекте у категории \"Материалы\" " +
+                    "отсутствует необходимый общий параметр:" +
+                    "\nPGS_ИзображениеТипоразмераМатериала",
+                    "Ошибка");
+                return Result.Cancelled;
+            }
 
             FilteredElementCollector materialCollector = new FilteredElementCollector(doc);
             List<Element> materials = materialCollector
@@ -66,12 +77,12 @@ namespace MS.Commands.AR
                         int green = color.Green;
                         int blue = color.Blue;
 
-                        if (elem.get_Parameter(_guid_par_colors_img) != null
-                            && elem.get_Parameter(_guid_par_colors_img).AsElementId().IntegerValue > 1)
+                        if (elem.get_Parameter(SharedParams.PGS_ImageTypeMaterial) != null
+                            && elem.get_Parameter(SharedParams.PGS_ImageTypeMaterial).AsElementId().IntegerValue > 1)
                         {
                             try
                             {
-                                ElementId imgId = elem.get_Parameter(_guid_par_colors_img).AsElementId();
+                                ElementId imgId = elem.get_Parameter(SharedParams.PGS_ImageTypeMaterial).AsElementId();
                                 var _color = (doc.GetElement(imgId) as ImageType).GetImage().GetPixel(1, 1);
                                 var r = _color.R;
                                 var g = _color.G;
@@ -108,7 +119,7 @@ namespace MS.Commands.AR
                         var _imageType = ImageType.Create(
                             doc,
                             opt);
-                        elem.get_Parameter(_guid_par_colors_img).Set(_imageType.Id);
+                        elem.get_Parameter(SharedParams.PGS_ImageTypeMaterial).Set(_imageType.Id);
                         updateMaterials++;
                     }
                 }

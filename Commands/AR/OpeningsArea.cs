@@ -4,10 +4,12 @@ using Autodesk.Revit.DB.Architecture;
 using Autodesk.Revit.UI;
 using MS.Commands.AR.DTO;
 using MS.GUI.AR;
+using MS.Shared;
 using MS.Utilites;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows;
 
 namespace MS.Commands.AR
 {
@@ -15,11 +17,6 @@ namespace MS.Commands.AR
     [Regeneration(RegenerationOption.Manual)]
     public class OpeningsArea : IExternalCommand
     {
-        /// <summary>
-        /// Guid параметра ПлощадьПроемов
-        /// </summary>
-        private static readonly Guid _parOpeningsArea = Guid.Parse("18e3f49d-1315-415f-8359-8f045a7a8938");
-
         /// <summary>
         /// Название стадии, в которой подсчитываются площади проемов
         /// </summary>
@@ -39,9 +36,8 @@ namespace MS.Commands.AR
 
         private static List<RoomDto> NotCalculatedRooms = new List<RoomDto>();
 
-
         /// <summary>
-        /// Подсчет и назначение площадей проемов в параметр помещения "ПлощадьПроемов"
+        /// Подсчет и назначение площадей проемов в параметр помещения "ADSK_Площадь проемов"
         /// </summary>
         /// <param name="commandData"></param>
         /// <param name="message"></param>
@@ -52,6 +48,20 @@ namespace MS.Commands.AR
             UIApplication uiapp = commandData.Application;
             UIDocument uidoc = uiapp.ActiveUIDocument;
             Document doc = uidoc.Document;
+
+            Guid[] _sharedParamsForCommand = new Guid[] {
+            SharedParams.ADSK_AreaOfOpenings
+            };
+            if (!SharedParams.IsCategoryOfDocContainsSharedParams(
+                doc,
+                BuiltInCategory.OST_Rooms,
+                _sharedParamsForCommand))
+            {
+                MessageBox.Show("В текущем проекте у категории \"Помещения\"" +
+                    "отсутствует общий параметр ADSK_Площадь проемов",
+                    "Ошибка");
+                return Result.Cancelled;
+            }
 
             Dictionary<ElementId, double> _dict_roomId_openingsArea = new Dictionary<ElementId, double>();
 
@@ -123,11 +133,6 @@ namespace MS.Commands.AR
                 .Where(w => (w as FamilyInstance).Host is Wall
                         && ((w as FamilyInstance).Host as Wall).CurtainGrid == null);
 
-            //.Where(w => (
-            //    doc.GetElement(
-            //    w.get_Parameter(BuiltInParameter.HOST_ID_PARAM).AsElementId()) as Wall)
-            //    .CurtainGrid == null);
-
             var filter_doors = new FilteredElementCollector(doc);
             var doors = filter_doors
                 .OfCategory(BuiltInCategory.OST_Doors)
@@ -136,12 +141,6 @@ namespace MS.Commands.AR
                 .Where(d => d.get_Parameter(BuiltInParameter.PHASE_CREATED).AsValueString() == _phase)
                 .Where(w => (w as FamilyInstance).Host is Wall
                         && ((w as FamilyInstance).Host as Wall).CurtainGrid == null);
-
-
-            //.Where(d => (
-            //    doc.GetElement(
-            //    d.get_Parameter(BuiltInParameter.HOST_ID_PARAM).AsElementId()) as Wall)
-            //    .CurtainGrid == null);
 
             SolidCurveIntersectionOptions solid_curve_intersect_opt = new SolidCurveIntersectionOptions();
 
@@ -237,7 +236,7 @@ namespace MS.Commands.AR
                         }
                     }
 
-                    room.get_Parameter(_parOpeningsArea).Set(room_area);
+                    room.get_Parameter(SharedParams.ADSK_AreaOfOpenings).Set(room_area);
                 }
 
                 trans.Commit();

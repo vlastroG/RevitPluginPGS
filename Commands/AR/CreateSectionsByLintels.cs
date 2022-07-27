@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace MS.Commands.AR
 {
@@ -77,7 +78,7 @@ namespace MS.Commands.AR
                 .Where(e => (e is FamilyInstance) &&
                             (e as FamilyInstance).Symbol
                             .get_Parameter(BuiltInParameter.ALL_MODEL_DESCRIPTION)
-                            .AsValueString() == SharedParams.LintelDescription)
+                            .AsValueString() == SharedValues.LintelDescription)
                 .Where(e => e.get_Parameter(SharedParams.Org_TypeIncludeInSchedule) != null &&
                             e.get_Parameter(SharedParams.Org_TypeIncludeInSchedule).AsInteger() == 1)
                 .Where(e => e.get_Parameter(SharedParams.PGS_MarkLintel) != null &&
@@ -173,14 +174,15 @@ namespace MS.Commands.AR
                 trans.Commit();
             }
 
-            TaskDialog.Show("Разрезы по перемычкам",
+            MessageBox.Show(
                 $"{sectionByLintels} разрезов создано для {lintels.Count()} перемычек." +
-                $"\n\nЕсли это количество не соответствует Вашим ожиданиям," +
+                $"\n\nЕсли это количество не соответствует ожиданиям," +
                 $"\nто, проверьте, чтобы:" +
                 $"\n1. У семейств перемычек в типе в \"Описании\" было \'Перемычка\';" +
                 $"\n2. В одном из экземпляров для каждого типа перемычек была галочка напротив Орг.ТипВключатьВСпецификацию;" +
                 $"\n3. В этих же экземплярах перемычек был заполнен параметр PGS_МаркаПеремычки." +
-                $"\n\nЕсли разрез по перемычке уже существует, новый создаваться не будет.");
+                $"\n\nЕсли разрез по перемычке уже существует, новый создаваться не будет.",
+                "Разрезы по перемычкам");
 
             return Result.Succeeded;
         }

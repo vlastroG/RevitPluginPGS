@@ -16,7 +16,7 @@ using System.Windows.Shapes;
 namespace MS.GUI.AR
 {
     /// <summary>
-    /// Interaction logic for UserControl1.xaml
+    /// 
     /// </summary>
     public partial class InputRoomsArea : Window
     {
@@ -31,18 +31,7 @@ namespace MS.GUI.AR
 
         public int AreaRound { get; private set; }
 
-        /*--------------------template_choice-----------------------------*/
-
-        private void tempPGS_Checked(object sender, RoutedEventArgs e)
-        {
-            RevitTemplate = "pgs";
-        }
-
-        private void tempADSK_Checked(object sender, RoutedEventArgs e)
-        {
-            RevitTemplate = "adsk";
-        }
-
+        
         /*--------------------calc_scale_choice---------------------------*/
 
         private void allProj_Checked(object sender, RoutedEventArgs e)

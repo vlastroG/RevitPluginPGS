@@ -12,16 +12,6 @@ namespace MS.Utilites
     public static class WorkWithGeometry
     {
         /// <summary>
-        /// Параметр ширины экземпляра семейства
-        /// </summary>
-        private static readonly Guid par_width = Guid.Parse("8f2e4f93-9472-4941-a65d-0ac468fd6a5d");
-
-        /// <summary>
-        /// Параметр высоты экземпляра семейства
-        /// </summary>
-        private static readonly Guid par_height = Guid.Parse("da753fe3-ecfa-465b-9a2c-02f55d0c2ff1");
-
-        /// <summary>
         /// Коэффициент для перевода квадратных футов в квадратные метры
         /// </summary>
         private static readonly double _sqFeetToMeters = 0.3048 * 0.3048;
