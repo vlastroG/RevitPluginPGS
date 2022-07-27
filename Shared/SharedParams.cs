@@ -115,6 +115,11 @@ namespace MS.Shared
         public static readonly Guid Arm_AreaOfMasonryMesh = Guid.Parse("7f925503-538c-43f3-9e75-aa7a3f43eb0e");
 
         /// <summary>
+        /// Guid параметра ADSK_Толщина стены = 9350e48f-842b-4c46-a15d-2e36ab1f352f
+        /// </summary>
+        public static readonly Guid ADSK_ThicknessOfWall = Guid.Parse("9350e48f-842b-4c46-a15d-2e36ab1f352f");
+
+        /// <summary>
         /// Валидация текущего проекта Revit на наличие общих параметров у заданной категории.
         /// </summary>
         /// <param name="doc">Документ Revit.</param>

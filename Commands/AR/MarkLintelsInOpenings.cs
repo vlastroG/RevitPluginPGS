@@ -14,6 +14,9 @@ using System.Windows;
 
 namespace MS.Commands.AR
 {
+    /// <summary>
+    /// Скрипт для назначения марок перемычкам
+    /// </summary>
     [Transaction(TransactionMode.Manual)]
     [Regeneration(RegenerationOption.Manual)]
     public class MarkLintelsInOpenings : IExternalCommand
@@ -93,7 +96,6 @@ namespace MS.Commands.AR
                 (BuiltInCategory)f.Host.Category.Id.IntegerValue == BuiltInCategory.OST_Walls)
                 .Where(f => f.get_Parameter(SharedParams.PGS_MarkLintel) != null)
                 .Where(f => f.get_Parameter(SharedParams.Mrk_MarkOfConstruction) != null)
-                .Where(f => f.Symbol.get_Parameter(SharedParams.ADSK_Mark) != null)
                 .ToList();
 
             using (Transaction transMarkOpenings = new Transaction(doc))

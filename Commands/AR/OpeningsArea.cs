@@ -13,6 +13,9 @@ using System.Windows;
 
 namespace MS.Commands.AR
 {
+    /// <summary>
+    /// Скрипт по подсчету площадей проемов в помещении.
+    /// </summary>
     [Transaction(TransactionMode.Manual)]
     [Regeneration(RegenerationOption.Manual)]
     public class OpeningsArea : IExternalCommand
