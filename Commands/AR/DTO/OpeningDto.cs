@@ -22,6 +22,11 @@ namespace MS.Commands.AR.DTO
         private string _lintelMark;
 
         /// <summary>
+        /// True, если в вычисление HashCode включено значение свойства Level, иначе False
+        /// </summary>
+        public bool HashWithLevel { get; private set; }
+
+        /// <summary>
         /// Словарь марок перемычек по хэш-коду DTO 
         /// </summary>
         private static readonly Dictionary<int, string> _dictLintelMarkByHashCode = new Dictionary<int, string>();
@@ -41,7 +46,15 @@ namespace MS.Commands.AR.DTO
         /// </summary>
         public FamilyInstance Lintel { get; private set; }
 
-        public OpeningDto(Document doc, FamilyInstance opening)
+        /// <summary>
+        /// Конструктор Dto проема
+        /// </summary>
+        /// <param name="doc">Документ Revit</param>
+        /// <param name="opening">Семейство Окна/Двери</param>
+        /// <param name="hashWithLevel">Включать в хэш-код Уровень: Да/Нет</param>
+        /// <exception cref="ArgumentNullException">В семействе <paramref name="opening"/> отсутствует параметр PGS_МаркаПеремычки</exception>
+        /// <exception cref="ArgumentException">Нельзя создать из семейства <paramref name="opening"/> Dto.</exception>
+        public OpeningDto(Document doc, FamilyInstance opening, bool hashWithLevel)
         {
             if (ValidateInput(doc, opening))
             {
@@ -53,6 +66,7 @@ namespace MS.Commands.AR.DTO
                                                 .get_Parameter(BuiltInParameter.ALL_MODEL_DESCRIPTION)
                                                 .AsValueString() == SharedValues.LintelDescription);
                 Lintel = doc.GetElement(lintelId) as FamilyInstance;
+                HashWithLevel = hashWithLevel;
                 try
                 {
                     _lintelMark = opening
@@ -216,12 +230,22 @@ namespace MS.Commands.AR.DTO
 
 
         /// <summary>
-        /// Получение хэш-кода из суммы свойств MassOfLintel, Width, WallWidth, LintelSubComponentsCount.
+        /// Если HashWithLevel == True, то возвращается хэш код суммы:
+        /// Level + MassOfLintel + Width + WallWidth + LintelSubComponentsCount
+        /// Иначе:
+        /// MassOfLintel + Width + WallWidth + LintelSubComponentsCount
         /// </summary>
         /// <returns>Хэш-код суммы свойств.</returns>
         public override int GetHashCode()
         {
-            return (MassOfLintel + Width + WallWidth + LintelSubComponentsCount).GetHashCode();
+            if (HashWithLevel)
+            {
+                return (Level + MassOfLintel + Width + WallWidth + LintelSubComponentsCount).GetHashCode();
+            }
+            else
+            {
+                return (MassOfLintel + Width + WallWidth + LintelSubComponentsCount).GetHashCode();
+            }
         }
 
         /// <summary>

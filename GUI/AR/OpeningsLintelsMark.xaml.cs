@@ -32,17 +32,21 @@ namespace MS.GUI.AR
         public OpeningsLintelsMark(List<OpeningDto> openingsDto, bool endToEndNumbering)
         {
             InitializeComponent();
-
+            _openings = openingsDto.Distinct().ToList();
+            _openings.Sort(
+                delegate (OpeningDto dto1, OpeningDto dto2)
+                {
+                    // Предварительная сортировка по массе перемычки
+                    return dto1.MassOfLintel.CompareTo(dto2.MassOfLintel);
+                });
             // Если сквозная маркировка
             if (endToEndNumbering)
             {
-                _openings = openingsDto.Distinct().ToList();
                 OpeningDtosList.ItemsSource = _openings;
             }
             // Если поэтажная маркировка
             else
             {
-                _openings = openingsDto.Distinct(new OpeningDtoComparerWithLevel()).ToList();
                 ListCollectionView collection = new ListCollectionView(_openings);
                 collection.GroupDescriptions.Add(new PropertyGroupDescription("Level"));
 

@@ -78,6 +78,23 @@ namespace MS.Commands.AR
                 return Result.Cancelled;
             }
 
+            var endToEndMark = UserInput.YesNoCancelInput("Маркировка", "Если маркировка сквозная - \"Да\", поэтажно - \"Нет\"");
+            if (endToEndMark != System.Windows.Forms.DialogResult.Yes && endToEndMark != System.Windows.Forms.DialogResult.No)
+            {
+                return Result.Cancelled;
+            }
+            bool marking;
+            if (endToEndMark == System.Windows.Forms.DialogResult.Yes)
+            {
+                // Маркировка сквозная, в хэш-код OpeningDto не включать Уровень
+                marking = true;
+            }
+            else
+            {
+                // Маркировка поэтажная, в хэш-код OpeningDto включать Уровень
+                marking = false;
+            }
+
             var filter_openings = new FilteredElementCollector(doc);
             var filtered_categories = new ElementMulticategoryFilter(
                 new Collection<BuiltInCategory> {
@@ -97,27 +114,14 @@ namespace MS.Commands.AR
                              id => (doc.GetElement(id) as FamilyInstance).Symbol
                              .get_Parameter(BuiltInParameter.ALL_MODEL_DESCRIPTION)
                              .AsValueString() == SharedValues.LintelDescription) != null);
-           var openings = ops9.Select(f => new OpeningDto(doc, f))
-                 .ToList();
+            var openings = ops9.Select(f => new OpeningDto(doc, f, !marking))
+                  .ToList();
 
             int lintelMarkSetCount = 0;
             int mrkMarkConstrSetCount = 0;
             int lintelMassSetCount = 0;
 
-            var endToEndMark = UserInput.YesNoCancelInput("Маркировка", "Если маркировка сквозная - \"Да\", поэтажно - \"Нет\"");
-            if (endToEndMark != System.Windows.Forms.DialogResult.Yes && endToEndMark != System.Windows.Forms.DialogResult.No)
-            {
-                return Result.Cancelled;
-            }
-            bool marking;
-            if (endToEndMark == System.Windows.Forms.DialogResult.Yes)
-            {
-                marking = true;
-            }
-            else
-            {
-                marking = false;
-            }
+
 
             //Вывод окна входных данных
             OpeningsLintelsMark inputForm = new OpeningsLintelsMark(openings, marking);
@@ -169,8 +173,8 @@ namespace MS.Commands.AR
             }
 
             MessageBox.Show(
-                $"Принято в обработку {openings.Count} семейств окон и дверей." +
-                $"\nPGS_МаркаПеремычки назначен {lintelMarkSetCount} раз," +
+                $"Принято в обработку {openings.Count} экземпляров семейств окон и дверей." +
+                $"\n\nPGS_МаркаПеремычки назначен {lintelMarkSetCount} раз," +
                 $"\nМрк.МаркаКонструкции назначен {mrkMarkConstrSetCount} раз," +
                 $"\nPGS_МассаПеремычки назначен {lintelMassSetCount} раз.",
                 "Маркировка переимычек");
