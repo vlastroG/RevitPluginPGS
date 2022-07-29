@@ -134,6 +134,7 @@
     <Compile Include="Utilites\WorkWithString.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include=".editorconfig" />
     <None Include="Diagrams\Copy of Algorhytm check lintels.drawio" />
     <None Include="Diagrams\RoomsAreaAlgorithm.drawio" />
     <None Include="packages.config" />

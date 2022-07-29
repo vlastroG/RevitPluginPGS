@@ -7,7 +7,7 @@ float dpi = 144;
 
 using (Bitmap b = new Bitmap(width, height))
 {
-    
+
     b.SetResolution(dpi, dpi);
     using (Graphics g = Graphics.FromImage(b))
     {

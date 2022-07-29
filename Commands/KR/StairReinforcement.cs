@@ -42,7 +42,7 @@ namespace MS.Commands.KR
             {
                 selectedElements = uidoc.Selection.PickObjects(ObjectType.Element, filter, "Выберите лестницы.").Select(e => doc.GetElement(e.ElementId)).ToList();
             }
-            catch (OperationCanceledException e)
+            catch (OperationCanceledException)
             {
                 return Result.Cancelled;
             }
@@ -50,10 +50,6 @@ namespace MS.Commands.KR
             // Тестовый выбор первой лестницы из списка
             var testStair = selectedElements.FirstOrDefault();
             var stair = new StairModel(testStair);
-
-
-
-            string test = "test";
 
             return Result.Succeeded;
         }

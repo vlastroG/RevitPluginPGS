@@ -292,35 +292,28 @@ namespace MS.Utilites
             foreach (Room room in rooms)
             {
                 SpatialElementBoundaryOptions opt
-                  = new SpatialElementBoundaryOptions();
-
-                opt.SpatialElementBoundaryLocation
-                  = SpatialElementBoundaryLocation.Finish;
+                  = new SpatialElementBoundaryOptions
+                  {
+                      SpatialElementBoundaryLocation
+                  = SpatialElementBoundaryLocation.Finish
+                  };
 
                 IList<IList<BoundarySegment>> loops
                   = room.GetBoundarySegments(opt);
 
                 int n = loops.Count;
 
-                int i = 0;
-
                 foreach (IList<BoundarySegment> loop in loops)
                 {
                     n = loop.Count;
-
-                    int j = 0;
 
                     foreach (BoundarySegment seg in loop)
                     {
                         Element e = doc.GetElement(seg.ElementId);
 
-                        string s = "Element property";
-
                         if (null == e)
                         {
-                            s = "GetElementByRay";
-
-                            e = GetElementByRay(uiapp, doc, view3d,
+                            e = GetElementByRay(doc, view3d,
                               seg.GetCurve());
                         }
                     }

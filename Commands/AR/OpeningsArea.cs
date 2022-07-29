@@ -194,14 +194,12 @@ namespace MS.Commands.AR
                                 {
                                     var curtain_wall_behind_modelline = WorkWithGeometry
                                         .GetElementByRay_switch(
-                                        uiapp,
                                         doc,
                                         view3d,
                                         bound.GetCurve(), true);
 
                                     var curtain_wall_before_modelline = WorkWithGeometry
                                         .GetElementByRay_switch(
-                                        uiapp,
                                         doc,
                                         view3d,
                                         bound.GetCurve(), false);

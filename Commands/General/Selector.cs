@@ -33,7 +33,7 @@ namespace MS
                 //selectedElements = uidoc.Selection.PickElementsByRectangle(filter, "Выберите помещения.").ToList();
                 selectedElements = uidoc.Selection.PickElementsByRectangle(filter, "Выберите помещения.").ToList();
             }
-            catch (OperationCanceledException e)
+            catch (OperationCanceledException)
             {
                 return Result.Cancelled;
             }
