@@ -4,6 +4,7 @@ using Autodesk.Revit.UI;
 using MS.Commands.AR.DTO;
 using MS.GUI.AR;
 using MS.Shared;
+using MS.Utilites;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -28,7 +29,8 @@ namespace MS.Commands.AR
             Document doc = uidoc.Document;
 
             Guid[] _sharedParamsForGenericModel = new Guid[] {
-                SharedParams.Mrk_MarkOfConstruction
+                SharedParams.Mrk_MarkOfConstruction,
+                SharedParams.PGS_MarkLintel
             };
             if (!SharedParams.IsCategoryOfDocContainsSharedParams(
                 doc,
@@ -36,14 +38,16 @@ namespace MS.Commands.AR
                 _sharedParamsForGenericModel))
             {
                 MessageBox.Show("В текущем проекте у категории \"Обобщенные модели\" " +
-                    "отсутствует общий параметр:" +
-                    "\nМрк.МаркаКонструкции",
+                    "Присутствуют НЕ ВСЕ необходимые общие параметры:" +
+                    "\nМрк.МаркаКонструкции" +
+                    "\nPGS_МаркаПеремычки",
                     "Ошибка");
                 return Result.Cancelled;
             }
 
             Guid[] _sharedParamsForOpenings = new Guid[] {
-                SharedParams.ADSK_Mark
+                SharedParams.Mrk_MarkOfConstruction,
+                SharedParams.PGS_MarkLintel
             };
             if (!SharedParams.IsCategoryOfDocContainsSharedParams(
                 doc,
@@ -51,8 +55,9 @@ namespace MS.Commands.AR
                 _sharedParamsForOpenings))
             {
                 MessageBox.Show("В текущем проекте у категории \"Двери\" " +
-                    "отсутствует общий параметр:" +
-                    "\nADSK_Марка",
+                    "Присутствуют НЕ ВСЕ необходимые общие параметры:" +
+                    "\nМрк.МаркаКонструкции" +
+                    "\nPGS_МаркаПеремычки",
                     "Ошибка");
                 return Result.Cancelled;
             }
@@ -63,8 +68,9 @@ namespace MS.Commands.AR
                 _sharedParamsForOpenings))
             {
                 MessageBox.Show("В текущем проекте у категории \"Окна\"" +
-                    "отсутствует общий параметр:" +
-                    "\nADSK_Марка",
+                    "Присутствуют НЕ ВСЕ необходимые общие параметры:" +
+                    "\nМрк.МаркаКонструкции" +
+                    "\nPGS_МаркаПеремычки",
                     "Ошибка");
                 return Result.Cancelled;
             }
@@ -75,110 +81,76 @@ namespace MS.Commands.AR
                      BuiltInCategory.OST_Windows,
                      BuiltInCategory.OST_Doors});
 
-            //var openings = filter_openings.WherePasses(filtered_categories)
-            //    .WhereElementIsNotElementType()
-            //    .ToElements()
-            //    .Cast<FamilyInstance>()
-            //    .Where(f => f.Host != null)
-            //    .Where(f =>
-            //    (BuiltInCategory)f.Host.Category.Id.IntegerValue == BuiltInCategory.OST_Walls)
-            //    .Where(f => f.get_Parameter(_parPgsLintelMark) != null)
-            //    .Where(f => f.get_Parameter(_parMrkMarkConstruction) != null)
-            //    .Where(f => f.Symbol.get_Parameter(_parAdskMarkOfSymbol) != null)
-            //    .Select(f => new OpeningDto(f))
-            //    .ToList();
             var openings = filter_openings.WherePasses(filtered_categories)
                 .WhereElementIsNotElementType()
                 .ToElements()
                 .Cast<FamilyInstance>()
                 .Where(f => f.Host != null)
                 .Where(f =>
-                (BuiltInCategory)f.Host.Category.Id.IntegerValue == BuiltInCategory.OST_Walls)
+            (BuiltInCategory)f.Host.Category.Id.IntegerValue == BuiltInCategory.OST_Walls)
                 .Where(f => f.get_Parameter(SharedParams.PGS_MarkLintel) != null)
                 .Where(f => f.get_Parameter(SharedParams.Mrk_MarkOfConstruction) != null)
-                .ToList();
+                .Where(f => f.GetSubComponentIds().FirstOrDefault(
+                                        id => (doc.GetElement(id) as FamilyInstance).Symbol
+                                        .get_Parameter(BuiltInParameter.ALL_MODEL_DESCRIPTION)
+                                        .AsValueString() == SharedValues.LintelDescription) != null)
+                .Select(f => new OpeningDto(doc, f))
+            .ToList();
 
-            using (Transaction transMarkOpenings = new Transaction(doc))
+            var endToEndMark = UserInput.YesNoCancelInput("Маркировка", "Если маркировка сквозная - \"Да\", поэтажно - \"Нет\"");
+            if (endToEndMark != System.Windows.Forms.DialogResult.Yes && endToEndMark != System.Windows.Forms.DialogResult.No)
             {
-                transMarkOpenings.Start("Назначить массы перемычек");
-                foreach (FamilyInstance opening in openings)
-                {
-                    var lintelId = opening
-                        .GetSubComponentIds()
-                        .Where(
-                             sub => (doc.GetElement(sub) as FamilyInstance).Symbol
-                             .get_Parameter(BuiltInParameter.ALL_MODEL_DESCRIPTION)
-                             .AsValueString() == SharedValues.LintelDescription)
-                        .FirstOrDefault();
-                    var lintelElem = doc.GetElement(lintelId);
-                    var lintelParamAdskMassElem = lintelElem.get_Parameter(SharedParams.ADSK_MassElement);
-                    if (lintelParamAdskMassElem != null)
-                    {
-                        try
-                        {
-                            opening.get_Parameter(SharedParams.PGS_MarkLintel)
-                                .Set(lintelElem.get_Parameter(SharedParams.ADSK_MassElement).AsDouble());
-                        }
-                        catch (ArgumentNullException)
-                        {
-                            throw new ArgumentNullException(
-                                $"В экземпляре семейства {opening.Id} отсутствует параметр PGS_МассаПеремычки.");
-                        }
-                    }
-                }
-                transMarkOpenings.Commit();
+                return Result.Cancelled;
+            }
+            bool marking;
+            if (endToEndMark == System.Windows.Forms.DialogResult.Yes)
+            {
+                marking = true;
+            }
+            else
+            {
+                marking = false;
             }
 
             //Вывод окна входных данных
-            //OpeningsLintelsMark inputForm = new OpeningsLintelsMark(openings);
-            //inputForm.ShowDialog();
+            OpeningsLintelsMark inputForm = new OpeningsLintelsMark(openings, marking);
+            inputForm.ShowDialog();
 
-            //if (inputForm.DialogResult == false)
-            //{
-            //    return Result.Cancelled;
-            //}
+            if (inputForm.DialogResult == false)
+            {
+                return Result.Cancelled;
+            }
 
-            //using (Transaction trans = new Transaction(doc))
-            //{
-            //    trans.Start("Назначить марки перемычек");
+            using (Transaction trans = new Transaction(doc))
+            {
+                trans.Start("PGS set marks lintels");
 
-            //    foreach (OpeningDto opening in openings)
-            //    {
-            //        // Марка перемычки
-            //        string lintelMark = OpeningDto.DictLintelMarkByHashCode[opening.GetHashCode()];
-            //        // Марка проема
-            //        string openingMark = OpeningDto.DictOpeningMarkByHashCode[opening.GetHashCode()];
+                foreach (OpeningDto opening in openings)
+                {
+                    // Марка перемычки
+                    string lintelMark = OpeningDto.DictLintelMarkByHashCode[opening.GetHashCode()];
 
-            //        // Назначить PGS_МаркаПеремычки в экземпляр семейства,
-            //        // если значение отличается от марки перемычки DTO.
-            //        if (opening.Opening.get_Parameter(_parPgsLintelMark).AsValueString() != lintelMark)
-            //        {
-            //            opening.Opening
-            //                .get_Parameter(_parPgsLintelMark)
-            //                .Set(OpeningDto.DictLintelMarkByHashCode[opening.GetHashCode()]);
-            //        }
-            //        // Назначить Марку в экземпляр семейства,
-            //        // если значение отличается от марки проема DTO
-            //        if (opening.Opening
-            //            .get_Parameter(BuiltInParameter.ALL_MODEL_MARK).AsValueString() != openingMark)
-            //        {
-            //            opening.Opening
-            //                .get_Parameter(BuiltInParameter.ALL_MODEL_MARK)
-            //                .Set(OpeningDto.DictOpeningMarkByHashCode[opening.GetHashCode()]);
-            //        }
-            //        // Назначить Мрк.МаркаКонструкции в экземпляр семейства,
-            //        // если значение отличается от марки перемычки DTO
-            //        if (opening.Opening
-            //            .get_Parameter(_parMrkMarkConstruction).AsValueString() != lintelMark)
-            //        {
-            //            opening.Opening
-            //                .get_Parameter(_parMrkMarkConstruction)
-            //                .Set(OpeningDto.DictLintelMarkByHashCode[opening.GetHashCode()]);
-            //        }
-            //    }
+                    // Назначить PGS_МаркаПеремычки в экземпляр семейства,
+                    // если значение отличается от марки перемычки DTO.
+                    if (opening.Opening.get_Parameter(SharedParams.PGS_MarkLintel).AsValueString() != lintelMark)
+                    {
+                        opening.Opening
+                            .get_Parameter(SharedParams.PGS_MarkLintel)
+                            .Set(OpeningDto.DictLintelMarkByHashCode[opening.GetHashCode()]);
+                    }
+                    // Назначить Мрк.МаркаКонструкции в экземпляр семейства,
+                    // если значение отличается от марки перемычки DTO
+                    if (opening.Opening
+                        .get_Parameter(SharedParams.Mrk_MarkOfConstruction).AsValueString() != lintelMark)
+                    {
+                        opening.Opening
+                            .get_Parameter(SharedParams.Mrk_MarkOfConstruction)
+                            .Set(OpeningDto.DictLintelMarkByHashCode[opening.GetHashCode()]);
+                    }
+                }
 
-            //    trans.Commit();
-            //}
+                trans.Commit();
+            }
 
             return Result.Succeeded;
         }

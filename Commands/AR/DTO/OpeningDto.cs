@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace MS.Commands.AR.DTO
 {
@@ -21,26 +22,37 @@ namespace MS.Commands.AR.DTO
         private string _lintelMark;
 
         /// <summary>
-        /// Марка проема, берущаяся из Марки двери или окна
-        /// </summary>
-        private string _openingMark;
-
-        /// <summary>
         /// Словарь марок перемычек по хэш-коду DTO 
         /// </summary>
         private static readonly Dictionary<int, string> _dictLintelMarkByHashCode = new Dictionary<int, string>();
 
+        /// <summary>
+        /// Документ Revit, в котором размещено семейство проема
+        /// </summary>
+        public Document Doc { get; private set; }
 
         /// <summary>
         /// Экземпляр семейства категории окна или двери
         /// </summary>
         public FamilyInstance Opening { get; private set; }
 
+        /// <summary>
+        /// Экземпляр семейства перемычки, вложенный в семейство окна/двери
+        /// </summary>
+        private FamilyInstance Lintel { get; set; }
+
         public OpeningDto(Document doc, FamilyInstance opening)
         {
             if (ValidateInput(doc, opening))
             {
                 Opening = opening;
+                Doc = doc;
+                var lintelId = Opening.GetSubComponentIds()
+                                .FirstOrDefault(
+                                                id => (doc.GetElement(id) as FamilyInstance).Symbol
+                                                .get_Parameter(BuiltInParameter.ALL_MODEL_DESCRIPTION)
+                                                .AsValueString() == SharedValues.LintelDescription);
+                Lintel = doc.GetElement(lintelId) as FamilyInstance;
                 try
                 {
                     _lintelMark = opening
@@ -52,9 +64,6 @@ namespace MS.Commands.AR.DTO
                     throw new ArgumentNullException($"В экземпляре семейства с Id = {opening.Id} " +
                         $"отсутствует параметр PGS_МаркаПеремычки.");
                 }
-                _openingMark = opening
-                    .get_Parameter(BuiltInParameter.ALL_MODEL_MARK)
-                    .AsValueString();
                 _dictLintelMarkByHashCode.AddOrUpdate(GetHashCode(), _lintelMark);
             }
             else
@@ -129,7 +138,17 @@ namespace MS.Commands.AR.DTO
         {
             get
             {
-                return 0;
+                if (Lintel.get_Parameter(SharedParams.ADSK_MassElement) != null)
+                {
+                    return Lintel.get_Parameter(SharedParams.ADSK_MassElement).AsDouble();
+                }
+                else
+                {
+                    MessageBox.Show(
+                        $"У перемычки с Id = {Lintel.Id} отсутствует общий параметр \"ADSK_Масса элемента\"",
+                        "Предупреждение");
+                    return 0;
+                }
             }
         }
 
@@ -140,7 +159,7 @@ namespace MS.Commands.AR.DTO
         {
             get
             {
-                return 0;
+                return Lintel.GetSubComponentIds().Count;
             }
         }
 
@@ -197,12 +216,12 @@ namespace MS.Commands.AR.DTO
 
 
         /// <summary>
-        /// Получение хэш-кода из суммы string значений 'Категории', 'ADSK_Толщина стены', 'Ширина'
+        /// Получение хэш-кода из суммы свойств MassOfLintel, Width, WallWidth, LintelSubComponentsCount.
         /// </summary>
-        /// <returns>Хэш-код суммы строк.</returns>
+        /// <returns>Хэш-код суммы свойств.</returns>
         public override int GetHashCode()
         {
-            return (WallWidth + Width).GetHashCode();
+            return (MassOfLintel + Width + WallWidth + LintelSubComponentsCount).GetHashCode();
         }
 
         /// <summary>

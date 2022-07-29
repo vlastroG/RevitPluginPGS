@@ -24,17 +24,30 @@ namespace MS.GUI.AR
         private List<OpeningDto> _openings;
 
 
-        //public IReadOnlyCollection<OpeningDto> Openings
-        //{
-        //    get { return _openings; }
-        //}
-
-        public OpeningsLintelsMark(List<OpeningDto> openingsDto)
+        /// <summary>
+        /// Конструктор формы маркировки перемычек в проемах
+        /// </summary>
+        /// <param name="openingsDto">Список проемов</param>
+        /// <param name="endToEndNumbering">Если маркировка сквозная - true, поэтажно - false</param>
+        public OpeningsLintelsMark(List<OpeningDto> openingsDto, bool endToEndNumbering)
         {
             _openings = openingsDto.Distinct().ToList();
             InitializeComponent();
 
-            OpeningDtosList.ItemsSource = _openings;
+            // Если сквозная маркировка
+            if (endToEndNumbering)
+            {
+                OpeningDtosList.ItemsSource = _openings;
+            }
+            // Если поэтажная маркировка
+            else
+            {
+                ListCollectionView collection = new ListCollectionView(_openings);
+                collection.GroupDescriptions.Add(new PropertyGroupDescription("Level"));
+
+                OpeningDtosList.ItemsSource = collection;
+            }
+
         }
 
         private void SubmitButton_Click(object sender, RoutedEventArgs e)
