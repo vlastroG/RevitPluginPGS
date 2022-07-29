@@ -39,7 +39,7 @@ namespace MS.Commands.AR.DTO
         /// <summary>
         /// Экземпляр семейства перемычки, вложенный в семейство окна/двери
         /// </summary>
-        private FamilyInstance Lintel { get; set; }
+        public FamilyInstance Lintel { get; private set; }
 
         public OpeningDto(Document doc, FamilyInstance opening)
         {

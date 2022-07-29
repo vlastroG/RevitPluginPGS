@@ -89,6 +89,7 @@
     <Compile Include="Commands\AR\ComplexAprtmntNmbr.cs" />
     <Compile Include="Commands\AR\CreateImagesFromSections.cs" />
     <Compile Include="Commands\AR\CreateSectionsByLintels.cs" />
+    <Compile Include="Commands\AR\DTO\OpeningDtoComparerWithLevel.cs" />
     <Compile Include="Commands\AR\MasonryMesh.cs" />
     <Compile Include="Commands\AR\MaterialColors.cs" />
     <Compile Include="Commands\AR\Models\Apartment.cs" />

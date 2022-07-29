@@ -31,17 +31,18 @@ namespace MS.GUI.AR
         /// <param name="endToEndNumbering">Если маркировка сквозная - true, поэтажно - false</param>
         public OpeningsLintelsMark(List<OpeningDto> openingsDto, bool endToEndNumbering)
         {
-            _openings = openingsDto.Distinct().ToList();
             InitializeComponent();
 
             // Если сквозная маркировка
             if (endToEndNumbering)
             {
+                _openings = openingsDto.Distinct().ToList();
                 OpeningDtosList.ItemsSource = _openings;
             }
             // Если поэтажная маркировка
             else
             {
+                _openings = openingsDto.Distinct(new OpeningDtoComparerWithLevel()).ToList();
                 ListCollectionView collection = new ListCollectionView(_openings);
                 collection.GroupDescriptions.Add(new PropertyGroupDescription("Level"));
 
