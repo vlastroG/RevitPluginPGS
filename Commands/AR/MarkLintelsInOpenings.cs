@@ -3,40 +3,97 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using MS.Commands.AR.DTO;
 using MS.GUI.AR;
+using MS.Shared;
+using MS.Utilites;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace MS.Commands.AR
 {
+    /// <summary>
+    /// Скрипт для назначения марок перемычкам
+    /// </summary>
     [Transaction(TransactionMode.Manual)]
     [Regeneration(RegenerationOption.Manual)]
     public class MarkLintelsInOpenings : IExternalCommand
     {
-        /// <summary>
-        /// Guid параметра PGS_МаркаПеремычки
-        /// </summary>
-        private static readonly Guid _parPgsLintelMark = Guid.Parse("aee96840-3b85-4cb6-a93e-85acee0be8c7");
-
-        /// <summary>
-        /// Guid параметра Мрк.МаркаКонструкции
-        /// </summary>
-        private static readonly Guid _parMrkMarkConstruction = Guid.Parse("5d369dfb-17a2-4ae2-a1a1-bdfc33ba7405");
-
-        /// <summary>
-        /// Guid параметра ADSK_Марка
-        /// </summary>
-        private static readonly Guid _parAdskMarkOfSymbol = Guid.Parse("2204049c-d557-4dfc-8d70-13f19715e46d");
-
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             UIApplication uiapp = commandData.Application;
             UIDocument uidoc = uiapp.ActiveUIDocument;
             Document doc = uidoc.Document;
 
+            Guid[] _sharedParamsForGenericModel = new Guid[] {
+                SharedParams.Mrk_MarkOfConstruction,
+                SharedParams.PGS_MarkLintel
+            };
+            if (!SharedParams.IsCategoryOfDocContainsSharedParams(
+                doc,
+                BuiltInCategory.OST_GenericModel,
+                _sharedParamsForGenericModel))
+            {
+                MessageBox.Show("В текущем проекте у категории \"Обобщенные модели\" " +
+                    "Присутствуют НЕ ВСЕ необходимые общие параметры:" +
+                    "\nМрк.МаркаКонструкции" +
+                    "\nPGS_МаркаПеремычки",
+                    "Ошибка");
+                return Result.Cancelled;
+            }
+
+            Guid[] _sharedParamsForOpenings = new Guid[] {
+                SharedParams.Mrk_MarkOfConstruction,
+                SharedParams.PGS_MarkLintel,
+                SharedParams.PGS_MassLintel
+            };
+            if (!SharedParams.IsCategoryOfDocContainsSharedParams(
+                doc,
+                BuiltInCategory.OST_Doors,
+                _sharedParamsForOpenings))
+            {
+                MessageBox.Show("В текущем проекте у категории \"Двери\" " +
+                    "Присутствуют НЕ ВСЕ необходимые общие параметры:" +
+                    "\nМрк.МаркаКонструкции" +
+                    "\nPGS_МаркаПеремычки" +
+                    "\nPGS_МассаПеремычки",
+                    "Ошибка");
+                return Result.Cancelled;
+            }
+
+            if (!SharedParams.IsCategoryOfDocContainsSharedParams(
+                doc,
+                BuiltInCategory.OST_Windows,
+                _sharedParamsForOpenings))
+            {
+                MessageBox.Show("В текущем проекте у категории \"Окна\"" +
+                    "Присутствуют НЕ ВСЕ необходимые общие параметры:" +
+                    "\nМрк.МаркаКонструкции" +
+                    "\nPGS_МаркаПеремычки" +
+                    "\nPGS_МассаПеремычки",
+                    "Ошибка");
+                return Result.Cancelled;
+            }
+
+            var endToEndMark = UserInput.YesNoCancelInput("Маркировка", "Если маркировка сквозная - \"Да\", поэтажно - \"Нет\"");
+            if (endToEndMark != System.Windows.Forms.DialogResult.Yes && endToEndMark != System.Windows.Forms.DialogResult.No)
+            {
+                return Result.Cancelled;
+            }
+            bool marking;
+            if (endToEndMark == System.Windows.Forms.DialogResult.Yes)
+            {
+                // Маркировка сквозная, в хэш-код OpeningDto не включать Уровень
+                marking = true;
+            }
+            else
+            {
+                // Маркировка поэтажная, в хэш-код OpeningDto включать Уровень
+                marking = false;
+            }
 
             var filter_openings = new FilteredElementCollector(doc);
             var filtered_categories = new ElementMulticategoryFilter(
@@ -44,21 +101,30 @@ namespace MS.Commands.AR
                      BuiltInCategory.OST_Windows,
                      BuiltInCategory.OST_Doors});
 
-            var openings = filter_openings.WherePasses(filtered_categories)
-                .WhereElementIsNotElementType()
-                .ToElements()
-                .Cast<FamilyInstance>()
-                .Where(f => f.Host != null)
-                .Where(f =>
-                (BuiltInCategory)f.Host.Category.Id.IntegerValue == BuiltInCategory.OST_Walls)
-                .Where(f => f.get_Parameter(_parPgsLintelMark) != null)
-                .Where(f => f.get_Parameter(_parMrkMarkConstruction) != null)
-                .Where(f => f.Symbol.get_Parameter(_parAdskMarkOfSymbol) != null)
-                .Select(f => new OpeningDto(f))
-                .ToList();
+            var ops1 = filter_openings.WherePasses(filtered_categories);
+            var ops2 = ops1.WhereElementIsNotElementType();
+            var ops3 = ops2.ToElements();
+            var ops4 = ops3.Cast<FamilyInstance>();
+            var ops5 = ops4.Where(f => f.Host != null);
+            var ops6 = ops5.Where(f =>
+                             (BuiltInCategory)f.Host.Category.Id.IntegerValue == BuiltInCategory.OST_Walls);
+            var ops7 = ops6.Where(f => f.get_Parameter(SharedParams.PGS_MarkLintel) != null);
+            var ops8 = ops7.Where(f => f.get_Parameter(SharedParams.Mrk_MarkOfConstruction) != null);
+            var ops9 = ops8.Where(f => f.GetSubComponentIds().FirstOrDefault(
+                             id => (doc.GetElement(id) as FamilyInstance).Symbol
+                             .get_Parameter(BuiltInParameter.ALL_MODEL_DESCRIPTION)
+                             .AsValueString() == SharedValues.LintelDescription) != null);
+            var openings = ops9.Select(f => new OpeningDto(doc, f, !marking))
+                  .ToList();
+
+            int lintelMarkSetCount = 0;
+            int mrkMarkConstrSetCount = 0;
+            int lintelMassSetCount = 0;
+
+
 
             //Вывод окна входных данных
-            OpeningsLintelsMark inputForm = new OpeningsLintelsMark(openings);
+            OpeningsLintelsMark inputForm = new OpeningsLintelsMark(openings, marking);
             inputForm.ShowDialog();
 
             if (inputForm.DialogResult == false)
@@ -68,45 +134,50 @@ namespace MS.Commands.AR
 
             using (Transaction trans = new Transaction(doc))
             {
-                trans.Start("Назначить марки перемычек");
+                trans.Start("PGS set marks lintels");
 
                 foreach (OpeningDto opening in openings)
                 {
                     // Марка перемычки
                     string lintelMark = OpeningDto.DictLintelMarkByHashCode[opening.GetHashCode()];
-                    // Марка проема
-                    string openingMark = OpeningDto.DictOpeningMarkByHashCode[opening.GetHashCode()];
 
                     // Назначить PGS_МаркаПеремычки в экземпляр семейства,
                     // если значение отличается от марки перемычки DTO.
-                    if (opening.Opening.get_Parameter(_parPgsLintelMark).AsValueString() != lintelMark)
+                    if (opening.Opening.get_Parameter(SharedParams.PGS_MarkLintel).AsValueString() != lintelMark)
                     {
                         opening.Opening
-                            .get_Parameter(_parPgsLintelMark)
+                            .get_Parameter(SharedParams.PGS_MarkLintel)
                             .Set(OpeningDto.DictLintelMarkByHashCode[opening.GetHashCode()]);
-                    }
-                    // Назначить Марку в экземпляр семейства,
-                    // если значение отличается от марки проема DTO
-                    if (opening.Opening
-                        .get_Parameter(BuiltInParameter.ALL_MODEL_MARK).AsValueString() != openingMark)
-                    {
-                        opening.Opening
-                            .get_Parameter(BuiltInParameter.ALL_MODEL_MARK)
-                            .Set(OpeningDto.DictOpeningMarkByHashCode[opening.GetHashCode()]);
+                        lintelMarkSetCount++;
                     }
                     // Назначить Мрк.МаркаКонструкции в экземпляр семейства,
                     // если значение отличается от марки перемычки DTO
                     if (opening.Opening
-                        .get_Parameter(_parMrkMarkConstruction).AsValueString() != lintelMark)
+                        .get_Parameter(SharedParams.Mrk_MarkOfConstruction).AsValueString() != lintelMark)
                     {
                         opening.Opening
-                            .get_Parameter(_parMrkMarkConstruction)
+                            .get_Parameter(SharedParams.Mrk_MarkOfConstruction)
                             .Set(OpeningDto.DictLintelMarkByHashCode[opening.GetHashCode()]);
+                        mrkMarkConstrSetCount++;
+                    }
+                    if (opening.Opening
+                        .get_Parameter(SharedParams.PGS_MassLintel).AsDouble()
+                        != opening.Lintel.get_Parameter(SharedParams.ADSK_MassElement).AsDouble())
+                    {
+                        opening.Opening.get_Parameter(SharedParams.PGS_MassLintel).Set(opening.MassOfLintel);
+                        lintelMassSetCount++;
                     }
                 }
 
                 trans.Commit();
             }
+
+            MessageBox.Show(
+                $"Принято в обработку {openings.Count} экземпляров семейств окон и дверей." +
+                $"\n\nPGS_МаркаПеремычки назначен {lintelMarkSetCount} раз," +
+                $"\nМрк.МаркаКонструкции назначен {mrkMarkConstrSetCount} раз," +
+                $"\nPGS_МассаПеремычки назначен {lintelMassSetCount} раз.",
+                "Маркировка переимычек");
 
             return Result.Succeeded;
         }

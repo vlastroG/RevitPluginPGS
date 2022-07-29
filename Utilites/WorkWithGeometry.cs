@@ -12,21 +12,6 @@ namespace MS.Utilites
     public static class WorkWithGeometry
     {
         /// <summary>
-        /// Параметр ширины экземпляра семейства
-        /// </summary>
-        private static readonly Guid par_width = Guid.Parse("8f2e4f93-9472-4941-a65d-0ac468fd6a5d");
-
-        /// <summary>
-        /// Параметр высоты экземпляра семейства
-        /// </summary>
-        private static readonly Guid par_height = Guid.Parse("da753fe3-ecfa-465b-9a2c-02f55d0c2ff1");
-
-        /// <summary>
-        /// Коэффициент для перевода квадратных футов в квадратные метры
-        /// </summary>
-        private static readonly double _sqFeetToMeters = 0.3048 * 0.3048;
-
-        /// <summary>
         /// Создание Solid из BoundingBox
         /// </summary>
         /// <param name="bbox">Входной BoundingBoxXYZ</param>
@@ -44,15 +29,19 @@ namespace MS.Utilites
             Line edge2 = Line.CreateBound(pt2, pt3);
             Line edge3 = Line.CreateBound(pt3, pt0);
             //create loop, still in BBox coords
-            List<Curve> edges = new List<Curve>();
-            edges.Add(edge0);
-            edges.Add(edge1);
-            edges.Add(edge2);
-            edges.Add(edge3);
+            List<Curve> edges = new List<Curve>
+            {
+                edge0,
+                edge1,
+                edge2,
+                edge3
+            };
             Double height = bbox.Max.Z - bbox.Min.Z;
             CurveLoop baseLoop = CurveLoop.Create(edges);
-            List<CurveLoop> loopList = new List<CurveLoop>();
-            loopList.Add(baseLoop);
+            List<CurveLoop> loopList = new List<CurveLoop>
+            {
+                baseLoop
+            };
             Solid preTransformBox = GeometryCreationUtilities.CreateExtrusionGeometry(loopList, XYZ.BasisZ, height);
 
             Solid transformBox = SolidUtils.CreateTransformed(preTransformBox, bbox.Transform);
@@ -91,8 +80,8 @@ namespace MS.Utilites
         {
             var opening_type = doc.GetElement(opening.get_Parameter(BuiltInParameter.ELEM_TYPE_PARAM).AsElementId());
 
-            Parameter par_width = null;
-            Parameter par_height = null;
+            Parameter par_width;
+            Parameter par_height;
             double opening_area = 0;
 
             for (int i = 0; i < _parsWidthHeight.Count; i++)
@@ -195,7 +184,6 @@ namespace MS.Utilites
         /// if part of an interior loop, and vice versa.
         /// </summary>
         public static Element GetElementByRay(
-          UIApplication app,
           Document doc,
           View3D view3d,
           Curve c)
@@ -250,11 +238,12 @@ namespace MS.Utilites
 
             ReferenceIntersector intersector
               = new ReferenceIntersector(wallFilter,
-                FindReferenceTarget.Element, view3d);
+                FindReferenceTarget.Element, view3d)
+              {
+                  // We don't want to find elements in linked files
 
-            // We don't want to find elements in linked files
-
-            intersector.FindReferencesInRevitLinks = false;
+                  FindReferencesInRevitLinks = false
+              };
 
             XYZ toWallDir = GetRightDirection(
               lineDirection);
@@ -262,7 +251,7 @@ namespace MS.Utilites
             ReferenceWithContext context = intersector
               .FindNearest(startPoint, toWallDir);
 
-            Reference closestReference = null;
+            Reference closestReference;
 
             if (context != null)
             {
@@ -288,7 +277,6 @@ namespace MS.Utilites
         /// продленная на равное расстояние в обе стороны от заданной линии.
         /// </summary>
         public static Element GetElementByRay_switch(
-          UIApplication app,
           Document doc,
           View3D view3d,
           Curve c,
@@ -361,11 +349,12 @@ namespace MS.Utilites
 
             ReferenceIntersector intersector
               = new ReferenceIntersector(multicategoryFilter,
-                FindReferenceTarget.Element, view3d);
+                FindReferenceTarget.Element, view3d)
+              {
+                  // We don't want to find elements in linked files
 
-            // We don't want to find elements in linked files
-
-            intersector.FindReferencesInRevitLinks = false;
+                  FindReferencesInRevitLinks = false
+              };
 
             XYZ toWallDir;
             if (isLeft)
@@ -382,7 +371,7 @@ namespace MS.Utilites
             ReferenceWithContext context = intersector
               .FindNearest(startPoint, toWallDir);
 
-            Reference closestReference = null;
+            Reference closestReference;
 
             if (context != null)
             {

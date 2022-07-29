@@ -15,9 +15,6 @@ namespace MS.Commands.AR
     [Regeneration(RegenerationOption.Manual)]
     public class CreateImagesFromSections : IExternalCommand
     {
-        private static string _prefix = "ПР-";
-
-
         /// <summary>
         /// Название временной папки
         /// </summary>
@@ -28,10 +25,6 @@ namespace MS.Commands.AR
         /// </summary>
         private string dirPath = String.Empty;
 
-        /// <summary>
-        /// Значение встроенного параметра типа "Описание" для семейств перемычек
-        /// </summary>  
-        private string _lintelDescription = "Перемычка";
 
         private DirectoryInfo CreateDirAndImgs(
             ExternalCommandData commandData,
@@ -130,6 +123,19 @@ namespace MS.Commands.AR
             UIDocument uidoc = uiapp.ActiveUIDocument;
             Document doc = uidoc.Document;
 
+            Guid[] _sharedParamsForCommand = new Guid[] { SharedParams.PGS_ImageTypeMaterial };
+            if (!SharedParams.IsCategoryOfDocContainsSharedParams(
+                doc,
+                BuiltInCategory.OST_GenericModel,
+                _sharedParamsForCommand))
+            {
+                MessageBox.Show("В текущем проекте у категории \"Обобщенная модель\" " +
+                    "отсутствует общий параметр PGS_ИзображениеТипоразмераМатериала" +
+                    "\nс Guid = 924e3bb2-a048-449f-916f-31093a3aa7a3",
+                    "Ошибка");
+                return Result.Cancelled;
+            }
+
             int updateImgs = 0;
             int newLoadedImgs = 0;
             int updatedLintels = 0;
@@ -139,13 +145,13 @@ namespace MS.Commands.AR
                 .OfCategory(BuiltInCategory.OST_Views)
                 .WhereElementIsNotElementType()
                 .Where(v => (v as View).ViewType == ViewType.Section)
-                .Where(v => v.Name.StartsWith(_prefix));
+                .Where(v => v.Name.StartsWith(SharedValues.LintelMarkPrefix));
 
             // Созданные изображения перемычек, имена начинаются с "ПР-".
             var createdImages = new FilteredElementCollector(doc)
                 .OfClass(typeof(ImageType))
                 .WhereElementIsElementType()
-                .Where(v => v.Name.StartsWith(_prefix));
+                .Where(v => v.Name.StartsWith(SharedValues.LintelMarkPrefix));
 
             var createdImagesNames = createdImages.Select(v => v.Name);
 
@@ -200,7 +206,7 @@ namespace MS.Commands.AR
                 .Where(e => (e is FamilyInstance) &&
                             (e as FamilyInstance).Symbol
                             .get_Parameter(BuiltInParameter.ALL_MODEL_DESCRIPTION)
-                            .AsValueString() == _lintelDescription)
+                            .AsValueString() == SharedValues.LintelDescription)
                 .Where(e => e.get_Parameter(SharedParams.PGS_MarkLintel) != null &&
                             !String.IsNullOrEmpty(e.get_Parameter(SharedParams.PGS_MarkLintel).AsValueString()))
                 .Cast<FamilyInstance>();
@@ -208,7 +214,7 @@ namespace MS.Commands.AR
             var loadedImgs = new FilteredElementCollector(doc)
                 .OfClass(typeof(ImageType))
                 .WhereElementIsElementType()
-                .Where(v => v.Name.StartsWith(_prefix));
+                .Where(v => v.Name.StartsWith(SharedValues.LintelMarkPrefix));
 
             using (Transaction transSetImgs = new Transaction(doc))
             {
@@ -217,13 +223,16 @@ namespace MS.Commands.AR
                 foreach (FamilyInstance lintel in lintels)
                 {
                     string lintelMarkImg = lintel.get_Parameter(SharedParams.PGS_MarkLintel)
-                        .AsValueString() + ".png";
-                    var lintelImg = lintel.get_Parameter(BuiltInParameter.ALL_MODEL_IMAGE);
+                        .AsValueString() + '_' + doc.GetElement(lintel.LevelId).Name + ".png";
+                    var lintelImg = lintel.get_Parameter(SharedParams.PGS_ImageTypeMaterial);
                     if (lintelImg.AsElementId() == null || lintelImg.AsValueString() != lintelMarkImg)
                     {
                         Element img = loadedImgs.Where(i => i.Name == lintelMarkImg).FirstOrDefault();
-                        lintel.get_Parameter(BuiltInParameter.ALL_MODEL_IMAGE).Set(img.Id);
-                        updatedLintels++;
+                        if (img != null)
+                        {
+                            lintel.get_Parameter(SharedParams.PGS_ImageTypeMaterial).Set(img.Id);
+                            updatedLintels++;
+                        }
                     }
                 }
 
@@ -240,7 +249,7 @@ namespace MS.Commands.AR
                 $"\nИзображения назначаются только тем перемычкам," +
                 $"\nу которых задан параметр PGS_МаркаПеремычки" +
                 $"\nи для которых созданы разрезы." +
-                $"\nЕсли название изображения совпадает с PGS_МаркаПеремычки," +
+                $"\nЕсли первое поле названия изображения совпадает с PGS_МаркаПеремычки," +
                 $"\nто переназначаться перемычке оно не будет.",
                 "Изображения перемычек");
 

@@ -1,12 +1,14 @@
 ﻿using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
+using MS.Shared;
 using MS.Utilites;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace MS.Commands.AR
 {
@@ -14,21 +16,6 @@ namespace MS.Commands.AR
     [Regeneration(RegenerationOption.Manual)]
     public class CreateSectionsByLintels : IExternalCommand
     {
-        /// <summary>
-        /// Guid параметра PGS_МаркаПеремычки
-        /// </summary>
-        private static readonly Guid _parLintelMark = Guid.Parse("aee96840-3b85-4cb6-a93e-85acee0be8c7");
-
-        /// <summary>
-        /// Guid параметра Орг.ТипВключатьВСпецификацию
-        /// </summary>
-        private static readonly Guid _parIncludeInSchedule = Guid.Parse("45ef1720-9cfe-49a7-b4d7-c67e4f7bd191");
-
-        /// <summary>
-        /// Значение встроенного параметра типа "Описание" для семейств перемычек
-        /// </summary>  
-        private string _lintelDescription = "Перемычка";
-
         /// <summary>
         /// Значение названия типа разрезов для автоматического создания
         /// </summary>
@@ -54,6 +41,7 @@ namespace MS.Commands.AR
         /// Смещение дальнего предела секущего диапазона разреза по перемычке
         /// </summary>
         private double _offsetFarLimit = 1.5;
+
 
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
@@ -90,11 +78,11 @@ namespace MS.Commands.AR
                 .Where(e => (e is FamilyInstance) &&
                             (e as FamilyInstance).Symbol
                             .get_Parameter(BuiltInParameter.ALL_MODEL_DESCRIPTION)
-                            .AsValueString() == _lintelDescription)
-                .Where(e => e.get_Parameter(_parIncludeInSchedule) != null &&
-                            e.get_Parameter(_parIncludeInSchedule).AsInteger() == 1)
-                .Where(e => e.get_Parameter(_parLintelMark) != null &&
-                            !String.IsNullOrEmpty(e.get_Parameter(_parLintelMark).AsValueString()))
+                            .AsValueString() == SharedValues.LintelDescription)
+                .Where(e => e.get_Parameter(SharedParams.Org_TypeIncludeInSchedule) != null &&
+                            e.get_Parameter(SharedParams.Org_TypeIncludeInSchedule).AsInteger() == 1)
+                .Where(e => e.get_Parameter(SharedParams.PGS_MarkLintel) != null &&
+                            !String.IsNullOrEmpty(e.get_Parameter(SharedParams.PGS_MarkLintel).AsValueString()))
                 .Cast<FamilyInstance>();
 
             FilteredElementCollector sectionsFilter = new FilteredElementCollector(doc);
@@ -118,10 +106,10 @@ namespace MS.Commands.AR
             {
                 trans.Start("Разрезы по перемычкам");
 
-                string lintelMark;
                 foreach (FamilyInstance lintel in lintels)
                 {
-                    lintelMark = lintel.get_Parameter(_parLintelMark).AsValueString();
+                    string lintelMark;
+                    lintelMark = lintel.get_Parameter(SharedParams.PGS_MarkLintel).AsValueString();
                     bool isSectionCreated = createdSections.Where(s => s.Name == lintelMark).Count() > 0;
                     if (isSectionCreated)
                     {
@@ -129,9 +117,6 @@ namespace MS.Commands.AR
                     }
                     else
                     {
-                        //Element.Location - точка размещения(X Y координаты)
-                        //FamilyInstance.HandOrientation - вектор вдоль длины перемычки
-                        //FamilyInstance.GetSubComponentIds().GetFirst().Location.Z - отметка центра разреза по высоте.
                         XYZ center;
                         XYZ direction;
                         double x = (lintel.Location as LocationPoint).Point.X;
@@ -144,9 +129,10 @@ namespace MS.Commands.AR
                         }
                         catch (ArgumentNullException)
                         {
-                            TaskDialog.Show("Ошибка", "Не обнаружены вложенные семейства в семействе перемычки." +
-                                $"\nId = {lintel.Id}");
-                            continue;
+                            z = (lintel.Location as LocationPoint).Point.Z;
+                            //TaskDialog.Show("Ошибка", "Не обнаружены вложенные семейства в семействе перемычки. Нельзя определить отметку низа перемычки." +
+                            //    $"\nId = {lintel.Id}");
+                            //continue;
                         }
                         center = new XYZ(x, y, z);
                         direction = lintel.HandOrientation.Normalize();
@@ -159,8 +145,6 @@ namespace MS.Commands.AR
                         sectionTransform.BasisY = up;
                         sectionTransform.BasisZ = direction;
 
-                        //Min = new XYZ(-3, -3, 0),
-                        //    Max = new XYZ(3, 3, 3),
                         BoundingBoxXYZ boxXYZ = new BoundingBoxXYZ()
                         {
                             Min = new XYZ(-_offsetLeftRight, -_offsetBottom, 0),
@@ -169,7 +153,15 @@ namespace MS.Commands.AR
                             Enabled = true
                         };
                         ViewSection section = ViewSection.CreateSection(doc, sectionTypeId, boxXYZ);
-                        section.Name = lintelMark;
+                        string sectionName = lintelMark + '_' + doc.GetElement(lintel.LevelId).Name;
+                        try
+                        {
+                            section.Name = sectionName;
+                        }
+                        catch (Exception)
+                        {
+                            section.Name = sectionName + Guid.NewGuid().ToString();
+                        }
                         if (sectionTemplate != null)
                         {
                             section.ViewTemplateId = sectionTemplate.Id;
@@ -182,14 +174,15 @@ namespace MS.Commands.AR
                 trans.Commit();
             }
 
-            TaskDialog.Show("Разрезы по перемычкам",
+            MessageBox.Show(
                 $"{sectionByLintels} разрезов создано для {lintels.Count()} перемычек." +
-                $"\n\nЕсли это количество не соответствует Вашим ожиданиям," +
+                $"\n\nЕсли это количество не соответствует ожиданиям," +
                 $"\nто, проверьте, чтобы:" +
                 $"\n1. У семейств перемычек в типе в \"Описании\" было \'Перемычка\';" +
                 $"\n2. В одном из экземпляров для каждого типа перемычек была галочка напротив Орг.ТипВключатьВСпецификацию;" +
                 $"\n3. В этих же экземплярах перемычек был заполнен параметр PGS_МаркаПеремычки." +
-                $"\n\nЕсли разрез по перемычке уже существует, новый создаваться не будет.");
+                $"\n\nЕсли разрез по перемычке уже существует, новый создаваться не будет.",
+                "Разрезы по перемычкам");
 
             return Result.Succeeded;
         }

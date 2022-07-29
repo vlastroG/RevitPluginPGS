@@ -86,6 +86,11 @@ namespace MS.Commands.AR.DTO
             }
         }
 
+        public override int GetHashCode()
+        {
+            return (Number + Name + Level).GetHashCode();
+        }
+
         private bool EqualsToRoomDto(RoomDto rDtoOther)
         {
             return rDtoOther.RoomRevit.IsValidObject

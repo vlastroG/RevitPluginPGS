@@ -2,12 +2,14 @@
 using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Architecture;
 using Autodesk.Revit.UI;
+using MS.Shared;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using static MS.Utilites.WorkWithGeometry;
 
 namespace MS.Commands.MEP
@@ -16,12 +18,6 @@ namespace MS.Commands.MEP
     [Regeneration(RegenerationOption.Manual)]
     public class PipelineFittings : IExternalCommand
     {
-        /// <summary>
-        /// Guid параметра НомерКвартиры
-        /// </summary>
-        private readonly Guid guid_par_apartment_number = Guid.Parse("10fb72de-237e-4b9c-915b-8849b8907695");
-
-
         /// <summary>
         /// Назначение номера квартиры (из помещений в связях) арматуре трубопроводов и оборудованию,
         /// которые расположена в ней.
@@ -34,6 +30,32 @@ namespace MS.Commands.MEP
         {
             Document doc = commandData.Application.ActiveUIDocument.Document;
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
+
+            Guid[] _sharedParamsForCommand = new Guid[] {
+            SharedParams.ADSK_NumberOfApartment
+            };
+            if (!SharedParams.IsCategoryOfDocContainsSharedParams(
+                doc,
+                BuiltInCategory.OST_PipeAccessory,
+                _sharedParamsForCommand))
+            {
+                MessageBox.Show("В текущем проекте у категории \"Арматура трубопроводов\" " +
+                    "отсутствует необходимый общий параметр:" +
+                    "\nADSK_Номер квартиры",
+                    "Ошибка");
+                return Result.Cancelled;
+            }
+            if (!SharedParams.IsCategoryOfDocContainsSharedParams(
+                doc,
+                BuiltInCategory.OST_MechanicalEquipment,
+                _sharedParamsForCommand))
+            {
+                MessageBox.Show("В текущем проекте у категории \"Оборудование\" " +
+                    "отсутствует необходимый общий параметр:" +
+                    "\nADSK_Номер квартиры",
+                    "Ошибка");
+                return Result.Cancelled;
+            }
 
             var filter_links = new FilteredElementCollector(doc);
             var linked_docs = filter_links
@@ -57,7 +79,7 @@ namespace MS.Commands.MEP
 
                 foreach (var pipe_acs in pipe_stuff)
                 {
-                    pipe_acs.get_Parameter(guid_par_apartment_number).Set(String.Empty);
+                    pipe_acs.get_Parameter(SharedParams.ADSK_NumberOfApartment).Set(String.Empty);
                 }
 
                 trans_renew.Commit();
@@ -104,8 +126,8 @@ namespace MS.Commands.MEP
                             {
                                 var fam_inst = pipe_acs as FamilyInstance;
                                 fam_inst
-                                    .get_Parameter(guid_par_apartment_number)
-                                    .Set(room.get_Parameter(guid_par_apartment_number).AsValueString());
+                                    .get_Parameter(SharedParams.ADSK_NumberOfApartment)
+                                    .Set(room.get_Parameter(SharedParams.ADSK_NumberOfApartment).AsValueString());
                             }
                         }
                     }

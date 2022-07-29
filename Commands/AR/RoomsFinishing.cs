@@ -61,37 +61,18 @@ namespace MS
 
                 int n = loops.Count;
 
-                //Debug.Print(
-                //  "Room {0} has {1} loop{2}{3}",
-                //  room.Name, n, PluralSuffix(n),
-                //  DotOrColon(n));
-
-                int i = 0;
-
                 string testOut = "";
                 StringBuilder sb = new StringBuilder();
                 foreach (IList<BoundarySegment> loop in loops)
                 {
                     n = loop.Count;
 
-                    //Debug.Print(
-                    //  "  Loop {0} has {1} segment{2}{3}",
-                    //  i++, n, PluralSuffix(n),
-                    //  DotOrColon(n));
-
-                    int j = 0;
-
-
                     foreach (BoundarySegment seg in loop)
                     {
                         Element e = doc.GetElement(seg.ElementId);
 
-                        string s = "Element property";
-
                         if (null == e)
                         {
-                            s = "GetElementByRay";
-
                             e = GetElementByRay(uiapp, doc, view3d,
                               seg.GetCurve());
                         }
@@ -112,12 +93,6 @@ namespace MS
 
                             throw;
                         }
-
-                        //Debug.Print(
-                        //  "    Segment {0}: {1} element {2} returned by {3}",
-                        //  j++, CurveString(seg.Curve),
-                        //  ElementDescription(e), s);
-
                     }
                 }
                 testOut = sb.ToString();
