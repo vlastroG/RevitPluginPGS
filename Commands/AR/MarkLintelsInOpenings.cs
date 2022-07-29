@@ -97,6 +97,9 @@ namespace MS.Commands.AR
                 .Select(f => new OpeningDto(doc, f))
                 .ToList();
 
+            int lintelMarkSetCount = 0;
+            int mrkMarkConstrSetCount = 0;
+
             var endToEndMark = UserInput.YesNoCancelInput("Маркировка", "Если маркировка сквозная - \"Да\", поэтажно - \"Нет\"");
             if (endToEndMark != System.Windows.Forms.DialogResult.Yes && endToEndMark != System.Windows.Forms.DialogResult.No)
             {
@@ -137,6 +140,7 @@ namespace MS.Commands.AR
                         opening.Opening
                             .get_Parameter(SharedParams.PGS_MarkLintel)
                             .Set(OpeningDto.DictLintelMarkByHashCode[opening.GetHashCode()]);
+                        lintelMarkSetCount++;
                     }
                     // Назначить Мрк.МаркаКонструкции в экземпляр семейства,
                     // если значение отличается от марки перемычки DTO
@@ -146,11 +150,18 @@ namespace MS.Commands.AR
                         opening.Opening
                             .get_Parameter(SharedParams.Mrk_MarkOfConstruction)
                             .Set(OpeningDto.DictLintelMarkByHashCode[opening.GetHashCode()]);
+                        mrkMarkConstrSetCount++;
                     }
                 }
 
                 trans.Commit();
             }
+
+            MessageBox.Show(
+                $"Принято в обработку {openings.Count} семейств окон и дверей." +
+                $"\nPGS_МаркаПеремычки назначен {lintelMarkSetCount} раз," +
+                $"\nМрк.МаркаКонструкции назначен {mrkMarkConstrSetCount} раз.",
+                "Маркировка переимычек");
 
             return Result.Succeeded;
         }
