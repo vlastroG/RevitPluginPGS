@@ -87,15 +87,15 @@ namespace MS.Commands.AR
                 .Cast<FamilyInstance>()
                 .Where(f => f.Host != null)
                 .Where(f =>
-            (BuiltInCategory)f.Host.Category.Id.IntegerValue == BuiltInCategory.OST_Walls)
+                            (BuiltInCategory)f.Host.Category.Id.IntegerValue == BuiltInCategory.OST_Walls)
                 .Where(f => f.get_Parameter(SharedParams.PGS_MarkLintel) != null)
                 .Where(f => f.get_Parameter(SharedParams.Mrk_MarkOfConstruction) != null)
                 .Where(f => f.GetSubComponentIds().FirstOrDefault(
-                                        id => (doc.GetElement(id) as FamilyInstance).Symbol
-                                        .get_Parameter(BuiltInParameter.ALL_MODEL_DESCRIPTION)
-                                        .AsValueString() == SharedValues.LintelDescription) != null)
+                            id => (doc.GetElement(id) as FamilyInstance).Symbol
+                            .get_Parameter(BuiltInParameter.ALL_MODEL_DESCRIPTION)
+                            .AsValueString() == SharedValues.LintelDescription) != null)
                 .Select(f => new OpeningDto(doc, f))
-            .ToList();
+                .ToList();
 
             var endToEndMark = UserInput.YesNoCancelInput("Маркировка", "Если маркировка сквозная - \"Да\", поэтажно - \"Нет\"");
             if (endToEndMark != System.Windows.Forms.DialogResult.Yes && endToEndMark != System.Windows.Forms.DialogResult.No)
