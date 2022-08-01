@@ -19,24 +19,17 @@ namespace MS.Utilites
         public static List<string> GetSubComponentsAdskNames(FamilyInstance lintel)
         {
             Document doc = lintel.Document;
-            var subComponentsIds = lintel.GetSubComponentIds();
-            var facingNormal = lintel.FacingOrientation.Normalize();
+            var subComponents = GetSubComponentsAlong(lintel);
             List<string> adskNames = new List<string>();
-            foreach (var subCompId in subComponentsIds)
+            foreach (var subComp in subComponents)
             {
-                var elem = doc.GetElement(subCompId);
-                if (elem != null)
+                if (subComp.get_Parameter(SharedParams.ADSK_Name) != null)
                 {
-                    var elemFacing = (elem as FamilyInstance).FacingOrientation.Normalize();
-                    bool isElemAlong = facingNormal.IsAlmostEqualTo(elemFacing);
-                    if (isElemAlong && elem.get_Parameter(SharedParams.ADSK_Name) != null)
+                    var adskName = subComp.get_Parameter(SharedParams.ADSK_Name).AsValueString();
+                    if (!String.IsNullOrEmpty(adskName))
                     {
-                        var adskName = elem.get_Parameter(SharedParams.ADSK_Name).AsValueString();
-                        if (!String.IsNullOrEmpty(adskName))
-                        {
-                            adskNames.Add(adskName);
-                        };
-                    }
+                        adskNames.Add(adskName);
+                    };
                 }
             }
             return adskNames;
@@ -68,7 +61,8 @@ namespace MS.Utilites
                 {
                     var famInst = elem as FamilyInstance;
                     var elemFacing = famInst.FacingOrientation.Normalize();
-                    bool isElemAlong = facingNormal.IsAlmostEqualTo(elemFacing);
+                    bool isElemAlong = facingNormal.IsAlmostEqualTo(elemFacing)
+                        || facingNormal.IsAlmostEqualTo(elemFacing.Negate());
                     if (isElemAlong)
                     {
                         result.Add(famInst);

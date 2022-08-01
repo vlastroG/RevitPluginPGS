@@ -3,6 +3,7 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using MS.Shared;
 using MS.Utilites;
+using MS.Utilites.Comparers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -76,14 +77,10 @@ namespace MS.Commands.AR
                 .OfCategory(BuiltInCategory.OST_GenericModel)
                 .WhereElementIsNotElementType()
                 .Where(e => (e is FamilyInstance) &&
-                            (e as FamilyInstance).Symbol
-                            .get_Parameter(BuiltInParameter.ALL_MODEL_DESCRIPTION)
-                            .AsValueString() == SharedValues.LintelDescription)
-                .Where(e => e.get_Parameter(SharedParams.Org_TypeIncludeInSchedule) != null &&
-                            e.get_Parameter(SharedParams.Org_TypeIncludeInSchedule).AsInteger() == 1)
-                .Where(e => e.get_Parameter(SharedParams.PGS_MarkLintel) != null &&
-                            !String.IsNullOrEmpty(e.get_Parameter(SharedParams.PGS_MarkLintel).AsValueString()))
+                            WorkWithFamilies.GetSymbolDescription(e as FamilyInstance)
+                            == SharedValues.LintelDescription)
                 .Cast<FamilyInstance>();
+            lintels.Distinct(new LintelsEqualityComparer());
 
             FilteredElementCollector sectionsFilter = new FilteredElementCollector(doc);
             var createdSections = sectionsFilter
@@ -108,9 +105,9 @@ namespace MS.Commands.AR
 
                 foreach (FamilyInstance lintel in lintels)
                 {
-                    string lintelMark;
-                    lintelMark = lintel.get_Parameter(SharedParams.PGS_MarkLintel).AsValueString();
-                    bool isSectionCreated = createdSections.Where(s => s.Name == lintelMark).Count() > 0;
+                    string lintelUniqueName;
+                    lintelUniqueName = GetLintelUniqueName(lintel);
+                    bool isSectionCreated = createdSections.Where(s => s.Name == lintelUniqueName).Count() > 0;
                     if (isSectionCreated)
                     {
                         continue;
@@ -153,7 +150,7 @@ namespace MS.Commands.AR
                             Enabled = true
                         };
                         ViewSection section = ViewSection.CreateSection(doc, sectionTypeId, boxXYZ);
-                        string sectionName = lintelMark + '_' + doc.GetElement(lintel.LevelId).Name;
+                        string sectionName = lintelUniqueName;
                         try
                         {
                             section.Name = sectionName;
@@ -185,6 +182,27 @@ namespace MS.Commands.AR
                 "Разрезы по перемычкам");
 
             return Result.Succeeded;
+        }
+
+        private string GetLintelUniqueName(FamilyInstance lintel)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            var wallWidth = WorkWithFamilies.GetWallWidth(lintel) * SharedValues.FootToMillimeters;
+            sb.Append(wallWidth);
+            sb.Append('_');
+
+            var subCompsAdskNames = WorkWithFamilies.GetSubComponentsAdskNames(lintel);
+            foreach (var adskName in subCompsAdskNames)
+            {
+                sb.Append(adskName);
+                sb.Append('_');
+            }
+
+            var widthOfLintel = Math.Round(WorkWithFamilies.GetMaxWidthOfLintel(lintel) * SharedValues.FootToMillimeters, 0);
+            sb.Append(widthOfLintel);
+
+            return sb.ToString();
         }
     }
 }

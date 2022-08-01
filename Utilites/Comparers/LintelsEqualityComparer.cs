@@ -12,7 +12,14 @@ namespace MS.Utilites.Comparers
     {
         public bool Equals(FamilyInstance lintel1, FamilyInstance lintel2)
         {
-            throw new NotImplementedException();
+            if (lintel1.GetHashCode() == lintel2.GetHashCode())
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         public int GetHashCode(FamilyInstance lintel)
@@ -24,21 +31,17 @@ namespace MS.Utilites.Comparers
             double wallWidth = WorkWithFamilies.GetWallWidth(lintel);
 
             StringBuilder sb = new StringBuilder();
+            // "ADSK_Наименование" вложенных экземпляров семейств в семействе перемычки
             var adskNames = WorkWithFamilies.GetSubComponentsAdskNames(lintel);
             foreach (var adskName in adskNames)
             {
                 sb.Append(adskName);
             }
-            string subCompsAdskNames = sb.ToString();
 
-            double wodthOfLintel = WorkWithFamilies.GetMaxWidthOfLintel(lintel);
+            // Ширина перемычки
+            double widthOfLintel = WorkWithFamilies.GetMaxWidthOfLintel(lintel);
 
-            // "ADSK_Наименование" вложенных экземпляров семейств в семействе перемычки
-
-            throw new NotImplementedException();
+            return (symbolDescription + wallWidth + sb + widthOfLintel).GetHashCode();
         }
-
-
-
     }
 }
