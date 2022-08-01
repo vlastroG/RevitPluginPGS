@@ -120,6 +120,11 @@ namespace MS.Shared
         public static readonly Guid ADSK_ThicknessOfWall = Guid.Parse("9350e48f-842b-4c46-a15d-2e36ab1f352f");
 
         /// <summary>
+        /// Guid параметра ADSK_Наименование = e6e0f5cd-3e26-485b-9342-23882b20eb43
+        /// </summary>
+        public static readonly Guid ADSK_Name = Guid.Parse("e6e0f5cd-3e26-485b-9342-23882b20eb43");
+
+        /// <summary>
         /// Валидация текущего проекта Revit на наличие общих параметров у заданной категории.
         /// </summary>
         /// <param name="doc">Документ Revit.</param>

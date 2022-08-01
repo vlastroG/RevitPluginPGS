@@ -424,5 +424,20 @@ namespace MS.Utilites
                 b.Save(@filePath, System.Drawing.Imaging.ImageFormat.Png);
             }
         }
+
+        /// <summary>
+        /// Возвращает расстояние со знаком от точки до плоскости
+        /// </summary>
+        /// <param name="plane">Плоскость</param>
+        /// <param name="point">Точка</param>
+        /// <returns>Расстояние со знаком</returns>
+        public static double SignedDistanceTo(
+            Plane plane,
+            XYZ point)
+        {
+            XYZ vector = point - plane.Origin;
+
+            return plane.Normal.DotProduct(vector);
+        }
     }
 }

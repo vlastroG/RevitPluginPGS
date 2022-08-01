@@ -120,6 +120,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Shared\SharedParams.cs" />
     <Compile Include="Shared\SharedValues.cs" />
+    <Compile Include="Utilites\Comparers\LintelsEqualityComparer.cs" />
     <Compile Include="Utilites\ExtensionDictionary.cs" />
     <Compile Include="Utilites\ExtensionPlanarFace.cs" />
     <Compile Include="Utilites\GetBoundarySegmentElement.cs" />
@@ -128,6 +129,7 @@
     <Compile Include="Utilites\SelectionFilterRooms.cs" />
     <Compile Include="Utilites\SelectionFilterElementsOfClass.cs" />
     <Compile Include="Utilites\UserInput.cs" />
+    <Compile Include="Utilites\WorkWithFamilies.cs" />
     <Compile Include="Utilites\WorkWithGeometry.cs" />
     <Compile Include="Utilites\WorkWithParameters.cs" />
     <Compile Include="Utilites\WorkWithPath.cs" />
