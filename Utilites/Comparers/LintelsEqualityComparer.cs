@@ -12,7 +12,7 @@ namespace MS.Utilites.Comparers
     {
         public bool Equals(FamilyInstance lintel1, FamilyInstance lintel2)
         {
-            if (lintel1.GetHashCode() == lintel2.GetHashCode())
+            if (this.GetHashCode(lintel1) == this.GetHashCode(lintel2))
             {
                 return true;
             }
@@ -22,13 +22,18 @@ namespace MS.Utilites.Comparers
             }
         }
 
+        /// <summary>
+        /// Хэш код для перемычки
+        /// </summary>
+        /// <param name="lintel"></param>
+        /// <returns></returns>
         public int GetHashCode(FamilyInstance lintel)
         {
             // "Описание" типоразмера семейства
             string symbolDescription = WorkWithFamilies.GetSymbolDescription(lintel);
 
             // "ADSK_Толщина стены" из семейства перемычки или из внешнего семейства (окно/дверь)
-            double wallWidth = WorkWithFamilies.GetWallWidth(lintel);
+            double wallWidth = Math.Round(WorkWithFamilies.GetWallWidth(lintel) * SharedValues.FootToMillimeters, 0);
 
             StringBuilder sb = new StringBuilder();
             // "ADSK_Наименование" вложенных экземпляров семейств в семействе перемычки
@@ -39,7 +44,7 @@ namespace MS.Utilites.Comparers
             }
 
             // Ширина перемычки
-            double widthOfLintel = WorkWithFamilies.GetMaxWidthOfLintel(lintel);
+            double widthOfLintel = Math.Round(WorkWithFamilies.GetMaxWidthOfLintel(lintel) * SharedValues.FootToMillimeters, 0);
 
             return (symbolDescription + wallWidth + sb + widthOfLintel).GetHashCode();
         }

@@ -61,8 +61,7 @@ namespace MS.Commands.AR
                 return Result.Cancelled;
             }
 
-            FilteredElementCollector sectionTypeFilter = new FilteredElementCollector(doc);
-            IList<Element> sectionTypesAll = sectionTypeFilter
+            IList<Element> sectionTypesAll = new FilteredElementCollector(doc)
                 .OfClass(typeof(ViewFamilyType))
                 .Where(vft => (vft as ViewFamilyType).ViewFamily == ViewFamily.Section)
                 .ToList();
@@ -72,25 +71,22 @@ namespace MS.Commands.AR
                 ?? sectionTypesAll.FirstOrDefault();
             ElementId sectionTypeId = sectionType.Id;
 
-            FilteredElementCollector lintelsFilter = new FilteredElementCollector(doc);
-            var lintels = lintelsFilter
+            var lintels = new FilteredElementCollector(doc)
                 .OfCategory(BuiltInCategory.OST_GenericModel)
                 .WhereElementIsNotElementType()
                 .Where(e => (e is FamilyInstance) &&
                             WorkWithFamilies.GetSymbolDescription(e as FamilyInstance)
                             == SharedValues.LintelDescription)
-                .Cast<FamilyInstance>();
-            lintels.Distinct(new LintelsEqualityComparer());
+                .Cast<FamilyInstance>()
+                .Distinct(new LintelsEqualityComparer());
 
-            FilteredElementCollector sectionsFilter = new FilteredElementCollector(doc);
-            var createdSections = sectionsFilter
+            var createdSections = new FilteredElementCollector(doc)
                 .OfCategory(BuiltInCategory.OST_Views)
                 .WhereElementIsNotElementType()
                 .Where(v => (v as View).ViewType == ViewType.Section)
                 .ToArray();
 
-            FilteredElementCollector sectionTemplateFilter = new FilteredElementCollector(doc);
-            var sectionTemplate = sectionTemplateFilter
+            var sectionTemplate = new FilteredElementCollector(doc)
                 .OfCategory(BuiltInCategory.OST_Views)
                 .WhereElementIsNotElementType()
                 .Cast<View>()
@@ -173,12 +169,14 @@ namespace MS.Commands.AR
 
             MessageBox.Show(
                 $"{sectionByLintels} разрезов создано для {lintels.Count()} перемычек." +
-                $"\n\nЕсли это количество не соответствует ожиданиям," +
-                $"\nто, проверьте, чтобы:" +
-                $"\n1. У семейств перемычек в типе в \"Описании\" было \'Перемычка\';" +
-                $"\n2. В одном из экземпляров для каждого типа перемычек была галочка напротив Орг.ТипВключатьВСпецификацию;" +
-                $"\n3. В этих же экземплярах перемычек был заполнен параметр PGS_МаркаПеремычки." +
-                $"\n\nЕсли разрез по перемычке уже существует, новый создаваться не будет.",
+                $"\n\nРазрезы создаются только для обобщенных моделей, " +
+                $"в типоразмере которых в описании написано \"Перемычка\"." +
+                $"\nРазрезы создаются для уникального набора значений параметров:" +
+                $"\n1) ADSK_Толщина стены, находящегося в экземпляре перемычки " +
+                $"или в экземпляре родительского семейства;" +
+                $"\n2) ADSK_Наименование всех вложенных элементов перемычки, которые параллельны стене;" +
+                $"\n3) Ширине перемычки, вычисленной как расстояние между центрами крайних элементов из п.2)," +
+                $"спроецированное на поперечную ось перемычки.",
                 "Разрезы по перемычкам");
 
             return Result.Succeeded;
