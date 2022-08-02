@@ -61,24 +61,40 @@ namespace MS.Commands.AR
                 return Result.Cancelled;
             }
 
+            var addLevelResult = UserInput.YesNoCancelInput("Разрезы по перемычкам", "Если считать перемычки поэтажно - \"Да\", иначе - \"Нет\"");
+            if (addLevelResult != System.Windows.Forms.DialogResult.Yes && addLevelResult != System.Windows.Forms.DialogResult.No)
+            {
+                return Result.Cancelled;
+            }
+            bool addLevel;
+            if (addLevelResult == System.Windows.Forms.DialogResult.Yes)
+            {
+                addLevel = true;
+            }
+            else
+            {
+                addLevel = false;
+            }
+
             IList<Element> sectionTypesAll = new FilteredElementCollector(doc)
                 .OfClass(typeof(ViewFamilyType))
                 .Where(vft => (vft as ViewFamilyType).ViewFamily == ViewFamily.Section)
-                .ToList();
+                .ToArray();
             Element sectionType = sectionTypesAll
                 .Where(type => type.Name == _sectionTypeName)
                 .FirstOrDefault()
                 ?? sectionTypesAll.FirstOrDefault();
             ElementId sectionTypeId = sectionType.Id;
 
-            var lintels = new FilteredElementCollector(doc)
+            var lintelsAll = new FilteredElementCollector(doc)
                 .OfCategory(BuiltInCategory.OST_GenericModel)
                 .WhereElementIsNotElementType()
                 .Where(e => (e is FamilyInstance) &&
                             WorkWithFamilies.GetSymbolDescription(e as FamilyInstance)
                             == SharedValues.LintelDescription)
                 .Cast<FamilyInstance>()
-                .Distinct(new LintelsEqualityComparer());
+                .ToArray();
+            var lintels = lintelsAll.Distinct(new LintelsEqualityComparer(addLevel));
 
             var createdSections = new FilteredElementCollector(doc)
                 .OfCategory(BuiltInCategory.OST_Views)
@@ -102,7 +118,7 @@ namespace MS.Commands.AR
                 foreach (FamilyInstance lintel in lintels)
                 {
                     string lintelUniqueName;
-                    lintelUniqueName = GetLintelUniqueName(lintel);
+                    lintelUniqueName = WorkWithFamilies.GetLintelUniqueName(lintel, addLevel);
                     bool isSectionCreated = createdSections.Where(s => s.Name == lintelUniqueName).Count() > 0;
                     if (isSectionCreated)
                     {
@@ -168,7 +184,7 @@ namespace MS.Commands.AR
             }
 
             MessageBox.Show(
-                $"{sectionByLintels} разрезов создано для {lintels.Count()} перемычек." +
+                $"{sectionByLintels} разрезов создано для {lintelsAll.Count()} перемычек." +
                 $"\n\nРазрезы создаются только для обобщенных моделей, " +
                 $"в типоразмере которых в описании написано \"Перемычка\"." +
                 $"\nРазрезы создаются для уникального набора значений параметров:" +
@@ -176,31 +192,11 @@ namespace MS.Commands.AR
                 $"или в экземпляре родительского семейства;" +
                 $"\n2) ADSK_Наименование всех вложенных элементов перемычки, которые параллельны стене;" +
                 $"\n3) Ширине перемычки, вычисленной как расстояние между центрами крайних элементов из п.2)," +
-                $"спроецированное на поперечную ось перемычки.",
+                $"спроецированное на поперечную ось перемычки." +
+                $"\n4)* Если перемычки считаются поэтажно, то к этому перечню параметров добавляется Уровень.",
                 "Разрезы по перемычкам");
 
             return Result.Succeeded;
-        }
-
-        private string GetLintelUniqueName(FamilyInstance lintel)
-        {
-            StringBuilder sb = new StringBuilder();
-
-            var wallWidth = WorkWithFamilies.GetWallWidth(lintel) * SharedValues.FootToMillimeters;
-            sb.Append(wallWidth);
-            sb.Append('_');
-
-            var subCompsAdskNames = WorkWithFamilies.GetSubComponentsAdskNames(lintel);
-            foreach (var adskName in subCompsAdskNames)
-            {
-                sb.Append(adskName);
-                sb.Append('_');
-            }
-
-            var widthOfLintel = Math.Round(WorkWithFamilies.GetMaxWidthOfLintel(lintel) * SharedValues.FootToMillimeters, 0);
-            sb.Append(widthOfLintel);
-
-            return sb.ToString();
         }
     }
 }

@@ -102,7 +102,11 @@ namespace MS.Utilites
             return widthOfLintel;
         }
 
-
+        /// <summary>
+        /// Получение ADSK_Толщина стены
+        /// </summary>
+        /// <param name="lintel"></param>
+        /// <returns></returns>
         public static double GetWallWidth(FamilyInstance lintel)
         {
             double wallWidth = 0;
@@ -116,6 +120,41 @@ namespace MS.Utilites
             }
 
             return wallWidth;
+        }
+
+        /// <summary>
+        /// Получение уникального названия перемычки, зависящее только от конфигурации поперечного сечения перемычки.
+        /// </summary>
+        /// <param name="lintel">Перемычка</param>
+        /// <param name="addLevel">Считать одинаковые перемычки на разных уровнях разными: True/False</param>
+        /// <returns>Уникальное название по поперечному сечению перемычки</returns>
+        public static string GetLintelUniqueName(FamilyInstance lintel, bool addLevel)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            var wallWidth = WorkWithFamilies.GetWallWidth(lintel) * SharedValues.FootToMillimeters;
+            sb.Append(wallWidth);
+            sb.Append('_');
+
+            var subCompsAdskNames = WorkWithFamilies.GetSubComponentsAdskNames(lintel);
+            foreach (var adskName in subCompsAdskNames)
+            {
+                sb.Append(adskName);
+                sb.Append('_');
+            }
+
+            var widthOfLintel = Math.Round(WorkWithFamilies.GetMaxWidthOfLintel(lintel) * SharedValues.FootToMillimeters, 0);
+            sb.Append(widthOfLintel);
+
+            if (addLevel)
+            {
+                sb.Append('_');
+                Document doc = lintel.Document;
+                var levelName = doc.GetElement(lintel.LevelId).Name;
+                sb.Append(levelName);
+            }
+
+            return sb.ToString();
         }
     }
 }

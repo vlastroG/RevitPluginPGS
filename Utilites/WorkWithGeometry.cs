@@ -420,7 +420,7 @@ namespace MS.Utilites
                     Brush brush = new SolidBrush(System.Drawing.Color.FromArgb(red, green, blue));
                     g.FillRectangle(brush, new System.Drawing.Rectangle(zero, zero, width, height));
                 }
-                Directory.CreateDirectory(@dirPath);
+                WorkWithPath.CreateTempDir(@dirPath);
                 b.Save(@filePath, System.Drawing.Imaging.ImageFormat.Png);
             }
         }

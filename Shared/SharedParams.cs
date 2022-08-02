@@ -25,7 +25,7 @@ namespace MS.Shared
         public static readonly Guid PGS_MassLintel = Guid.Parse("77a36313-f239-426c-a6f9-29bf64efee76");
 
         /// <summary>
-        /// Guid параметра PGS_Изображение типоразмера материала = 924e3bb2-a048-449f-916f-31093a3aa7a3
+        /// Guid параметра PGS_ИзображениеТипоразмераМатериала = 924e3bb2-a048-449f-916f-31093a3aa7a3
         /// </summary>
         public static readonly Guid PGS_ImageTypeMaterial = Guid.Parse("924e3bb2-a048-449f-916f-31093a3aa7a3");
 
@@ -134,12 +134,13 @@ namespace MS.Shared
         public static bool IsCategoryOfDocContainsSharedParams(Document doc, BuiltInCategory category, Guid[] sharedParamsGuids)
         {
             ElementId categoryId = Category.GetCategory(doc, category).Id;
+            bool containsAll = true;
             foreach (Guid sharedParamGuid in sharedParamsGuids)
             {
                 try
                 {
                     ElementId parId = SharedParameterElement.Lookup(doc, sharedParamGuid).Id;
-                    TableView.GetAvailableParameters(doc, categoryId).Contains(parId);
+                    containsAll = containsAll && TableView.GetAvailableParameters(doc, categoryId).Contains(parId);
                 }
                 catch (NullReferenceException)
                 {
@@ -150,7 +151,7 @@ namespace MS.Shared
                     return false;
                 }
             }
-            return true;
+            return containsAll;
         }
     }
 }
