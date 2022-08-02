@@ -146,15 +146,22 @@ namespace MS.Commands.AR
             UIDocument uidoc = uiapp.ActiveUIDocument;
             Document doc = uidoc.Document;
 
-            Guid[] _sharedParamsForCommand = new Guid[] { SharedParams.PGS_ImageTypeMaterial };
+            Guid[] _sharedParamsForCommand = new Guid[]
+            {
+                SharedParams.PGS_ImageTypeMaterial,
+                SharedParams.PGS_MarkLintel,
+                SharedParams.PGS_MultiTextMark
+            };
             if (!SharedParams.IsCategoryOfDocContainsSharedParams(
                 doc,
                 BuiltInCategory.OST_GenericModel,
                 _sharedParamsForCommand))
             {
-                MessageBox.Show("В текущем проекте у категории \"Обобщенная модель\" " +
-                    "отсутствует общий параметр PGS_ИзображениеТипоразмераМатериала" +
-                    "\nс Guid = 924e3bb2-a048-449f-916f-31093a3aa7a3",
+                MessageBox.Show("В текущем проекте у категории \"Обобщенные модели\" " +
+                    "присутствуют НЕ ВСЕ необходимые общие параметры:" +
+                    "\nPGS_ИзображениеТипоразмераМатериала," +
+                    "\nPGS_МаркаПеремычки," +
+                    "\nPGS_МногострочнаяМарка.",
                     "Ошибка");
                 return Result.Cancelled;
             }
@@ -163,6 +170,8 @@ namespace MS.Commands.AR
             int newLoadedImgs = 0;
             int updatedLintels = 0;
             int setLintels = 0;
+            int setMultiTextMark = 0;
+            int updatedMultiTextMark = 0;
 
             var addLevelResult = UserInput.YesNoCancelInput("Изображения по перемычкам", "Если считать перемычки поэтажно - \"Да\", иначе - \"Нет\"");
             if (addLevelResult != System.Windows.Forms.DialogResult.Yes && addLevelResult != System.Windows.Forms.DialogResult.No)
@@ -270,6 +279,7 @@ namespace MS.Commands.AR
                 transImgsLoading.Commit();
             }
 
+            Dictionary<string, string> dictMultiMarkByUniqueName = new Dictionary<string, string>();
             using (Transaction transSetImgs = new Transaction(doc))
             {
                 transSetImgs.Start("PGS_SetLintelsImgs");
@@ -281,7 +291,28 @@ namespace MS.Commands.AR
                 .ToArray();
                 foreach (FamilyInstance lintel in lintels)
                 {
-                    string lintelUniqueNamePngSuff = WorkWithFamilies.GetLintelUniqueName(lintel, addLevel) + ".png";
+                    string lintelUniqueName = WorkWithFamilies.GetLintelUniqueName(lintel, addLevel);
+                    string lintelMark = lintel.get_Parameter(SharedParams.PGS_MarkLintel).AsValueString();
+                    string lintelUniqueNamePngSuff = lintelUniqueName + ".png";
+
+                    if (!String.IsNullOrEmpty(lintelMark))
+                    {
+                        if (dictMultiMarkByUniqueName.ContainsKey(lintelUniqueName))
+                        {
+                            string dictMultiMark = dictMultiMarkByUniqueName[lintelUniqueName];
+                            if (!dictMultiMark.Contains(lintelMark))
+                            {
+                                string multiText = dictMultiMark + ',' + ' ' + lintelMark;
+                                dictMultiMarkByUniqueName[lintelUniqueName] = multiText;
+                                
+                            }
+                        }
+                        else
+                        {
+                            dictMultiMarkByUniqueName.Add(lintelUniqueName, lintelMark);
+                        }
+                    }
+
                     var lintelImg = lintel.get_Parameter(SharedParams.PGS_ImageTypeMaterial);
                     if (lintelImg.AsElementId().IntegerValue == -1)
                     {
@@ -310,11 +341,38 @@ namespace MS.Commands.AR
 
             temporaryFolder.Delete(true);
 
+            using (Transaction setMultiTextTrans = new Transaction(doc))
+            {
+                setMultiTextTrans.Start("PGS_SetMultiTextMark");
+
+                foreach (var lintel in lintels)
+                {
+                    string lintelUniqueName = WorkWithFamilies.GetLintelUniqueName(lintel, addLevel);
+                    string lintelMultiMark = lintel.get_Parameter(SharedParams.PGS_MultiTextMark).AsValueString();
+                    string dictMultiMark = dictMultiMarkByUniqueName[lintelUniqueName];
+                    if (String.IsNullOrEmpty(lintelMultiMark))
+                    {
+                        lintel.get_Parameter(SharedParams.PGS_MultiTextMark).Set(dictMultiMark);
+                        setMultiTextMark++;
+                        continue;
+                    }
+                    if (lintelMultiMark != dictMultiMark)
+                    {
+                        lintel.get_Parameter(SharedParams.PGS_MultiTextMark).Set(dictMultiMark);
+                        updatedMultiTextMark++;
+                    }
+                }
+
+                setMultiTextTrans.Commit();
+            }
+
             MessageBox.Show(
                 $"Загружено {newLoadedImgs} изображений перемычек;" +
                 $"\nОбновлено {updateImgs} изображений перемычек;" +
                 $"\nПереназначено {updatedLintels} изображений перемычкам;" +
-                $"\nНазначено {setLintels} изображений перемычкам." +
+                $"\nНазначено {setLintels} изображений перемычкам;" +
+                $"\nПереназначено {updatedMultiTextMark} многострочных марок перемычкам;" +
+                $"\nНазначено {setMultiTextMark} многострочных марок перемычкам;" +
                 $"\n\nПримечание:" +
                 $"\n\nИзображения назначаются только для обобщенных моделей, " +
                 $"в типоразмере которых в описании написано \"Перемычка\"." +

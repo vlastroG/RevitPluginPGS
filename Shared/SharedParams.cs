@@ -125,6 +125,11 @@ namespace MS.Shared
         public static readonly Guid ADSK_Name = Guid.Parse("e6e0f5cd-3e26-485b-9342-23882b20eb43");
 
         /// <summary>
+        /// Guid параметра PGS_МногострочнаяМарка = 5970110c-724d-4b91-bec5-6ff415a2731b
+        /// </summary>
+        public static readonly Guid PGS_MultiTextMark = Guid.Parse("5970110c-724d-4b91-bec5-6ff415a2731b");
+
+        /// <summary>
         /// Валидация текущего проекта Revit на наличие общих параметров у заданной категории.
         /// </summary>
         /// <param name="doc">Документ Revit.</param>
