@@ -131,18 +131,22 @@ namespace MS.Commands.AR
                         double x = (lintel.Location as LocationPoint).Point.X;
                         double y = (lintel.Location as LocationPoint).Point.Y;
                         double z;
-                        try
+
+                        var isZbySubComp = lintel.GetSubComponentIds().FirstOrDefault() != null;
+
+                        if (isZbySubComp)
                         {
                             z = (doc.GetElement(lintel.GetSubComponentIds().FirstOrDefault())
                                                 .Location as LocationPoint).Point.Z;
                         }
-                        catch (ArgumentNullException)
+                        else
                         {
                             z = (lintel.Location as LocationPoint).Point.Z;
                             //TaskDialog.Show("Ошибка", "Не обнаружены вложенные семейства в семействе перемычки. Нельзя определить отметку низа перемычки." +
                             //    $"\nId = {lintel.Id}");
                             //continue;
                         }
+
                         center = new XYZ(x, y, z);
                         direction = lintel.HandOrientation.Normalize();
                         XYZ up = XYZ.BasisZ;

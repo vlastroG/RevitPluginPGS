@@ -81,6 +81,10 @@ namespace MS.Utilites
             List<double> distances = new List<double>();
 
             var subComps = GetSubComponentsAlong(lintel);
+            if (subComps.Count == 0)
+            {
+                return 0;
+            }
             foreach (var subEl in subComps)
             {
                 XYZ subElPoint = (subEl.Location as LocationPoint).Point;
