@@ -91,6 +91,8 @@
     <Compile Include="Commands\AR\CreateSectionsByLintels.cs" />
     <Compile Include="Commands\AR\DTO\LintelMultiMarkDto.cs" />
     <Compile Include="Commands\AR\DTO\MarkWithCountDto.cs" />
+    <Compile Include="Commands\AR\DTO\MultiNameRoomsDto.cs" />
+    <Compile Include="Commands\AR\DTO\NameWithNumbersDto.cs" />
     <Compile Include="Commands\AR\MasonryMesh.cs" />
     <Compile Include="Commands\AR\MaterialColors.cs" />
     <Compile Include="Commands\AR\Models\Apartment.cs" />
@@ -101,6 +103,7 @@
     <Compile Include="Commands\AR\MarkLintelsInOpenings.cs" />
     <Compile Include="Commands\AR\RoomsAreaNew.cs" />
     <Compile Include="Commands\AR\RoomsFinishing.cs" />
+    <Compile Include="Commands\AR\RoomsFinishingMultiMark.cs" />
     <Compile Include="Commands\General\Info.cs" />
     <Compile Include="Commands\General\LevelName.cs" />
     <Compile Include="Commands\General\Selector.cs" />
