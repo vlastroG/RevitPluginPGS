@@ -1,6 +1,7 @@
 ﻿using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
+using MS.Commands.AR.DTO;
 using MS.Shared;
 using MS.Utilites;
 using System;
@@ -279,7 +280,7 @@ namespace MS.Commands.AR
                 transImgsLoading.Commit();
             }
 
-            Dictionary<string, string> dictMultiMarkByUniqueName = new Dictionary<string, string>();
+            Dictionary<string, LintelMultiMarkDto> dictMultiMarkByUniqueName = new Dictionary<string, LintelMultiMarkDto>();
             using (Transaction transSetImgs = new Transaction(doc))
             {
                 transSetImgs.Start("PGS_SetLintelsImgs");
@@ -295,21 +296,17 @@ namespace MS.Commands.AR
                     string lintelMark = lintel.get_Parameter(SharedParams.PGS_MarkLintel).AsValueString();
                     string lintelUniqueNamePngSuff = lintelUniqueName + ".png";
 
+                    // Добавление марки в список марок с количеством для данного поперечного сечения перемычки
                     if (!String.IsNullOrEmpty(lintelMark))
                     {
                         if (dictMultiMarkByUniqueName.ContainsKey(lintelUniqueName))
                         {
-                            string dictMultiMark = dictMultiMarkByUniqueName[lintelUniqueName];
-                            if (!dictMultiMark.Contains(lintelMark))
-                            {
-                                string multiText = dictMultiMark + ',' + ' ' + lintelMark;
-                                dictMultiMarkByUniqueName[lintelUniqueName] = multiText;
-                                
-                            }
+                            dictMultiMarkByUniqueName[lintelUniqueName].AddMark(new MarkWithCountDto(lintelMark));
                         }
                         else
                         {
-                            dictMultiMarkByUniqueName.Add(lintelUniqueName, lintelMark);
+                            dictMultiMarkByUniqueName.Add(lintelUniqueName,
+                                new LintelMultiMarkDto(new MarkWithCountDto(lintelMark)));
                         }
                     }
 
@@ -349,7 +346,7 @@ namespace MS.Commands.AR
                 {
                     string lintelUniqueName = WorkWithFamilies.GetLintelUniqueName(lintel, addLevel);
                     string lintelMultiMark = lintel.get_Parameter(SharedParams.PGS_MultiTextMark).AsValueString();
-                    string dictMultiMark = dictMultiMarkByUniqueName[lintelUniqueName];
+                    string dictMultiMark = dictMultiMarkByUniqueName[lintelUniqueName].ToString();
                     if (String.IsNullOrEmpty(lintelMultiMark))
                     {
                         lintel.get_Parameter(SharedParams.PGS_MultiTextMark).Set(dictMultiMark);
