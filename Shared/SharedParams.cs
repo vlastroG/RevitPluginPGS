@@ -25,7 +25,7 @@ namespace MS.Shared
         public static readonly Guid PGS_MassLintel = Guid.Parse("77a36313-f239-426c-a6f9-29bf64efee76");
 
         /// <summary>
-        /// Guid параметра PGS_Изображение типоразмера материала = 924e3bb2-a048-449f-916f-31093a3aa7a3
+        /// Guid параметра PGS_ИзображениеТипоразмераМатериала = 924e3bb2-a048-449f-916f-31093a3aa7a3
         /// </summary>
         public static readonly Guid PGS_ImageTypeMaterial = Guid.Parse("924e3bb2-a048-449f-916f-31093a3aa7a3");
 
@@ -120,6 +120,16 @@ namespace MS.Shared
         public static readonly Guid ADSK_ThicknessOfWall = Guid.Parse("9350e48f-842b-4c46-a15d-2e36ab1f352f");
 
         /// <summary>
+        /// Guid параметра ADSK_Наименование = e6e0f5cd-3e26-485b-9342-23882b20eb43
+        /// </summary>
+        public static readonly Guid ADSK_Name = Guid.Parse("e6e0f5cd-3e26-485b-9342-23882b20eb43");
+
+        /// <summary>
+        /// Guid параметра PGS_МногострочнаяМарка = 5970110c-724d-4b91-bec5-6ff415a2731b
+        /// </summary>
+        public static readonly Guid PGS_MultiTextMark = Guid.Parse("5970110c-724d-4b91-bec5-6ff415a2731b");
+
+        /// <summary>
         /// Валидация текущего проекта Revit на наличие общих параметров у заданной категории.
         /// </summary>
         /// <param name="doc">Документ Revit.</param>
@@ -129,12 +139,13 @@ namespace MS.Shared
         public static bool IsCategoryOfDocContainsSharedParams(Document doc, BuiltInCategory category, Guid[] sharedParamsGuids)
         {
             ElementId categoryId = Category.GetCategory(doc, category).Id;
+            bool containsAll = true;
             foreach (Guid sharedParamGuid in sharedParamsGuids)
             {
                 try
                 {
                     ElementId parId = SharedParameterElement.Lookup(doc, sharedParamGuid).Id;
-                    TableView.GetAvailableParameters(doc, categoryId).Contains(parId);
+                    containsAll = containsAll && TableView.GetAvailableParameters(doc, categoryId).Contains(parId);
                 }
                 catch (NullReferenceException)
                 {
@@ -145,7 +156,7 @@ namespace MS.Shared
                     return false;
                 }
             }
-            return true;
+            return containsAll;
         }
     }
 }

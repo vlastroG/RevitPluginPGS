@@ -134,7 +134,7 @@ namespace MS.Commands.AR
 
             using (Transaction trans = new Transaction(doc))
             {
-                trans.Start("PGS set marks lintels");
+                trans.Start("PGS set _marks lintels");
 
                 foreach (OpeningDto opening in openings)
                 {

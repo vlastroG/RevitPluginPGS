@@ -3,6 +3,7 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using MS.Shared;
 using MS.Utilites;
+using MS.Utilites.Comparers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -60,40 +61,48 @@ namespace MS.Commands.AR
                 return Result.Cancelled;
             }
 
-            FilteredElementCollector sectionTypeFilter = new FilteredElementCollector(doc);
-            IList<Element> sectionTypesAll = sectionTypeFilter
+            var addLevelResult = UserInput.YesNoCancelInput("Разрезы по перемычкам", "Если считать перемычки поэтажно - \"Да\", иначе - \"Нет\"");
+            if (addLevelResult != System.Windows.Forms.DialogResult.Yes && addLevelResult != System.Windows.Forms.DialogResult.No)
+            {
+                return Result.Cancelled;
+            }
+            bool addLevel;
+            if (addLevelResult == System.Windows.Forms.DialogResult.Yes)
+            {
+                addLevel = true;
+            }
+            else
+            {
+                addLevel = false;
+            }
+
+            IList<Element> sectionTypesAll = new FilteredElementCollector(doc)
                 .OfClass(typeof(ViewFamilyType))
                 .Where(vft => (vft as ViewFamilyType).ViewFamily == ViewFamily.Section)
-                .ToList();
+                .ToArray();
             Element sectionType = sectionTypesAll
                 .Where(type => type.Name == _sectionTypeName)
                 .FirstOrDefault()
                 ?? sectionTypesAll.FirstOrDefault();
             ElementId sectionTypeId = sectionType.Id;
 
-            FilteredElementCollector lintelsFilter = new FilteredElementCollector(doc);
-            var lintels = lintelsFilter
+            var lintelsAll = new FilteredElementCollector(doc)
                 .OfCategory(BuiltInCategory.OST_GenericModel)
                 .WhereElementIsNotElementType()
                 .Where(e => (e is FamilyInstance) &&
-                            (e as FamilyInstance).Symbol
-                            .get_Parameter(BuiltInParameter.ALL_MODEL_DESCRIPTION)
-                            .AsValueString() == SharedValues.LintelDescription)
-                .Where(e => e.get_Parameter(SharedParams.Org_TypeIncludeInSchedule) != null &&
-                            e.get_Parameter(SharedParams.Org_TypeIncludeInSchedule).AsInteger() == 1)
-                .Where(e => e.get_Parameter(SharedParams.PGS_MarkLintel) != null &&
-                            !String.IsNullOrEmpty(e.get_Parameter(SharedParams.PGS_MarkLintel).AsValueString()))
-                .Cast<FamilyInstance>();
+                            WorkWithFamilies.GetSymbolDescription(e as FamilyInstance)
+                            == SharedValues.LintelDescription)
+                .Cast<FamilyInstance>()
+                .ToArray();
+            var lintels = lintelsAll.Distinct(new LintelsEqualityComparer(addLevel));
 
-            FilteredElementCollector sectionsFilter = new FilteredElementCollector(doc);
-            var createdSections = sectionsFilter
+            var createdSections = new FilteredElementCollector(doc)
                 .OfCategory(BuiltInCategory.OST_Views)
                 .WhereElementIsNotElementType()
                 .Where(v => (v as View).ViewType == ViewType.Section)
                 .ToArray();
 
-            FilteredElementCollector sectionTemplateFilter = new FilteredElementCollector(doc);
-            var sectionTemplate = sectionTemplateFilter
+            var sectionTemplate = new FilteredElementCollector(doc)
                 .OfCategory(BuiltInCategory.OST_Views)
                 .WhereElementIsNotElementType()
                 .Cast<View>()
@@ -108,9 +117,9 @@ namespace MS.Commands.AR
 
                 foreach (FamilyInstance lintel in lintels)
                 {
-                    string lintelMark;
-                    lintelMark = lintel.get_Parameter(SharedParams.PGS_MarkLintel).AsValueString();
-                    bool isSectionCreated = createdSections.Where(s => s.Name == lintelMark).Count() > 0;
+                    string lintelUniqueName;
+                    lintelUniqueName = WorkWithFamilies.GetLintelUniqueName(lintel, addLevel);
+                    bool isSectionCreated = createdSections.Where(s => s.Name == lintelUniqueName).Count() > 0;
                     if (isSectionCreated)
                     {
                         continue;
@@ -122,18 +131,22 @@ namespace MS.Commands.AR
                         double x = (lintel.Location as LocationPoint).Point.X;
                         double y = (lintel.Location as LocationPoint).Point.Y;
                         double z;
-                        try
+
+                        var isZbySubComp = lintel.GetSubComponentIds().FirstOrDefault() != null;
+
+                        if (isZbySubComp)
                         {
                             z = (doc.GetElement(lintel.GetSubComponentIds().FirstOrDefault())
                                                 .Location as LocationPoint).Point.Z;
                         }
-                        catch (ArgumentNullException)
+                        else
                         {
                             z = (lintel.Location as LocationPoint).Point.Z;
                             //TaskDialog.Show("Ошибка", "Не обнаружены вложенные семейства в семействе перемычки. Нельзя определить отметку низа перемычки." +
                             //    $"\nId = {lintel.Id}");
                             //continue;
                         }
+
                         center = new XYZ(x, y, z);
                         direction = lintel.HandOrientation.Normalize();
                         XYZ up = XYZ.BasisZ;
@@ -153,7 +166,7 @@ namespace MS.Commands.AR
                             Enabled = true
                         };
                         ViewSection section = ViewSection.CreateSection(doc, sectionTypeId, boxXYZ);
-                        string sectionName = lintelMark + '_' + doc.GetElement(lintel.LevelId).Name;
+                        string sectionName = lintelUniqueName;
                         try
                         {
                             section.Name = sectionName;
@@ -175,13 +188,16 @@ namespace MS.Commands.AR
             }
 
             MessageBox.Show(
-                $"{sectionByLintels} разрезов создано для {lintels.Count()} перемычек." +
-                $"\n\nЕсли это количество не соответствует ожиданиям," +
-                $"\nто, проверьте, чтобы:" +
-                $"\n1. У семейств перемычек в типе в \"Описании\" было \'Перемычка\';" +
-                $"\n2. В одном из экземпляров для каждого типа перемычек была галочка напротив Орг.ТипВключатьВСпецификацию;" +
-                $"\n3. В этих же экземплярах перемычек был заполнен параметр PGS_МаркаПеремычки." +
-                $"\n\nЕсли разрез по перемычке уже существует, новый создаваться не будет.",
+                $"{sectionByLintels} разрезов создано для {lintelsAll.Count()} перемычек." +
+                $"\n\nРазрезы создаются только для обобщенных моделей, " +
+                $"в типоразмере которых в описании написано \"Перемычка\"." +
+                $"\nРазрезы создаются для уникального набора значений параметров:" +
+                $"\n1) ADSK_Толщина стены, находящегося в экземпляре перемычки " +
+                $"или в экземпляре родительского семейства;" +
+                $"\n2) ADSK_Наименование всех вложенных элементов перемычки, которые параллельны стене;" +
+                $"\n3) Ширине перемычки, вычисленной как расстояние между центрами крайних элементов из п.2)," +
+                $"спроецированное на поперечную ось перемычки." +
+                $"\n4)* Если перемычки считаются поэтажно, то к этому перечню параметров добавляется Уровень.",
                 "Разрезы по перемычкам");
 
             return Result.Succeeded;

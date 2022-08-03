@@ -106,7 +106,7 @@ namespace MS
             btnLintelsSections.LargeImage = btnLintelsSectionsImage;
 
             // CreateImagesFromSections command
-            PushButtonData btnCreateImagesFromSections = new PushButtonData("CreateImagesFromSections", "Изображения\nпо перемычкам", path, "MS.Commands.AR.CreateImagesFromSections");
+            PushButtonData btnCreateImagesFromSections = new PushButtonData("CreateImagesFromSections", "Ведомость\nперемычек", path, "MS.Commands.AR.CreateImagesFromSections");
             Uri btnCreateImagesFromSectionsImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
             BitmapImage btnCreateImagesFromSectionsImage = new BitmapImage(btnCreateImagesFromSectionsImagePath);
             btnCreateImagesFromSections.LargeImage = btnCreateImagesFromSectionsImage;

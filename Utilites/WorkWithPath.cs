@@ -16,5 +16,21 @@ namespace MS.Utilites
                 return Path.GetDirectoryName(path);
             }
         }
+
+        /// <summary>
+        /// Создать временную папку. Если папка существует,
+        /// то она предварительно удалится рекурсивно, а затем создастся заново (пустая).
+        /// </summary>
+        /// <param name="dirPath">Путь к папке</param>
+        /// <returns>Временная папка</returns>
+        public static DirectoryInfo CreateTempDir(string @dirPath)
+        {
+            if (Directory.Exists(@dirPath))
+            {
+                Directory.Delete(@dirPath, true);
+            }
+            DirectoryInfo temporaryFolder = Directory.CreateDirectory(@dirPath);
+            return temporaryFolder;
+        }
     }
 }
