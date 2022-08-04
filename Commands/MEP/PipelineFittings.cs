@@ -2,11 +2,14 @@
 using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Architecture;
 using Autodesk.Revit.UI;
+using MS.Shared;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using static MS.Utilites.WorkWithGeometry;
 
 namespace MS.Commands.MEP
@@ -16,13 +19,8 @@ namespace MS.Commands.MEP
     public class PipelineFittings : IExternalCommand
     {
         /// <summary>
-        /// Guid параметра НомерКвартиры
-        /// </summary>
-        private readonly Guid guid_par_apartment_number = Guid.Parse("10fb72de-237e-4b9c-915b-8849b8907695");
-
-
-        /// <summary>
-        /// Назначение номера квартиры (из помещений в связях) арматуре трубопроводов, которая расположена в ней.
+        /// Назначение номера квартиры (из помещений в связях) арматуре трубопроводов и оборудованию,
+        /// которые расположена в ней.
         /// </summary>
         /// <param name="commandData"></param>
         /// <param name="message"></param>
@@ -33,15 +31,44 @@ namespace MS.Commands.MEP
             Document doc = commandData.Application.ActiveUIDocument.Document;
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
 
+            Guid[] _sharedParamsForCommand = new Guid[] {
+            SharedParams.ADSK_NumberOfApartment
+            };
+            if (!SharedParams.IsCategoryOfDocContainsSharedParams(
+                doc,
+                BuiltInCategory.OST_PipeAccessory,
+                _sharedParamsForCommand))
+            {
+                MessageBox.Show("В текущем проекте у категории \"Арматура трубопроводов\" " +
+                    "отсутствует необходимый общий параметр:" +
+                    "\nADSK_Номер квартиры",
+                    "Ошибка");
+                return Result.Cancelled;
+            }
+            if (!SharedParams.IsCategoryOfDocContainsSharedParams(
+                doc,
+                BuiltInCategory.OST_MechanicalEquipment,
+                _sharedParamsForCommand))
+            {
+                MessageBox.Show("В текущем проекте у категории \"Оборудование\" " +
+                    "отсутствует необходимый общий параметр:" +
+                    "\nADSK_Номер квартиры",
+                    "Ошибка");
+                return Result.Cancelled;
+            }
+
             var filter_links = new FilteredElementCollector(doc);
             var linked_docs = filter_links
                 .OfCategory(BuiltInCategory.OST_RvtLinks)
                 .WhereElementIsNotElementType()
                 .ToElements();
 
-            var filter_pipe_acs = new FilteredElementCollector(doc);
-            var pipe_accessories = filter_pipe_acs
-                .OfCategory(BuiltInCategory.OST_PipeAccessory)
+            var filter_pipe_stuff = new FilteredElementCollector(doc);
+            var pipe_stuff_categories = new ElementMulticategoryFilter(new Collection<BuiltInCategory> {
+                     BuiltInCategory.OST_PipeAccessory,
+                     BuiltInCategory.OST_MechanicalEquipment});
+
+            var pipe_stuff = filter_pipe_stuff.WherePasses(pipe_stuff_categories)
                 .WhereElementIsNotElementType()
                 .ToElements();
 
@@ -50,9 +77,9 @@ namespace MS.Commands.MEP
             {
                 trans_renew.Start("Арматура труб обнуление");
 
-                foreach (var pipe_acs in pipe_accessories)
+                foreach (var pipe_acs in pipe_stuff)
                 {
-                    pipe_acs.get_Parameter(guid_par_apartment_number).Set(String.Empty);
+                    pipe_acs.get_Parameter(SharedParams.ADSK_NumberOfApartment).Set(String.Empty);
                 }
 
                 trans_renew.Commit();
@@ -90,7 +117,7 @@ namespace MS.Commands.MEP
                             }
 
                             var pipe_acs_in_room = new FilteredElementCollector(doc)
-                                .OfCategory(BuiltInCategory.OST_PipeAccessory)
+                                .WherePasses(pipe_stuff_categories)
                                 .WherePasses(new ElementIntersectsSolidFilter(room_solid))
                                 .Cast<FamilyInstance>()
                                 .ToList();
@@ -99,8 +126,8 @@ namespace MS.Commands.MEP
                             {
                                 var fam_inst = pipe_acs as FamilyInstance;
                                 fam_inst
-                                    .get_Parameter(guid_par_apartment_number)
-                                    .Set(room.get_Parameter(guid_par_apartment_number).AsValueString());
+                                    .get_Parameter(SharedParams.ADSK_NumberOfApartment)
+                                    .Set(room.get_Parameter(SharedParams.ADSK_NumberOfApartment).AsValueString());
                             }
                         }
                     }

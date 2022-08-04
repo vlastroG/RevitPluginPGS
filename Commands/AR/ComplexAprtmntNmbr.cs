@@ -1,11 +1,13 @@
 ﻿using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
+using MS.Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace MS.Commands.AR
 {
@@ -13,21 +15,6 @@ namespace MS.Commands.AR
     [Regeneration(RegenerationOption.Manual)]
     public class ComplexAprtmntNmbr : IExternalCommand
     {
-        /// <summary>
-        /// Guid параметра КоличествоЖилыхКомнат
-        /// </summary>
-        private readonly Guid guid_par_liv_rooms_count = Guid.Parse("f52108e1-0813-4ad6-8376-a38a1a23a55b");
-
-        /// <summary>
-        /// Guid параметра ТипКвартиры
-        /// </summary>
-        private readonly Guid guid_par_apartment_type = Guid.Parse("78e3b89c-eb68-4600-84a7-c523de162743");
-
-        /// <summary>
-        /// Guid параметра ИндексКвартиры
-        /// </summary>
-        private readonly Guid guid_par_apartment_index = Guid.Parse("a2985e5c-b28e-416a-acf6-7ab7e4ee6d86");
-
         /// <summary>
         /// Guid параметра СоставнойНомерКвартиры
         /// </summary>
@@ -49,6 +36,25 @@ namespace MS.Commands.AR
         {
             Document doc = commandData.Application.ActiveUIDocument.Document;
 
+            Guid[] _sharedParamsForCommand = new Guid[] {
+            SharedParams.ADSK_CountOfRooms,
+            SharedParams.ADSK_TypeOfApartment,
+            SharedParams.ADSK_IndexOfApartment
+            };
+            if (!SharedParams.IsCategoryOfDocContainsSharedParams(
+                doc,
+                BuiltInCategory.OST_Rooms,
+                _sharedParamsForCommand))
+            {
+                MessageBox.Show("В текущем проекте у категории \"Помещения\" " +
+                    "присутствуют НЕ ВСЕ необходимые общие параметры:" +
+                    "\nADSK_Количество комнат" +
+                    "\nADSK_Тип квартиры" +
+                    "\nADSK_Индекс квартиры",
+                    "Ошибка");
+                return Result.Cancelled;
+            }
+
             var rooms_filter = new FilteredElementCollector(doc);
             var rooms = rooms_filter
                 .OfCategory(BuiltInCategory.OST_Rooms)
@@ -62,9 +68,9 @@ namespace MS.Commands.AR
                 foreach (var room in rooms)
                 {
                     StringBuilder sb = new StringBuilder();
-                    sb.Append(room.get_Parameter(guid_par_liv_rooms_count).AsValueString());
-                    sb.Append(room.get_Parameter(guid_par_apartment_type).AsValueString());
-                    sb.Append(room.get_Parameter(guid_par_apartment_index).AsValueString());
+                    sb.Append(room.get_Parameter(SharedParams.ADSK_CountOfRooms).AsValueString());
+                    sb.Append(room.get_Parameter(SharedParams.ADSK_TypeOfApartment).AsValueString());
+                    sb.Append(room.get_Parameter(SharedParams.ADSK_IndexOfApartment).AsValueString());
 
                     var cmplx_aprtm_num = sb.ToString();
                     if (cmplx_aprtm_num == "0")
