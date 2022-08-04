@@ -88,7 +88,8 @@ namespace MS.Commands.AR
 
             string finWallsScheduleName = UserInput.GetStringFromUser(
                 "Ключевые спецификации отделки",
-                "Введите название ключевой спецификации для отделки помещений (стены+потолок):",
+                "Проверьте, что ключевая спецификация отделки СТЕН И ПОТОЛКА помещений заполнена верно и " +
+                "введите ее название:",
                 "В_Отделка-помещения-01_Стили помещений_Ключевая"
                 );
             if (finWallsScheduleName.Length == 0)
@@ -97,7 +98,8 @@ namespace MS.Commands.AR
             }
             string finFloorScheduleName = UserInput.GetStringFromUser(
                 "Ключевые спецификации отделки",
-                "Введите название ключевой спецификации для отделки помещений (пол):",
+                "Проверьте, что ключевая спецификация отделки ПОЛА помещений заполнена верно и " +
+                "введите ее название:",
                 "В_Полы-помещения-01_Стили полов_Ключевая"
                 );
             if (finFloorScheduleName.Length == 0)
@@ -152,34 +154,96 @@ namespace MS.Commands.AR
                 ElementId scheduleViewId = finWallsSchedule.Id;
                 ElementOwnerViewFilter filter = new ElementOwnerViewFilter(scheduleViewId);
                 var elems = finWallsSchedule.GetDependentElements(filter).Select(id => doc.GetElement(id)).ToArray();
-                foreach (var row in elems)
+                using (Transaction transFinWalls = new Transaction(doc))
                 {
-                    try
+                    transFinWalls.Start("Помещения с отделкой стен");
+                    foreach (var row in elems)
                     {
-                        string key = row.get_Parameter(SharedParams.PGS_FinishingTypeOfWalls).AsValueString();
-                        string multiText = row.get_Parameter(SharedParams.PGS_MultiTextMark).AsValueString();
-                        string multiTextDict = dictFinWallsMultiName[key].ToString();
-                        if (multiText != multiTextDict)
+                        try
                         {
-                            row.get_Parameter(SharedParams.PGS_MultiTextMark).Set(dictFinWallsMultiName[key].ToString());
+                            string key = row.get_Parameter(SharedParams.PGS_FinishingTypeOfWalls).AsValueString();
+                            string multiText = row.get_Parameter(SharedParams.PGS_MultiTextMark).AsValueString();
+                            string multiTextDict = dictFinWallsMultiName[key].ToString();
+                            if (multiText != multiTextDict)
+                            {
+                                row.get_Parameter(SharedParams.PGS_MultiTextMark).Set(dictFinWallsMultiName[key].ToString());
+                            }
+                        }
+                        catch (ArgumentNullException)
+                        {
+                            MessageBox.Show($"В спецификации {finWallsScheduleName} присутствуют не все необходимые поля:" +
+                                $"\nPGS_ТипОтделкиСтен" +
+                                $"\nPGS_МногострочнаяМарка",
+                                "Ошибка!");
+                            return Result.Failed;
+                        }
+                        catch (NullReferenceException)
+                        {
+                            MessageBox.Show($"В спецификации {finWallsScheduleName} присутствуют не все необходимые поля:" +
+                                $"\nPGS_ТипОтделкиСтен" +
+                                $"\nPGS_МногострочнаяМарка",
+                                "Ошибка!");
+                            return Result.Failed;
                         }
                     }
-                    catch (ArgumentNullException)
-                    {
-                        MessageBox.Show($"В спецификации {finWallsScheduleName} присутствуют не все необходимые поля:" +
-                            $"\nPGS_ТипОтделкиСтен" +
-                            $"\nPGS_", "");
-                        return Result.Failed;
-                    }
+                    transFinWalls.Commit();
                 }
             }
-
+            else
+            {
+                MessageBox.Show($"Не найдена ключевая спецификация с названием {finWallsScheduleName}",
+                    "Предупреждение!");
+            }
 
             Element finFloorSchedule = new FilteredElementCollector(doc)
                 .OfCategory(BuiltInCategory.OST_Schedules)
                 .FirstOrDefault(s => s.Name == finFloorScheduleName);
 
-
+            if (finFloorSchedule != null)
+            {
+                ElementId scheduleViewId = finFloorSchedule.Id;
+                ElementOwnerViewFilter filter = new ElementOwnerViewFilter(scheduleViewId);
+                var elems = finFloorSchedule.GetDependentElements(filter).Select(id => doc.GetElement(id)).ToArray();
+                using (Transaction transFinFloor = new Transaction(doc))
+                {
+                    transFinFloor.Start("Помещения с отделкой пола");
+                    foreach (var row in elems)
+                    {
+                        try
+                        {
+                            string key = row.get_Parameter(SharedParams.PGS_FinishingTypeOfFloor).AsValueString();
+                            string multiText = row.get_Parameter(SharedParams.PGS_MultiTextMark_2).AsValueString();
+                            string multiTextDict = dictFinFloorMultiName[key].ToString();
+                            if (multiText != multiTextDict)
+                            {
+                                row.get_Parameter(SharedParams.PGS_MultiTextMark_2).Set(dictFinFloorMultiName[key].ToString());
+                            }
+                        }
+                        catch (ArgumentNullException)
+                        {
+                            MessageBox.Show($"В спецификации {finFloorScheduleName} присутствуют не все необходимые поля:" +
+                                $"\nPGS_ТипОтделкиПола" +
+                                $"\nPGS_МногострочнаяМарка_2",
+                                "Ошибка!");
+                            return Result.Failed;
+                        }
+                        catch (NullReferenceException)
+                        {
+                            MessageBox.Show($"В спецификации {finFloorScheduleName} присутствуют не все необходимые поля:" +
+                                $"\nPGS_ТипОтделкиПола" +
+                                $"\nPGS_МногострочнаяМарка_2",
+                                "Ошибка!");
+                            return Result.Failed;
+                        }
+                    }
+                    transFinFloor.Commit();
+                }
+            }
+            else
+            {
+                MessageBox.Show($"Не найдена ключевая спецификация с названием {finFloorScheduleName}",
+                    "Предупреждение!");
+            }
 
             return Result.Succeeded;
         }

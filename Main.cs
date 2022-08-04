@@ -111,12 +111,18 @@ namespace MS
             BitmapImage btnCreateImagesFromSectionsImage = new BitmapImage(btnCreateImagesFromSectionsImagePath);
             btnCreateImagesFromSections.LargeImage = btnCreateImagesFromSectionsImage;
 
+            // RoomsFinishingMultiMark command
+            PushButtonData btnRoomsFinishingMultiMark = new PushButtonData("RoomsFinishingMultiMark", "Помещения\nс одинаковой отделкой", path, "MS.Commands.AR.RoomsFinishingMultiMark");
+            Uri btnRoomsFinishingMultiMarkImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            BitmapImage btnRoomsFinishingMultiMarkImage = new BitmapImage(btnRoomsFinishingMultiMarkImagePath);
+            btnRoomsFinishingMultiMark.LargeImage = btnRoomsFinishingMultiMarkImage;
+
 
             // RoomsFinishingCommand
-            PushButtonData btnRmFinishing = new PushButtonData("RoomsFinishing\nDebug", "Отделка\n(Beta)", path, "MS.Utilites.GetBoundarySegmentElement");
-            Uri btnRmFinishingImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\RoomsFinishing.png");
-            BitmapImage btnRmFinishingImage = new BitmapImage(btnRmFinishingImagePath);
-            btnRmFinishing.LargeImage = btnRmFinishingImage;
+            //PushButtonData btnRmFinishing = new PushButtonData("RoomsFinishing\nDebug", "Отделка\n(Beta)", path, "MS.Utilites.GetBoundarySegmentElement");
+            //Uri btnRmFinishingImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\RoomsFinishing.png");
+            //BitmapImage btnRmFinishingImage = new BitmapImage(btnRmFinishingImagePath);
+            //btnRmFinishing.LargeImage = btnRmFinishingImage;
 
 
             // MaterialColorsCommand
@@ -157,6 +163,7 @@ namespace MS
             panelAR.AddItem(btnMarkLintelsInOpenings);
             panelAR.AddItem(btnLintelsSections);
             panelAR.AddItem(btnCreateImagesFromSections);
+            panelAR.AddItem(btnRoomsFinishingMultiMark);
             //panelAR.AddItem(btnRmFinishing); // в разработке, нужно указать названия параметров
             panelAR.AddItem(btnSelection);
             panelAR.AddItem(btnMasonryMesh);
