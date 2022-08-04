@@ -91,6 +91,8 @@
     <Compile Include="Commands\AR\CreateSectionsByLintels.cs" />
     <Compile Include="Commands\AR\DTO\LintelMultiMarkDto.cs" />
     <Compile Include="Commands\AR\DTO\MarkWithCountDto.cs" />
+    <Compile Include="Commands\AR\DTO\MultiNameRoomsDto.cs" />
+    <Compile Include="Commands\AR\DTO\NameWithNumbersDto.cs" />
     <Compile Include="Commands\AR\MasonryMesh.cs" />
     <Compile Include="Commands\AR\MaterialColors.cs" />
     <Compile Include="Commands\AR\Models\Apartment.cs" />
@@ -101,6 +103,7 @@
     <Compile Include="Commands\AR\MarkLintelsInOpenings.cs" />
     <Compile Include="Commands\AR\RoomsAreaNew.cs" />
     <Compile Include="Commands\AR\RoomsFinishing.cs" />
+    <Compile Include="Commands\AR\RoomsFinishingMultiMark.cs" />
     <Compile Include="Commands\General\Info.cs" />
     <Compile Include="Commands\General\LevelName.cs" />
     <Compile Include="Commands\General\Selector.cs" />
@@ -123,19 +126,19 @@
     <Compile Include="Shared\SharedParams.cs" />
     <Compile Include="Shared\SharedValues.cs" />
     <Compile Include="Utilites\Comparers\LintelsEqualityComparer.cs" />
-    <Compile Include="Utilites\ExtensionDictionary.cs" />
-    <Compile Include="Utilites\ExtensionPlanarFace.cs" />
+    <Compile Include="Utilites\Extensions\ExtensionDictionary.cs" />
+    <Compile Include="Utilites\Extensions\ExtensionPlanarFace.cs" />
     <Compile Include="Utilites\GetBoundarySegmentElement.cs" />
-    <Compile Include="Utilites\SelectionFilterEdges.cs" />
-    <Compile Include="Utilites\SelectionFilterPlanarFaces.cs" />
-    <Compile Include="Utilites\SelectionFilterRooms.cs" />
-    <Compile Include="Utilites\SelectionFilterElementsOfClass.cs" />
-    <Compile Include="Utilites\UserInput.cs" />
-    <Compile Include="Utilites\WorkWithFamilies.cs" />
-    <Compile Include="Utilites\WorkWithGeometry.cs" />
-    <Compile Include="Utilites\WorkWithParameters.cs" />
-    <Compile Include="Utilites\WorkWithPath.cs" />
-    <Compile Include="Utilites\WorkWithString.cs" />
+    <Compile Include="Utilites\SelectionFilters\SelectionFilterEdges.cs" />
+    <Compile Include="Utilites\SelectionFilters\SelectionFilterPlanarFaces.cs" />
+    <Compile Include="Utilites\SelectionFilters\SelectionFilterRooms.cs" />
+    <Compile Include="Utilites\SelectionFilters\SelectionFilterElementsOfClass.cs" />
+    <Compile Include="Utilites\UserInput\UserInput.cs" />
+    <Compile Include="Utilites\WorkWith\WorkWithFamilies.cs" />
+    <Compile Include="Utilites\WorkWith\WorkWithGeometry.cs" />
+    <Compile Include="Utilites\WorkWith\WorkWithParameters.cs" />
+    <Compile Include="Utilites\WorkWith\WorkWithPath.cs" />
+    <Compile Include="Utilites\WorkWith\WorkWithString.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />

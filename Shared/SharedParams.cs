@@ -130,6 +130,21 @@ namespace MS.Shared
         public static readonly Guid PGS_MultiTextMark = Guid.Parse("5970110c-724d-4b91-bec5-6ff415a2731b");
 
         /// <summary>
+        /// Guid параметра PGS_МногострочнаяМарка_2 = f592cad1-9c11-463e-88eb-c8ef7c446666
+        /// </summary>
+        public static readonly Guid PGS_MultiTextMark_2 = Guid.Parse("f592cad1-9c11-463e-88eb-c8ef7c446666");
+
+        /// <summary>
+        /// Guid параметра PGS_ТипОтделкиСтен = cd68c50c-249b-4cf4-9d90-8671cb7115d5
+        /// </summary>
+        public static readonly Guid PGS_FinishingTypeOfWalls = Guid.Parse("cd68c50c-249b-4cf4-9d90-8671cb7115d5");
+
+        /// <summary>
+        /// Guid параметра PGS_ТипОтделкиПола = 6f7dd141-1edf-4cd1-82e9-a6834166a84b
+        /// </summary>
+        public static readonly Guid PGS_FinishingTypeOfFloor = Guid.Parse("6f7dd141-1edf-4cd1-82e9-a6834166a84b");
+
+        /// <summary>
         /// Валидация текущего проекта Revit на наличие общих параметров у заданной категории.
         /// </summary>
         /// <param name="doc">Документ Revit.</param>
