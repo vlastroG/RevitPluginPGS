@@ -2,6 +2,7 @@
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using MS.Shared;
+using MS.Utilites;
 using System;
 using System.Linq;
 using System.Windows;
@@ -32,7 +33,7 @@ namespace MS.Commands.AR
 
             Guid[] _sharedParamsForCommand = new Guid[] {
             SharedParams.Arm_CountReinforcedRowsMasonry,
-            SharedParams.Arm_AreaOfMasonryMesh
+            SharedParams.PGS_TotalMasonryMesh
             };
             if (!SharedParams.IsCategoryOfDocContainsSharedParams(
                 doc,
@@ -42,8 +43,18 @@ namespace MS.Commands.AR
                 MessageBox.Show("В текущем проекте у категории \"Стены\" " +
                     "присутствуют НЕ ВСЕ необходимые общие параметры:" +
                     "\nАрм.КолвоАрмированияКладки" +
-                    "\nАрм.ПлощадьКлСетки",
+                    "\nPGS_ИтогАрмСетки",
                     "Ошибка");
+                return Result.Cancelled;
+            }
+
+            int indent = 0;
+            try
+            {
+                indent = UserInput.GetIntFromUser("Ввод числа", "Введите ЦЕЛОЕ число");
+            }
+            catch (System.OperationCanceledException)
+            {
                 return Result.Cancelled;
             }
 
@@ -112,7 +123,7 @@ namespace MS.Commands.AR
                     trans.Start("Подсчет кладочной сетки");
                     try
                     {
-                        wall.get_Parameter(SharedParams.Arm_AreaOfMasonryMesh).Set(mesh_area_total);
+                        wall.get_Parameter(SharedParams.PGS_TotalMasonryMesh).Set(mesh_area_total);
                         calculatedWallsCount++;
                     }
                     catch (NullReferenceException)

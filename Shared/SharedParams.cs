@@ -110,9 +110,9 @@ namespace MS.Shared
         public static readonly Guid ADSK_DimensionHeight = Guid.Parse("da753fe3-ecfa-465b-9a2c-02f55d0c2ff1");
 
         /// <summary>
-        /// Guid параметра Арм.ПлощадьКлСетки = 7f925503-538c-43f3-9e75-aa7a3f43eb0e
+        /// Guid параметра PGS_ИтогАрмСетки = 40f2c9af-2986-4330-a6d9-4c9ae9419342 (double)
         /// </summary>
-        public static readonly Guid Arm_AreaOfMasonryMesh = Guid.Parse("7f925503-538c-43f3-9e75-aa7a3f43eb0e");
+        public static readonly Guid PGS_TotalMasonryMesh = Guid.Parse("40f2c9af-2986-4330-a6d9-4c9ae9419342");
 
         /// <summary>
         /// Guid параметра ADSK_Толщина стены = 9350e48f-842b-4c46-a15d-2e36ab1f352f
