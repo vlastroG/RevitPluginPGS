@@ -1,5 +1,6 @@
 ﻿using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.Architecture;
 using Autodesk.Revit.UI;
 using MS.Commands.AR.DTO;
 using MS.Shared;
@@ -75,6 +76,32 @@ namespace MS.Commands.AR
             }
         }
 
+        /// <summary>
+        /// Вычисляет ключ для словаря типа отделки и списка помещений с этой отделкой
+        /// </summary>
+        /// <param name="room">Помещение</param>
+        /// <param name="finType">Значение параметра типа отделки</param>
+        /// <param name="byLevel">Если True, то ключ по уровню и типу отделки, иначе только по типу отделки.</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException">Элемент не является помещением.</exception>
+        private string GetKeyForFinishing(in Element room, in string finType, in bool byLevel)
+        {
+            if (!(room is Room))
+            {
+                throw new ArgumentException($"Элемент с {room.Id} не является помещением!");
+            }
+            if (byLevel)
+            {
+                Document doc = room.Document;
+                string levelName = doc.GetElement(room.LevelId).Name;
+                return finType + levelName;
+            }
+            else
+            {
+                return finType;
+            }
+        }
+
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             UIApplication uiapp = commandData.Application;
@@ -86,37 +113,34 @@ namespace MS.Commands.AR
                 return Result.Cancelled;
             }
 
-            string finWallsScheduleName = UserInput.GetStringFromUser(
-                "Ключевые спецификации отделки",
-                "Проверьте, что ключевая спецификация отделки СТЕН И ПОТОЛКА помещений заполнена верно и " +
-                "введите ее название:",
-                "В_Отделка-помещения-01_Стили помещений_Ключевая"
-                );
-            if (finWallsScheduleName.Length == 0)
+            var multiNameRange = UserInput.YesNoCancelInput("Помещения с одинаковой отделкой", "Если считать отделку поэтажно - \"Да\", если сквозной подсчет - \"Нет\"");
+            if (multiNameRange != System.Windows.Forms.DialogResult.Yes && multiNameRange != System.Windows.Forms.DialogResult.No)
             {
                 return Result.Cancelled;
             }
-            string finFloorScheduleName = UserInput.GetStringFromUser(
-                "Ключевые спецификации отделки",
-                "Проверьте, что ключевая спецификация отделки ПОЛА помещений заполнена верно и " +
-                "введите ее название:",
-                "В_Полы-помещения-01_Стили полов_Ключевая"
-                );
-            if (finFloorScheduleName.Length == 0)
+            bool byLevel;
+            if (multiNameRange == System.Windows.Forms.DialogResult.Yes)
             {
-                return Result.Cancelled;
+                byLevel = true;
+            }
+            else
+            {
+                byLevel = false;
             }
 
             var rooms = new FilteredElementCollector(doc)
                 .OfCategory(BuiltInCategory.OST_Rooms)
                 .WhereElementIsNotElementType()
                 .ToElements()
+                .Where(e => e.get_Parameter(BuiltInParameter.ROOM_AREA).AsDouble() > 0)
                 .ToList();
 
             // Словарь пар значений PGS_ТипОтделкиСтен и списка названий помещений с их номерами
             Dictionary<string, MultiNameRoomsDto> dictFinWallsMultiName = new Dictionary<string, MultiNameRoomsDto>();
             // Словарь пар значений PGS_ТипОтделкиПола и списка названий помещений с их номерами
             Dictionary<string, MultiNameRoomsDto> dictFinFloorMultiName = new Dictionary<string, MultiNameRoomsDto>();
+
+            List<Element> roomsWithFinishing = new List<Element>();
 
             foreach (Element room in rooms)
             {
@@ -128,24 +152,88 @@ namespace MS.Commands.AR
                 {
                     if (!String.IsNullOrEmpty(typeFinWall))
                     {
+                        string keyTypeFinWall = GetKeyForFinishing(room, typeFinWall, byLevel);
                         AddOrUpdateMultiNamesDict(
                             dictFinWallsMultiName,
-                            typeFinWall,
+                            keyTypeFinWall,
                             roomName,
                             roomNumber);
+                        roomsWithFinishing.Add(room);
                     }
                     if (!String.IsNullOrEmpty(typeFinFloor))
                     {
+                        string keyTypeFinFloor = GetKeyForFinishing(room, typeFinFloor, byLevel);
                         AddOrUpdateMultiNamesDict(
                             dictFinFloorMultiName,
-                            typeFinFloor,
+                            keyTypeFinFloor,
                             roomName,
                             roomNumber);
+                        roomsWithFinishing.Add(room);
                     }
                 }
             }
 
-           
+            int equalFinWallSetCount = 0;
+            int equalFinFloorSetCount = 0;
+            using (Transaction transEqualFinishing = new Transaction(doc))
+            {
+                transEqualFinishing.Start("Одинаковая отделка помещений");
+                foreach (Element room in roomsWithFinishing)
+                {
+                    string typeFinWall = room.get_Parameter(SharedParams.PGS_FinishingTypeOfWalls).AsValueString();
+                    string typeFinFloor = room.get_Parameter(SharedParams.PGS_FinishingTypeOfFloor).AsValueString();
+                    string roomNumber = room.get_Parameter(BuiltInParameter.ROOM_NUMBER).AsValueString();
+                    string roomName = room.get_Parameter(BuiltInParameter.ROOM_NAME).AsValueString();
+
+                    if (!String.IsNullOrEmpty(typeFinWall))
+                    {
+                        string keyTypeFinWall = GetKeyForFinishing(room, typeFinWall, byLevel);
+                        string dictValue = dictFinWallsMultiName[keyTypeFinWall].ToString();
+                        string existValue = room.get_Parameter(SharedParams.PGS_MultiTextMark).AsValueString();
+                        try
+                        {
+                            if (existValue != dictValue)
+                            {
+                                room.get_Parameter(SharedParams.PGS_MultiTextMark).Set(dictValue);
+                                equalFinWallSetCount++;
+                            }
+                        }
+                        catch (Autodesk.Revit.Exceptions.InvalidOperationException)
+                        {
+                            MessageBox.Show("Параметр PGS_МногострочнаяМарка доступен только для чтения," +
+                                " проверьте, что он не используется в ключевой спецификации.", "Ошибка!");
+                            return Result.Failed;
+                        }
+                    }
+                    if (!String.IsNullOrEmpty(typeFinFloor))
+                    {
+                        string keyTypeFinFloor = GetKeyForFinishing(room, typeFinFloor, byLevel);
+                        string dictValue = dictFinFloorMultiName[keyTypeFinFloor].ToString();
+                        string existValue = room.get_Parameter(SharedParams.PGS_MultiTextMark_2).AsValueString();
+                        try
+                        {
+                            if (existValue != dictValue)
+                            {
+                                room.get_Parameter(SharedParams.PGS_MultiTextMark_2).Set(dictValue);
+                                equalFinFloorSetCount++;
+                            }
+                        }
+                        catch (Autodesk.Revit.Exceptions.InvalidOperationException)
+                        {
+                            MessageBox.Show("Параметр PGS_МногострочнаяМарка_2 доступен только для чтения," +
+                                " проверьте, что он не используется в ключевой спецификации.", "Ошибка!");
+                            return Result.Failed;
+                        }
+                    }
+                }
+                transEqualFinishing.Commit();
+            }
+
+            MessageBox.Show($"Обработано {roomsWithFinishing.Count} помещений с отделкой" +
+                $" из всех {rooms.Count} помещений в проеке с ненулевой площадью." +
+                $"\nPGS_МногострочнаяМарка для одинаковой отделки стен и потолка обновлена {equalFinWallSetCount} раз," +
+                $"\nPGS_МногострочнаяМарка_2 для одинаковой отделки пола обновлена {equalFinFloorSetCount} раз.",
+                "Одинаковая отделка помещений.");
 
             return Result.Succeeded;
         }
