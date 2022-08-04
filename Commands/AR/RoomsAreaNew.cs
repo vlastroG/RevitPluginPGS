@@ -89,6 +89,25 @@ namespace MS.Commands.AR
 
 
         /// <summary>
+        /// Проверяет, являестя строка null,
+        /// и возвращает либо пустую строку, либо исходную (если она не null)
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        private string MakeStringValid(ref string value)
+        {
+            if (!ReferenceEquals(value, null))
+            {
+                return value;
+            }
+            else
+            {
+                value = String.Empty;
+                return value;
+            }
+        }
+
+        /// <summary>
         /// Расчитывает площади помещений и квартир с учетом коэффициентов, и принадлежности к жилой/нежилой зоне. 
         /// </summary>
         /// <param name="commandData"></param>
@@ -204,9 +223,12 @@ namespace MS.Commands.AR
                 string RoomApartmentNumber;
                 foreach (var Room in Rooms)
                 {
-                    RoomName = Room.get_Parameter(BuiltInParameter.ROOM_NAME).AsString().ToLower();
-                    RoomComment = Room.get_Parameter(BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS).AsString().ToLower();
-                    RoomApartmentNumber = Room.get_Parameter(SharedParams.ADSK_NumberOfApartment).AsString();
+                    RoomName = Room.get_Parameter(BuiltInParameter.ROOM_NAME).AsValueString();
+                    RoomName = MakeStringValid(ref RoomName).ToLower();
+                    RoomComment = Room.get_Parameter(BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS).AsValueString();
+                    RoomComment = MakeStringValid(ref RoomComment).ToLower();
+                    RoomApartmentNumber = Room.get_Parameter(SharedParams.ADSK_NumberOfApartment).AsValueString();
+                    RoomApartmentNumber = MakeStringValid(ref RoomApartmentNumber);
 
                     if (RoomComment.Contains("нежилая"))
                     {

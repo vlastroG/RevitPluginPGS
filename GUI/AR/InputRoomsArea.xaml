@@ -5,22 +5,25 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:MS.GUI.AR"
              x:Name="cmdAreaWin"
-             mc:Ignorable="d" MinWidth="350" MaxWidth="350" MinHeight="200" MaxHeight="200" Background="White" Height="200">
+             mc:Ignorable="d" MinWidth="400" MaxWidth="400" MinHeight="300" MaxHeight="300" Background="White" Height="300">
     <Grid Margin="0,0,0,34">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="123*"/>
-            <ColumnDefinition Width="52*"/>
+            <ColumnDefinition Width="104*"/>
+            <ColumnDefinition Width="41*"/>
+            <ColumnDefinition Width="44*"/>
+            <ColumnDefinition Width="32*"/>
+            <ColumnDefinition Width="60*"/>
+            <ColumnDefinition Width="119*"/>
         </Grid.ColumnDefinitions>
-        <Button Content="Отмена" Margin="0,0,0,-34" Click="Cancel_Click" RenderTransformOrigin="-3.659,-7.388" Height="25" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="50" Background="#FFFBB5B5" Grid.Column="1"/>
-        <RadioButton GroupName="calcRange" x:Name="allProj" Content="Во всем проекте" HorizontalAlignment="Left" Margin="51,54,0,0" VerticalAlignment="Top" Checked="allProj_Checked"/>
-        <RadioButton GroupName="calcRange" x:Name="allView" Content="Видимые на виде" HorizontalAlignment="Left" Margin="194,55,0,0" VerticalAlignment="Top" Checked="allView_Checked" Width="128" Height="14" IsChecked="True" Grid.ColumnSpan="2"/>
-        <RadioButton GroupName="roundValue" x:Name="twoDecimal" Content="0.00" HorizontalAlignment="Left" Margin="51,127,0,0" VerticalAlignment="Top" Checked="twoDecimal_Checked" IsChecked="True"/>
-        <RadioButton GroupName="roundValue" x:Name="threeDecimal" Content="0.000" HorizontalAlignment="Left" Margin="194,127,0,0" VerticalAlignment="Top" Checked="threeDecimal_Checked" IsChecked="True"/>
-        <Button Content="Расчет" Margin="0,0,50,-34" Click="Execute_Click" RenderTransformOrigin="-3.659,-7.388" Height="25" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="55" Background="#FFD8FDDC" Grid.ColumnSpan="2" BorderBrush="#FFA28C8C"/>
-        <TextBlock HorizontalAlignment="Left" Margin="3,-17,0,0" TextWrapping="Wrap" VerticalAlignment="Top"><Run Text="Расчет площадей помещени"/><Run Language="ru-ru" Text="й в квартирах"/></TextBlock>
-        <TextBlock HorizontalAlignment="Left" Margin="10,18,0,0" TextWrapping="Wrap" VerticalAlignment="Top" RenderTransformOrigin="0.501,3.167"><Run Language="ru-ru" Text="Расчет площадей выполняется"/><Run Text=":"/></TextBlock>
-        <TextBlock HorizontalAlignment="Left" Margin="10,95,0,0" TextWrapping="Wrap" VerticalAlignment="Top" RenderTransformOrigin="0.501,3.167" Text="Формат чисел расчитанных площадей:"/>
-        <Separator HorizontalAlignment="Left" Margin="0,63,0,0" VerticalAlignment="Top" Height="32" RenderTransformOrigin="0.5,0.5" Width="350" Background="Black" Grid.ColumnSpan="2">
+        <Button Content="Отмена" Margin="0,0,0,-34" Click="Cancel_Click" RenderTransformOrigin="-3.659,-7.388" Height="25" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="50" Background="#FFFBB5B5" Grid.Column="5"/>
+        <RadioButton GroupName="calcRange" x:Name="allProj" Content="Во всем проекте" HorizontalAlignment="Left" Margin="51,86,0,0" VerticalAlignment="Top" Checked="allProj_Checked" Grid.ColumnSpan="3"/>
+        <RadioButton GroupName="calcRange" x:Name="allView" Content="Видимые на виде" HorizontalAlignment="Left" Margin="5,87,0,0" VerticalAlignment="Top" Checked="allView_Checked" Width="128" Height="14" IsChecked="True" Grid.ColumnSpan="3" Grid.Column="3"/>
+        <RadioButton GroupName="roundValue" x:Name="threeDecimal" Content="0.000" HorizontalAlignment="Left" Margin="5,159,0,0" VerticalAlignment="Top" Checked="threeDecimal_Checked" IsChecked="True" Grid.ColumnSpan="2" Grid.Column="3"/>
+        <RadioButton GroupName="roundValue" x:Name="twoDecimal" Content="0.00" HorizontalAlignment="Left" Margin="51,159,0,0" VerticalAlignment="Top" Checked="twoDecimal_Checked" IsChecked="True"/>
+        <Button Content="Расчет" Margin="0,0,50,-34" Click="Execute_Click" RenderTransformOrigin="-3.659,-7.388" Height="25" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="55" Background="#FFD8FDDC" BorderBrush="#FFA28C8C" Grid.Column="5"/>
+        <TextBlock HorizontalAlignment="Left" Margin="10,50,0,0" TextWrapping="Wrap" VerticalAlignment="Top" RenderTransformOrigin="0.501,3.167" Grid.ColumnSpan="6" Width="340"><Run Language="ru-ru" Text="Расчет площадей выполняется"/><Run Text=":"/></TextBlock>
+        <TextBlock HorizontalAlignment="Left" Margin="10,130,0,0" TextWrapping="Wrap" VerticalAlignment="Top" RenderTransformOrigin="0.501,3.167" Text="Формат чисел расчитанных площадей:" Grid.ColumnSpan="5"/>
+        <Separator HorizontalAlignment="Left" VerticalAlignment="Top" Height="32" RenderTransformOrigin="0.5,0.5" Width="400" Background="Black" Grid.ColumnSpan="6" Margin="0,89,0,0">
             <Separator.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform ScaleY="-1"/>
