@@ -92,7 +92,7 @@ namespace MS.Shared
         /// <summary>
         /// Guid параметра Мрк.МаркаСетки = dd157586-3a06-41a8-9564-391c410bae63 (string)
         /// </summary>
-        public static Guid Mrk_MarkOfMesh => Guid.Parse("dd157586-3a06-41a8-9564-391c410bae63");
+        public static Guid Mrk_MeshMark => Guid.Parse("dd157586-3a06-41a8-9564-391c410bae63");
 
         /// <summary>
         /// Guid параметра ADSK_Марка = 2204049c-d557-4dfc-8d70-13f19715e46d (string)
@@ -100,9 +100,9 @@ namespace MS.Shared
         public static Guid ADSK_Mark => Guid.Parse("2204049c-d557-4dfc-8d70-13f19715e46d");
 
         /// <summary>
-        /// Guid параметра Арм.КолвоАрмированияКладки = fb502bf5-cbd4-416b-8ce1-cbf2ac40c3b6 (int)
+        /// Guid параметра PGS_АрмКолвоАрмРядов = 9d149e47-87a0-45f7-9237-d47436065c80 (double)
         /// </summary>
-        public static Guid Arm_CountReinforcedRowsMasonry => Guid.Parse("fb502bf5-cbd4-416b-8ce1-cbf2ac40c3b6");
+        public static Guid PGS_ArmCountRows => Guid.Parse("9d149e47-87a0-45f7-9237-d47436065c80");
 
         /// <summary>
         /// Guid параметра Рзм.Ширина = 8f2e4f93-9472-4941-a65d-0ac468fd6a5d (double)
@@ -150,24 +150,39 @@ namespace MS.Shared
         public static Guid PGS_FinishingTypeOfFloor => Guid.Parse("6f7dd141-1edf-4cd1-82e9-a6834166a84b");
 
         /// <summary>
-        /// Guid параметра Арм.ТипАрмирования = 4a15c387-8778-4539-b64c-ec375ed0ec8c (double)
+        /// Guid параметра PGS_АрмТип = 93178432-562c-4753-9c86-991aa97dba72 (double)
         /// </summary>
-        public static Guid Arm_TypeOfReinforcement => Guid.Parse("4a15c387-8778-4539-b64c-ec375ed0ec8c");
+        public static Guid PGS_ArmType => Guid.Parse("93178432-562c-4753-9c86-991aa97dba72");
 
         /// <summary>
-        /// Guid параметра Арм.КолвоСтержнейКладки = f9043c18-927f-4216-bd04-4ca1be9923fb (int)
+        /// Guid параметра PGS_АрмКолвоСтержней = 03bb8459-28c7-4cdb-8058-cb44563e1c0c (double)
         /// </summary>
-        public static Guid Arm_CountOfBarsInMasonry => Guid.Parse("f9043c18-927f-4216-bd04-4ca1be9923fb");
+        public static Guid PGS_ArmBarsCount => Guid.Parse("03bb8459-28c7-4cdb-8058-cb44563e1c0c");
 
         /// <summary>
-        /// Guid параметра Арм.ОтступОтГранейСтены = 6def42bc-21d1-4baa-809d-93d45f7088ed (double)
+        /// Guid параметра PGS_АрмОтступОтГраней = 54f360ca-8d79-4168-bc13-7ee63f7743e1 (double)
         /// </summary>
-        public static Guid Arm_IndentFromWallEdges => Guid.Parse("6def42bc-21d1-4baa-809d-93d45f7088ed");
+        public static Guid PGS_ArmIndentFromFace => Guid.Parse("54f360ca-8d79-4168-bc13-7ee63f7743e1");
 
         /// <summary>
         /// Guid параметра Мрк.НаименованиеСетки = ca324d54-2a1d-4b38-a91b-09cdaecd01ff (string)
         /// </summary>
         public static Guid Mrk_MeshName => Guid.Parse("ca324d54-2a1d-4b38-a91b-09cdaecd01ff");
+
+        /// <summary>
+        /// Guid параметра PGS_АрмШаг = dc0ed051-c8c5-40e8-92d6-5d57937a6590 (double)
+        /// </summary>
+        public static Guid PGS_ArmStep => Guid.Parse("dc0ed051-c8c5-40e8-92d6-5d57937a6590");
+
+        /// <summary>
+        /// Guid параметра PGS_АрмДиаметр = ec329a4f-5899-469e-9335-867c1e38da40
+        /// </summary>
+        public static Guid PGS_ArmDiameter => Guid.Parse("ec329a4f-5899-469e-9335-867c1e38da40");
+
+        /// <summary>
+        /// Guid параметра Арм.КлассСтали = e8e92e84-d88e-415d-8ba0-26a09d8bcccf (string)
+        /// </summary>
+        public static Guid Arm_SteelClass => Guid.Parse("e8e92e84-d88e-415d-8ba0-26a09d8bcccf");
 
         /// <summary>
         /// Валидация текущего проекта Revit на наличие общих параметров у заданной категории.

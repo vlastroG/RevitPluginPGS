@@ -14,34 +14,53 @@ namespace MS.Commands.AR
     [Regeneration(RegenerationOption.Manual)]
     public class MasonryMesh : IExternalCommand
     {
-        private string CreateMeshName(Element wall, double wallWidth, int indent)
+        /// <summary>
+        /// Сформировать значение наименования сетки для стены по типу армирования, ширине стены и отступу от граней стены
+        /// </summary>
+        /// <param name="wall"></param>
+        /// <param name="reinforceType"></param>
+        /// <param name="wallWidth"></param>
+        /// <param name="indent"></param>
+        /// <returns></returns>
+        private string CreateMeshName(Element wall, int reinforceType, double wallWidth, int indent)
         {
-            //int reinforceType = 0;// Значение параметра ТипАрмирования
-            string meshName = String.Empty; //Значение параметра Мрк.Наименование сетки, куда нужно писать текст
-            string meshMark = String.Empty; //Значение параметра Мрк.МаркаСетки
-            int diameter = 0; //Значение параметра Арм.ГоризДиаметр
-            string steel = String.Empty; //Значение параметра Арм.КлассСтали
-            string barStep = String.Empty; //Значение параметра Арм.ГоризШаг
-            int meshWidth = 0; //Значение ширины кладочной сетки = ширина стены - отступ*2
+            string meshMark = wall.get_Parameter(SharedParams.Mrk_MeshMark).AsValueString();//  ?? String.Empty; //Значение параметра Мрк.МаркаСетки
+            string steel = wall.get_Parameter(SharedParams.Arm_SteelClass).AsValueString();//  ?? String.Empty; //Значение параметра Арм.КлассСтали
+            int barStep = (int)wall.get_Parameter(SharedParams.PGS_ArmStep).AsDouble();//  ?? String.Empty; //Значение параметра PGS_АрмШаг
+            int diameter = (int)wall.get_Parameter(SharedParams.PGS_ArmDiameter).AsDouble(); //Значение параметра PGS_АрмДиаметр
+            int meshWidth = ((int)wallWidth - indent * 2) / 10; //Значение ширины кладочной сетки = ширина стены - отступ*2
 
             StringBuilder sb = new StringBuilder();
-            int reinforceType = wall.get_Parameter(SharedParams).AsInteger();
             if (reinforceType == 1)
             {
-                sb.Append()
+                sb.Append(meshMark);
+                sb.Append(' ');
+                sb.Append(diameter);
+                sb.Append(steel);
+                sb.Append('-');
+                sb.Append(barStep);
+                sb.Append('/');
+                sb.Append(diameter);
+                sb.Append(steel);
+                sb.Append('-');
+                sb.Append(barStep);
+                sb.Append(' ');
+                sb.Append(meshWidth);
             }
-            else if(reinforceType == 2)
+            else if (reinforceType == 2)
             {
-
+                sb.Append("Ø");
+                sb.Append(diameter);
+                sb.Append(' ');
+                sb.Append(steel);
+                sb.Append(", м.п.");
             }
+            return sb.ToString();
         }
 
         /// <summary>
-        /// Подсчет кладочной сетки в стенах и его назначение в параметр ДлинаКладочнойСетки
-        /// Сейчас заполняется параметр Комментарии.
-        /// Для релиза изменить свойство guid_par_mesh_length - для длины кладочной сетки
-        /// и guid_par_mesh_rows_count - для количества армируемых рядов.
-        /// После нужно скорректировать назначение параметра в транзакции (116 line)
+        /// Подсчет кладочной сетки в стенах и его назначение в параметр PGS_ИтогАрмСетки
+        /// наименование кладочного изделия пишется в Мрк.НаименованиеСетки
         /// </summary>
         /// <param name="commandData"></param>
         /// <param name="message"></param>
@@ -54,9 +73,15 @@ namespace MS.Commands.AR
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
 
             Guid[] _sharedParamsForCommand = new Guid[] {
-            SharedParams.Arm_CountReinforcedRowsMasonry,
-            SharedParams.PGS_TotalMasonryMesh
-            //Добавить параметры-------------------------------------------------------
+            SharedParams.PGS_TotalMasonryMesh,
+            SharedParams.PGS_ArmType,
+            SharedParams.PGS_ArmBarsCount,
+            SharedParams.PGS_ArmCountRows,
+            SharedParams.PGS_ArmIndentFromFace,
+            SharedParams.Mrk_MeshName,
+            SharedParams.Mrk_MeshMark,
+            SharedParams.PGS_ArmStep,
+            SharedParams.PGS_ArmDiameter
             };
             if (!SharedParams.IsCategoryOfDocContainsSharedParams(
                 doc,
@@ -65,8 +90,15 @@ namespace MS.Commands.AR
             {
                 MessageBox.Show("В текущем проекте у категории \"Стены\" " +
                     "присутствуют НЕ ВСЕ необходимые общие параметры:" +
-                    "\nАрм.КолвоАрмированияКладки" +
-                    "\nPGS_ИтогАрмСетки",
+                    "\nPGS_ИтогАрмСетки" +
+                    "\nPGS_АрмТип" +
+                    "\nPGS_АрмКолвоСтержней" +
+                    "\nPGS_АрмКолвоАрмРядов" +
+                    "\nPGS_АрмОтступОтГраней" +
+                    "\nМрк.НаименованиеСетки" +
+                    "\nМрк.МаркаСетки" +
+                    "\nPGS_АрмШаг" +
+                    "\nPGS_АрмДиаметр",
                     "Ошибка");
                 return Result.Cancelled;
             }
@@ -74,7 +106,7 @@ namespace MS.Commands.AR
             int indent = 0; //Значение отступа кладочной сетки от грани стены (с одной стороны)
             try
             {
-                indent = UserInput.GetIntFromUser("Ввод отступа кладочной сетки в мм", "Введите ЦЕЛОЕ число:");
+                indent = UserInput.GetIntFromUser("Ввод отступа кладочной сетки в мм", "Введите ЦЕЛОЕ число:", 10);
             }
             catch (System.OperationCanceledException)
             {
@@ -90,81 +122,65 @@ namespace MS.Commands.AR
                 .Select(e => e as Wall)
                 .Where(w => w.WallType.GetCompoundStructure() != null
                          && w.WallType.GetCompoundStructure().LayerCount == 1)
-                //Изменить параметр на тип армирования
-                .Where(w => w.get_Parameter(SharedParams.Arm_CountReinforcedRowsMasonry).HasValue == true
-                         && (w.get_Parameter(SharedParams.Arm_CountReinforcedRowsMasonry).AsDouble() == 1
-                         || w.get_Parameter(SharedParams.Arm_CountReinforcedRowsMasonry).AsDouble() == 2));
+                .Where(w => w.get_Parameter(SharedParams.PGS_ArmType).HasValue == true
+                         && (w.get_Parameter(SharedParams.PGS_ArmType).AsDouble() == 1
+                         || w.get_Parameter(SharedParams.PGS_ArmType).AsDouble() == 2))
+                .ToArray();
 
-            double mesh_rows_in_wall = 0;
-            double mesh_length_in_openings = 0;
-            double wall_height = 0;
-            double wall_length = 0;
-            double wall_width = 0;
-            double mesh_length_total = 0;
-            double mesh_area_total = 0;
-            int calculatedWallsCount = 0;
-            int reinforceType = 0;// Значение параметра ТипАрмирования
-            string meshName = String.Empty; //Значение параметра Мрк.Наименование сетки, куда нужно писать текст
-            string meshMark = String.Empty; //Значение параметра Мрк.МаркаСетки
-            int diameter = 0; //Значение параметра Арм.ГоризДиаметр
-            string steel = String.Empty; //Значение параметра Арм.КлассСтали
-            string barStep = String.Empty; //Значение параметра Арм.ГоризШаг
-            int meshWidth = 0; //Значение ширины кладочной сетки = ширина стены - отступ*2
-            foreach (var wall in walls)
+            int setLengthCount = 0;
+            int setNameCount = 0;
+            using (Transaction trans = new Transaction(doc))
             {
-                mesh_rows_in_wall = wall.get_Parameter(SharedParams.Arm_CountReinforcedRowsMasonry).AsDouble();
-                wall_height = wall.get_Parameter(BuiltInParameter.WALL_USER_HEIGHT_PARAM).AsDouble() * SharedValues.FootToMillimeters;
-                wall_length = wall.get_Parameter(BuiltInParameter.CURVE_ELEM_LENGTH).AsDouble() * SharedValues.FootToMillimeters;
-                wall_width = wall.WallType.get_Parameter(BuiltInParameter.WALL_ATTR_WIDTH_PARAM).AsDouble() * SharedValues.FootToMillimeters;
-
-                var list_openings = wall
-                    .FindInserts(true, true, true, true)
-                    .Select(i => doc.GetElement(i) as FamilyInstance)
-                    .ToList();
-
-                double opening_width = 0;
-                double opening_height = 0;
-                double opening_wall_height_percent = 0;
-                double mesh_rows_in_opening = 0;
-                double mesh_length_in_opening = 0;
-                foreach (var opening in list_openings)
+                trans.Start("Подсчет кладочной сетки");
+                foreach (var wall in walls)
                 {
-                    opening_width = opening.get_Parameter(SharedParams.ADSK_DimensionWidth).AsDouble() * SharedValues.FootToMillimeters;
-                    if (opening_width == 0)
+                    double mesh_rows_in_wall = wall.get_Parameter(SharedParams.PGS_ArmCountRows).AsDouble();
+                    double wall_height = wall.get_Parameter(BuiltInParameter.WALL_USER_HEIGHT_PARAM).AsDouble()
+                        * SharedValues.FootToMillimeters;
+                    double wall_length = wall.get_Parameter(BuiltInParameter.CURVE_ELEM_LENGTH).AsDouble()
+                        * SharedValues.FootToMillimeters;
+                    double wall_width = wall.WallType.get_Parameter(BuiltInParameter.WALL_ATTR_WIDTH_PARAM).AsDouble()
+                        * SharedValues.FootToMillimeters;
+                    int reinforceType = (int)wall.get_Parameter(SharedParams.PGS_ArmType).AsDouble();
+                    string meshName = CreateMeshName(wall, reinforceType, wall_width, indent);
+                    string meshNameExist = wall.get_Parameter(SharedParams.Mrk_MeshName).AsValueString();
+
+                    var list_openings = wall
+                        .FindInserts(false, false, true, true)
+                        .Select(i => doc.GetElement(i))
+                        .ToArray();
+
+                    double mesh_length_in_openings = 0;
+                    foreach (var opening in list_openings)
                     {
-                        opening_width = opening.Symbol.get_Parameter(SharedParams.ADSK_DimensionWidth).AsDouble() * SharedValues.FootToMillimeters;
+                        var (Height, Width) = WorkWithGeometry.GetWidthAndHeightOfElement(opening);
+                        double opening_height = Height * SharedValues.FootToMillimeters;
+                        double opening_width = Width * SharedValues.FootToMillimeters;
+                        double opening_wall_height_percent = opening_height / wall_height;
+                        int mesh_rows_in_opening = (int)(opening_wall_height_percent * mesh_rows_in_wall);
+                        double mesh_length_in_opening = mesh_rows_in_opening * opening_width;
+                        mesh_length_in_openings += mesh_length_in_opening;
                     }
-
-                    opening_height = opening.get_Parameter(SharedParams.ADSK_DimensionHeight).AsDouble() * SharedValues.FootToMillimeters;
-                    if (opening_height == 0)
+                    // Длина кладочной сетки в метрах
+                    double mesh_length_total = (mesh_rows_in_wall * wall_length - mesh_length_in_openings) / 1000;
+                    double meshLength = wall.get_Parameter(SharedParams.PGS_TotalMasonryMesh).AsDouble();
+                    if (meshLength != mesh_length_total)
                     {
-                        opening_height = opening.Symbol.get_Parameter(SharedParams.ADSK_DimensionHeight).AsDouble() * SharedValues.FootToMillimeters;
+                        wall.get_Parameter(SharedParams.PGS_TotalMasonryMesh).Set(mesh_length_total);
+                        setLengthCount++;
                     }
-
-                    opening_wall_height_percent = opening_height / wall_height;
-                    mesh_rows_in_opening = opening_wall_height_percent * mesh_rows_in_wall;
-                    mesh_length_in_opening = mesh_rows_in_opening * opening_width;
-                    mesh_length_in_openings += mesh_length_in_opening;
+                    if (meshName != meshNameExist)
+                    {
+                        wall.get_Parameter(SharedParams.Mrk_MeshName).Set(meshName);
+                        setNameCount++;
+                    }
                 }
-
-                mesh_length_total = mesh_rows_in_wall * wall_length - mesh_length_in_openings;
-                mesh_area_total = (mesh_length_total / SharedValues.FootToMillimeters) * (wall_width / SharedValues.FootToMillimeters);
-
-                using (Transaction trans = new Transaction(doc))
-                {
-                    trans.Start("Подсчет кладочной сетки");
-
-                    wall.get_Parameter(SharedParams.PGS_TotalMasonryMesh).Set(mesh_area_total);
-                    calculatedWallsCount++;
-
-                    trans.Commit();
-                }
+                trans.Commit();
             }
-            if (calculatedWallsCount == 0)
-                MessageBox.Show($"Обработано {calculatedWallsCount} стен.");
-            else
-                MessageBox.Show($"Площадь кладочной сетки подсчитана в м.кв.\nОбработано {calculatedWallsCount} стен.");
 
+            MessageBox.Show($"Длина кладочной сетки подсчитана в м.п." +
+                $"\nPGS_ИтогАрмСетки обновлен {setLengthCount} раз," +
+                $"\nМрк.НаименованиеСетки обновлено {setNameCount} раз.");
             return Result.Succeeded;
         }
     }

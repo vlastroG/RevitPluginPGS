@@ -83,21 +83,22 @@ namespace MS.Utilites
         /// </summary>
         /// <param name="header">Заголовок сообщения для пользователя</param>
         /// <param name="message">Сообщение пользователю для контекста ввода числа</param>
+        /// <param name="defaultValue">Значение по умолчанию</param>
         /// <returns>Число, введенное пользователем</returns>
         /// <exception cref="System.OperationCanceledException">Отмена операции</exception>
-        public static int GetIntFromUser(string header, string message)
+        public static int GetIntFromUser(string header, string message, int defaultValue)
         {
-            string strIndent;
-            int indent = 0;
+            string strValue;
+            int value = defaultValue;
             do
             {
-                strIndent = GetStringFromUser(header, message, "0");
-                if (strIndent.Length == 0)
+                strValue = GetStringFromUser(header, message, defaultValue.ToString());
+                if (strValue.Length == 0)
                 {
                     throw new System.OperationCanceledException();
                 }
-            } while (!int.TryParse(strIndent, out indent));
-            return indent;
+            } while (!int.TryParse(strValue, out value));
+            return value;
         }
     }
 }
