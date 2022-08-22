@@ -176,7 +176,7 @@ namespace MS.Utilites
             double elemTop = elemBox.Max.Z;
 
             double deltaBottom = elemBottom - wallBottom;
-            double deltaTop = elemTop - wallTop;
+            double deltaTop = wallTop - elemTop;
             (double heightEl, double widthEl) = GetWidthAndHeightOfElement(insertedElement);
             if (deltaBottom >= 0 && deltaTop >= 0)// проем внутри стены
             {

@@ -103,15 +103,15 @@ namespace MS.Commands.AR
                 return Result.Cancelled;
             }
 
-            int indent = 0; //Значение отступа кладочной сетки от грани стены (с одной стороны)
-            try
-            {
-                indent = UserInput.GetIntFromUser("Ввод отступа кладочной сетки в мм", "Введите ЦЕЛОЕ число:", 10);
-            }
-            catch (System.OperationCanceledException)
-            {
-                return Result.Cancelled;
-            }
+            //int indent = 0; //Значение отступа кладочной сетки от грани стены (с одной стороны)
+            //try
+            //{
+            //    indent = UserInput.GetIntFromUser("Ввод отступа кладочной сетки в мм", "Введите ЦЕЛОЕ число:", 10);
+            //}
+            //catch (System.OperationCanceledException)
+            //{
+            //    return Result.Cancelled;
+            //}
 
             // Выбор всех однослойных стен в проекте, у которых значение параметра ТипАрмирования == 1 || 2
             var filter = new FilteredElementCollector(doc);
@@ -142,6 +142,7 @@ namespace MS.Commands.AR
                     double wall_width = wall.WallType.get_Parameter(BuiltInParameter.WALL_ATTR_WIDTH_PARAM).AsDouble()
                         * SharedValues.FootToMillimeters;
                     int reinforceType = (int)wall.get_Parameter(SharedParams.PGS_ArmType).AsDouble();
+                    int indent = (int)wall.get_Parameter(SharedParams.PGS_ArmIndentFromFace).AsDouble();
                     string meshName = CreateMeshName(wall, reinforceType, wall_width, indent);
                     string meshNameExist = wall.get_Parameter(SharedParams.Mrk_MeshName).AsValueString();
 
