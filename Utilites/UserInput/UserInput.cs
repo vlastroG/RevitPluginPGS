@@ -74,5 +74,31 @@ namespace MS.Utilites
 
             return dialogResult;
         }
+
+        /// <summary>
+        /// Запрашивает ввод целого числа от пользователя до тех пор,
+        /// пока вводимая строка не будет валидна. 
+        /// Если пользователь ввел пустую строку, или нажал "Отмена",
+        /// будет вызвано исключение <see cref="System.OperationCanceledException"/>
+        /// </summary>
+        /// <param name="header">Заголовок сообщения для пользователя</param>
+        /// <param name="message">Сообщение пользователю для контекста ввода числа</param>
+        /// <param name="defaultValue">Значение по умолчанию</param>
+        /// <returns>Число, введенное пользователем</returns>
+        /// <exception cref="System.OperationCanceledException">Отмена операции</exception>
+        public static int GetIntFromUser(string header, string message, int defaultValue)
+        {
+            string strValue;
+            int value = defaultValue;
+            do
+            {
+                strValue = GetStringFromUser(header, message, defaultValue.ToString());
+                if (strValue.Length == 0)
+                {
+                    throw new System.OperationCanceledException();
+                }
+            } while (!int.TryParse(strValue, out value));
+            return value;
+        }
     }
 }

@@ -6,6 +6,8 @@ using System.Drawing;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using MS.Shared;
+using System.Linq;
 
 namespace MS.Utilites
 {
@@ -122,6 +124,154 @@ namespace MS.Utilites
             var wall_area = length * height;
 
             return wall_area;
+        }
+
+        /// <summary>
+        /// Функция находит ширину и высоту вырезаемой проемом части стены,
+        /// выполненным прямоугольным семейством или прямоугольным вложенным витражом.
+        /// Релизовано 5 случаев:
+        /// 1. Проем по вертикали полностью внутри стены, или нижней/верхней гранью касается нижней/вержней грани стены;
+        /// 2. Проем снизу и сверху вылазит из стены;
+        /// 3. Проем вылазит только снизу стены;
+        /// 4. Проем вылазит только сверху стены;
+        /// 5. Проем находится вне стены.
+        /// </summary>
+        /// <param name="insertedElement">Проем внутри стены: семейство, размещенной в стене или витраж.</param>
+        /// <param name="hostWall">Стена, в которой размещен проем.</param>
+        /// <returns>Кортеж высоты и ширины проема</returns>
+        /// <exception cref="ArgumentException">Исключение, если элемент и стена в разных документах.</exception>
+        /// <exception cref="ArgumentNullException">Исключение, если не найден 3D вид по умолчанию.</exception>
+        public static (double Height, double Width) GetWidthAndHeightOfInsertElement(
+            Element insertedElement,
+            Wall hostWall)
+        {
+            if (insertedElement.Document.PathName != hostWall.Document.PathName)
+            {
+                throw new ArgumentException(
+                    $"Elements with ids: {insertedElement.Id} & {hostWall.Id} aren't in the same document!");
+            }
+            Document doc = insertedElement.Document;
+            View3D view3d;
+            BoundingBoxXYZ wallBox;
+            BoundingBoxXYZ elemBox;
+            using (var collector = new FilteredElementCollector(doc))
+            {
+                view3d = collector
+                                .OfClass(typeof(View3D))
+                                .Cast<View3D>()
+                                .FirstOrDefault(v => v.Name == "{3D}");
+            }
+            try
+            {
+                wallBox = hostWall.get_BoundingBox(view3d);
+                elemBox = insertedElement.get_BoundingBox(view3d);
+            }
+            catch (Exception)
+            {
+                throw new ArgumentNullException("Не найден 3D вид по умолчанию!");
+            }
+            double wallBottom = wallBox.Min.Z;
+            double wallTop = wallBox.Max.Z;
+            double elemBottom = elemBox.Min.Z;
+            double elemTop = elemBox.Max.Z;
+
+            double deltaBottom = elemBottom - wallBottom;
+            double deltaTop = elemTop - wallTop;
+            (double heightEl, double widthEl) = GetWidthAndHeightOfElement(insertedElement);
+            if (deltaBottom >= 0 && deltaTop >= 0)// проем внутри стены
+            {
+                return (heightEl, widthEl);
+            }
+            if (deltaBottom < 0 && deltaTop < 0) // проем выходит за пределы стены сверху и снизу
+            {
+                double height = hostWall.get_Parameter(BuiltInParameter.WALL_USER_HEIGHT_PARAM).AsDouble();
+                return (height, widthEl);
+            }
+            if (deltaBottom < 0 && deltaTop > 0)// проем выходит за пределы стены только снизу
+            {
+                double height = elemTop - wallBottom;
+                return (height, widthEl);
+            }
+            if (deltaBottom > 0 && deltaTop < 0)// проем выходит за пределы стены только сверху
+            {
+                double height = wallTop - elemBottom;
+                return (height, widthEl);
+            }
+            // иначе проем не заходит на стену
+            return (0, 0);
+        }
+
+        /// <summary>
+        /// Возвращает кортеж двух чисел: высоты и ширины элемента в футах
+        /// </summary>
+        /// <param name="element">Проем: либо <see cref="Autodesk.Revit.DB.FamilyInstance"/>, либо <see cref="Wall"/></param>
+        /// <returns></returns>
+        public static (double Height, double Width) GetWidthAndHeightOfElement(Element element)
+        {
+            double height = 0;
+            double width = 0;
+            if (element is FamilyInstance)
+            {
+                // Если элемент - загружаемое семейство
+                var famInst = element as FamilyInstance;
+                try
+                {
+                    if (famInst.get_Parameter(BuiltInParameter.FAMILY_HEIGHT_PARAM) != null
+                        && famInst.get_Parameter(BuiltInParameter.FAMILY_HEIGHT_PARAM).AsDouble() > 0)
+                    {
+                        //"Высота", "Ширина", "Э"
+                        height = famInst.get_Parameter(BuiltInParameter.FAMILY_HEIGHT_PARAM).AsDouble();
+                        width = famInst.get_Parameter(BuiltInParameter.FAMILY_WIDTH_PARAM).AsDouble();
+                    }
+                    else if (famInst.get_Parameter(SharedParams.ADSK_DimensionHeight) != null
+                        && famInst.get_Parameter(SharedParams.ADSK_DimensionHeight).AsDouble() > 0)
+                    {
+                        //"Рзм.Высота", "Рзм.Ширина", "Э"
+                        height = famInst.get_Parameter(SharedParams.ADSK_DimensionHeight).AsDouble();
+                        width = famInst.get_Parameter(SharedParams.ADSK_DimensionWidth).AsDouble();
+                    }
+                    else if (famInst.get_Parameter(BuiltInParameter.FAMILY_ROUGH_HEIGHT_PARAM) != null
+                        && famInst.get_Parameter(BuiltInParameter.FAMILY_ROUGH_HEIGHT_PARAM).AsDouble() > 0)
+                    {
+                        //"Примерная высота", "Примерная ширина", "Э"
+                        height = famInst.get_Parameter(BuiltInParameter.FAMILY_ROUGH_HEIGHT_PARAM).AsDouble();
+                        width = famInst.get_Parameter(BuiltInParameter.FAMILY_ROUGH_WIDTH_PARAM).AsDouble();
+                    }
+                    else if (famInst.Symbol.get_Parameter(BuiltInParameter.FAMILY_HEIGHT_PARAM) != null
+                        && famInst.Symbol.get_Parameter(BuiltInParameter.FAMILY_HEIGHT_PARAM).AsDouble() > 0)
+                    {
+                        //"Высота", "Ширина", "Т"
+                        height = famInst.Symbol.get_Parameter(BuiltInParameter.FAMILY_HEIGHT_PARAM).AsDouble();
+                        width = famInst.Symbol.get_Parameter(BuiltInParameter.FAMILY_WIDTH_PARAM).AsDouble();
+                    }
+                    else if (famInst.Symbol.get_Parameter(SharedParams.ADSK_DimensionHeight) != null
+                        && famInst.Symbol.get_Parameter(SharedParams.ADSK_DimensionHeight).AsDouble() > 0)
+                    {
+                        //"Рзм.Высота", "Рзм.Ширина", "Т"
+                        height = famInst.Symbol.get_Parameter(SharedParams.ADSK_DimensionHeight).AsDouble();
+                        width = famInst.Symbol.get_Parameter(SharedParams.ADSK_DimensionWidth).AsDouble();
+                    }
+                    else if (famInst.Symbol.get_Parameter(BuiltInParameter.FAMILY_ROUGH_HEIGHT_PARAM) != null
+                        && famInst.Symbol.get_Parameter(BuiltInParameter.FAMILY_ROUGH_HEIGHT_PARAM).AsDouble() > 0)
+                    {
+                        //"Примерная высота", "Примерная ширина", "Т"
+                        height = famInst.Symbol.get_Parameter(BuiltInParameter.FAMILY_ROUGH_HEIGHT_PARAM).AsDouble();
+                        width = famInst.Symbol.get_Parameter(BuiltInParameter.FAMILY_ROUGH_WIDTH_PARAM).AsDouble();
+                    }
+                }
+                catch (NullReferenceException)
+                {
+                    height = 0;
+                    width = 0;
+                }
+            }
+            else if (element is Wall)
+            {
+                // Если элемент - стена
+                height = element.get_Parameter(BuiltInParameter.WALL_USER_HEIGHT_PARAM).AsDouble();
+                width = element.get_Parameter(BuiltInParameter.CURVE_ELEM_LENGTH).AsDouble();
+            }
+            return (height, width);
         }
 
         /// <summary>

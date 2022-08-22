@@ -1,19 +1,10 @@
-﻿using System.Drawing;
+﻿
+using static MS.Utilites.UserInput;
+int test = 0;
+double d = 1;
+test = (int)d;
+var b = d == 1;
+var b2 = test == 1;
 
-int width = 360;
-int height = 86;
-int zero = 0;
-float dpi = 144;
-
-using (Bitmap b = new Bitmap(width, height))
-{
-
-    b.SetResolution(dpi, dpi);
-    using (Graphics g = Graphics.FromImage(b))
-    {
-        Brush brush = new SolidBrush(Color.FromArgb(170, 100, 105));
-        g.FillRectangle(brush, new Rectangle(zero, zero, width, height));
-    }
-    b.Save(@"green.png", System.Drawing.Imaging.ImageFormat.Png);
-}
+var test2 = test * 2;
 
