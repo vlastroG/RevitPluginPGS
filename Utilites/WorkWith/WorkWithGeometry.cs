@@ -127,7 +127,7 @@ namespace MS.Utilites
         }
 
         /// <summary>
-        /// Функция находит ширину и высоту вырезаемой части стены проемом, 
+        /// Функция находит ширину и высоту вырезаемой проемом части стены,
         /// выполненным прямоугольным семейством или прямоугольным вложенным витражом.
         /// Релизовано 5 случаев:
         /// 1. Проем по вертикали полностью внутри стены, или нижней/верхней гранью касается нижней/вержней грани стены;
@@ -138,17 +138,17 @@ namespace MS.Utilites
         /// </summary>
         /// <param name="insertedElement">Проем внутри стены: семейство, размещенной в стене или витраж.</param>
         /// <param name="hostWall">Стена, в которой размещен проем.</param>
-        /// <returns></returns>
+        /// <returns>Кортеж высоты и ширины проема</returns>
         /// <exception cref="ArgumentException">Исключение, если элемент и стена в разных документах.</exception>
         /// <exception cref="ArgumentNullException">Исключение, если не найден 3D вид по умолчанию.</exception>
         public static (double Height, double Width) GetWidthAndHeightOfInsertElement(
             Element insertedElement,
             Wall hostWall)
         {
-            if (insertedElement.Document != hostWall.Document)
+            if (insertedElement.Document.PathName != hostWall.Document.PathName)
             {
                 throw new ArgumentException(
-                    $"Elements with ids: {insertedElement.Id} & {hostWall} aren't in the same document!");
+                    $"Elements with ids: {insertedElement.Id} & {hostWall.Id} aren't in the same document!");
             }
             Document doc = insertedElement.Document;
             View3D view3d;

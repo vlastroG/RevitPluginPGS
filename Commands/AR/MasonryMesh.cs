@@ -149,11 +149,10 @@ namespace MS.Commands.AR
                         .FindInserts(false, false, true, true)
                         .Select(i => doc.GetElement(i))
                         .ToArray();
-
                     double mesh_length_in_openings = 0;
                     foreach (var opening in list_openings)
                     {
-                        var (Height, Width) = WorkWithGeometry.GetWidthAndHeightOfElement(opening);
+                        var (Height, Width) = WorkWithGeometry.GetWidthAndHeightOfInsertElement(opening, wall);
                         double opening_height = Height * SharedValues.FootToMillimeters;
                         double opening_width = Width * SharedValues.FootToMillimeters;
                         double opening_wall_height_percent = opening_height / wall_height;
