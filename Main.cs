@@ -150,12 +150,27 @@ namespace MS
             Uri btnPipelineFittingsImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
             BitmapImage btnPipelineFittingsImage = new BitmapImage(btnPipelineFittingsImagePath);
             btnPipelineFittings.LargeImage = btnPipelineFittingsImage;
+            btnPipelineFittings.ToolTip = "Автоматическое заполнение пунктов номера квартиры " +
+                "в спецификации \"PGS_ОВ_Настройка поквартирных клапанов\".";
+            btnPipelineFittings.LongDescription = "Копирование значения прааметров в экземпляры " +
+                "элементов категорий: Арматура трубопроводов и в Оборудование " +
+                "пишется значение номер квартиры из помещения, в которых эти экземпляры расположены.";
+            btnPipelineFittings.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, @"https://google.com"));
+
 
             // ОВиК системы в пространствах command
             PushButtonData btnSystemsInSpace = new PushButtonData("SystemsInSpace", "Системы\nв пространствах", path, "MS.Commands.MEP.SystemsInSpace");
             Uri btnSystemsInSpaceImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
             BitmapImage btnSystemsInSpaceImage = new BitmapImage(btnSystemsInSpaceImagePath);
             btnSystemsInSpace.LargeImage = btnSystemsInSpaceImage;
+            btnSystemsInSpace.ToolTip = "Автоматическое заполнение пунктов принадлежности " +
+                "систем притока и вытяжки для таблицы воздухообменов.";
+            btnSystemsInSpace.LongDescription = "Копирование значений параметров воздуховодов " +
+                "\"Имя системы\" для притока и вытяжки в параметры пространства " +
+                "\"ADSK_Наименование приточной системы\" и \"ADSK_Наименование вытяжной системы\". " +
+                "Для самостоятельного заполнения пункта в параметр пространства \"Комментарии\" " +
+                "написать \"не обрабатывать\" (регистр не важен)";
+            btnSystemsInSpace.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, @"https://google.com"));
 
 
             // General panel

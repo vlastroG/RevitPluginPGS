@@ -3,6 +3,7 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Mechanical;
 using Autodesk.Revit.UI;
 using MS.Shared;
+using MS.Utilites;
 using System;
 using System.Linq;
 using System.Windows;
@@ -47,6 +48,17 @@ namespace MS.Commands.MEP
                     "\nADSK_Наименование вытяжной системы" +
                     "\nADSK_Наименование приточной системы",
                     "Ошибка");
+                return Result.Cancelled;
+            }
+
+            System.Windows.Forms.DialogResult userWarning = System.Windows.Forms.MessageBox.Show("У всех пространств, в Комментирии которых НЕ содержится \'не обрабатывать\' " +
+                "обновятся значения параметров \'ADSK_Наименование вытяжной системы\' " +
+                "и \'ADSK_Наименование приточной системы\' в соответствии с названиями приточных и вытяжных" +
+                " систем воздуховодов в этих пространствах.",
+                "Предупреждение",
+                System.Windows.Forms.MessageBoxButtons.OKCancel);
+            if (userWarning != System.Windows.Forms.DialogResult.OK)
+            {
                 return Result.Cancelled;
             }
 
@@ -122,7 +134,8 @@ namespace MS.Commands.MEP
                 }
                 trans.Commit();
                 MessageBox.Show($"Значения наименований вытяжных систем в пространствах обновлены {exhaustCount} раз;" +
-                    $"\nЗначения наименований приточных систем в пространствах обновлены {supplyCount} раз");
+                    $"\nЗначения наименований приточных систем в пространствах обновлены {supplyCount} раз",
+                    "Системы в пространствах");
             }
             return Result.Succeeded;
         }
