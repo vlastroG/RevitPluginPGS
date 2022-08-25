@@ -111,6 +111,7 @@
     <Compile Include="Commands\KR\Models\StairModel.cs" />
     <Compile Include="Commands\KR\StairReinforcement.cs" />
     <Compile Include="Commands\MEP\PipelineFittings.cs" />
+    <Compile Include="Commands\MEP\SystemsInSpace.cs" />
     <Compile Include="Commands\SS\Numerator.cs" />
     <Compile Include="GUI\AR\OpeningsLintelsMark.xaml.cs">
       <DependentUpon>OpeningsLintelsMark.xaml</DependentUpon>

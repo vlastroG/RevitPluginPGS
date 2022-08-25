@@ -4,13 +4,9 @@ using Autodesk.Revit.DB.Architecture;
 using Autodesk.Revit.UI;
 using MS.Shared;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using static MS.Utilites.WorkWithGeometry;
 
 namespace MS.Commands.MEP
 {

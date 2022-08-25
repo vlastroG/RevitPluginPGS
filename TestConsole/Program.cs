@@ -1,6 +1,4 @@
-﻿
-using static MS.Utilites.UserInput;
-int test = 0;
+﻿int test = 0;
 double d = 1;
 test = (int)d;
 var b = d == 1;
