@@ -93,7 +93,8 @@ namespace MS.Commands.MEP
                     var rooms = room_filter
                            .OfCategory(BuiltInCategory.OST_Rooms)
                            .WhereElementIsNotElementType()
-                           .Select(e => e as Room);
+                           .Select(e => e as Room)
+                           .ToArray();
 
                     if (rooms != null)
                     {
