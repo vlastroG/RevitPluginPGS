@@ -5,6 +5,7 @@ using Autodesk.Revit.UI;
 using MS.Shared;
 using MS.Utilites;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 
@@ -86,6 +87,8 @@ namespace MS.Commands.MEP
             var exhaustCount = 0;
             var supplyCount = 0;
 
+            List<ElementId> errorIds = new List<ElementId>();
+
             using (Transaction trans = new Transaction(doc))
             {
                 trans.Start("Системы в пространствах назначение");
@@ -93,8 +96,22 @@ namespace MS.Commands.MEP
                 foreach (var space in spaces)
                 {
                     SpatialElementGeometryCalculator calculator = new SpatialElementGeometryCalculator(doc);
-                    SpatialElementGeometryResults results = calculator.CalculateSpatialElementGeometry(space);
-                    Solid spaceSolid = results.GetGeometry();
+                    Solid spaceSolid;
+                    try
+                    {
+                        SpatialElementGeometryResults results = calculator.CalculateSpatialElementGeometry(space);
+                        spaceSolid = results.GetGeometry();
+                    }
+                    catch (ArgumentException)
+                    {
+                        errorIds.Add(space.Id);
+                        continue;
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        errorIds.Add(space.Id);
+                        continue;
+                    }
 
                     var ductsExhaustInSpace = new FilteredElementCollector(doc)
                         .OfCategory(BuiltInCategory.OST_DuctCurves)
@@ -133,6 +150,14 @@ namespace MS.Commands.MEP
                     }
                 }
                 trans.Commit();
+                if (errorIds.Count > 0)
+                {
+                    string ids = String.Join(", ", errorIds.Select(e => e.ToString()));
+                    MessageBox.Show($"Ошибка, пространства не обработаны, нельзя определить их объемы. Id: {ids}." +
+                        $"\n\nЗначения наименований вытяжных систем в пространствах обновлены {exhaustCount} раз;" +
+                        $"\nЗначения наименований приточных систем в пространствах обновлены {supplyCount} раз",
+                        "Системы в пространствах");
+                }
                 MessageBox.Show($"Значения наименований вытяжных систем в пространствах обновлены {exhaustCount} раз;" +
                     $"\nЗначения наименований приточных систем в пространствах обновлены {supplyCount} раз",
                     "Системы в пространствах");

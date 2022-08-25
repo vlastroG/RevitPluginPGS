@@ -4,6 +4,7 @@ using Autodesk.Revit.DB.Architecture;
 using Autodesk.Revit.UI;
 using MS.Shared;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
@@ -82,6 +83,8 @@ namespace MS.Commands.MEP
             }
             var setCount = 0;
 
+            List<ElementId> errorIds = new List<ElementId>();
+
             foreach (var link in linked_docs)
             {
                 //Назначение номеров квартир арматуре трубопроводов
@@ -102,8 +105,22 @@ namespace MS.Commands.MEP
                         foreach (var room in rooms)
                         {
                             SpatialElementGeometryCalculator calculator = new SpatialElementGeometryCalculator(doc);
-                            SpatialElementGeometryResults results = calculator.CalculateSpatialElementGeometry(room);
-                            Solid room_solid = results.GetGeometry();
+                            Solid room_solid;
+                            try
+                            {
+                                SpatialElementGeometryResults results = calculator.CalculateSpatialElementGeometry(room);
+                                room_solid = results.GetGeometry();
+                            }
+                            catch (ArgumentException)
+                            {
+                                errorIds.Add(room.Id);
+                                continue;
+                            }
+                            catch (InvalidOperationException)
+                            {
+                                errorIds.Add(room.Id);
+                                continue;
+                            }
 
                             //Изначально solid создается по координатам из связанного файла.
                             //Если связь перемещена, то solid необходимо переместить в эту позицию:
@@ -132,8 +149,20 @@ namespace MS.Commands.MEP
                     }
 
                     trans.Commit();
-                    MessageBox.Show($"Номера кравтир назначены {setCount} раз " +
-                        $"экземплярам категорий Оборудование и Арматура трубопроводов");
+                    if (errorIds.Count > 0)
+                    {
+                        string ids = String.Join(", ", errorIds.Select(e => e.ToString()));
+                        MessageBox.Show($"Ошибка, помещения не обработаны, нельзя определить их объемы. Id: {ids}." +
+                            $"\n\nНомера квартир назначены {setCount} раз " +
+                            $"экземплярам категорий Оборудование и Арматура трубопроводов",
+                            "Номера квартир для MEP");
+                    }
+                    else
+                    {
+                        MessageBox.Show($"Номера квартир назначены {setCount} раз " +
+                            $"экземплярам категорий Оборудование и Арматура трубопроводов",
+                            "Номера квартир для MEP");
+                    }
                 }
             }
             return Result.Succeeded;
