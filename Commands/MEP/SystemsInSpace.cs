@@ -1,14 +1,133 @@
-﻿using Autodesk.Revit.DB;
+﻿using Autodesk.Revit.Attributes;
+using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.Mechanical;
 using Autodesk.Revit.UI;
+using MS.Shared;
 using System;
+using System.Linq;
+using System.Windows;
 
 namespace MS.Commands.MEP
 {
+    [Transaction(TransactionMode.Manual)]
+    [Regeneration(RegenerationOption.Manual)]
     public class SystemsInSpace : IExternalCommand
     {
+        /// <summary>
+        /// Значение, которое содержится в параметре Комментарии у пространств, которые не обрабатываются
+        /// </summary>
+        private readonly string _comment = "не обрабатывать";
+
+        /// <summary>
+        /// Значение, которое содержится в параметре Тип системы у вытяжной системы
+        /// </summary>
+        private readonly string _systemExhaust = "вытяжка";
+
+        /// <summary>
+        /// Значение, которое содержится в параметре Тип системы у приточной системы
+        /// </summary>
+        private readonly string _systemSypply = "приток";
+
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
-            throw new NotImplementedException();
+            Document doc = commandData.Application.ActiveUIDocument.Document;
+            UIDocument uidoc = commandData.Application.ActiveUIDocument;
+
+            Guid[] _sharedParamsForCommand = new Guid[] {
+            SharedParams.ADSK_SupplySystemName,
+            SharedParams.ADSK_ExhaustSystemName
+            };
+            if (!SharedParams.IsCategoryOfDocContainsSharedParams(
+                doc,
+                BuiltInCategory.OST_MEPSpaces,
+                _sharedParamsForCommand))
+            {
+                MessageBox.Show("В текущем проекте у категории \"Пространства\" " +
+                    "отсутствуют необходимые общие параметры:" +
+                    "\nADSK_Наименование вытяжной системы" +
+                    "\nADSK_Наименование приточной системы",
+                    "Ошибка");
+                return Result.Cancelled;
+            }
+
+            var spaces = new FilteredElementCollector(doc)
+                .OfCategory(BuiltInCategory.OST_MEPSpaces)
+                .WhereElementIsNotElementType()
+                .Where(e => ReferenceEquals(e.get_Parameter(BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS)
+                                .AsValueString(), null) ||
+                            !e.get_Parameter(BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS)
+                                .AsValueString().ToLower()
+                                .Contains(_comment))
+                .Cast<Space>()
+                .ToArray();
+
+            var ducts = new FilteredElementCollector(doc)
+                .OfCategory(BuiltInCategory.OST_DuctCurves)
+                .WhereElementIsNotElementType()
+                .Where(e => e.get_Parameter(BuiltInParameter.RBS_DUCT_SYSTEM_TYPE_PARAM)
+                                .AsValueString().ToLower()
+                                .Contains(_systemExhaust)
+                         || e.get_Parameter(BuiltInParameter.RBS_DUCT_SYSTEM_TYPE_PARAM)
+                                .AsValueString().ToLower()
+                                .Contains(_systemSypply))
+                .ToArray();
+
+            // Обнуление значений
+            using (Transaction trans_renew = new Transaction(doc))
+            {
+                trans_renew.Start("Системы в пространствах обнуление");
+
+                foreach (var space in spaces)
+                {
+                    space.get_Parameter(SharedParams.ADSK_ExhaustSystemName).Set(String.Empty);
+                    space.get_Parameter(SharedParams.ADSK_SupplySystemName).Set(String.Empty);
+                }
+
+                trans_renew.Commit();
+            }
+
+            //Назначение
+            using (Transaction trans = new Transaction(doc))
+            {
+                trans.Start("Системы в пространствах назначение");
+
+                foreach (var space in spaces)
+                {
+                    SpatialElementGeometryCalculator calculator = new SpatialElementGeometryCalculator(doc);
+                    SpatialElementGeometryResults results = calculator.CalculateSpatialElementGeometry(space);
+                    Solid spaceSolid = results.GetGeometry();
+
+                    var ductsExhaustInSpace = new FilteredElementCollector(doc)
+                        .OfCategory(BuiltInCategory.OST_DuctCurves)
+                        .WhereElementIsNotElementType()
+                        .WherePasses(new ElementIntersectsSolidFilter(spaceSolid))
+                        .Where(e => e.get_Parameter(BuiltInParameter.RBS_DUCT_SYSTEM_TYPE_PARAM)
+                                        .AsValueString().ToLower()
+                                        .Contains(_systemExhaust))
+                        .GroupBy(duct => duct.get_Parameter(BuiltInParameter.RBS_SYSTEM_NAME_PARAM).AsValueString())
+                        .Select(grp => grp.First().get_Parameter(BuiltInParameter.RBS_SYSTEM_NAME_PARAM).AsValueString())
+                        .ToArray();
+
+                    var ductsSupplyInSpace = new FilteredElementCollector(doc)
+                        .OfCategory(BuiltInCategory.OST_DuctCurves)
+                        .WhereElementIsNotElementType()
+                        .WherePasses(new ElementIntersectsSolidFilter(spaceSolid))
+                        .Where(e => e.get_Parameter(BuiltInParameter.RBS_DUCT_SYSTEM_TYPE_PARAM)
+                                        .AsValueString().ToLower()
+                                        .Contains(_systemSypply))
+                        .GroupBy(duct => duct.get_Parameter(BuiltInParameter.RBS_SYSTEM_NAME_PARAM).AsValueString())
+                        .Select(grp => grp.First().get_Parameter(BuiltInParameter.RBS_SYSTEM_NAME_PARAM).AsValueString())
+                        .ToArray();
+
+                    string exhaustSystemsInSpace = String.Join(", ", ductsExhaustInSpace);
+                    string supplySystemsInSpace = String.Join(", ", ductsSupplyInSpace);
+
+                    space.get_Parameter(SharedParams.ADSK_ExhaustSystemName).Set(exhaustSystemsInSpace);
+                    space.get_Parameter(SharedParams.ADSK_SupplySystemName).Set(supplySystemsInSpace);
+                }
+                trans.Commit();
+            }
+            return Result.Succeeded;
         }
     }
 }

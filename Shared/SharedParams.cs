@@ -181,6 +181,16 @@ namespace MS.Shared
         public static Guid Arm_SteelClass => Guid.Parse("e8e92e84-d88e-415d-8ba0-26a09d8bcccf");
 
         /// <summary>
+        /// Guid параметра ADSK_Наименование вытяжной системы = f11ed0d9-3b91-4d35-bc44-01a579e45ce7 (string)
+        /// </summary>
+        public static Guid ADSK_ExhaustSystemName => Guid.Parse("f11ed0d9-3b91-4d35-bc44-01a579e45ce7");
+
+        /// <summary>
+        /// Guid параметра ADSK_Наименование приточной системы = 5162f6a4-55c5-43e6-95f4-c06ace52faa0 (string)
+        /// </summary>
+        public static Guid ADSK_SupplySystemName => Guid.Parse("5162f6a4-55c5-43e6-95f4-c06ace52faa0");
+
+        /// <summary>
         /// Валидация текущего проекта Revit на наличие общих параметров у заданной категории.
         /// </summary>
         /// <param name="doc">Документ Revit.</param>

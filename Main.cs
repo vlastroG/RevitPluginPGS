@@ -145,11 +145,17 @@ namespace MS
             //BitmapImage btnNumeratorImage = new BitmapImage(btnNumeratorImagePath);
             //btnNumerator.LargeImage = btnNumeratorImage;
 
-            // ОВиК Numerator command
+            // ОВиК арматура трубопроводов и оборудование в помещениях command
             PushButtonData btnPipelineFittings = new PushButtonData("PipelineFittings", "Арматура\nтрубопроводов", path, "MS.Commands.MEP.PipelineFittings");
             Uri btnPipelineFittingsImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
             BitmapImage btnPipelineFittingsImage = new BitmapImage(btnPipelineFittingsImagePath);
             btnPipelineFittings.LargeImage = btnPipelineFittingsImage;
+
+            // ОВиК системы в пространствах command
+            PushButtonData btnSystemsInSpace = new PushButtonData("SystemsInSpace", "Системы\nв пространствах", path, "MS.Commands.MEP.SystemsInSpace");
+            Uri btnSystemsInSpaceImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            BitmapImage btnSystemsInSpaceImage = new BitmapImage(btnSystemsInSpaceImagePath);
+            btnSystemsInSpace.LargeImage = btnSystemsInSpaceImage;
 
 
             // General panel
@@ -177,6 +183,7 @@ namespace MS
 
             // ОВиК panel
             panelOVVK.AddItem(btnPipelineFittings);
+            panelOVVK.AddItem(btnSystemsInSpace);
         }
     }
 }
