@@ -71,22 +71,9 @@ namespace MS.Commands.MEP
                                 .AsValueString().ToLower()
                                 .Contains(_systemSypply))
                 .ToArray();
+            var exhaustCount = 0;
+            var supplyCount = 0;
 
-            // Обнуление значений
-            using (Transaction trans_renew = new Transaction(doc))
-            {
-                trans_renew.Start("Системы в пространствах обнуление");
-
-                foreach (var space in spaces)
-                {
-                    space.get_Parameter(SharedParams.ADSK_ExhaustSystemName).Set(String.Empty);
-                    space.get_Parameter(SharedParams.ADSK_SupplySystemName).Set(String.Empty);
-                }
-
-                trans_renew.Commit();
-            }
-
-            //Назначение
             using (Transaction trans = new Transaction(doc))
             {
                 trans.Start("Системы в пространствах назначение");
@@ -122,10 +109,20 @@ namespace MS.Commands.MEP
                     string exhaustSystemsInSpace = String.Join(", ", ductsExhaustInSpace);
                     string supplySystemsInSpace = String.Join(", ", ductsSupplyInSpace);
 
-                    space.get_Parameter(SharedParams.ADSK_ExhaustSystemName).Set(exhaustSystemsInSpace);
-                    space.get_Parameter(SharedParams.ADSK_SupplySystemName).Set(supplySystemsInSpace);
+                    if (space.get_Parameter(SharedParams.ADSK_ExhaustSystemName).AsValueString() != exhaustSystemsInSpace)
+                    {
+                        space.get_Parameter(SharedParams.ADSK_ExhaustSystemName).Set(exhaustSystemsInSpace);
+                        exhaustCount++;
+                    }
+                    if (space.get_Parameter(SharedParams.ADSK_SupplySystemName).AsValueString() != supplySystemsInSpace)
+                    {
+                        space.get_Parameter(SharedParams.ADSK_SupplySystemName).Set(supplySystemsInSpace);
+                        supplyCount++;
+                    }
                 }
                 trans.Commit();
+                MessageBox.Show($"Значения наименований вытяжных систем в пространствах обновлены {exhaustCount} раз;" +
+                    $"\nЗначения наименований приточных систем в пространствах обновлены {supplyCount} раз");
             }
             return Result.Succeeded;
         }

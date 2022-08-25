@@ -80,6 +80,7 @@ namespace MS.Commands.MEP
 
                 trans_renew.Commit();
             }
+            var setCount = 0;
 
             foreach (var link in linked_docs)
             {
@@ -125,11 +126,14 @@ namespace MS.Commands.MEP
                                 fam_inst
                                     .get_Parameter(SharedParams.ADSK_NumberOfApartment)
                                     .Set(room.get_Parameter(SharedParams.ADSK_NumberOfApartment).AsValueString());
+                                setCount++;
                             }
                         }
                     }
 
                     trans.Commit();
+                    MessageBox.Show($"Номера кравтир назначены {setCount} раз " +
+                        $"экземплярам категорий Оборудование и Арматура трубопроводов");
                 }
             }
             return Result.Succeeded;
