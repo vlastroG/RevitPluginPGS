@@ -102,12 +102,12 @@ namespace MS.Commands.MEP
                         SpatialElementGeometryResults results = calculator.CalculateSpatialElementGeometry(space);
                         spaceSolid = results.GetGeometry();
                     }
-                    catch (ArgumentException)
+                    catch (Autodesk.Revit.Exceptions.ArgumentException)
                     {
                         errorIds.Add(space.Id);
                         continue;
                     }
-                    catch (InvalidOperationException)
+                    catch (Autodesk.Revit.Exceptions.InvalidOperationException)
                     {
                         errorIds.Add(space.Id);
                         continue;
@@ -156,11 +156,14 @@ namespace MS.Commands.MEP
                     MessageBox.Show($"Ошибка, пространства не обработаны, нельзя определить их объемы. Id: {ids}." +
                         $"\n\nЗначения наименований вытяжных систем в пространствах обновлены {exhaustCount} раз;" +
                         $"\nЗначения наименований приточных систем в пространствах обновлены {supplyCount} раз",
-                        "Системы в пространствах");
+                        "Системы в пространствах, выполнено с ошибками!");
                 }
-                MessageBox.Show($"Значения наименований вытяжных систем в пространствах обновлены {exhaustCount} раз;" +
-                    $"\nЗначения наименований приточных систем в пространствах обновлены {supplyCount} раз",
-                    "Системы в пространствах");
+                else
+                {
+                    MessageBox.Show($"Значения наименований вытяжных систем в пространствах обновлены {exhaustCount} раз;" +
+                        $"\nЗачения наименований приточных систем в пространствах обновлены {supplyCount} раз",
+                        "Систмы в пространствах, выполнено без ошибок");
+                }
             }
             return Result.Succeeded;
         }

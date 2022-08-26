@@ -111,12 +111,12 @@ namespace MS.Commands.MEP
                                 SpatialElementGeometryResults results = calculator.CalculateSpatialElementGeometry(room);
                                 room_solid = results.GetGeometry();
                             }
-                            catch (ArgumentException)
+                            catch (Autodesk.Revit.Exceptions.ArgumentException)
                             {
                                 errorIds.Add(room.Id);
                                 continue;
                             }
-                            catch (InvalidOperationException)
+                            catch (Autodesk.Revit.Exceptions.InvalidOperationException)
                             {
                                 errorIds.Add(room.Id);
                                 continue;
@@ -155,13 +155,13 @@ namespace MS.Commands.MEP
                         MessageBox.Show($"Ошибка, помещения не обработаны, нельзя определить их объемы. Id: {ids}." +
                             $"\n\nНомера квартир назначены {setCount} раз " +
                             $"экземплярам категорий Оборудование и Арматура трубопроводов",
-                            "Номера квартир для MEP");
+                            "Номера квартир для MEP, выполнено с ошибками!");
                     }
                     else
                     {
                         MessageBox.Show($"Номера квартир назначены {setCount} раз " +
                             $"экземплярам категорий Оборудование и Арматура трубопроводов",
-                            "Номера квартир для MEP");
+                            "Номера квартир для MEP, выполнено без ошибок");
                     }
                 }
             }
