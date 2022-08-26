@@ -191,6 +191,11 @@ namespace MS.Shared
         public static Guid ADSK_SupplySystemName => Guid.Parse("5162f6a4-55c5-43e6-95f4-c06ace52faa0");
 
         /// <summary>
+        /// Guid параметра Орг.ДиапазонПозиций = 75d41d2e-d5cd-45f4-bd3d-ff28b6a69547 (string)
+        /// </summary>
+        public static Guid Org_PositionRange => Guid.Parse("75d41d2e-d5cd-45f4-bd3d-ff28b6a69547");
+
+        /// <summary>
         /// Валидация текущего проекта Revit на наличие общих параметров у заданной категории.
         /// </summary>
         /// <param name="doc">Документ Revit.</param>

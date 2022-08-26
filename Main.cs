@@ -40,8 +40,8 @@ namespace MS
             RibbonPanel panelGeneral = application.CreateRibbonPanel("PGS-BIM", "Общее");
             // Раздел АР
             RibbonPanel panelAR = application.CreateRibbonPanel("PGS-BIM", "Раздел АР");
-            // Раздел КР
-            //RibbonPanel panelKR = application.CreateRibbonPanel("PGS-BIM", "Раздел КР");
+            //Раздел КР
+            RibbonPanel panelKR = application.CreateRibbonPanel("PGS-BIM", "Раздел КР");
             // Раздел СС
             // RibbonPanel panelSS = application.CreateRibbonPanel("PGS-BIM", "Раздел СС");
             // Раздел ОВиК
@@ -133,10 +133,25 @@ namespace MS
 
 
             // StairReinforcement command
-            PushButtonData stairRnfrcmtCmd = new PushButtonData("StairReinforcement", "Армирование\nлестниц", path, "MS.Commands.KR.StairReinforcement");
-            Uri stairRnfrcmtCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\KR\StairRnfrcmt.png");
-            BitmapImage stairRnfrcmtCmdImage = new BitmapImage(stairRnfrcmtCmdImagePath);
-            stairRnfrcmtCmd.LargeImage = stairRnfrcmtCmdImage;
+            //PushButtonData stairRnfrcmtCmd = new PushButtonData("StairReinforcement", "Армирование\nлестниц", path, "MS.Commands.KR.StairReinforcement");
+            //Uri stairRnfrcmtCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\KR\StairRnfrcmt.png");
+            //BitmapImage stairRnfrcmtCmdImage = new BitmapImage(stairRnfrcmtCmdImagePath);
+            //stairRnfrcmtCmd.LargeImage = stairRnfrcmtCmdImage;
+
+            //Диапазон марок свай command
+            PushButtonData btnPilesMarkRangeCmd = new PushButtonData(
+                "PilesMarkRange",
+                "Маркировка\nсвай",
+                path,
+                "MS.Commands.KR.PilesMarkRange");
+            Uri btnPilesMarkRangeCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            BitmapImage btnPilesMarkRangeCmdImage = new BitmapImage(btnPilesMarkRangeCmdImagePath);
+            btnPilesMarkRangeCmd.LargeImage = btnPilesMarkRangeCmdImage;
+            btnPilesMarkRangeCmd.ToolTip = "Назначение диапазона Марок выбранным сваям (несущим колоннам) " +
+                "с одинаковой Мрк.МаркаКонструкции.";
+            btnPilesMarkRangeCmd.LongDescription = "Для маркировки у категории \'Несущие колонны\'" +
+                " должны быть общие параметры \'Мрк.МаркаКонструкции\' и \'Орг.Диапазон позиций\'";
+            btnPilesMarkRangeCmd.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, @"https://google.com"));
 
 
             // SS Numerator command
@@ -192,6 +207,7 @@ namespace MS
 
             // KR panel
             //panelKR.AddItem(stairRnfrcmtCmd); // в разработке (сырая)
+            panelKR.AddItem(btnPilesMarkRangeCmd);
 
             // SS panel
             // panelSS.AddItem(btnNumerator);

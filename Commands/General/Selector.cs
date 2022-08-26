@@ -30,7 +30,6 @@ namespace MS
             List<Element> selectedElements = null;
             try
             {
-                //selectedElements = uidoc.Selection.PickElementsByRectangle(filter, "Выберите помещения.").ToList();
                 selectedElements = uidoc.Selection.PickElementsByRectangle(filter, "Выберите помещения.").ToList();
             }
             catch (OperationCanceledException)

@@ -109,6 +109,7 @@
     <Compile Include="Commands\General\Selector.cs" />
     <Compile Include="Commands\KR\Models\StairFlight.cs" />
     <Compile Include="Commands\KR\Models\StairModel.cs" />
+    <Compile Include="Commands\KR\PilesMarkRange.cs" />
     <Compile Include="Commands\KR\StairReinforcement.cs" />
     <Compile Include="Commands\MEP\PipelineFittings.cs" />
     <Compile Include="Commands\MEP\SystemsInSpace.cs" />
