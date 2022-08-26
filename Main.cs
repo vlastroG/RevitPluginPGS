@@ -53,13 +53,15 @@ namespace MS
             Uri btnInfoImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
             BitmapImage btnInfoImage = new BitmapImage(btnInfoImagePath);
             btnInfo.LargeImage = btnInfoImage;
+            btnInfo.ToolTip = "Информация о плагине";
 
 
             // LevelName command
-            PushButtonData btnLevelName = new PushButtonData("LevelName", "Отметки\nуровней", path, "MS.Commands.General.LevelName");
-            Uri btnLevelNameImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
-            BitmapImage btnLevelNameImage = new BitmapImage(btnLevelNameImagePath);
-            btnLevelName.LargeImage = btnLevelNameImage;
+            //PushButtonData btnLevelName = new PushButtonData("LevelName", "Отметки\nуровней", path, "MS.Commands.General.LevelName");
+            //Uri btnLevelNameImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            //BitmapImage btnLevelNameImage = new BitmapImage(btnLevelNameImagePath);
+            //btnLevelName.LargeImage = btnLevelNameImage;
+            //btnLevelName.ToolTip = "Проверка отметок уровней в их названии";
 
 
             // SelectionRooms command
@@ -67,55 +69,125 @@ namespace MS
             Uri btnSelectionImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Selection.png");
             BitmapImage btnSelectionImage = new BitmapImage(btnSelectionImagePath);
             btnSelection.LargeImage = btnSelectionImage;
+            btnSelection.ToolTip =
+                "Интерфейс переключается в режим выбора рамкой только элементов категории \'Помещения\'.";
+            btnSelection.LongDescription =
+                "За одно использование команды можно выделить только помещения только рамкой только один раз.";
 
             // MasonryMesh command
             PushButtonData btnMasonryMesh = new PushButtonData("MasonryMesh", "Кладочная\nсетка", path, "MS.Commands.AR.MasonryMesh");
             Uri btnMasonryMeshImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Selection.png");
             BitmapImage btnMasonryMeshImage = new BitmapImage(btnMasonryMeshImagePath);
             btnMasonryMesh.LargeImage = btnMasonryMeshImage;
-
+            btnMasonryMesh.ToolTip = "Расчет длины кладочной сетки в пог.м. для однослойных стен " +
+                "с заполненным параметром \'PGS_ТипАрмирования\' (1 или 2) " +
+                "и назначение \'Мрк.НаименованиеСетки\' по заполненным параметрам.";
+            btnMasonryMesh.LongDescription = "Длина кладочной сетки расчитывается следующим образом:" +
+                "\n\tДлина стены * PGS_АрмКолвоАрмРядов - Длина кладочной сетки в проемах" +
+                "\nДлина кладочной сетки в проемах расчитывается:" +
+                "\n\tВысота проема / Высота стены * PGS_АрмКолвоАрмРядов * Ширина проема. " +
+                "\nКоличество армируемых рядов в проеме округляется до меньшего целого." +
+                "\n\nЕсли \'PGS_ТипАрмирования\' = 1, то наименование сетки компонуется из " +
+                "\'Мрк.МаркаСетки\', \'PGS_АрмДиаметр\', \'Арм.КлассСтали\', \'PGS_АрмШаг\' и " +
+                "\'PGS_АрмОтступОтГраней\'." +
+                "\n\tПример: С-1 5Вр1-50/5Вр1-50 23" +
+                "\nЕсли \'PGS_ТипАрмирования\' = 2, то наименование компонуется из " +
+                "\'PGS_АрмДиаметр\' и \'Арм.КлассСтали\'." +
+                "\n\tПример: Ø6 А240, м.п.";
 
             // RoomsAreaPGS command
             PushButtonData btnRmArea = new PushButtonData("RoomsAreaNew", "Квартирография\nPGS_temp", path, "MS.Commands.AR.RoomsAreaNew");
             Uri btnRmAreaImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\RoomsArea.png");
             BitmapImage btnRmAreaImage = new BitmapImage(btnRmAreaImagePath);
             btnRmArea.LargeImage = btnRmAreaImage;
+            btnRmArea.ToolTip = "Расчет количества жилых комнат в квартирах, " +
+                "жилой площади квартиры, отапливаемой и общей с коэффициентом. " +
+                "Для маркировки квартир можно пользоваться командой \'Выбор помешений\'.";
+            btnRmArea.LongDescription = "Квартиры компонуются по значению параметра \'ADSK_Номер квартиры\', " +
+                "это и Имя помещения - единственные параметры, которые необходимо корректно заполнить." +
+                "Тип комнат (и коэффициент площади) определяется по их Именам, " +
+                "ознакомиться со списком и внести в него корректировки " +
+                "можно в BIM-отделе. Полученные значения будут записаны в параметры \'ADSK_Количество комнат\', " +
+                "\'ADSK_Площадь квартиры жилая\', \'ADSK_Площадь квартиры\' и \'ADSK_Площадь квартиры общая\'.";
 
             // ComplexApartmentNumber command
             PushButtonData btnCmplxAprtNum = new PushButtonData("ComplexAprtmntNmbr", "Составные номера\nквартир", path, "MS.Commands.AR.ComplexAprtmntNmbr");
             Uri btnCmplxAprtNumImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
             BitmapImage btnCmplxAprtNumImage = new BitmapImage(btnCmplxAprtNumImagePath);
             btnCmplxAprtNum.LargeImage = btnCmplxAprtNumImage;
+            btnCmplxAprtNum.ToolTip = "Заполнение составного номера квартиры в Комментирии";
+            btnCmplxAprtNum.LongDescription = "Составной номер будет компоноваться из значений параметров " +
+                "\'ADKS_Количество комнат\', \'ADSK_Тип квартиры\' и \'ADSK_Индекс квартиры\'." +
+                " Полученное значение будет записано в параметр \'Комментарии\'";
 
             // OpeningsArea command
             PushButtonData btnOpeningsArea = new PushButtonData("OpeningsArea", "Площадь проемов\nв помещениях", path, "MS.Commands.AR.OpeningsArea");
             Uri btnOpeningsAreaImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
             BitmapImage btnOpeningsAreaImage = new BitmapImage(btnOpeningsAreaImagePath);
             btnOpeningsArea.LargeImage = btnOpeningsAreaImage;
+            btnOpeningsArea.ToolTip = "Площади проемов помещаний будут записаны в параметр \'ADSK_Площадь проемов\'";
+            btnOpeningsArea.LongDescription = "Площади проемов расчитываются с учетом расположенных в помещении окон, " +
+                "дверей, витражей и линий границ помещений. " +
+                "В исключительных случаях моделирования площади проемов могут считаться некорректно. " +
+                "В основном это происходит, если у помещения необычная геометрия " +
+                "и его границы сделаны границей помещений; или если в помещении переменный уровень пола." +
+                "Такие уникальные помещения нужно убрать из расчета во всплывающем окне.";
 
             // MarkLintelsInOpenings command
             PushButtonData btnMarkLintelsInOpenings = new PushButtonData("MarkLintelsInOpenings", "Маркировать перемычки\nокон и дверей", path, "MS.Commands.AR.MarkLintelsInOpenings");
             Uri btnMarkLintelsInOpeningsImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
             BitmapImage btnMarkLintelsInOpeningsImage = new BitmapImage(btnMarkLintelsInOpeningsImagePath);
             btnMarkLintelsInOpenings.LargeImage = btnMarkLintelsInOpeningsImage;
+            btnMarkLintelsInOpenings.ToolTip = "Назначение Марок перемычек в параметры окон и дверей: " +
+                "\'PGS_МаркаПеремычки\' и \'Мрк.МаркаКонструкции\', и назначение массы перемычки " +
+                "(\'ADSK_Масса элемента)\' в \'PGS_МассаПеремычки\' у окна и двери при помощи выпадающего окна.";
+            btnMarkLintelsInOpenings.LongDescription =
+                "В Описании типоразмера родительского семейства перемычки (и только в нем!) " +
+                "должно быть написано \'Перемычка\'." +
+                "Семейство перемычки должно быть выполнено категорией \'Обобщенные модели\'.";
 
             // LintelsSections command
             PushButtonData btnLintelsSections = new PushButtonData("LintelsSections", "Разрезы\nпо перемычкам", path, "MS.Commands.AR.CreateSectionsByLintels");
             Uri btnLintelsSectionsImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
             BitmapImage btnLintelsSectionsImage = new BitmapImage(btnLintelsSectionsImagePath);
             btnLintelsSections.LargeImage = btnLintelsSectionsImage;
+            btnLintelsSections.ToolTip =
+                "Создание разрезов по каждому уникальному сечению перемычки " +
+                "для последующего формирования ведомости перемычек.";
+            btnLintelsSections.LongDescription = "Уникальность сечения определяется как уникальный набор значений " +
+                "толщины стены, наименований вложенных семейств перемычки, " +
+                "расстояния между двумя крайними продольными элементами перемычки," +
+                "и наименования уровня (опционально, если подсчет перемычек поэтажный). " +
+                "Перемычки должны быть созданы категорией \'Обобщенные модели\', " +
+                "в Описании типоразмера родительского семейства перемычки (и только в нем!) " +
+                "должно быть написано \'Перемычка\'." +
+                "\nОформлять разрезы необходимо вручную, но границу обрезки изменять нежелательно, " +
+                "т.к. впоследствии при формировании изображений у них будет отличаться масштаб.";
 
             // CreateImagesFromSections command
             PushButtonData btnCreateImagesFromSections = new PushButtonData("CreateImagesFromSections", "Ведомость\nперемычек", path, "MS.Commands.AR.CreateImagesFromSections");
             Uri btnCreateImagesFromSectionsImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
             BitmapImage btnCreateImagesFromSectionsImage = new BitmapImage(btnCreateImagesFromSectionsImagePath);
             btnCreateImagesFromSections.LargeImage = btnCreateImagesFromSectionsImage;
+            btnCreateImagesFromSections.ToolTip = "Формирование изображений из разрезов " +
+                "(необходимо их оформить вручную, не изменяя границу обрезки, " +
+                "т.к. при этом изменится масштаб изображения) по перемычкам, " +
+                "сформированным командой \'Разрезы по перемычкам\' и их назначение на перемычкам в параметр " +
+                "\'PGS_ИзображениеТипоразмераМатериала\' для ведомости перемычек. Также перемычкам " +
+                "назначается \'PGS_МногострочнаяМарка\', в которой написаны все марки перемычек " +
+                "с одинаковым поперечным сечением.";
 
             // RoomsFinishingMultiMark command
             PushButtonData btnRoomsFinishingMultiMark = new PushButtonData("RoomsFinishingMultiMark", "Помещения\nс одинаковой отделкой", path, "MS.Commands.AR.RoomsFinishingMultiMark");
             Uri btnRoomsFinishingMultiMarkImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
             BitmapImage btnRoomsFinishingMultiMarkImage = new BitmapImage(btnRoomsFinishingMultiMarkImagePath);
             btnRoomsFinishingMultiMark.LargeImage = btnRoomsFinishingMultiMarkImage;
+            btnRoomsFinishingMultiMark.ToolTip = "Назначение \'PGS_МногострочнаяМарка\' " +
+                "для помещений с одинаковой отделкой стен и потолка и \'PGS_МногострочнаяМарка_2\' " +
+                "для помещений с одинаковой отделкой пола.";
+            btnRoomsFinishingMultiMark.LongDescription =
+                "Отделка помещений должна быть выполнена параметрами и задана через ключевую спецификацию. " +
+                "Параметры для многострочных марок не должны быть в этих ключевых спецификациях.";
 
 
             // RoomsFinishingCommand
@@ -130,6 +202,12 @@ namespace MS
             Uri btnMaterialColorsImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\MaterialColors.png");
             BitmapImage btnMaterialColorsImage = new BitmapImage(btnMaterialColorsImagePath);
             btnMaterialColors.LargeImage = btnMaterialColorsImage;
+            btnMaterialColors.ToolTip = "Формирование цветового изображения по RGB материала " +
+                "и назначение в параметр \'PGS_ИзображениеТипоразмераМатериала\' " +
+                "для формирования ведомости отделки фасада.";
+            btnMaterialColors.LongDescription = "Обрабатываются все без исключения материалы. " +
+                "Если RGB материала изменился, изображение будет обновлено. " +
+                "Лишние изображения из проекта не удаляются.";
 
 
             // StairReinforcement command
@@ -190,7 +268,7 @@ namespace MS
 
             // General panel
             panelGeneral.AddItem(btnInfo);
-            panelGeneral.AddItem(btnLevelName);
+            //panelGeneral.AddItem(btnLevelName);
 
             // AR panel
             panelAR.AddItem(btnRmArea);

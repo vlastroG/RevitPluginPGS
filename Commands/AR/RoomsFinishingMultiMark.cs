@@ -111,8 +111,11 @@ namespace MS.Commands.AR
                 return Result.Cancelled;
             }
 
-            var multiNameRange = UserInput.YesNoCancelInput("Помещения с одинаковой отделкой", "Если считать отделку поэтажно - \"Да\", если сквозной подсчет - \"Нет\"");
-            if (multiNameRange != System.Windows.Forms.DialogResult.Yes && multiNameRange != System.Windows.Forms.DialogResult.No)
+            var multiNameRange = UserInput.YesNoCancelInput(
+                "Помещения с одинаковой отделкой", "Если считать отделку поэтажно - \"Да\", " +
+                "если сквозной подсчет - \"Нет\"");
+            if (multiNameRange != System.Windows.Forms.DialogResult.Yes 
+                && multiNameRange != System.Windows.Forms.DialogResult.No)
             {
                 return Result.Cancelled;
             }
