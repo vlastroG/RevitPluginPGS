@@ -191,10 +191,23 @@ namespace MS
 
 
             // RoomsFinishingCommand
-            //PushButtonData btnRmFinishing = new PushButtonData("RoomsFinishing\nDebug", "Отделка\n(Beta)", path, "MS.Utilites.GetBoundarySegmentElement");
+            //PushButtonData btnRmFinishing = new PushButtonData("RoomsFinishing\nDebug", "Отделка\n(Beta)", path, "MS.Utilites.RoomsFinishing");
             //Uri btnRmFinishingImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\RoomsFinishing.png");
             //BitmapImage btnRmFinishingImage = new BitmapImage(btnRmFinishingImagePath);
             //btnRmFinishing.LargeImage = btnRmFinishingImage;
+            //btnRmFinishing.ToolTip = "Назначение принадлежности кпомещению отделочным стенам.";
+            //btnRmFinishing.LongDescription = "По границам помещения определяются элементы, которые ее образуют. " +
+            //    "Если это разделитель помещения, то ищется ближайший к нему элемент (например, витраж). " +
+            //    "Команда на стадии разработки.";
+
+            // RoomsFinCreationCommand
+            PushButtonData btnRmFinCreation = new PushButtonData("RoomsFinishing\nDebug", "Отделка\n(Beta)", path, "MS.Utilites.RoomsFinishingCreation");
+            Uri btnRmFinCreationImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\RoomsFinishing.png");
+            BitmapImage btnRmFinCreationImage = new BitmapImage(btnRmFinCreationImagePath);
+            btnRmFinCreation.LargeImage = btnRmFinCreationImage;
+            btnRmFinCreation.ToolTip = "Создание отделочных стен внутри выбранных помещений.";
+            btnRmFinCreation.LongDescription = "По границам помещения определяются элементы, которые ее образуют и, " +
+                "если это стена или колонна, то строится соединенная с нэтим элементом отделочная стена.";
 
 
             // MaterialColorsCommand
@@ -278,7 +291,8 @@ namespace MS
             panelAR.AddItem(btnLintelsSections);
             panelAR.AddItem(btnCreateImagesFromSections);
             panelAR.AddItem(btnRoomsFinishingMultiMark);
-            //panelAR.AddItem(btnRmFinishing); // в разработке, нужно указать названия параметров
+            //panelAR.AddItem(btnRmFinishing); // команда в разработке
+            panelAR.AddItem(btnRmFinCreation);
             panelAR.AddItem(btnSelection);
             panelAR.AddItem(btnMasonryMesh);
             panelAR.AddItem(btnMaterialColors);

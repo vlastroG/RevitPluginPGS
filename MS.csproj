@@ -103,6 +103,7 @@
     <Compile Include="Commands\AR\MarkLintelsInOpenings.cs" />
     <Compile Include="Commands\AR\RoomsAreaNew.cs" />
     <Compile Include="Commands\AR\RoomsFinishing.cs" />
+    <Compile Include="Commands\AR\RoomsFinishingCreation.cs" />
     <Compile Include="Commands\AR\RoomsFinishingMultiMark.cs" />
     <Compile Include="Commands\General\Info.cs" />
     <Compile Include="Commands\General\LevelName.cs" />

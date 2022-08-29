@@ -17,7 +17,6 @@ namespace MS
                 "\n" +
                 "\nДля подробной информации обратитесь в BIM-отдел.",
                 "Информация");
-
             return Result.Succeeded;
         }
     }
