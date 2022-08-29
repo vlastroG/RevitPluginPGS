@@ -191,7 +191,7 @@ namespace MS
 
 
             // RoomsFinishingCommand
-            //PushButtonData btnRmFinishing = new PushButtonData("RoomsFinishing\nDebug", "Отделка\n(Beta)", path, "MS.Utilites.RoomsFinishing");
+            //PushButtonData btnRmFinishing = new PushButtonData("RoomsFinishing\nDebug", "Отделка\n(Beta)", path, "MS.Commands.AR.RoomsFinishing");
             //Uri btnRmFinishingImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\RoomsFinishing.png");
             //BitmapImage btnRmFinishingImage = new BitmapImage(btnRmFinishingImagePath);
             //btnRmFinishing.LargeImage = btnRmFinishingImage;
@@ -201,7 +201,7 @@ namespace MS
             //    "Команда на стадии разработки.";
 
             // RoomsFinCreationCommand
-            PushButtonData btnRmFinCreation = new PushButtonData("RoomsFinishing\nDebug", "Отделка\n(Beta)", path, "MS.Utilites.RoomsFinishingCreation");
+            PushButtonData btnRmFinCreation = new PushButtonData("RoomsFinishing\nDebug", "Отделка\n(Beta)", path, "MS.Commands.AR.RoomsFinishingCreation");
             Uri btnRmFinCreationImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\RoomsFinishing.png");
             BitmapImage btnRmFinCreationImage = new BitmapImage(btnRmFinCreationImagePath);
             btnRmFinCreation.LargeImage = btnRmFinCreationImage;

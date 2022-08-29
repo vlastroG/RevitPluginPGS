@@ -1,0 +1,34 @@
+﻿<Window x:Class="MS.GUI.AR.FinishingCreation"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:MS.GUI.AR"
+             mc:Ignorable="d" d:DesignWidth="800" Height="455">
+    <Grid Background="White" Height="214" VerticalAlignment="Top">
+        <DataGrid Name="FinishingDto"
+                  Margin="0,20,0,0" 
+                  AutoGenerateColumns="False" 
+                  IsSynchronizedWithCurrentItem="True"
+                  SelectionUnit="FullRow"
+                  MinRowHeight="20"
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False">
+            <DataGrid.Columns>
+                <DataGridTextColumn Binding="{Binding Path = Description}"
+                                        IsReadOnly="True" 
+                                        Header="PGS__НаименованиеОтделки" 
+                                        MinWidth="100" 
+                                        MaxWidth="200"/>
+                <DataGridComboBoxColumn x:Name="wallTypesComboBoxColumn" 
+                                        Header="WallType" 
+                                        SelectedItemBinding="{Binding Path=WallType}"
+                                        DisplayMemberPath="Name"
+                                        MinWidth="150"
+                                        MaxWidth="300"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        <Button x:Name="Submit" Content="Готово" HorizontalAlignment="Left" VerticalAlignment="Top" RenderTransformOrigin="0.69,0.303" Width="60" Click="SubmitButton_Click"/>
+        <Button x:Name="Cancel" Content="Отмена" HorizontalAlignment="Left" Margin="60,0,0,0" VerticalAlignment="Top" Width="60" Click="CancelButton_Click"/>
+    </Grid>
+</Window>

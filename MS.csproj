@@ -93,6 +93,7 @@
     <Compile Include="Commands\AR\DTO\MarkWithCountDto.cs" />
     <Compile Include="Commands\AR\DTO\MultiNameRoomsDto.cs" />
     <Compile Include="Commands\AR\DTO\NameWithNumbersDto.cs" />
+    <Compile Include="Commands\AR\DTO\WallTypeFinishingDto.cs" />
     <Compile Include="Commands\AR\MasonryMesh.cs" />
     <Compile Include="Commands\AR\MaterialColors.cs" />
     <Compile Include="Commands\AR\Models\Apartment.cs" />
@@ -115,6 +116,9 @@
     <Compile Include="Commands\MEP\PipelineFittings.cs" />
     <Compile Include="Commands\MEP\SystemsInSpace.cs" />
     <Compile Include="Commands\SS\Numerator.cs" />
+    <Compile Include="GUI\AR\FinishingCreation.xaml.cs">
+      <DependentUpon>FinishingCreation.xaml</DependentUpon>
+    </Compile>
     <Compile Include="GUI\AR\OpeningsLintelsMark.xaml.cs">
       <DependentUpon>OpeningsLintelsMark.xaml</DependentUpon>
     </Compile>
@@ -151,6 +155,7 @@
     <EmbeddedResource Include="SolutionItems\MS.addin">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
+    <None Include="Properties\DataSources\MS.Commands.AR.DTO.MultiNameRoomsDto.datasource" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Images\Icons\AR\RoomsArea.png">
@@ -177,6 +182,10 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <Page Include="GUI\AR\FinishingCreation.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="GUI\AR\OpeningsLintelsMark.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

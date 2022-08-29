@@ -196,6 +196,11 @@ namespace MS.Shared
         public static Guid Org_PositionRange => Guid.Parse("75d41d2e-d5cd-45f4-bd3d-ff28b6a69547");
 
         /// <summary>
+        /// Guid параметра PGS_НаименованиеОтделки = f2c3dea3-2edf-4e34-87df-059fd78135f6 (string)
+        /// </summary>
+        public static Guid PGS_FinishingName => Guid.Parse("f2c3dea3-2edf-4e34-87df-059fd78135f6");
+
+        /// <summary>
         /// Валидация текущего проекта Revit на наличие общих параметров у заданной категории.
         /// </summary>
         /// <param name="doc">Документ Revit.</param>
