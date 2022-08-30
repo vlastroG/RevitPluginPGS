@@ -155,7 +155,6 @@
     <EmbeddedResource Include="SolutionItems\MS.addin">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <None Include="Properties\DataSources\MS.Commands.AR.DTO.MultiNameRoomsDto.datasource" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Images\Icons\AR\RoomsArea.png">

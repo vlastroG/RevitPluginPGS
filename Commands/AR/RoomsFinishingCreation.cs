@@ -16,10 +16,27 @@ using System.Windows;
 
 namespace MS.Commands.AR
 {
+    public enum FinWallsHeight
+    {
+        /// <summary>
+        /// Заданная высота отделочной стены
+        /// </summary>
+        ByInput,
+        /// <summary>
+        /// Высота отделочной стены по высоте помещения
+        /// </summary>
+        ByRoom,
+        /// <summary>
+        /// Высота отделочной стены по элементу
+        /// </summary>
+        ByElement
+    }
+
     [Transaction(TransactionMode.Manual)]
     [Regeneration(RegenerationOption.Manual)]
     public class RoomsFinishingCreation : IExternalCommand
     {
+        private const string _defaultName = "НЕ НАЗНАЧЕНО";
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             UIApplication uiapp = commandData.Application;
@@ -73,7 +90,8 @@ namespace MS.Commands.AR
             }
 
             List<string> descriptions = new List<string>();
-            List<BoundarySegment> validSegments = new List<BoundarySegment>();
+            List<(BoundarySegment Segment, ElementId LevelId, double HRoom, double HElem, double BottomOffset)> validSegmentsAndH =
+                new List<(BoundarySegment, ElementId, double, double, double)>();
             foreach (Room room in rooms)
             {
                 IList<IList<BoundarySegment>> loops
@@ -85,7 +103,6 @@ namespace MS.Commands.AR
                     foreach (BoundarySegment seg in loop)
                     {
                         Element e = doc.GetElement(seg.ElementId);
-                        // 3101789
                         if (null == e)
                         {
                             continue;
@@ -99,19 +116,32 @@ namespace MS.Commands.AR
                             // стенами и несущими колоннами
                             continue;
                         }
-                        validSegments.Add(seg);
+                        double roomH = room.get_Parameter(BuiltInParameter.ROOM_HEIGHT).AsDouble();
+                        double elemH = 0;
+                        if (!(e is RevitLinkInstance))
+                        {
+                            var bBox = e.get_Geometry(new Options()).GetBoundingBox();
+                            elemH = Math.Round((bBox.Max.Z - bBox.Min.Z) * SharedValues.FootToMillimeters)
+                                / SharedValues.FootToMillimeters;
+                        }
+                        var bottomOffset = room.get_Parameter(BuiltInParameter.ROOM_LOWER_OFFSET).AsDouble();
+                        validSegmentsAndH.Add((seg, room.LevelId, roomH, elemH, bottomOffset));
                         try
                         {
-                            string finName = String.Empty;
+                            string finName = _defaultName;
                             if (e is Wall)
                             {
                                 finName = (e as Wall).WallType.get_Parameter(SharedParams.PGS_FinishingName)
-                                    .AsValueString() ?? String.Empty;
+                                    .AsValueString();
                             }
                             else if (e is FamilyInstance)
                             {
                                 finName = (e as FamilyInstance).Symbol.get_Parameter(SharedParams.PGS_FinishingName)
-                                    .AsValueString() ?? String.Empty;
+                                    .AsValueString();
+                            }
+                            if (String.IsNullOrEmpty(finName))
+                            {
+                                finName = _defaultName;
                             }
                             if (!descriptions.Contains(finName))
                             {
@@ -126,11 +156,11 @@ namespace MS.Commands.AR
                 }
             }
 
-            // 2. Добавить вывод окна для назначений типов отделочных слоев---------------------------
             var wallTypesAll = new FilteredElementCollector(doc)
                 .OfCategory(BuiltInCategory.OST_Walls)
                 .WhereElementIsElementType()
                 .Select(w => w as WallType)
+                .Where(w => w.GetCompoundStructure() != null)
                 .ToList();
             List<WallTypeFinishingDto> dtos = descriptions.Select(d => new WallTypeFinishingDto(d)).ToList();
 
@@ -140,24 +170,17 @@ namespace MS.Commands.AR
             {
                 return Result.Cancelled;
             }
-
-            var uiTestGet = ui.Dtos;
-
-            var wtTest = new FilteredElementCollector(doc)
-                .OfCategory(BuiltInCategory.OST_Walls)
-                .WhereElementIsElementType()
-                .ToArray()[15] as WallType;
-
+            IReadOnlyDictionary<string, WallType> dictWT = ui.DictWallTypeByFinName;
+            WallType wtDefault = null;
             List<Tuple<Element, Element>> pairsToJoin = new List<Tuple<Element, Element>>();
 
-            var offset = wtTest.GetCompoundStructure().GetWidth() / 2;
             using (Transaction trans = new Transaction(doc))
             {
                 trans.Start("Создание отделочных стен");
 
-                foreach (BoundarySegment seg in validSegments)
+                foreach (var segTuple in validSegmentsAndH)
                 {
-                    Element e = doc.GetElement(seg.ElementId);
+                    Element e = doc.GetElement(segTuple.Segment.ElementId);
 
                     if (null == e)
                     {
@@ -173,15 +196,55 @@ namespace MS.Commands.AR
                         continue;
                     }
 
+                    var wt = wtDefault;
+                    double offset = 0;
+                    string finName = _defaultName;
+                    if (e is Wall)
+                    {
+                        finName = (e as Wall).WallType
+                            .get_Parameter(SharedParams.PGS_FinishingName).AsValueString();
+                    }
+                    else if (e is FamilyInstance)
+                    {
+                        finName = (e as FamilyInstance).Symbol
+                            .get_Parameter(SharedParams.PGS_FinishingName).AsValueString();
+                    }
+                    if (String.IsNullOrEmpty(finName))
+                    {
+                        finName = _defaultName;
+                    }
+                    wt = dictWT[finName];
+                    if (ReferenceEquals(null, wt))
+                    {
+                        continue;
+                    }
+                    offset = wt.Width / 2;
+
                     try
                     {
-                        Curve curve = seg.GetCurve();
-                        Line line1 = (Line)curve;
-                        Line line = (Line)curve.CreateOffset(-offset, XYZ.BasisZ);
-
-                        var wall = Wall.Create(doc, line, wtTest.Id, e.LevelId, 10, 0, false, false);
-                        Tuple<Element, Element> item = new Tuple<Element, Element>(e, wall);
-                        pairsToJoin.Add(item);
+                        Curve curve = segTuple.Segment.GetCurve();
+                        Curve wallGrid = curve.CreateOffset(-offset, XYZ.BasisZ);
+                        double height = 0;
+                        double bottomOffset = 0;
+                        switch (ui.FinWallsHeightType)
+                        {
+                            case FinWallsHeight.ByRoom:
+                                height = segTuple.HRoom;
+                                bottomOffset = segTuple.BottomOffset;
+                                break;
+                            case FinWallsHeight.ByElement:
+                                height = segTuple.HElem;
+                                bottomOffset = 0;
+                                break;
+                            case FinWallsHeight.ByInput:
+                                height = ui.InputHeight / SharedValues.FootToMillimeters;
+                                bottomOffset = segTuple.BottomOffset;
+                                break;
+                        }
+                        var LevelIdTest = segTuple.LevelId;
+                        var wall = Wall.Create(doc, wallGrid, wt.Id, segTuple.LevelId, height, bottomOffset, false, false);
+                        Tuple<Element, Element> toJoinPair = new Tuple<Element, Element>(e, wall);
+                        pairsToJoin.Add(toJoinPair);
                     }
                     catch (Autodesk.Revit.Exceptions.InvalidOperationException)
                     {
