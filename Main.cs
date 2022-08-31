@@ -201,13 +201,21 @@ namespace MS
             //    "Команда на стадии разработки.";
 
             // RoomsFinCreationCommand
-            PushButtonData btnRmFinCreation = new PushButtonData("RoomsFinishing\nDebug", "Отделка\n(Beta)", path, "MS.Commands.AR.RoomsFinishingCreation");
+            PushButtonData btnRmFinCreation = new PushButtonData("RoomsFinishing", "Отделка\nпомещений", path, "MS.Commands.AR.RoomsFinishingCreation");
             Uri btnRmFinCreationImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\RoomsFinishing.png");
             BitmapImage btnRmFinCreationImage = new BitmapImage(btnRmFinCreationImagePath);
             btnRmFinCreation.LargeImage = btnRmFinCreationImage;
             btnRmFinCreation.ToolTip = "Создание отделочных стен внутри выбранных помещений.";
             btnRmFinCreation.LongDescription = "По границам помещения определяются элементы, которые ее образуют и, " +
-                "если это стена или колонна, то строится соединенная с нэтим элементом отделочная стена.";
+                "если это элемент категории 'Стены' или 'Несущие колонны', " +
+                "то строится соединенная с этим элементом отделочная стена. " +
+                "Типоразмеры отделочных стен определяются по значению параметра " +
+                "'PGS_НаименованиеОтделки' в типе отделываемого элемента " +
+                "и назначаюстя через всплывающее окно. Если типоразмер не назначен для данного значения параметра, " +
+                "то по этому элементу отделка создаваться не будет." +
+                "\nДля связей и типоразмеров элементов " +
+                "с пустым или не назначенным параметром 'PGS_НаименованиеОтделки'" +
+                "во всплывающем окне будет сформирована строчка 'НЕ НАЗНАЧЕНО'.";
 
 
             // MaterialColorsCommand
