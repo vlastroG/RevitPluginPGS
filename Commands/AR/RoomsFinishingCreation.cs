@@ -90,7 +90,7 @@ namespace MS.Commands.AR
             }
 
             List<string> descriptions = new List<string>();
-            List<(BoundarySegment Segment, ElementId LevelId, double HRoom, double HElem, double BottomOffset)> validSegmentsAndH =
+            List<(BoundarySegment Segment, ElementId LevelId, double HRoom, double HElem, double RoomBottomOffset)> validSegmentsAndH =
                 new List<(BoundarySegment, ElementId, double, double, double)>();
             foreach (Room room in rooms)
             {
@@ -100,9 +100,9 @@ namespace MS.Commands.AR
 
                 foreach (IList<BoundarySegment> loop in loops)
                 {
-                    foreach (BoundarySegment seg in loop)
+                    for (int i = 0; i < loop.Count; i++)
                     {
-                        Element e = doc.GetElement(seg.ElementId);
+                        Element e = doc.GetElement(loop[i].ElementId);
                         if (null == e)
                         {
                             continue;
@@ -124,8 +124,12 @@ namespace MS.Commands.AR
                             elemH = Math.Round((bBox.Max.Z - bBox.Min.Z) * SharedValues.FootToMillimeters)
                                 / SharedValues.FootToMillimeters;
                         }
+                        else
+                        {
+                            elemH = roomH;
+                        }
                         var bottomOffset = room.get_Parameter(BuiltInParameter.ROOM_LOWER_OFFSET).AsDouble();
-                        validSegmentsAndH.Add((seg, room.LevelId, roomH, elemH, bottomOffset));
+                        validSegmentsAndH.Add((loop[i], room.LevelId, roomH, elemH, bottomOffset));
                         try
                         {
                             string finName = _defaultName;
@@ -178,9 +182,9 @@ namespace MS.Commands.AR
             {
                 trans.Start("Создание отделочных стен");
 
-                foreach (var segTuple in validSegmentsAndH)
+                for (int i = 0; i < validSegmentsAndH.Count; i++)
                 {
-                    Element e = doc.GetElement(segTuple.Segment.ElementId);
+                    Element e = doc.GetElement(validSegmentsAndH[i].Segment.ElementId);
 
                     if (null == e)
                     {
@@ -199,13 +203,18 @@ namespace MS.Commands.AR
                     var wt = wtDefault;
                     double offset = 0;
                     string finName = _defaultName;
+                    double elemBottomOffset = 0;
                     if (e is Wall)
                     {
+                        elemBottomOffset = e
+                            .get_Parameter(BuiltInParameter.WALL_BASE_OFFSET).AsDouble();
                         finName = (e as Wall).WallType
                             .get_Parameter(SharedParams.PGS_FinishingName).AsValueString();
                     }
                     else if (e is FamilyInstance)
                     {
+                        elemBottomOffset = e
+                            .get_Parameter(BuiltInParameter.FAMILY_BASE_LEVEL_OFFSET_PARAM).AsDouble();
                         finName = (e as FamilyInstance).Symbol
                             .get_Parameter(SharedParams.PGS_FinishingName).AsValueString();
                     }
@@ -222,27 +231,26 @@ namespace MS.Commands.AR
 
                     try
                     {
-                        Curve curve = segTuple.Segment.GetCurve();
+                        Curve curve = validSegmentsAndH[i].Segment.GetCurve();
                         Curve wallGrid = curve.CreateOffset(-offset, XYZ.BasisZ);
                         double height = 0;
                         double bottomOffset = 0;
                         switch (ui.FinWallsHeightType)
                         {
                             case FinWallsHeight.ByRoom:
-                                height = segTuple.HRoom;
-                                bottomOffset = segTuple.BottomOffset;
+                                height = validSegmentsAndH[i].HRoom;
+                                bottomOffset = validSegmentsAndH[i].RoomBottomOffset;
                                 break;
                             case FinWallsHeight.ByElement:
-                                height = segTuple.HElem;
-                                bottomOffset = 0;
+                                height = validSegmentsAndH[i].HElem;
+                                bottomOffset = elemBottomOffset - validSegmentsAndH[i].RoomBottomOffset;
                                 break;
                             case FinWallsHeight.ByInput:
                                 height = ui.InputHeight / SharedValues.FootToMillimeters;
-                                bottomOffset = segTuple.BottomOffset;
+                                bottomOffset = validSegmentsAndH[i].RoomBottomOffset;
                                 break;
                         }
-                        var LevelIdTest = segTuple.LevelId;
-                        var wall = Wall.Create(doc, wallGrid, wt.Id, segTuple.LevelId, height, bottomOffset, false, false);
+                        var wall = Wall.Create(doc, wallGrid, wt.Id, validSegmentsAndH[i].LevelId, height, bottomOffset, false, false);
                         Tuple<Element, Element> toJoinPair = new Tuple<Element, Element>(e, wall);
                         pairsToJoin.Add(toJoinPair);
                     }
