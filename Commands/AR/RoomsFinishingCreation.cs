@@ -11,11 +11,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace MS.Commands.AR
 {
+    /// <summary>
+    /// Перечисление для определения способа построения отделочных стен
+    /// </summary>
     public enum FinWallsHeight
     {
         /// <summary>
@@ -36,6 +38,10 @@ namespace MS.Commands.AR
     [Regeneration(RegenerationOption.Manual)]
     public class RoomsFinishingCreation : IExternalCommand
     {
+        /// <summary>
+        /// Значение параметра PGS_НаименованиеОтделки по умолчанию для строки во всплывающем окне,
+        /// если в модели null или пустая строка
+        /// </summary>
         private const string _defaultName = "НЕ НАЗНАЧЕНО";
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
@@ -176,7 +182,7 @@ namespace MS.Commands.AR
             }
             IReadOnlyDictionary<string, WallType> dictWT = ui.DictWallTypeByFinName;
             WallType wtDefault = null;
-            List<Tuple<Element, Element>> pairsToJoin = new List<Tuple<Element, Element>>();
+            List<(Element, Element)> pairsToJoin = new List<(Element, Element)>();
 
             using (Transaction trans = new Transaction(doc))
             {
@@ -251,7 +257,7 @@ namespace MS.Commands.AR
                                 break;
                         }
                         var wall = Wall.Create(doc, wallGrid, wt.Id, validSegmentsAndH[i].LevelId, height, bottomOffset, false, false);
-                        Tuple<Element, Element> toJoinPair = new Tuple<Element, Element>(e, wall);
+                        (Element, Element) toJoinPair = (e, wall);
                         pairsToJoin.Add(toJoinPair);
                     }
                     catch (Autodesk.Revit.Exceptions.InvalidOperationException)
@@ -262,7 +268,7 @@ namespace MS.Commands.AR
                 }
                 trans.Commit();
             }
-            List<Tuple<Element, Element>> errorsList = new List<Tuple<Element, Element>>();
+            List<(Element, Element)> errorsList = new List<(Element, Element)>();
             using (Transaction joining = new Transaction(doc))
             {
                 joining.Start("Соединение стен");
@@ -277,6 +283,10 @@ namespace MS.Commands.AR
                         errorsList.Add(pair);
                         continue;
                     }
+                    catch (Autodesk.Revit.Exceptions.InvalidObjectException)
+                    {
+                        continue;
+                    }
                 }
                 joining.Commit();
             }
@@ -284,9 +294,21 @@ namespace MS.Commands.AR
             {
                 StringBuilder sb = new StringBuilder();
                 sb.AppendLine("Не удалось соединить элементы! Id:");
-                foreach (var error in errorsList)
+                var errsGroups = errorsList.Where(errs => errs.Item1.IsValidObject && errs.Item2.IsValidObject)
+                    .GroupBy(group => group.Item1.Id);
+                foreach (var groupId in errsGroups)
                 {
-                    sb.AppendLine($"{error.Item1.Id}, {error.Item2.Id}");
+                    if (groupId.Count() > 10)
+                    {
+                        sb.AppendLine($"{groupId.Key} и более 10 элементов;");
+                    }
+                    else
+                    {
+                        foreach (var item in groupId)
+                        {
+                            sb.AppendLine($"{item.Item1.Id} и {item.Item2.Id};");
+                        }
+                    }
                 }
                 MessageBox.Show(sb.ToString(), "Ошибка");
             }
