@@ -49,11 +49,11 @@ namespace MS
 
 
             // Info command
-            PushButtonData btnInfo = new PushButtonData("Info", "Info", path, "MS.Info");
+            PushButtonData btnInfo = new PushButtonData("Info", "Alt\nсимволы", path, "MS.Info");
             Uri btnInfoImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
             BitmapImage btnInfoImage = new BitmapImage(btnInfoImagePath);
             btnInfo.LargeImage = btnInfoImage;
-            btnInfo.ToolTip = "Информация о плагине";
+            btnInfo.ToolTip = "Alt-символы Revit.";
 
             // PolyLineLength command
             PushButtonData btnPolyLineLength = new PushButtonData("PolyLineLength", "Длина\nполилинии", path, "MS.Commands.General.PolyLineLength");

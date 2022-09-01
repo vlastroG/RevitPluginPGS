@@ -1,6 +1,7 @@
 ﻿using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
+using MS.GUI.General;
 using System.Windows.Forms;
 
 namespace MS
@@ -11,12 +12,9 @@ namespace MS
     {
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
-            var messagebox = MessageBox.Show(
-                "Плагин содержит основные команды" +
-                "\nдля проектировщиков ПГС Проект." +
-                "\n" +
-                "\nДля подробной информации обратитесь в BIM-отдел.",
-                "Информация");
+            var uiWin = new AltSymbols();
+            uiWin.Show();
+
             return Result.Succeeded;
         }
     }
