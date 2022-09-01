@@ -61,6 +61,11 @@ namespace MS
             BitmapImage btnPolyLineLengthImage = new BitmapImage(btnPolyLineLengthImagePath);
             btnPolyLineLength.LargeImage = btnPolyLineLengthImage;
             btnPolyLineLength.ToolTip = "Суммарная длина выбранных линий";
+            btnPolyLineLength.LongDescription = "Выберите линии до нажатия на кнопку " +
+                "или нажмите кнопку и выберите линии рамкой или кликом, поcле чего нажмите 'Готово'. " +
+                "\nМожно выбрать как линии детализации, так и линии модели. " +
+                "\nЕсли до нажатия команды выбраны элементы " +
+                "разных категорий, то линии из них отфильтруются автоматически.";
 
 
             // LevelName command
