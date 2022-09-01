@@ -23,7 +23,22 @@ namespace MS.Commands.General
             UIDocument uidoc = uiapp.ActiveUIDocument;
             Document doc = uidoc.Document;
             Selection sel = uidoc.Selection;
+            var selectedLines = sel.GetElementIds().Select(id => doc.GetElement(id))
+                .Where(e => (BuiltInCategory)WorkWithParameters.GetCategoryIdAsInteger(e)
+                == BuiltInCategory.OST_Lines)
+                .ToList();
 
+            double lengthTotal = 0;
+            if (selectedLines.Count > 0)
+            {
+                foreach (var line in selectedLines)
+                {
+                    lengthTotal += line.get_Parameter(BuiltInParameter.CURVE_ELEM_LENGTH).AsDouble()
+                        * SharedValues.FootToMillimeters;
+                }
+                MessageBox.Show($"Суммарная длина выбранных линий: {lengthTotal}", "Длина линий");
+                return Result.Succeeded;
+            }
             var filter = new SelectionFilterElementsOfCategory<Element>(
                 new List<BuiltInCategory> { BuiltInCategory.OST_Lines },
                 false);
@@ -43,7 +58,6 @@ namespace MS.Commands.General
                 return Result.Cancelled;
             }
 
-            double lengthTotal = 0;
             foreach (var line in lines)
             {
                 lengthTotal += line.get_Parameter(BuiltInParameter.CURVE_ELEM_LENGTH).AsDouble() * SharedValues.FootToMillimeters;
