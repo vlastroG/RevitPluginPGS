@@ -108,6 +108,7 @@
     <Compile Include="Commands\AR\RoomsFinishingMultiMark.cs" />
     <Compile Include="Commands\General\Info.cs" />
     <Compile Include="Commands\General\LevelName.cs" />
+    <Compile Include="Commands\General\PolyLineLength.cs" />
     <Compile Include="Commands\General\Selector.cs" />
     <Compile Include="Commands\KR\Models\StairFlight.cs" />
     <Compile Include="Commands\KR\Models\StairModel.cs" />

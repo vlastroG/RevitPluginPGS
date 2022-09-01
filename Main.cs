@@ -55,6 +55,13 @@ namespace MS
             btnInfo.LargeImage = btnInfoImage;
             btnInfo.ToolTip = "Информация о плагине";
 
+            // PolyLineLength command
+            PushButtonData btnPolyLineLength = new PushButtonData("PolyLineLength", "Длина\nполилинии", path, "MS.Commands.General.PolyLineLength");
+            Uri btnPolyLineLengthImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            BitmapImage btnPolyLineLengthImage = new BitmapImage(btnPolyLineLengthImagePath);
+            btnPolyLineLength.LargeImage = btnPolyLineLengthImage;
+            btnPolyLineLength.ToolTip = "Суммарная длина выбранных линий";
+
 
             // LevelName command
             //PushButtonData btnLevelName = new PushButtonData("LevelName", "Отметки\nуровней", path, "MS.Commands.General.LevelName");
@@ -289,6 +296,7 @@ namespace MS
 
             // General panel
             panelGeneral.AddItem(btnInfo);
+            panelGeneral.AddItem(btnPolyLineLength);
             //panelGeneral.AddItem(btnLevelName);
 
             // AR panel
