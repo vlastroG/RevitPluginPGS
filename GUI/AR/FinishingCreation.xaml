@@ -5,10 +5,10 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:MS.GUI.AR"
-             mc:Ignorable="d" Height="455" Width="618">
-    <Grid Background="White" Height="445" VerticalAlignment="Top">
+             mc:Ignorable="d" Height="460" MinHeight="455" MaxHeight="470" Width="618" MinWidth="618" MaxWidth="618">
+    <Grid Background="White" Height="439" VerticalAlignment="Center">
         <DataGrid Name="FinishingDto"
-                  Margin="10,20,10,223" 
+                  Margin="10,30,10,190" 
                   AutoGenerateColumns="False" 
                   IsSynchronizedWithCurrentItem="True"
                   SelectionUnit="FullRow"
@@ -19,21 +19,21 @@
                 <DataGridTextColumn Binding="{Binding Path = FinishingName}"
                                         IsReadOnly="True" 
                                         Header="PGS__НаименованиеОтделки" 
-                                        MinWidth="100" 
-                                        MaxWidth="200"/>
+                                        MinWidth="150" 
+                                        Width="1*"/>
                 <DataGridComboBoxColumn x:Name="wallTypesComboBoxColumn" 
                                         Header="WallType" 
                                         SelectedItemBinding="{Binding Path=WallType}"
                                         DisplayMemberPath="Name"
                                         MinWidth="150"
-                                        MaxWidth="300"/>
+                                        Width="1*"/>
             </DataGrid.Columns>
         </DataGrid>
-        <Button x:Name="Submit" Content="Готово" HorizontalAlignment="Left" VerticalAlignment="Top" RenderTransformOrigin="0.69,0.303" Width="60" Click="SubmitButton_Click"/>
-        <Button x:Name="Cancel" Content="Отмена" HorizontalAlignment="Left" Margin="60,0,0,0" VerticalAlignment="Top" Width="60" Click="CancelButton_Click"/>
-        <TextBox x:Name="textBoxHeight" PreviewTextInput="NumberValidationTextBox" HorizontalAlignment="Left" Margin="189,249,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="60"/>
+        <Button x:Name="Submit" Content="Готово" HorizontalAlignment="Left" VerticalAlignment="Top" RenderTransformOrigin="0.69,0.303" Width="60" Click="SubmitButton_Click" Margin="10,10,0,0"/>
+        <Button x:Name="Cancel" Content="Отмена" HorizontalAlignment="Left" Margin="70,10,0,0" VerticalAlignment="Top" Width="60" Click="CancelButton_Click"/>
+        <TextBox x:Name="textBoxHeight" PreviewTextInput="NumberValidationTextBox" HorizontalAlignment="Left" Margin="189,277,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="60"/>
         <TextBlock HorizontalAlignment="Left" 
-                   Margin="30,250,0,0" 
+                   Margin="30,278,0,0" 
                    TextWrapping="Wrap"
                    VerticalAlignment="Top" 
                    Width="138">
@@ -41,19 +41,19 @@
         </TextBlock>
         <RadioButton Content="Высота стен по элементам" 
                      HorizontalAlignment="Left" 
-                     Margin="30,285,0,0" 
+                     Margin="30,313,0,0" 
                      VerticalAlignment="Top"
                      IsChecked="True" 
                      Checked="HElems_Checked"/>
         <RadioButton Content="Высота стен по помещению"
                      HorizontalAlignment="Left"
-                     Margin="30,318,0,0" 
+                     Margin="30,346,0,0" 
                      VerticalAlignment="Top" 
                      IsChecked="True" 
                      Checked="HRooms_Checked"/>
         <RadioButton Content="Заданная высота стен" 
                      HorizontalAlignment="Left" 
-                     Margin="30,350,0,0" 
+                     Margin="30,378,0,0" 
                      VerticalAlignment="Top" 
                      IsChecked="True" 
                      Checked="HInput_Checked"/>

@@ -59,7 +59,7 @@ namespace MS.Commands.AR
                 _sharedParamsForCommand))
             {
                 MessageBox.Show("В текущем проекте у категории \"Стены\" " +
-                    "отсутствуют необходимые общие параметры:" +
+                    "в типе отсутствуют необходимые общие параметры:" +
                     "\nPGS_НаименованиеОтделки",
                     "Ошибка");
                 return Result.Cancelled;
@@ -70,7 +70,7 @@ namespace MS.Commands.AR
                 _sharedParamsForCommand))
             {
                 MessageBox.Show("В текущем проекте у категории \"Несущие колонны\" " +
-                    "отсутствуют необходимые общие параметры:" +
+                    "в типе отсутствуют необходимые общие параметры:" +
                     "\nPGS_НаименованиеОтделки",
                     "Ошибка");
                 return Result.Cancelled;
