@@ -210,9 +210,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Diagrams\TextFile1.txt" />
-    <EmbeddedResource Include="GUI\General\Alt_symbols.png">
+    <Resource Include="GUI\General\Alt_symbols.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
+    </Resource>
     <EmbeddedResource Include="Images\Icons\AR\MaterialColors.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
