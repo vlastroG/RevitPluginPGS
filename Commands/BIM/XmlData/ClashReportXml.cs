@@ -146,6 +146,28 @@ namespace Xml2CSharp
         public List<Clashobject> Clashobject { get; set; }
     }
 
+    [XmlRoot(ElementName = "comment")]
+    public class Comment
+    {
+        [XmlElement(ElementName = "user")]
+        public string User { get; set; }
+        [XmlElement(ElementName = "body")]
+        public string Body { get; set; }
+        [XmlElement(ElementName = "createddate")]
+        public Createddate Createddate { get; set; }
+        [XmlAttribute(AttributeName = "id")]
+        public string Id { get; set; }
+        [XmlAttribute(AttributeName = "status")]
+        public string Status { get; set; }
+    }
+
+    [XmlRoot(ElementName = "comments")]
+    public class Comments
+    {
+        [XmlElement(ElementName = "comment")]
+        public List<Comment> Comment { get; set; }
+    }
+
     [XmlRoot(ElementName = "clashresult")]
     public class Clashresult
     {
@@ -159,8 +181,12 @@ namespace Xml2CSharp
         public string Gridlocation { get; set; }
         [XmlElement(ElementName = "createddate")]
         public Createddate Createddate { get; set; }
+        [XmlElement(ElementName = "assignedto")]
+        public string Assignedto { get; set; }
         [XmlElement(ElementName = "clashobjects")]
         public Clashobjects Clashobjects { get; set; }
+        [XmlElement(ElementName = "comments")]
+        public Comments Comments { get; set; }
         [XmlAttribute(AttributeName = "name")]
         public string Name { get; set; }
         [XmlAttribute(AttributeName = "guid")]

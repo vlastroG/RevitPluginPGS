@@ -18,12 +18,19 @@ namespace MS.Commands.BIM
     [Regeneration(RegenerationOption.Manual)]
     public class ClashReportImport : IExternalCommand
     {
-        private void ErrorMessage()
+        private Result ErrorMessage()
         {
             MessageBox.Show("Xml файл поврежден!", "Ошибка!");
+            return Result.Failed;
         }
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
+            UIApplication uiapp = commandData.Application;
+            UIDocument uidoc = uiapp.ActiveUIDocument;
+            Document doc = uidoc.Document;
+
+            string path = String.Empty;
+
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             openFileDialog.Filter = "XML файлы (*.xml)|*.xml";
@@ -31,31 +38,46 @@ namespace MS.Commands.BIM
             openFileDialog.RestoreDirectory = true;
             if (openFileDialog.ShowDialog() == true)
             {
-                string path = openFileDialog.FileName;
+                path = openFileDialog.FileName;
+            }
+            else
+            {
+                return Result.Cancelled;
+            }
+            if (!path.EndsWith(".xml"))
+            {
+                return ErrorMessage();
             }
 
-            var filePath = @"C:\Users\stroganov.vg\Desktop\КР_Плиты перекрытия-ОВ_Воздуховоды.xml";
+            List<Clashresult> clashResults = new List<Clashresult>();
             XmlSerializer serializer = new XmlSerializer(typeof(Exchange));
-            using (FileStream fs = new FileStream(filePath, FileMode.Open))
+            using (FileStream fs = new FileStream(path, FileMode.Open))
             {
                 try
                 {
                     var exchange = (Exchange)serializer.Deserialize(fs);
-                    var clashTests = exchange.Batchtest.Clashtests.Clashtest.Clashresults.Clashresult;
-                    var point = clashTests[0].Clashpoint.Pos3f;
+                    clashResults = exchange.Batchtest.Clashtests.Clashtest.Clashresults.Clashresult;
                 }
                 catch (InvalidOperationException)
                 {
-                    ErrorMessage();
-                    return Result.Failed;
+                    return ErrorMessage();
                 }
                 catch (NullReferenceException)
                 {
-                    ErrorMessage();
-                    return Result.Failed;
+                    return ErrorMessage();
                 }
             }
-            var b = 9;
+
+            using (Transaction placeFams = new Transaction(doc))
+            {
+                placeFams.Start("Размещение семейств коллизий");
+                foreach (var clash in clashResults)
+                {
+
+                }
+                placeFams.Commit();
+            }
+
             return Result.Succeeded;
         }
     }
