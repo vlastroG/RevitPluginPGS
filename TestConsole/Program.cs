@@ -1,34 +1,34 @@
-﻿List<(string, string)> list = new List<(string, string)>()
-{
-    ("123","3434343"),
-    ("123","7634343"),
-    ("123","3-0984343"),
-    ("123","e78u74343"),
-    ("123","09343"),
-    ("123","48674343"),
-    ("123","-0984343"),
-    ("123","78474343"),
-    ("321","78474343"),
-    ("321","78474343"),
-    ("321","78474343"),
-    ("123","78474343"),
-    ("123","78474343"),
-    ("444","78474343")
-};
+﻿using Microsoft.Win32;
+using System.Xml.Serialization;
+using Xml2CSharp;
 
-var list2 = list.GroupBy(tuple => tuple.Item1);
-foreach (var item in list2)
+//OpenFileDialog openFileDialog = new OpenFileDialog();
+//openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+//openFileDialog.Filter = "*.xml";
+//openFileDialog.Multiselect = false;
+//openFileDialog.RestoreDirectory = true;
+//if (openFileDialog.ShowDialog() == true)
+//{
+//    string path = openFileDialog.FileName;
+//}
+//var filePath = @"C:\Users\stroganov.vg\Desktop\КР_Плиты перекрытия-ОВ_Воздуховоды_CRASH.xml";
+var filePath = @"C:\Users\stroganov.vg\Desktop\КР_Плиты перекрытия-ОВ_Воздуховоды.xml";
+XmlSerializer serializer = new XmlSerializer(typeof(Exchange));
+using (FileStream fs = new FileStream(filePath, FileMode.Open))
 {
-    if (item.Count() > 1)
+    try
     {
-        foreach (var miniItem in item)
-        {
-            var t = 0;
-        }
+        var exchange = (Exchange)serializer.Deserialize(fs);
+        var clashTests = exchange.Batchtest.Clashtests.Clashtest.Clashresults.Clashresult;
+        var point = clashTests[0].Clashpoint.Pos3f;
     }
-    else
+    catch (InvalidOperationException)
     {
-        var b = 2;
+        Console.WriteLine("Файл поврежден!");
+    }
+    catch (NullReferenceException)
+    {
+        Console.WriteLine("Файл поврежден!");
     }
 }
-
+var b = 9;

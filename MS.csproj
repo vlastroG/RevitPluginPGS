@@ -106,6 +106,8 @@
     <Compile Include="Commands\AR\RoomsFinishing.cs" />
     <Compile Include="Commands\AR\RoomsFinishingCreation.cs" />
     <Compile Include="Commands\AR\RoomsFinishingMultiMark.cs" />
+    <Compile Include="Commands\BIM\ClashReportImport.cs" />
+    <Compile Include="Commands\BIM\XmlData\ClashReportXml.cs" />
     <Compile Include="Commands\General\Info.cs" />
     <Compile Include="Commands\General\LevelName.cs" />
     <Compile Include="Commands\General\PolyLineLength.cs" />

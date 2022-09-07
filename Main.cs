@@ -46,6 +46,7 @@ namespace MS
             // RibbonPanel panelSS = application.CreateRibbonPanel("PGS-BIM", "Раздел СС");
             // Раздел ОВиК
             RibbonPanel panelOVVK = application.CreateRibbonPanel("PGS-BIM", "Раздел ОВиК");
+            RibbonPanel panelBIM = application.CreateRibbonPanel("PGS-BIM", "BIM");
 
 
             // Info command
@@ -54,6 +55,13 @@ namespace MS
             BitmapImage btnInfoImage = new BitmapImage(btnInfoImagePath);
             btnInfo.LargeImage = btnInfoImage;
             btnInfo.ToolTip = "Alt-символы Revit.";
+
+            // ClashReport command
+            PushButtonData btnClashReport = new PushButtonData("ClashReport", "Clashes\nimport", path, "MS.Commands.BIM.ClashReportImport");
+            Uri btnClashReportImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            BitmapImage btnClashReportImage = new BitmapImage(btnClashReportImagePath);
+            btnClashReport.LargeImage = btnClashReportImage;
+            btnClashReport.ToolTip = "Расстановка семейств по координатом пересечений из отчета Navisworks.";
 
             // PolyLineLength command
             PushButtonData btnPolyLineLength = new PushButtonData("PolyLineLength", "Длина\nполилинии", path, "MS.Commands.General.PolyLineLength");
@@ -329,6 +337,8 @@ namespace MS
             // ОВиК panel
             panelOVVK.AddItem(btnPipelineFittings);
             panelOVVK.AddItem(btnSystemsInSpace);
+
+            panelBIM.AddItem(btnClashReport);
         }
     }
 }
