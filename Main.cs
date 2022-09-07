@@ -77,14 +77,15 @@ namespace MS
 
 
             // SelectionRooms command
-            PushButtonData btnSelection = new PushButtonData("Selection", "Выбор\nпомещений", path, "MS.Selector");
+            PushButtonData btnSelection = new PushButtonData("Selection", "Выбор\nэлементов", path, "MS.Selector");
             Uri btnSelectionImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Selection.png");
             BitmapImage btnSelectionImage = new BitmapImage(btnSelectionImagePath);
             btnSelection.LargeImage = btnSelectionImage;
             btnSelection.ToolTip =
-                "Интерфейс переключается в режим выбора рамкой только элементов категории \'Помещения\'.";
+                "Интерфейс переключается в режим выбора только элементов заданной категории.";
             btnSelection.LongDescription =
-                "За одно использование команды можно выделить только помещения только рамкой только один раз.";
+                "Категория задается во всплывающем окне и запоминается для последующего использования в сеансе Revit. " +
+                "Доступны все категории Revit, даже группы.";
 
             // MasonryMesh command
             PushButtonData btnMasonryMesh = new PushButtonData("MasonryMesh", "Кладочная\nсетка", path, "MS.Commands.AR.MasonryMesh");
@@ -302,6 +303,7 @@ namespace MS
             // General panel
             panelGeneral.AddItem(btnInfo);
             panelGeneral.AddItem(btnPolyLineLength);
+            panelGeneral.AddItem(btnSelection);
             //panelGeneral.AddItem(btnLevelName);
 
             // AR panel
@@ -314,7 +316,6 @@ namespace MS
             panelAR.AddItem(btnRoomsFinishingMultiMark);
             //panelAR.AddItem(btnRmFinishing); // команда в разработке
             panelAR.AddItem(btnRmFinCreation);
-            panelAR.AddItem(btnSelection);
             panelAR.AddItem(btnMasonryMesh);
             panelAR.AddItem(btnMaterialColors);
 

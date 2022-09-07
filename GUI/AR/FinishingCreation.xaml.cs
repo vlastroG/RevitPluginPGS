@@ -122,6 +122,5 @@ namespace MS.GUI.AR
         {
             FinWallsHeightType = FinWallsHeight.ByInput;
         }
-
     }
 }

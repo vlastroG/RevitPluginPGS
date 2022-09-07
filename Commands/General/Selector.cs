@@ -6,6 +6,7 @@ using MS.Utilites;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using MS.GUI.General;
 
 namespace MS
 {
@@ -13,8 +14,10 @@ namespace MS
     [Regeneration(RegenerationOption.Manual)]
     public class Selector : IExternalCommand
     {
+        private static string _category = "Помещения";
+
         /// <summary>
-        /// Выбирает помещения рамкой на текущем виде
+        /// Выбирает элементы заданной категории на текущем виде
         /// </summary>
         /// <param name="commandData"></param>
         /// <param name="message"></param>
@@ -22,44 +25,53 @@ namespace MS
         /// <returns></returns>
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
-            // Выбор помещений рамкой на текущем виде
+            // Выбор элементов заданной категории текущем виде
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
+            Document doc = uidoc.Document;
 
-            var filter = new SelectionFilterRooms();
-
-            List<Element> selectedElements = null;
-            try
+            var categories = doc.Settings.Categories;
+            List<Category> categoriesList = new List<Category>();
+            foreach (Category category in categories)
             {
-                selectedElements = uidoc.Selection.PickElementsByRectangle(filter, "Выберите помещения.").ToList();
+                categoriesList.Add(category);
             }
-            catch (OperationCanceledException)
+            categoriesList.Sort((x, y) => x.Name.CompareTo(y.Name));
+
+            var form = new CategoryInput(categoriesList, _category);
+            form.ShowDialog();
+            if (form.DialogResult != true)
+            {
+                return Result.Cancelled;
+            }
+            _category = form.Category.Name;
+            var categorySelected = form.Category;
+            if (categorySelected == null)
             {
                 return Result.Cancelled;
             }
 
-            uidoc.Selection.SetElementIds(selectedElements.Select(it => it.Id).ToList());
+            var filter = new SelectionFilterElementsOfCategory<Element>(
+                new List<BuiltInCategory> { (BuiltInCategory)categorySelected.Id.IntegerValue },
+                false);
+            List<Element> elems = null;
+            try
+            {
+                elems = uidoc.Selection
+                    .PickObjects(
+                        Autodesk.Revit.UI.Selection.ObjectType.Element,
+                        filter,
+                        $"Выберите элементы категории {_category}")
+                    .Select(e => doc.GetElement(e))
+                    .ToList();
+            }
+            catch (Autodesk.Revit.Exceptions.OperationCanceledException)
+            {
+                return Result.Cancelled;
+            }
+
+            uidoc.Selection.SetElementIds(elems.Select(it => it.Id).ToList());
 
             return Result.Succeeded;
-        }
-
-
-        /// <summary>
-        /// Старый метод выбора элементов
-        /// </summary>
-        /// <param name="uIDocument"></param>
-        private void FilterSelectByClick(UIDocument uIDocument)
-        {
-            UIDocument uidoc = uIDocument;
-            Document doc = uidoc.Document;
-            //Pick an object by which Category you will filter
-            Reference refer = uidoc.Selection.PickObject(ObjectType.Element, "Выберите элемент для назначения категории фильтру.");
-
-            IList<Element> elements = uidoc.Selection.PickElementsByRectangle();
-
-            uidoc.Selection.SetElementIds(elements
-                .Where(x => x.Category.Id.IntegerValue.Equals(doc.GetElement(refer).Category.Id.IntegerValue))
-                .Select(x => x.Id)
-                .ToList());
         }
     }
 }
