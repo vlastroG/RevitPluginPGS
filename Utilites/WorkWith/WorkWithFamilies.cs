@@ -160,5 +160,52 @@ namespace MS.Utilites
 
             return sb.ToString();
         }
+
+        /// <summary>
+        /// Размещает семейство адаптивного компонента в плоскости || XoY в виде правильного многоугольника
+        /// с центром в заданной точке. Если адаптивное семейство содержит менее 3 точек, 
+        /// то центр также определяется геометрически.
+        /// Координаты центра в ФУТАХ!
+        /// </summary>
+        /// <param name="document">Документ Revit</param>
+        /// <param name="symbol">Типоразмер семейства</param>
+        /// <param name="center">Координаты центра в ФУТАХ</param>
+        /// <returns>Созданный элемент</returns>
+        public static Element CreateAdaptiveComponentInstance(Document document, FamilySymbol symbol, XYZ center)
+        {
+            // Create a new instance of an adaptive component family
+            FamilyInstance instance = AdaptiveComponentInstanceUtils.CreateAdaptiveComponentInstance(document, symbol);
+
+            // Get the placement points of this instance
+            IList<ElementId> placePointIds = new List<ElementId>();
+            placePointIds = AdaptiveComponentInstanceUtils.GetInstancePlacementPointElementRefIds(instance);
+            double x = 0;
+
+            // Set the position of each placement point
+
+            foreach (ElementId id in placePointIds)
+            {
+                double xCenter = 0;
+                double yCenter = 0;
+                double zCenter = 0;
+                if (placePointIds.Count == 1)
+                {
+                    xCenter = center.X;
+                    yCenter = center.Y;
+                    zCenter = center.Z;
+                }
+                else
+                {
+                    xCenter += 10 * x + center.X;
+                    yCenter += 10 * Math.Cos(x) + center.Y;
+                    zCenter += 0 + center.Z;
+                }
+                ReferencePoint point = document.GetElement(id) as ReferencePoint;
+                point.Position = new Autodesk.Revit.DB.XYZ(xCenter, yCenter, zCenter);
+                x += Math.PI / 6;
+            }
+
+            return instance;
+        }
     }
 }

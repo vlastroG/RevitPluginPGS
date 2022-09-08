@@ -12,23 +12,23 @@ using Xml2CSharp;
 //    string path = openFileDialog.FileName;
 //}
 //var filePath = @"C:\Users\stroganov.vg\Desktop\КР_Плиты перекрытия-ОВ_Воздуховоды_CRASH.xml";
-var filePath = @"C:\Users\stroganov.vg\Desktop\КР_Плиты перекрытия-ОВ_Воздуховоды.xml";
-XmlSerializer serializer = new XmlSerializer(typeof(Exchange));
-using (FileStream fs = new FileStream(filePath, FileMode.Open))
-{
-    try
-    {
-        var exchange = (Exchange)serializer.Deserialize(fs);
-        var clashTests = exchange.Batchtest.Clashtests.Clashtest.Clashresults.Clashresult;
-        var point = clashTests[0].Clashpoint.Pos3f;
-    }
-    catch (InvalidOperationException)
-    {
-        Console.WriteLine("Файл поврежден!");
-    }
-    catch (NullReferenceException)
-    {
-        Console.WriteLine("Файл поврежден!");
-    }
-}
+//var filePath = @"C:\Users\stroganov.vg\Desktop\КР_Плиты перекрытия-ОВ_Воздуховоды.xml";
+//XmlSerializer serializer = new XmlSerializer(typeof(Exchange));
+//using (FileStream fs = new FileStream(filePath, FileMode.Open))
+//{
+//    try
+//    {
+//        var exchange = (Exchange)serializer.Deserialize(fs);
+//        var clashTests = exchange.Batchtest.Clashtests.Clashtest.Clashresults.Clashresult;
+//        var point = clashTests[0].Clashpoint.Pos3f;
+//    }
+//    catch (InvalidOperationException)
+//    {
+//        Console.WriteLine("Файл поврежден!");
+//    }
+//    catch (NullReferenceException)
+//    {
+//        Console.WriteLine("Файл поврежден!");
+//    }
+//}
 var b = 9;

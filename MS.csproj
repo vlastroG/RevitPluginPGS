@@ -160,6 +160,9 @@
     <None Include=".editorconfig" />
     <None Include="Diagrams\Copy of Algorhytm check lintels.drawio" />
     <None Include="Diagrams\RoomsAreaAlgorithm.drawio" />
+    <EmbeddedResource Include="EmbeddedFamilies\ABG_GEN_ClashSphere_R22.rfa">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
     <None Include="packages.config" />
     <EmbeddedResource Include="SolutionItems\MS.addin">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

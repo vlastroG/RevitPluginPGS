@@ -201,6 +201,21 @@ namespace MS.Shared
         public static Guid PGS_FinishingName => Guid.Parse("f2c3dea3-2edf-4e34-87df-059fd78135f6");
 
         /// <summary>
+        /// Guid параметра ADSK_Код изделия = 2fd9e8cb-84f3-4297-b8b8-75f444e124ed (string)
+        /// </summary>
+        public static Guid ADSK_ItemCode => Guid.Parse("2fd9e8cb-84f3-4297-b8b8-75f444e124ed");
+
+        /// <summary>
+        /// Guid параметра ADSK_Позиция = ae8ff999-1f22-4ed7-ad33-61503d85f0f4 (string)
+        /// </summary>
+        public static Guid ADSK_Position => Guid.Parse("ae8ff999-1f22-4ed7-ad33-61503d85f0f4");
+
+        /// <summary>
+        /// Guid параметра ADSK_Обозначение = 9c98831b-9450-412d-b072-7d69b39f4029 (string)
+        /// </summary>
+        public static Guid ADSK_Designation => Guid.Parse("9c98831b-9450-412d-b072-7d69b39f4029");
+
+        /// <summary>
         /// Валидация текущего проекта Revit на наличие общих параметров у заданной категории.
         /// </summary>
         /// <param name="doc">Документ Revit.</param>
