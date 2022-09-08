@@ -62,6 +62,13 @@ namespace MS
             BitmapImage btnClashReportImage = new BitmapImage(btnClashReportImagePath);
             btnClashReport.LargeImage = btnClashReportImage;
             btnClashReport.ToolTip = "Расстановка семейств по координатом пересечений из отчета Navisworks.";
+            btnClashReport.LongDescription = $"\n\nНазвание проверки записано в ADSK_Группирование" +
+                $"\nОтветственный записывается в 'Комментарии'" +
+                $"\nid1 записывается в 'ADSK_Код изделия'" +
+                $"\nid2 записывается в 'ADSK_Позиция'" +
+                $"\nname1 записывается в 'ADSK_Наименование'" +
+                $"\nname2 записывается в 'ADSK_Обозначение'" +
+                $"\nclashresult записывается в 'ADSK_Примечание'";
 
             // PolyLineLength command
             PushButtonData btnPolyLineLength = new PushButtonData("PolyLineLength", "Длина\nполилинии", path, "MS.Commands.General.PolyLineLength");

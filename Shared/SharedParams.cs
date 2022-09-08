@@ -216,6 +216,16 @@ namespace MS.Shared
         public static Guid ADSK_Designation => Guid.Parse("9c98831b-9450-412d-b072-7d69b39f4029");
 
         /// <summary>
+        /// Guid параметр ADSK_Группирование = 3de5f1a4-d560-4fa8-a74f-25d250fb3401 (string)
+        /// </summary>
+        public static Guid ADSK_Grouping => Guid.Parse("3de5f1a4-d560-4fa8-a74f-25d250fb3401");
+
+        /// <summary>
+        /// Guid параметра ADSK_Примечание = a85b7661-26b0-412f-979c-66af80b4b2c3 (string)
+        /// </summary>
+        public static Guid ADSK_Note => Guid.Parse("a85b7661-26b0-412f-979c-66af80b4b2c3");
+
+        /// <summary>
         /// Валидация текущего проекта Revit на наличие общих параметров у заданной категории.
         /// </summary>
         /// <param name="doc">Документ Revit.</param>

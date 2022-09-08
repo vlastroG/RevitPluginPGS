@@ -27,6 +27,8 @@ namespace MS.Commands.BIM
             return Result.Failed;
         }
 
+        private static string _startPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
         private readonly string _assemblyDir = WorkWithPath.AssemblyDirectory;
 
         private readonly string _famPath = @"\EmbeddedFamilies\ABG_GEN_ClashSphere_R22.rfa";
@@ -76,7 +78,7 @@ namespace MS.Commands.BIM
             string xmlPath = String.Empty;
             OpenFileDialog openFileDialog = new OpenFileDialog()
             {
-                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                InitialDirectory = _startPath,
                 Filter = "XML файлы (*.xml)|*.xml",
                 Multiselect = false,
                 RestoreDirectory = true,
@@ -85,6 +87,8 @@ namespace MS.Commands.BIM
             if (openFileDialog.ShowDialog() == true)
             {
                 xmlPath = openFileDialog.FileName;
+                FileInfo file = new FileInfo(xmlPath);
+                _startPath = file.DirectoryName;
             }
             else
             {
@@ -94,7 +98,7 @@ namespace MS.Commands.BIM
             {
                 return ErrorMessage("Неверный формат файла!");
             }
-
+            string clashTestName = String.Empty;
             List<Clashresult> clashResults = new List<Clashresult>();
             XmlSerializer serializer = new XmlSerializer(typeof(Exchange));
             using (FileStream fs = new FileStream(xmlPath, FileMode.Open))
@@ -102,6 +106,7 @@ namespace MS.Commands.BIM
                 try
                 {
                     var exchange = (Exchange)serializer.Deserialize(fs);
+                    clashTestName = exchange.Batchtest.Clashtests.Clashtest.Name;
                     clashResults = exchange.Batchtest.Clashtests.Clashtest.Clashresults.Clashresult
                         .Where(result => _resultStatuses.Contains(result.Resultstatus))
                         .ToList();
@@ -121,23 +126,34 @@ namespace MS.Commands.BIM
                 placeFams.Start("Placed clash families");
                 foreach (var clash in clashResults)
                 {
+                    double xClash = Double.Parse(clash.Clashpoint.Pos3f.X, CultureInfo.InvariantCulture);
+                    double yClash = Double.Parse(clash.Clashpoint.Pos3f.Y, CultureInfo.InvariantCulture);
+                    double zClash = Double.Parse(clash.Clashpoint.Pos3f.Z, CultureInfo.InvariantCulture);
                     XYZ center = new XYZ(
-                        Double.Parse(clash.Clashpoint.Pos3f.X, CultureInfo.InvariantCulture) / SharedValues.FootToMillimeters * 1000,
-                        Double.Parse(clash.Clashpoint.Pos3f.Y, CultureInfo.InvariantCulture) / SharedValues.FootToMillimeters * 1000,
-                        Double.Parse(clash.Clashpoint.Pos3f.Z, CultureInfo.InvariantCulture) / SharedValues.FootToMillimeters * 1000
+                        xClash / SharedValues.FootToMillimeters * 1000,
+                        yClash / SharedValues.FootToMillimeters * 1000,
+                        zClash / SharedValues.FootToMillimeters * 1000
                     );
                     Element clashEl = WorkWithFamilies.CreateAdaptiveComponentInstance(doc, clashFamSymb, center);
                     count++;
                     clashEl.get_Parameter(BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS).Set(clash.Assignedto);
                     try
                     {
-                        clashEl.get_Parameter(SharedParams.ADSK_ItemCode).Set(clash.Clashobjects.Clashobject[0].Objectattribute.Value);
-                        clashEl.get_Parameter(SharedParams.ADSK_Name).Set(clash.Clashobjects.Clashobject[0].Smarttags.Smarttag[0].Value);
-                        clashEl.get_Parameter(SharedParams.ADSK_Position).Set(clash.Clashobjects.Clashobject[1].Objectattribute.Value);
-                        clashEl.get_Parameter(SharedParams.ADSK_Designation).Set(clash.Clashobjects.Clashobject[1].Smarttags.Smarttag[0].Value);
-                        clashEl.LookupParameter("ClashX").Set(center.X);
-                        clashEl.LookupParameter("ClashY").Set(center.Y);
-                        clashEl.LookupParameter("ClashZ").Set(center.Z);
+                        clashEl.get_Parameter(SharedParams.ADSK_ItemCode)
+                            .Set(clash.Clashobjects.Clashobject[0].Objectattribute.Value); //id1
+                        clashEl.get_Parameter(SharedParams.ADSK_Name)
+                            .Set(clash.Clashobjects.Clashobject[0].Smarttags.Smarttag[0].Value); //name1
+                        clashEl.get_Parameter(SharedParams.ADSK_Position)
+                            .Set(clash.Clashobjects.Clashobject[1].Objectattribute.Value); //id2
+                        clashEl.get_Parameter(SharedParams.ADSK_Designation)
+                            .Set(clash.Clashobjects.Clashobject[1].Smarttags.Smarttag[0].Value); //name2
+                        clashEl.get_Parameter(SharedParams.ADSK_Grouping)
+                            .Set(clashTestName); //clashtest name
+                        clashEl.get_Parameter(SharedParams.ADSK_Note)
+                            .Set(clash.Name); //Номер проверки name
+                        clashEl.LookupParameter("ClashX").Set(xClash);
+                        clashEl.LookupParameter("ClashY").Set(yClash);
+                        clashEl.LookupParameter("ClashZ").Set(zClash);
                     }
                     catch (NullReferenceException)
                     {
@@ -153,11 +169,13 @@ namespace MS.Commands.BIM
             }
             MessageBox.Show($"Размещено {count} экземпляров семейств коллизий. " +
                 $"Семейства размещаются только для коллизий статусов 'Создать' и 'Активн.'. " +
+                $"\n\nНазвание проверки записано в ADSK_Группирование" +
                 $"\nОтветственный записан в 'Комментарии'" +
                 $"\nid1 записан в 'ADSK_Код изделия'" +
                 $"\nid2 записан в 'ADSK_Позиция'" +
                 $"\nname1 записано в 'ADSK_Наименование'" +
-                $"\nname2 записано в 'ADSK_Обозначение'", "Clashes import");
+                $"\nname2 записано в 'ADSK_Обозначение'" +
+                $"\nclashresult записан в 'ADSK_Примечание'", "Clashes import");
             return Result.Succeeded;
         }
     }
