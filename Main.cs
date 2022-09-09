@@ -294,9 +294,10 @@ namespace MS
             btnPipelineFittings.LargeImage = btnPipelineFittingsImage;
             btnPipelineFittings.ToolTip = "Автоматическое заполнение пунктов номера квартиры " +
                 "в спецификации \"PGS_ОВ_Настройка поквартирных клапанов\".";
-            btnPipelineFittings.LongDescription = "Копирование значения прааметров в экземпляры " +
-                "элементов категорий: Арматура трубопроводов и в Оборудование " +
-                "пишется значение номер квартиры из помещения, в которых эти экземпляры расположены.";
+            btnPipelineFittings.LongDescription = "Копирование значения параметров в экземпляры " +
+                "элементов категорий: Арматура трубопроводов, Оборудование, Воздухораспределители на выбор." +
+                "Пишется значение номера квартиры из помещения (или номера помещения пространства на выбор), " +
+                "в которых эти экземпляры расположены.";
             btnPipelineFittings.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, @"https://google.com"));
 
 

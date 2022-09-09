@@ -137,6 +137,9 @@
     <Compile Include="GUI\General\CategoryInput.xaml.cs">
       <DependentUpon>CategoryInput.xaml</DependentUpon>
     </Compile>
+    <Compile Include="GUI\MEP\MEPinSpatials.xaml.cs">
+      <DependentUpon>MEPinSpatials.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Shared\SharedParams.cs" />
@@ -216,6 +219,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="GUI\General\CategoryInput.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GUI\MEP\MEPinSpatials.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

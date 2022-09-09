@@ -3,6 +3,7 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Architecture;
 using Autodesk.Revit.DB.Mechanical;
 using Autodesk.Revit.UI;
+using MS.GUI.MEP;
 using MS.Shared;
 using System;
 using System.Collections.Generic;
@@ -17,18 +18,32 @@ namespace MS.Commands.MEP
     public class PipelineFittings : IExternalCommand
     {
         /// <summary>
-        /// Назначение номера квартиры (из помещений в связях) арматуре трубопроводов и оборудованию,
-        /// которые расположена в ней.
+        /// Обнуляет значение параметра ADSK_Номер квартиры для всех элементов
         /// </summary>
-        /// <param name="commandData"></param>
-        /// <param name="message"></param>
-        /// <param name="elements"></param>
-        /// <returns></returns>
-        public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
+        /// <param name="doc">Документ Revit, в котором будет происходить транзакция</param>
+        /// <param name="elems">Элементы для обнуления</param>
+        private void ClearParamValues(Document doc, IList<Element> elems)
         {
-            Document doc = commandData.Application.ActiveUIDocument.Document;
-            UIDocument uidoc = commandData.Application.ActiveUIDocument;
+            using (Transaction trans = new Transaction(doc))
+            {
+                trans.Start("MEP in rooms clear values");
 
+                foreach (var elem in elems)
+                {
+                    elem.get_Parameter(SharedParams.ADSK_NumberOfApartment).Set(String.Empty);
+                }
+
+                trans.Commit();
+            }
+        }
+
+        /// <summary>
+        /// Валидация файла Revit на наличие необходимых общих параметров
+        /// </summary>
+        /// <param name="doc">Файл Revit</param>
+        /// <returns>True, если файл валидный, иначе false</returns>
+        private bool ValidateRevitFile(Document doc)
+        {
             Guid[] _sharedParamsForCommand = new Guid[] {
             SharedParams.ADSK_NumberOfApartment
             };
@@ -41,7 +56,7 @@ namespace MS.Commands.MEP
                     "отсутствует необходимый общий параметр:" +
                     "\nADSK_Номер квартиры",
                     "Ошибка");
-                return Result.Cancelled;
+                return false;
             }
             if (!SharedParams.IsCategoryOfDocContainsSharedParams(
                 doc,
@@ -52,7 +67,7 @@ namespace MS.Commands.MEP
                     "отсутствует необходимый общий параметр:" +
                     "\nADSK_Номер квартиры",
                     "Ошибка");
-                return Result.Cancelled;
+                return false;
             }
             if (!SharedParams.IsCategoryOfDocContainsSharedParams(
                 doc,
@@ -63,8 +78,83 @@ namespace MS.Commands.MEP
                     "отсутствует необходимый общий параметр:" +
                     "\nADSK_Номер квартиры",
                     "Ошибка");
+                return false;
+            }
+            return true;
+        }
+
+        private (List<Element> Elements, ElementId Error) GetIntersectedElems(
+            Document doc,
+            Element SpatialEl,
+            List<BuiltInCategory> categories,
+            RevitLinkInstance link)
+        {
+            SpatialElementGeometryCalculator calculator = new SpatialElementGeometryCalculator(doc);
+            Solid solid;
+            if (!(SpatialEl is SpatialElement))
+            {
+                throw new ArgumentException($"{SpatialEl} не является наследником класса {nameof(SpatialElement)}");
+            }
+            SpatialElement spatial = SpatialEl as SpatialElement;
+            try
+            {
+                SpatialElementGeometryResults results = calculator.CalculateSpatialElementGeometry(spatial);
+                solid = results.GetGeometry();
+            }
+            catch (Autodesk.Revit.Exceptions.ArgumentException)
+            {
+                return (null, SpatialEl.Id);
+            }
+            catch (Autodesk.Revit.Exceptions.InvalidOperationException)
+            {
+                return (null, SpatialEl.Id);
+            }
+
+            //Изначально solid создается по координатам из связанного файла.
+            //Если связь перемещена, то solid необходимо переместить в эту позицию:
+            if (link != null)
+            {
+                Transform transform = link.GetTransform();
+                if (!transform.AlmostEqual(Transform.Identity))
+                {
+                    solid = SolidUtils
+                        .CreateTransformed(solid, transform);
+                }
+            }
+            var filter = new ElementMulticategoryFilter(categories);
+            var elems = new FilteredElementCollector(doc)
+                .WherePasses(filter)
+                .WherePasses(new ElementIntersectsSolidFilter(solid))
+                .ToList();
+            return (elems, null);
+        }
+
+        /// <summary>
+        /// Назначение номера квартиры (из помещений в связях) арматуре трубопроводов и оборудованию,
+        /// которые расположена в ней.
+        /// </summary>
+        /// <param name="commandData"></param>
+        /// <param name="message"></param>
+        /// <param name="elements"></param>
+        /// <returns></returns>
+        public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
+        {
+            Document doc = commandData.Application.ActiveUIDocument.Document;
+            UIDocument uidoc = commandData.Application.ActiveUIDocument;
+
+            if (!ValidateRevitFile(doc))
+            {
                 return Result.Cancelled;
             }
+
+            var ui = new MEPinSpatials();
+            ui.ShowDialog();
+            if (ui.DialogResult != true)
+            {
+                return Result.Cancelled;
+            }
+            var categories = ui.Categories.ToList();
+            var spatialsFromLinks = ui.SpatialsFromLinks;
 
             //var filter_links = new FilteredElementCollector(doc);
             //var linked_docs = filter_links
@@ -74,28 +164,14 @@ namespace MS.Commands.MEP
             //    .ToList();
 
             var filter_pipe_stuff = new FilteredElementCollector(doc);
-            var pipe_stuff_categories = new ElementMulticategoryFilter(new Collection<BuiltInCategory> {
-                     BuiltInCategory.OST_PipeAccessory,
-                     BuiltInCategory.OST_MechanicalEquipment,
-                     BuiltInCategory.OST_DuctTerminal
-            });
+            var pipe_stuff_categories = new ElementMulticategoryFilter(categories);
 
             var pipe_stuff = filter_pipe_stuff.WherePasses(pipe_stuff_categories)
                 .WhereElementIsNotElementType()
                 .ToElements();
 
             // Обнуление значений номеров квартир у арматуры трубопроводов
-            using (Transaction trans_renew = new Transaction(doc))
-            {
-                trans_renew.Start("Арматура труб обнуление");
-
-                foreach (var pipe_acs in pipe_stuff)
-                {
-                    pipe_acs.get_Parameter(SharedParams.ADSK_NumberOfApartment).Set(String.Empty);
-                }
-
-                trans_renew.Commit();
-            }
+            ClearParamValues(doc, pipe_stuff);
             var setCount = 0;
 
             var iterationsCount = 0;
