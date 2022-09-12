@@ -4,8 +4,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:MS.GUI.MEP"
-             mc:Ignorable="d" d:DesignWidth="500" Height="300">
-    <Grid RenderTransformOrigin="0.502,0.502">
+             mc:Ignorable="d" MinWidth="500" MaxWidth="500" MinHeight="300" MaxHeight="300">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="2*"></RowDefinition>
             <RowDefinition Height="1*"></RowDefinition>
@@ -14,14 +14,14 @@
             <ColumnDefinition></ColumnDefinition>
             <ColumnDefinition></ColumnDefinition>
         </Grid.ColumnDefinitions>
-        <TextBlock Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" Margin="87,29,0,144" TextWrapping="Wrap" Text="Категории для обработки"/>
-        <CheckBox x:Name="PipelineFittings" Grid.Row="0" Grid.Column="0" Content="Арматура трубопроводов" HorizontalAlignment="Left" Margin="48,70,0,104" Checked="PipelineFittings_Checked" Unchecked="PipelineFittings_UnChecked"/>
-        <CheckBox x:Name="Equipment" Grid.Row="0" Grid.Column="0" Content="Оборудование" HorizontalAlignment="Left" Margin="48,107,0,67" Checked="Equipment_Checked" Unchecked="Equipment_UnChecked"/>
-        <CheckBox x:Name="DuctTerminal" Grid.Row="0" Content="Воздухораспределители" HorizontalAlignment="Center" Margin="0,142,0,32" Checked="DuctTerminal_Checked" Unchecked="DuctTerminal_UnChecked"/>
-        <Button x:Name="Ok" Grid.Row="1" Grid.Column="0" Content="Ок" Margin="195,27,10,46" Click="Ok_Click"/>
-        <Button x:Name="Cancel" Grid.Row="1" Grid.Column="1" Content="Отмена" Margin="10,27,0,46" HorizontalAlignment="Left" Width="45" Click="Cancel_Click"/>
-        <TextBlock Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" Margin="67,29,0,143" TextWrapping="Wrap" Text="Выбор источника"/>
-        <RadioButton x:Name="LinkAR" Grid.Row="0" Grid.Column="1" GroupName="Source" Content="Помещения в связанных файлах АР" HorizontalAlignment="Right" Margin="0,91,38,82" IsChecked="True" Checked="LinkAR_Checked"/>
-        <RadioButton x:Name="Spaces" Grid.Row="0" Grid.Column="1" GroupName="Source" Content="Пространства в текущем файле" HorizontalAlignment="Right" Margin="0,131,15,42" IsChecked="True" Checked="Spaces_Checked"/>
+        <TextBlock Grid.Row="0" Grid.Column="0" HorizontalAlignment="Left" Margin="87,29,0,0" TextWrapping="Wrap" Text="Категории для обработки" Height="16" VerticalAlignment="Top"/>
+        <CheckBox x:Name="PipelineFittings" Grid.Row="0" Content="Арматура трубопроводов" Margin="48,70,0,0" Checked="PipelineFittings_Checked" Unchecked="PipelineFittings_UnChecked" Height="16" VerticalAlignment="Top"/>
+        <CheckBox x:Name="Equipment" Grid.Row="0" Grid.Column="0" Content="Оборудование" Margin="48,107,0,0" Checked="Equipment_Checked" Unchecked="Equipment_UnChecked" Height="15" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+        <CheckBox x:Name="DuctTerminal" Grid.Row="0" Content="Воздухораспределители" HorizontalAlignment="Left" Margin="48,144,0,0" Checked="DuctTerminal_Checked" Unchecked="DuctTerminal_UnChecked" Height="17" VerticalAlignment="Top"/>
+        <Button x:Name="Ok" Grid.Row="1" Grid.Column="0" Content="Ок" Margin="0,27,10,0" Click="Ok_Click" Height="22" VerticalAlignment="Top" HorizontalAlignment="Right" Width="45"/>
+        <Button x:Name="Cancel" Grid.Row="1" Grid.Column="1" Content="Отмена" Margin="10,27,0,0" HorizontalAlignment="Left" Width="45" Click="Cancel_Click" Height="22" VerticalAlignment="Top"/>
+        <TextBlock Grid.Row="0" Grid.Column="1" Margin="0,29,86,0" TextWrapping="Wrap" Text="Выбор источника" Height="17" VerticalAlignment="Top" HorizontalAlignment="Right" Width="97"/>
+        <RadioButton x:Name="LinkAR" Grid.Row="0" Grid.Column="1" GroupName="Source" Content="Помещения в связанных файлах АР" HorizontalAlignment="Right" Margin="0,95,10,0" IsChecked="True" Checked="LinkAR_Checked" Width="221" Height="16" VerticalAlignment="Top"/>
+        <RadioButton x:Name="Spaces" Grid.Row="0" Grid.Column="1" GroupName="Source" Content="Пространства в текущем файле" HorizontalAlignment="Right" Margin="0,132,38,0" IsChecked="True" Checked="Spaces_Checked" Height="16" VerticalAlignment="Top"/>
     </Grid>
 </Window>

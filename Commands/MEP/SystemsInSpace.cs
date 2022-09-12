@@ -52,7 +52,8 @@ namespace MS.Commands.MEP
                 return Result.Cancelled;
             }
 
-            System.Windows.Forms.DialogResult userWarning = System.Windows.Forms.MessageBox.Show("У всех пространств, в Комментирии которых НЕ содержится \'не обрабатывать\' " +
+            System.Windows.Forms.DialogResult userWarning = System.Windows.Forms.MessageBox.Show(
+                "У всех пространств, в Комментирии которых НЕ содержится \'не обрабатывать\' " +
                 "обновятся значения параметров \'ADSK_Наименование вытяжной системы\' " +
                 "и \'ADSK_Наименование приточной системы\' в соответствии с названиями приточных и вытяжных" +
                 " систем воздуховодов в этих пространствах.",

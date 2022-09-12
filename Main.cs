@@ -288,16 +288,18 @@ namespace MS
             //btnNumerator.LargeImage = btnNumeratorImage;
 
             // ОВиК арматура трубопроводов и оборудование в помещениях command
-            PushButtonData btnPipelineFittings = new PushButtonData("PipelineFittings", "Арматура\nтрубопроводов", path, "MS.Commands.MEP.PipelineFittings");
+            PushButtonData btnPipelineFittings = new PushButtonData("PipelineFittings", "Инженерные элементы\nв пространствах", path, "MS.Commands.MEP.PipelineFittings");
             Uri btnPipelineFittingsImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
             BitmapImage btnPipelineFittingsImage = new BitmapImage(btnPipelineFittingsImagePath);
             btnPipelineFittings.LargeImage = btnPipelineFittingsImage;
             btnPipelineFittings.ToolTip = "Автоматическое заполнение пунктов номера квартиры " +
                 "в спецификации \"PGS_ОВ_Настройка поквартирных клапанов\".";
-            btnPipelineFittings.LongDescription = "Копирование значения параметров в экземпляры " +
-                "элементов категорий: Арматура трубопроводов, Оборудование, Воздухораспределители на выбор." +
-                "Пишется значение номера квартиры из помещения (или номера помещения пространства на выбор), " +
-                "в которых эти экземпляры расположены.";
+            btnPipelineFittings.LongDescription = "Копирование значения параметра пространства (или помещения) " +
+                "в экземпляры элементов категорий: Арматура трубопроводов, Оборудование, Воздухораспределители на выбор. " +
+                "Пишется значение 'ADSK_Номер квартиры' из помещения (или 'Номер помещения' из пространства), " +
+                "в расположенные в них экземпляры элементов выбранных категорий." +
+                "\n\nВажно! Перед запуском команды убедитесь, что геометрия пространств (помещений) доходит до потолка, " +
+                "иначе не будет найдена принадлежность элемента инженерных систем данному пространству (помещению).";
             btnPipelineFittings.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, @"https://google.com"));
 
 
