@@ -26,7 +26,7 @@ namespace MS.Commands.MEP
         {
             using (Transaction trans = new Transaction(doc))
             {
-                trans.Start("MEP in rooms clear values");
+                trans.Start("MEP in spatials clear values");
 
                 foreach (var elem in elems)
                 {
@@ -83,17 +83,30 @@ namespace MS.Commands.MEP
             return true;
         }
 
+        /// <summary>
+        /// Находит все элементы заданных категорий, которые пересекаются со Spatial элементом из данного документа, 
+        /// или связанного файла
+        /// </summary>
+        /// <param name="doc">Документ, в котором ищутся пересечения</param>
+        /// <param name="SpatialEl">Элемент, наследующий класс SpatialElement, 
+        /// который проверяется на пересечения с элементами заданных категорий</param>
+        /// <param name="categories">Категории элементов, 
+        /// которые проверяются на пересечение с <paramref name="SpatialEl"/></param>
+        /// <param name="link">Связанный файл, в котором расположен <paramref name="SpatialEl"/></param>
+        /// <returns>Кортеж списка найденных элементов и результата об ошибке = null, 
+        /// в случае ошибки null вместо списка и id <paramref name="SpatialEl"/></returns>
+        /// <exception cref="ArgumentException"></exception>
         private (List<Element> Elements, ElementId Error) GetIntersectedElems(
-            Document doc,
-            Element SpatialEl,
-            List<BuiltInCategory> categories,
-            RevitLinkInstance link)
+            in Document doc,
+            in Element SpatialEl,
+            in List<BuiltInCategory> categories,
+            in RevitLinkInstance link = null)
         {
             SpatialElementGeometryCalculator calculator = new SpatialElementGeometryCalculator(doc);
             Solid solid;
             if (!(SpatialEl is SpatialElement))
             {
-                throw new ArgumentException($"{SpatialEl} не является наследником класса {nameof(SpatialElement)}");
+                return (null, SpatialEl.Id);
             }
             SpatialElement spatial = SpatialEl as SpatialElement;
             try
@@ -154,96 +167,126 @@ namespace MS.Commands.MEP
                 return Result.Cancelled;
             }
             var categories = ui.Categories.ToList();
+            if (categories.Count == 0)
+            {
+                MessageBox.Show("Не выбрано ни одной категории!", "Операция отменена");
+                return Result.Succeeded;
+            }
             var spatialsFromLinks = ui.SpatialsFromLinks;
+            string transDesc = "MEP элементы в пространствах";
+            List<(RevitLinkInstance, Document)> linksDocs = new List<(RevitLinkInstance, Document)> { (null, doc) };
+            if (spatialsFromLinks)
+            {
+                linksDocs = new FilteredElementCollector(doc)
+                    .OfCategory(BuiltInCategory.OST_RvtLinks)
+                    .WhereElementIsNotElementType()
+                    .Where(e => e.Name.Contains("АР"))
+                    .Cast<RevitLinkInstance>()
+                    .Select(l => (l, l.GetLinkDocument()))
+                    .ToList();
+                if (linksDocs.Count == 0)
+                {
+                    MessageBox.Show("Не найдена ни одна связь АР!", "Операция отменена");
+                    return Result.Cancelled;
+                }
+                transDesc = "MEP элементы в помещениях";
+            }
 
-            //var filter_links = new FilteredElementCollector(doc);
-            //var linked_docs = filter_links
-            //    .OfCategory(BuiltInCategory.OST_RvtLinks)
-            //    .WhereElementIsNotElementType()
-            //    .Where(e => e.Name.Contains("АР"))
-            //    .ToList();
-
-            var filter_pipe_stuff = new FilteredElementCollector(doc);
-            var pipe_stuff_categories = new ElementMulticategoryFilter(categories);
-
-            var pipe_stuff = filter_pipe_stuff.WherePasses(pipe_stuff_categories)
+            var MEPcategories = new ElementMulticategoryFilter(categories);
+            var pipeStuff = new FilteredElementCollector(doc)
+                .WherePasses(MEPcategories)
                 .WhereElementIsNotElementType()
                 .ToElements();
 
             // Обнуление значений номеров квартир у арматуры трубопроводов
-            ClearParamValues(doc, pipe_stuff);
+            ClearParamValues(doc, pipeStuff);
             var setCount = 0;
-
             var iterationsCount = 0;
 
             List<ElementId> errorIds = new List<ElementId>();
-
-            var spaces = new FilteredElementCollector(doc)
-                .OfCategory(BuiltInCategory.OST_MEPSpaces)
-                .WhereElementIsNotElementType()
-                .Cast<Space>()
-                .ToList();
             //------------------------------------------------------Если выбор пространств
             //Назначение номеров квартир арматуре трубопроводов
-            using (Transaction trans = new Transaction(doc))
+
+            foreach (var linkDoc in linksDocs)
             {
-                trans.Start("Арматура труб в пространствах");
-
-                if (spaces != null)
+                using (Transaction trans = new Transaction(doc))
                 {
-                    foreach (var room in spaces)
+                    trans.Start(transDesc);
+                    List<Element> spatials = null;
+                    if (linkDoc.Item1 != null)
                     {
-                        SpatialElementGeometryCalculator calculator = new SpatialElementGeometryCalculator(doc);
-                        Solid room_solid;
-                        try
+                        // Spatials из связи АР (помещения)
+                        spatials = new FilteredElementCollector(linkDoc.Item2)
+                            .OfCategory(BuiltInCategory.OST_Rooms)
+                            .WhereElementIsNotElementType()
+                            .Cast<Element>()
+                            .ToList();
+                    }
+                    else
+                    {
+                        // spatials из текущего документа (пространства)
+                        spatials = new FilteredElementCollector(linkDoc.Item2)
+                            .OfCategory(BuiltInCategory.OST_MEPSpaces)
+                            .WhereElementIsNotElementType()
+                            .Cast<Element>()
+                            .ToList();
+                    }
+                    try
+                    {
+                        if (spatials != null)
                         {
-                            SpatialElementGeometryResults results = calculator.CalculateSpatialElementGeometry(room);
-                            room_solid = results.GetGeometry();
-                        }
-                        catch (Autodesk.Revit.Exceptions.ArgumentException)
-                        {
-                            errorIds.Add(room.Id);
-                            continue;
-                        }
-                        catch (Autodesk.Revit.Exceptions.InvalidOperationException)
-                        {
-                            errorIds.Add(room.Id);
-                            continue;
-                        }
-
-
-                        var pipe_acs_in_room = new FilteredElementCollector(doc)
-                            .WherePasses(pipe_stuff_categories)
-                            .WherePasses(new ElementIntersectsSolidFilter(room_solid))
-                            .ToElements();
-
-                        foreach (var pipe_acs in pipe_acs_in_room)
-                        {
-                            iterationsCount++;
-                            var fam_inst = pipe_acs as FamilyInstance;
-                            fam_inst
-                                .get_Parameter(SharedParams.ADSK_NumberOfApartment)
-                                .Set(room.get_Parameter(BuiltInParameter.SPACE_ASSOC_ROOM_NUMBER).AsValueString());
-                            setCount++;
+                            foreach (var spatial in spatials)
+                            {
+                                var (pipeStuffInSpatial, errorId) = GetIntersectedElems(doc, spatial, categories, linkDoc.Item1);
+                                if (errorId != null)
+                                {
+                                    errorIds.Add(errorId);
+                                    continue;
+                                }
+                                foreach (var stuff in pipeStuffInSpatial)
+                                {
+                                    iterationsCount++;
+                                    string sValue = String.Empty;
+                                    if (linkDoc.Item1 != null)
+                                    {
+                                        // Помещения
+                                        sValue = spatial.get_Parameter(SharedParams.ADSK_NumberOfApartment).AsValueString();
+                                    }
+                                    else
+                                    {
+                                        // Пространства
+                                        sValue = spatial.get_Parameter(BuiltInParameter.SPACE_ASSOC_ROOM_NUMBER).AsValueString();
+                                    }
+                                    stuff.get_Parameter(SharedParams.ADSK_NumberOfApartment).Set(sValue);
+                                    setCount++;
+                                }
+                            }
                         }
                     }
-                }
+                    catch (NullReferenceException)
+                    {
+                        MessageBox.Show($"У категории Помещения в файле {linkDoc.Item2.PathName} " +
+                            $"отсутствует общий параметр 'ADSK_Номер квартиры'");
+                        continue;
+                    }
 
-                trans.Commit();
-                if (errorIds.Count > 0)
-                {
-                    string ids = String.Join(", ", errorIds.Select(e => e.ToString()));
-                    MessageBox.Show($"Ошибка, пространства не обработаны, нельзя определить их объемы. Id: {ids}." +
-                        $"\n\nНомера пространств назначены {setCount} раз " +
-                        $"экземплярам категорий Оборудование и Арматура трубопроводов",
-                        "Номера пространств для MEP, выполнено с ошибками!");
+                    trans.Commit();
                 }
-                else
-                {
-                    MessageBox.Show($"Номера пространств назначены {setCount} раз " +
-                        $"экземплярам категорий Оборудование и Арматура трубопроводов",
-                        "Номера пространств для MEP, выполнено без ошибок");
-                }
+            }
+            string categs = String.Join(", ", categories.Select(c => Category.GetCategory(doc, c).Name));
+            if (errorIds.Count > 0)
+            {
+                string ids = String.Join(", ", errorIds.Select(e => e.ToString()));
+                MessageBox.Show($"Ошибка, пространства (помещения) не обработаны, " +
+                    $"нельзя определить их объемы. Id: {ids}." +
+                    $"\n\nADSK_Номер квартиры назначен {setCount} раз " +
+                    $"экземплярам категорий {categs}",
+                    "Номера пространств для MEP, выполнено с ошибками!");
+            }
+            else
+            {
+                MessageBox.Show($"ADSK_Номер квартиры назначен {setCount} раз " +
+                    $"экземплярам категорий {categs}");
             }
             //-----------------------------------------------------выбор пространств окончание
 
