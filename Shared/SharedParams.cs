@@ -226,6 +226,11 @@ namespace MS.Shared
         public static Guid ADSK_Note => Guid.Parse("a85b7661-26b0-412f-979c-66af80b4b2c3");
 
         /// <summary>
+        /// Guid параметра PSG_Откосы_Глубина = 5842657b-ccd1-4a1d-9745-45ac29c2cc12 (double)
+        /// </summary>
+        public static Guid PGS_SlopeDepth => Guid.Parse("5842657b-ccd1-4a1d-9745-45ac29c2cc12");
+
+        /// <summary>
         /// Валидация текущего проекта Revit на наличие общих параметров у заданной категории.
         /// </summary>
         /// <param name="doc">Документ Revit.</param>
