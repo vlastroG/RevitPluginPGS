@@ -23,5 +23,20 @@ namespace MS.Utilites.Extensions
             }
             return length;
         }
+
+        /// <summary>
+        /// Конвертирует CurveArr в список
+        /// </summary>
+        /// <param name="curveArr">Массив кривых Revit</param>
+        /// <returns>Обычный список кривых</returns>
+        public static List<Curve> ToList(this CurveArray curveArr)
+        {
+            List<Curve> list = new List<Curve>();
+            for (int i = 0; i < curveArr.Size; i++)
+            {
+                list.Add(curveArr.get_Item(i));
+            }
+            return list;
+        }
     }
 }

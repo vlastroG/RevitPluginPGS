@@ -97,12 +97,12 @@ namespace MS.Commands.MEP
         /// в случае ошибки null вместо списка и id <paramref name="SpatialEl"/></returns>
         /// <exception cref="ArgumentException"></exception>
         private (List<Element> Elements, ElementId Error) GetIntersectedElems(
+            in SpatialElementGeometryCalculator calculator,
             in Document doc,
             in Element SpatialEl,
             in List<BuiltInCategory> categories,
             in RevitLinkInstance link = null)
         {
-            SpatialElementGeometryCalculator calculator = new SpatialElementGeometryCalculator(doc);
             Solid solid;
             if (!(SpatialEl is SpatialElement))
             {
@@ -154,7 +154,7 @@ namespace MS.Commands.MEP
         {
             Document doc = commandData.Application.ActiveUIDocument.Document;
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
-
+            SpatialElementGeometryCalculator calculator = new SpatialElementGeometryCalculator(doc);
             if (!ValidateRevitFile(doc))
             {
                 return Result.Cancelled;
@@ -237,7 +237,7 @@ namespace MS.Commands.MEP
                         {
                             foreach (var spatial in spatials)
                             {
-                                var (pipeStuffInSpatial, errorId) = GetIntersectedElems(doc, spatial, categories, linkDoc.Item1);
+                                var (pipeStuffInSpatial, errorId) = GetIntersectedElems(calculator, doc, spatial, categories, linkDoc.Item1);
                                 if (errorId != null)
                                 {
                                     errorIds.Add(errorId);

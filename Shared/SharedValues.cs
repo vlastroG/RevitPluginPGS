@@ -23,12 +23,12 @@
         public static readonly string RoomsFinishingFloor = "Тип отделки пола";
 
         /// <summary>
-        /// Коэффициент для перевода квадратных футов в квадратные метры
+        /// Коэффициент для перевода квадратных футов в квадратные метры = 0.3048 * 0.3048
         /// </summary>
         public static readonly double SqFeetToMeters = 0.3048 * 0.3048;
 
         /// <summary>
-        /// Коэффициент для перевода футов в миллиметры
+        /// Коэффициент для перевода футов в миллиметры = 304.8
         /// </summary>
         public static readonly double FootToMillimeters = 304.8;
     }
