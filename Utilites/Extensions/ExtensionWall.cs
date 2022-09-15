@@ -18,14 +18,16 @@ namespace MS.Utilites.Extensions
         /// <returns>Массив кривых, образующих прямоугольный профиль</returns>
         public static CurveArray GetRectangularProfile(this Wall wall)
         {
-            CurveArray loop = new CurveArray();
-            Curve centerBottomLine = (wall.Location as LocationCurve).Curve;
-            double height = wall.get_Parameter(BuiltInParameter.WALL_USER_HEIGHT_PARAM).AsDouble();
             int zero = 0;
             int one = 1;
+            double baseOffset = wall.get_Parameter(BuiltInParameter.WALL_BASE_OFFSET).AsDouble();
+            double height = wall.get_Parameter(BuiltInParameter.WALL_USER_HEIGHT_PARAM).AsDouble();
+            Transform moveUp = Transform.CreateTranslation(new XYZ(zero, zero, height));
+            Transform moveByBaseOffset = Transform.CreateTranslation(new XYZ(zero, zero, baseOffset));
+            CurveArray loop = new CurveArray();
+            Curve centerBottomLine = (wall.Location as LocationCurve).Curve.CreateTransformed(moveByBaseOffset);
             XYZ bottomStart = centerBottomLine.GetEndPoint(zero);
             XYZ bottomEnd = centerBottomLine.GetEndPoint(one);
-            Transform moveUp = Transform.CreateTranslation(new XYZ(zero, zero, height));
             Curve centerTopLine = centerBottomLine.CreateTransformed(moveUp).CreateReversed();
             XYZ topStart = centerTopLine.GetEndPoint(zero);
             XYZ topEnd = centerTopLine.GetEndPoint(one);

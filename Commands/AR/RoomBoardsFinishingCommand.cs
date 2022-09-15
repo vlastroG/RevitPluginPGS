@@ -44,6 +44,8 @@ namespace MS.Commands.AR
             return curves;
         }
 
+
+
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             UIApplication uiapp = commandData.Application;
@@ -131,13 +133,12 @@ namespace MS.Commands.AR
                 foreach (Room room in rooms)
                 {
                     Solid solid;
-                    SpatialElement spatial = room as SpatialElement;
+                    SpatialElement spatial = room;
                     double slopeArea = 0;
                     try
                     {
                         SpatialElementGeometryResults results = calculator.CalculateSpatialElementGeometry(spatial);
                         solid = results.GetGeometry();
-
                     }
                     catch (Autodesk.Revit.Exceptions.ArgumentException)
                     {
@@ -147,21 +148,13 @@ namespace MS.Commands.AR
                     {
                         continue;
                     }
-                    var bbox = room.get_BoundingBox(null);                // delete
-                    var min = bbox.Min.Z + bbox.Transform.BasisZ.Z;       // delete
-                    var max = bbox.Max.Z + bbox.Transform.BasisZ.Z;       // delete
-                    var h = (max - min) * SharedValues.FootToMillimeters; // delete
                     foreach (var curveSlope in curvesSlopes)
                     {
+                        var start = curveSlope.Curve.GetEndPoint(0);
+                        var finish = curveSlope.Curve.GetEndPoint(1);
                         SolidCurveIntersection result = solid.IntersectWithCurve(curveSlope.Curve, intersectionOptions);
                         foreach (var intersectCurve in result)
                         {
-                            var l = intersectCurve.Length * SharedValues.FootToMillimeters;// delete
-                            var segmentsCount = result.SegmentCount;// delete
-                            for (int i = 0; i < segmentsCount; i++)
-                            {
-                                var segmentLength = result.GetCurveSegment(i).Length * SharedValues.FootToMillimeters;
-                            }
                             slopeArea += (intersectCurve.Length * curveSlope.Slope / SharedValues.FootToMillimeters);
                         }
                     }
