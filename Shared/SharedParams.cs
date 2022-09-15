@@ -236,6 +236,11 @@ namespace MS.Shared
         public static Guid PGS_SlopesArea => Guid.Parse("d54eb20d-f66e-43ac-95a9-0908be9aeac6");
 
         /// <summary>
+        /// Guid параметра PGS_Длина_Плинтус = ad4d6b89-6138-467e-b472-80e103e004b9 (double)
+        /// </summary>
+        public static Guid PGS_PlinthLength => Guid.Parse("ad4d6b89-6138-467e-b472-80e103e004b9");
+
+        /// <summary>
         /// Валидация текущего проекта Revit на наличие общих параметров у заданной категории.
         /// </summary>
         /// <param name="doc">Документ Revit.</param>
