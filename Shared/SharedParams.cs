@@ -226,6 +226,21 @@ namespace MS.Shared
         public static Guid ADSK_Note => Guid.Parse("a85b7661-26b0-412f-979c-66af80b4b2c3");
 
         /// <summary>
+        /// Guid параметра PSG_Откосы_Глубина = 5842657b-ccd1-4a1d-9745-45ac29c2cc12 (double)
+        /// </summary>
+        public static Guid PGS_SlopeDepth => Guid.Parse("5842657b-ccd1-4a1d-9745-45ac29c2cc12");
+
+        /// <summary>
+        /// Guid параметра PGS_Откосы_Площадь = d54eb20d-f66e-43ac-95a9-0908be9aeac6 (area)
+        /// </summary>
+        public static Guid PGS_SlopesArea => Guid.Parse("d54eb20d-f66e-43ac-95a9-0908be9aeac6");
+
+        /// <summary>
+        /// Guid параметра PGS_Длина_Плинтус = ad4d6b89-6138-467e-b472-80e103e004b9 (double)
+        /// </summary>
+        public static Guid PGS_PlinthLength => Guid.Parse("ad4d6b89-6138-467e-b472-80e103e004b9");
+
+        /// <summary>
         /// Валидация текущего проекта Revit на наличие общих параметров у заданной категории.
         /// </summary>
         /// <param name="doc">Документ Revit.</param>

@@ -102,6 +102,7 @@
     <Compile Include="Commands\AR\DTO\RoomDto.cs" />
     <Compile Include="Commands\AR\OpeningsArea.cs" />
     <Compile Include="Commands\AR\MarkLintelsInOpenings.cs" />
+    <Compile Include="Commands\AR\RoomBoardsFinishingCommand.cs" />
     <Compile Include="Commands\AR\RoomsAreaNew.cs" />
     <Compile Include="Commands\AR\RoomsFinishing.cs" />
     <Compile Include="Commands\AR\RoomsFinishingCreation.cs" />
@@ -145,8 +146,12 @@
     <Compile Include="Shared\SharedParams.cs" />
     <Compile Include="Shared\SharedValues.cs" />
     <Compile Include="Utilites\Comparers\LintelsEqualityComparer.cs" />
+    <Compile Include="Utilites\Extensions\ExtensionCurve.cs" />
+    <Compile Include="Utilites\Extensions\ExtensionCurveArrArray.cs" />
+    <Compile Include="Utilites\Extensions\ExtensionCurveArray.cs" />
     <Compile Include="Utilites\Extensions\ExtensionDictionary.cs" />
     <Compile Include="Utilites\Extensions\ExtensionPlanarFace.cs" />
+    <Compile Include="Utilites\Extensions\ExtensionWall.cs" />
     <Compile Include="Utilites\GetBoundarySegmentElement.cs" />
     <Compile Include="Utilites\SelectionFilters\SelectionFilterEdges.cs" />
     <Compile Include="Utilites\SelectionFilters\SelectionFilterPlanarFaces.cs" />

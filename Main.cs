@@ -258,6 +258,27 @@ namespace MS
                 "Если RGB материала изменился, изображение будет обновлено. " +
                 "Лишние изображения из проекта не удаляются.";
 
+            // RoomBoardsFinishingCommand
+            PushButtonData btnRoomBoardsFinishing = new PushButtonData("RoomBoardsFinishing", "Откосы\nи плинтусы\n(Beta)", path, "MS.Commands.AR.RoomBoardsFinishingCommand");
+            Uri btnRoomBoardsFinishingImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            BitmapImage btnRoomBoardsFinishingImage = new BitmapImage(btnRoomBoardsFinishingImagePath);
+            btnRoomBoardsFinishing.LargeImage = btnRoomBoardsFinishingImage;
+            btnRoomBoardsFinishing.ToolTip = "Подсчет площадей откосов и длины плинтуса в выбранных помещениях";
+            btnRoomBoardsFinishing.LongDescription = "Во всех выбранных помещениях с ненулевой площадью " +
+                "будут найдены витражи, " +
+                "у которых в экземпляре параметр 'PGS_Глубина откосов' > 0. " +
+                "По пересечению их контуров (кроме нижней горизонтальной линии подоконника) с помещением " +
+                "будет посчитан периметр откосов и их площадь." +
+                "\nТакже будет посчитана длина плинтуса в помещении как разница длины периметра помещения " +
+                "и суммы сегментов границ помещения, образованных линией разделителей помещений " +
+                "и ширины всех дверей в помещении." +
+                "\nВАЖНО! Для корректной обработки дверей, сделанных витражами необходимо построить " +
+                "линию разделения помещений по граниче помещения возле этих витражей." +
+                "\nЗначения будут записаны в параметры Помещения 'PGS_Откосы_Площадь' и 'PGS_Длина_Плинтус'." +
+                "\n\nПомещения можно сначала выбрать и запустить команду " +
+                "(даже если выбраны не только помещения, то они автоматически отфильтруются) " +
+                "или запустить команду и выбрать необходимые на виде помещения.";
+
 
             // StairReinforcement command
             //PushButtonData stairRnfrcmtCmd = new PushButtonData("StairReinforcement", "Армирование\nлестниц", path, "MS.Commands.KR.StairReinforcement");
@@ -334,6 +355,7 @@ namespace MS
             panelAR.AddItem(btnRoomsFinishingMultiMark);
             //panelAR.AddItem(btnRmFinishing); // команда в разработке
             panelAR.AddItem(btnRmFinCreation);
+            panelAR.AddItem(btnRoomBoardsFinishing);
             panelAR.AddItem(btnMasonryMesh);
             panelAR.AddItem(btnMaterialColors);
 
