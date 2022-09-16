@@ -387,6 +387,7 @@ namespace MS
             // ОВиК panel
             panelOVVK.AddItem(btnPipelineFittings);
             panelOVVK.AddItem(btnSystemsInSpace);
+            panelOVVK.AddItem(btnSystemNameCorrectCmd);
 
             panelBIM.AddItem(btnClashReport);
         }
