@@ -338,6 +338,24 @@ namespace MS
                 "написать \"не обрабатывать\" (регистр не важен)";
             btnSystemsInSpace.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, @"https://google.com"));
 
+            // ОВиК корректировка имени системы command
+            PushButtonData btnSystemNameCorrectCmd = new PushButtonData("SystemNameCorrectCmd", "Скорректировать\nИмяСистемы", path, "MS.Commands.MEP.SystemNameCorrectCmd");
+            Uri btnSystemNameCorrectCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            BitmapImage btnSystemNameCorrectCmdImage = new BitmapImage(btnSystemNameCorrectCmdImagePath);
+            btnSystemNameCorrectCmd.LargeImage = btnSystemNameCorrectCmdImage;
+            btnSystemNameCorrectCmd.ToolTip = "Корректировка параметра 'ИмяСистемы' у элементов категорий " +
+                "'Оборудование', 'Сантехническое оборудование' и 'Арматура трубопроводов' по таблице Excel.";
+            btnSystemNameCorrectCmd.LongDescription = "Из первого столбца, начиная с первой строки, " +
+                "берется строковое значение, которое должно содержаться в параметре ADSK_Наименование " +
+                "у элементов обрабатываемых категорий. Во втором столбце напротив каждого строкового значения " +
+                "должна быть строка, обозначающая систему, которую необходимо оставить, например 'В'. " +
+                "Если у какого-то элемента несколько систем одного и того же типа, " +
+                "то будет выведено сообщение с Id этого элемента." +
+                "\nПравила составления Excel файла:" +
+                "\n1. Заполнять таблицу в первых двух столбцах, начиная с первой строки (шапку не использовать)." +
+                "\n2. В таблице не должно быть пустых строчек, которые разделяют строки со значениями." +
+                "\n3. В первом столбце не должно быть повторяющихся значений." +
+                "\n4. Оформление таблицы не влияет на работу команды.";
 
             // General panel
             panelGeneral.AddItem(btnInfo);

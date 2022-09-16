@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.IO;
 using System.Reflection;
+using System.Windows;
 
 namespace MS.Utilites
 {
@@ -31,6 +33,44 @@ namespace MS.Utilites
             }
             DirectoryInfo temporaryFolder = Directory.CreateDirectory(@dirPath);
             return temporaryFolder;
+        }
+
+        /// <summary>
+        /// Выводит диалоговое окно для выбора файла заданного расширения и получения полного пути к нему.
+        /// В случае отмены или выбора пользователем неправильного расширения возвращается пустая строка.
+        /// </summary>
+        /// <param name="StartPath">Стартовая директория</param>
+        /// <param name="FileFilter">Фильтр для файлов</param>
+        /// <param name="Tittle">Заголовок окна</param>
+        /// <param name="MustEndsWith">Расширение, которое должно быть у выбранного файла</param>
+        /// <returns></returns>
+        public static string GetPath(ref string StartPath, string FileFilter, string Tittle, string MustEndsWith)
+        {
+            string path = String.Empty;
+            OpenFileDialog openFileDialog = new OpenFileDialog()
+            {
+                InitialDirectory = StartPath,
+                Filter = FileFilter,
+                Multiselect = false,
+                RestoreDirectory = true,
+                Title = Tittle
+            };
+            if (openFileDialog.ShowDialog() == true)
+            {
+                path = openFileDialog.FileName;
+                FileInfo file = new FileInfo(path);
+                StartPath = file.DirectoryName;
+            }
+            else
+            {
+                return String.Empty;
+            }
+            if (!path.EndsWith(MustEndsWith))
+            {
+                MessageBox.Show("Неверный формат файла!", "Ошибка");
+                return String.Empty;
+            }
+            return path;
         }
     }
 }
