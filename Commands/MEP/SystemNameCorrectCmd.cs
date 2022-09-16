@@ -116,7 +116,7 @@ namespace MS.Commands.MEP
                         continue;
                     }
                     string systemFull = el.LookupParameter(_parSystemName).AsValueString().ToLower();
-                    string systemShort = namingAndSystemTuple.FirstOrDefault(t => systemFull.Contains(t.Naming)).System;
+                    string systemShort = namingAndSystemTuple.FirstOrDefault(t => adskNaming.Contains(t.Naming)).System;
                     var systems = systemFull.Split('\u002C');
                     var system = systems.Where(s => s.Contains(systemShort)).ToList();
                     var systemCheck = String.Empty;
