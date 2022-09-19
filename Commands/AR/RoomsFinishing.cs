@@ -4,6 +4,7 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Architecture;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
+using MS.Shared;
 using MS.Utilites;
 using System;
 using System.Collections.Generic;
@@ -11,12 +12,36 @@ using System.Linq;
 using System.Text;
 using System.Windows;
 
-namespace MS
+namespace MS.Commands.AR
 {
     [Transaction(TransactionMode.Manual)]
     [Regeneration(RegenerationOption.Manual)]
     public class RoomsFinishing : IExternalCommand
     {
+        /// <summary>
+        /// Валидация проекта Revit на наличие необходимых общих параметров
+        /// </summary>
+        /// <param name="doc">Документ Revit</param>
+        /// <returns>True, если все общие параметры присутствуют, иначе false</returns>
+        private bool ValidateSharedParams(Document doc)
+        {
+            Guid[] _sharedParamsForWalls = new Guid[] {
+            SharedParams.ADSK_RoomNumberInApartment
+            };
+            if (!SharedParams.IsCategoryOfDocContainsSharedParams(
+                doc,
+                BuiltInCategory.OST_Walls,
+                _sharedParamsForWalls))
+            {
+                MessageBox.Show("В текущем проекте у категории \"Стены\"" +
+                    "в экземпляре отсутствует необходимый общий параметр:" +
+                    "\nADSK_Номер помещения квартиры",
+                    "Ошибка");
+                return false;
+            }
+            return true;
+        }
+
         /// <summary>
         /// Команда для назначения элементам, образующим границы помещения и являющихся внутренней отделкой, 
         /// номер этого помещения. Команда в разработке, необходимо определиться с параметрами, 
@@ -34,17 +59,40 @@ namespace MS
             UIApplication uiapp = commandData.Application;
             UIDocument uidoc = uiapp.ActiveUIDocument;
             Document doc = uidoc.Document;
+            if (!ValidateSharedParams(doc)) return Result.Cancelled;
             Selection sel = uidoc.Selection;
 
-            List<Room> rooms = new List<Room>(
-              sel.PickElementsByRectangle()
-              .Cast<Room>());
+            // Все выбранные помещения перед запуском команды
+            List<Room> rooms = sel.GetElementIds().Select(id => doc.GetElement(id))
+                    .Where(e => (BuiltInCategory)WorkWithParameters.GetCategoryIdAsInteger(e)
+                    == BuiltInCategory.OST_Rooms)
+                    .Cast<Room>()
+                    .Where(r => r.Area > 0)
+                    .ToList();
 
-            if (1 != rooms.Count)
+            if (rooms.Count == 0)
             {
-                message = "Please select exactly one room.";
-
-                return Result.Failed;
+                try
+                {
+                    var filter = new SelectionFilterElementsOfCategory<Element>(
+                        new List<BuiltInCategory> { BuiltInCategory.OST_Rooms },
+                        false);
+                    // Пользователь выбирает помещения
+                    rooms = uidoc.Selection
+                        .PickObjects(
+                            Autodesk.Revit.UI.Selection.ObjectType.Element,
+                            filter,
+                            "Выберите помещения")
+                        .Select(e => doc.GetElement(e))
+                        .Cast<Room>()
+                        .Where(r => r.Area > 0)
+                        .ToList();
+                    if (rooms.Count == 0) return Result.Cancelled;
+                }
+                catch (Autodesk.Revit.Exceptions.OperationCanceledException)
+                {
+                    return Result.Cancelled;
+                }
             }
 
             View3D view3d
@@ -61,58 +109,33 @@ namespace MS
                 return Result.Failed;
             }
 
-            foreach (Room room in rooms)
+            using (Transaction rNumsToWallsTrans = new Transaction(doc))
             {
-                IList<IList<BoundarySegment>> loops
-                  = room.GetBoundarySegments(
-                    new SpatialElementBoundaryOptions());
-
-                int n = loops.Count;
-
-                string testOut = "";
-                StringBuilder sb = new StringBuilder();
-                foreach (IList<BoundarySegment> loop in loops)
+                rNumsToWallsTrans.Start("Номера помещений отделочным стенам");
+                foreach (Room room in rooms)
                 {
-                    n = loop.Count;
+                    IList<IList<BoundarySegment>> loops
+                      = room.GetBoundarySegments(
+                        new SpatialElementBoundaryOptions());
 
-                    foreach (BoundarySegment seg in loop)
+                    foreach (IList<BoundarySegment> loop in loops)
                     {
-                        Element e = doc.GetElement(seg.ElementId);
-
-                        if (null == e)
+                        foreach (BoundarySegment seg in loop)
                         {
-                            e = WorkWithGeometry.GetElementByRay(doc, view3d,
-                              seg.GetCurve());
-                        }
+                            Element e = doc.GetElement(seg.ElementId);
 
-                        ElementId eTypeId = e.GetTypeId();
-
-                        ElementType type = doc.GetElement(eTypeId) as ElementType;
-
-
-                        try
-                        {
-                            sb.Append(type.LookupParameter("Имя типа").AsString());
-
-
-                        }
-                        catch (Exception)
-                        {
-
-                            throw;
+                            if (null == e)
+                            {
+                                e = WorkWithGeometry.GetElementByRay(doc, view3d,
+                                  seg.GetCurve());
+                            }
+                            if (!(e is Wall)) continue;
+                            string rNum = room.get_Parameter(BuiltInParameter.ROOM_NUMBER).AsValueString();
+                            e.get_Parameter(SharedParams.ADSK_RoomNumberInApartment).Set(rNum);
                         }
                     }
                 }
-                testOut = sb.ToString();
-
-                using (Transaction trans = new Transaction(doc))
-                {
-                    trans.Start("PGS_RoomsFinishing");
-
-                    room.LookupParameter("Отделка потолка").Set(testOut);
-
-                    trans.Commit();
-                }
+                rNumsToWallsTrans.Commit();
             }
             return Result.Succeeded;
         }

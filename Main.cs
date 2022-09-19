@@ -219,14 +219,14 @@ namespace MS
 
 
             // RoomsFinishingCommand
-            //PushButtonData btnRmFinishing = new PushButtonData("RoomsFinishing\nDebug", "Отделка\n(Beta)", path, "MS.Commands.AR.RoomsFinishing");
-            //Uri btnRmFinishingImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\RoomsFinishing.png");
-            //BitmapImage btnRmFinishingImage = new BitmapImage(btnRmFinishingImagePath);
-            //btnRmFinishing.LargeImage = btnRmFinishingImage;
-            //btnRmFinishing.ToolTip = "Назначение принадлежности кпомещению отделочным стенам.";
-            //btnRmFinishing.LongDescription = "По границам помещения определяются элементы, которые ее образуют. " +
-            //    "Если это разделитель помещения, то ищется ближайший к нему элемент (например, витраж). " +
-            //    "Команда на стадии разработки.";
+            PushButtonData btnRmFinishing = new PushButtonData("RoomsFinishing\nDebug", "№ Помещений\nотделочным стенам", path, "MS.Commands.AR.RoomsFinishing");
+            Uri btnRmFinishingImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\RoomsFinishing.png");
+            BitmapImage btnRmFinishingImage = new BitmapImage(btnRmFinishingImagePath);
+            btnRmFinishing.LargeImage = btnRmFinishingImage;
+            btnRmFinishing.ToolTip = "Назначение принадлежности к помещению отделочным стенам " +
+                "в параметр экземпляра для стен 'ADSK_Номер помещения квартиры'";
+            btnRmFinishing.LongDescription = "По границам помещения определяются элементы, которые ее образуют. " +
+                "Если это разделитель помещения, то ищется ближайшая к нему стена с внешней стороны помещения";
 
             // RoomsFinCreationCommand
             PushButtonData btnRmFinCreation = new PushButtonData("RoomsFinishing", "Отделка\nпомещений", path, "MS.Commands.AR.RoomsFinishingCreation");
@@ -371,7 +371,7 @@ namespace MS
             panelAR.AddItem(btnLintelsSections);
             panelAR.AddItem(btnCreateImagesFromSections);
             panelAR.AddItem(btnRoomsFinishingMultiMark);
-            //panelAR.AddItem(btnRmFinishing); // команда в разработке
+            panelAR.AddItem(btnRmFinishing);
             panelAR.AddItem(btnRmFinCreation);
             panelAR.AddItem(btnRoomBoardsFinishing);
             panelAR.AddItem(btnMasonryMesh);

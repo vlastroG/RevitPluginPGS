@@ -325,7 +325,7 @@ namespace MS.Utilites
         }
 
         /// <summary>
-        /// Return the neighbouring BIM element generating 
+        /// Return the neighbouring BIM element (wall) generating 
         /// the given room boundary curve c, assuming it
         /// is oriented counter-clockwise around the room
         /// if part of an interior loop, and vice versa.
