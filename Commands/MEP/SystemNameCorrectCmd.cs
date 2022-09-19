@@ -116,14 +116,15 @@ namespace MS.Commands.MEP
                         continue;
                     }
                     string systemFull = el.LookupParameter(_parSystemName).AsValueString().ToLower();
-                    string systemShort = namingAndSystemTuple.FirstOrDefault(t => adskNaming.Contains(t.Naming)).System;
                     var systems = systemFull.Split('\u002C');
-                    var system = systems.Where(s => s.Contains(systemShort)).ToList();
+                    var namingAndSystemNeed = namingAndSystemTuple.FirstOrDefault(t => adskNaming.Contains(t.Naming));
+                    if (namingAndSystemNeed.System is null) continue;
+                    var system = systems.Where(s => s.Contains(namingAndSystemNeed.System)).ToList();
                     var systemCheck = String.Empty;
                     if (system.Count > 1)
                     {
                         errors.Add(el.Id);
-                        systemCheck = system.First();
+                        continue;
                     }
                     else if (system.Count == 1)
                     {
@@ -131,6 +132,7 @@ namespace MS.Commands.MEP
                     }
                     else
                     {
+                        errors.Add(el.Id);
                         continue;
                     }
                     el.LookupParameter(_parSystemName).Set(systemCheck);
@@ -144,7 +146,7 @@ namespace MS.Commands.MEP
                 string ids = String.Join(", ", errors.Select(e => e.ToString()));
                 MessageBox.Show($"Ошибка, элементы не обработаны, " +
                     $"нельзя определить значение параметра 'ADSK_Наименование' " +
-                    $"или у элемента несколько однотипных систем. Id: {ids}." +
+                    $"или нельзя определить необходимый тип системы. Id: {ids}." +
                     $"\n\n'ИмяСистемы' скорректировано у {count} элементов.",
                     "Корректировка параметра 'ИмяСистемы', выполнено с ошибками!");
             }
