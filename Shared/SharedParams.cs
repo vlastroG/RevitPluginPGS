@@ -241,6 +241,16 @@ namespace MS.Shared
         public static Guid PGS_PlinthLength => Guid.Parse("ad4d6b89-6138-467e-b472-80e103e004b9");
 
         /// <summary>
+        /// Guid параметра ADSK_Номер помещения квартиры = 69890ae1-d66e-4fe9-aced-024c27719f53 (string)
+        /// </summary>
+        public static Guid ADSK_RoomNumberInApartment => Guid.Parse("69890ae1-d66e-4fe9-aced-024c27719f53");
+
+        /// <summary>
+        /// Guid параметра PGS_Идентификация = 3edf98d0-93bb-44bc-a1ab-8d401cacaf28 (string)
+        /// </summary>
+        public static Guid PGS_Identification => Guid.Parse("3edf98d0-93bb-44bc-a1ab-8d401cacaf28");
+
+        /// <summary>
         /// Валидация текущего проекта Revit на наличие общих параметров у заданной категории.
         /// </summary>
         /// <param name="doc">Документ Revit.</param>

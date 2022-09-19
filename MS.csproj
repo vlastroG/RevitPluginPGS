@@ -121,6 +121,7 @@
     <Compile Include="Commands\KR\Models\StairModel.cs" />
     <Compile Include="Commands\KR\PilesMarkRange.cs" />
     <Compile Include="Commands\KR\StairReinforcement.cs" />
+    <Compile Include="Commands\MEP\EquipmentInSystemCmd.cs" />
     <Compile Include="Commands\MEP\PipelineFittings.cs" />
     <Compile Include="Commands\MEP\SystemNameCorrectCmd.cs" />
     <Compile Include="Commands\MEP\SystemsInSpace.cs" />
@@ -152,6 +153,7 @@
     <Compile Include="Shared\SharedValues.cs" />
     <Compile Include="Utilites\Comparers\LintelsEqualityComparer.cs" />
     <Compile Include="Utilites\DataParsers\Excel.cs" />
+    <Compile Include="Utilites\Extensions\ElementSetExtension.cs" />
     <Compile Include="Utilites\Extensions\ExtensionCurve.cs" />
     <Compile Include="Utilites\Extensions\ExtensionCurveArrArray.cs" />
     <Compile Include="Utilites\Extensions\ExtensionCurveArray.cs" />
