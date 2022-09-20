@@ -2,6 +2,7 @@
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using MS.Shared;
+using MS.Utilites;
 using MS.Utilites.DataParsers;
 using MS.Utilites.Extensions;
 using System;
@@ -89,6 +90,20 @@ namespace MS.Commands.MEP
             Document doc = commandData.Application.ActiveUIDocument.Document;
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
 
+            System.Windows.Forms.DialogResult trimNumbersUI = UserInput.YesNoCancelInput("Корректировка параметра ИмяСистемы", "Удалять цифры из наименования системы?");
+            bool trimNumbers = false;
+            switch (trimNumbersUI)
+            {
+                case System.Windows.Forms.DialogResult.Yes:
+                    trimNumbers = true;
+                    break;
+                case System.Windows.Forms.DialogResult.No:
+                    trimNumbers = false;
+                    break;
+                default:
+                    return Result.Cancelled;
+            }
+
             List<(string Naming, string System)> namingAndSystemTuple = GetNamingAndSystemTuple();
             if (namingAndSystemTuple is null) return Result.Cancelled;
 
@@ -128,13 +143,14 @@ namespace MS.Commands.MEP
                     }
                     else if (system.Count == 1)
                     {
-                        systemCheck = system.First();
+                        systemCheck = system.First().ToUpper();
                     }
                     else
                     {
                         errors.Add(el.Id);
                         continue;
                     }
+                    systemCheck = trimNumbers ? systemCheck.FirstOrDefault().ToString() : systemCheck;
                     el.LookupParameter(_parSystemName).Set(systemCheck);
                     count++;
                 }
