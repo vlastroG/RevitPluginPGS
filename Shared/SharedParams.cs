@@ -1,5 +1,7 @@
 ﻿using Autodesk.Revit.DB;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace MS.Shared
 {
@@ -251,6 +253,91 @@ namespace MS.Shared
         public static Guid PGS_Identification => Guid.Parse("3edf98d0-93bb-44bc-a1ab-8d401cacaf28");
 
         /// <summary>
+        /// Guid параметра ADSK_Потеря давления воздуха в нагревателе = f51f7bf1-e50f-4563-aa17-4d1c12a2be81 (double)
+        /// </summary>
+        public static Guid ADSK_LossPreasureInAirHeater => Guid.Parse("f51f7bf1-e50f-4563-aa17-4d1c12a2be81");
+
+        /// <summary>
+        /// Guid параметра ADSK_Температура воздуха на входе в нагреватель = f4f0aae1-c6e9-40be-98d0-d58f84e9d0f0 (double)
+        /// </summary>
+        public static Guid ADSK_AirTempInAirHeater => Guid.Parse("f4f0aae1-c6e9-40be-98d0-d58f84e9d0f0");
+
+        /// <summary>
+        /// Guid параметра ADSK_Температура воздуха на выходе из нагревателя = 4cbc6f9d-54f5-4adc-879f-6ae38e5190c5 (double)
+        /// </summary>
+        public static Guid ADSK_AirTempOutAirHeater => Guid.Parse("4cbc6f9d-54f5-4adc-879f-6ae38e5190c5");
+
+        /// <summary>
+        /// Guid параметра ADSK_Тепловая мощность = be7d2b1b-1916-428f-87f0-d9ee8d4f1efe (double)
+        /// </summary>
+        public static Guid ADSK_PowerThermal => Guid.Parse("be7d2b1b-1916-428f-87f0-d9ee8d4f1efe");
+
+        /// <summary>
+        /// Guid параметра PGS_ВоздухонагревательМощность = 55a3312a-cd79-45ae-8c0b-5b51338d4c70 (double)
+        /// </summary>
+        public static Guid PGS_AirHeaterPower => Guid.Parse("55a3312a-cd79-45ae-8c0b-5b51338d4c70");
+
+        /// <summary>
+        /// Guid параметра PGS_ВоздухонагревательТип = efd37911-6c8e-40a4-990c-574743cf300d (string)
+        /// </summary>
+        public static Guid PGS_AirHeaterType => Guid.Parse("efd37911-6c8e-40a4-990c-574743cf300d");
+
+        /// <summary>
+        /// Guid параметра PGS_ВоздухонагревательКоличество = 2bb6ed27-17da-45ed-9dcd-2cc54ffedd25 (double)
+        /// </summary>
+        public static Guid PGS_AirHeaterCount => Guid.Parse("2bb6ed27-17da-45ed-9dcd-2cc54ffedd25");
+
+        /// <summary>
+        /// Guid параметра ADSK_Потеря давления воздуха в охладителе = 35e504b6-9ff1-4feb-8179-3f145e701ca8 (double)
+        /// </summary>
+        public static Guid ADSK_LossPreasureInAirCooler => Guid.Parse("35e504b6-9ff1-4feb-8179-3f145e701ca8");
+
+        /// <summary>
+        /// Guid параметра ADSK_Температура воздуха на входе в охладитель = 35d72244-2520-43ec-b36f-1a2c4527988b (double)
+        /// </summary>
+        public static Guid ADSK_AirTempInAirCooler => Guid.Parse("35d72244-2520-43ec-b36f-1a2c4527988b");
+
+        /// <summary>
+        /// Guid параметра ADSK_Температура воздуха на выходе из охладителя = b8549b18-1d9f-430e-a2e8-cdbfa511712d (double)
+        /// </summary>
+        public static Guid ADSK_AirTempOutAirCooler => Guid.Parse("b8549b18-1d9f-430e-a2e8-cdbfa511712d");
+
+        /// <summary>
+        /// Guid параметра ADSK_Холодильная мощность = f07965f9-3490-4c68-9404-3fa6721c1c8c (double)
+        /// </summary>
+        public static Guid ADSK_PowerCooling => Guid.Parse("f07965f9-3490-4c68-9404-3fa6721c1c8c");
+
+        /// <summary>
+        /// Guid параметра PGS_ВоздухоохладительМощность = 5b5a38a4-beb7-42dc-9692-6317788af685 (double)
+        /// </summary>
+        public static Guid PGS_AirCoolerPower => Guid.Parse("5b5a38a4-beb7-42dc-9692-6317788af685");
+
+        /// <summary>
+        /// Guid параметра PGS_ВоздухоохладительТип = bbb93870-933b-4d82-838c-409cb9c51e00 (string)
+        /// </summary>
+        public static Guid PGS_AirCoolerType => Guid.Parse("bbb93870-933b-4d82-838c-409cb9c51e00");
+
+        /// <summary>
+        /// Guid параметра PGS_ВоздухоохладительКоличество = 4ba316f2-2b88-4942-8dbf-d269909e0cf7 (double)
+        /// </summary>
+        public static Guid PGS_AirCoolerCount => Guid.Parse("4ba316f2-2b88-4942-8dbf-d269909e0cf7");
+
+        /// <summary>
+        /// Guid параметра ADSK_Сопротивление воздушного фильтра = 8018c952-ae41-4f18-90cd-e5c59c0a1517 (double)
+        /// </summary>
+        public static Guid ADSK_AirFilterResistance => Guid.Parse("8018c952-ae41-4f18-90cd-e5c59c0a1517");
+
+        /// <summary>
+        /// Guid параметра PGS_ФильтрТип = 5cedb7af-049a-4461-8d36-c631be95d07e (string)
+        /// </summary>
+        public static Guid PGS_FilterType => Guid.Parse("5cedb7af-049a-4461-8d36-c631be95d07e");
+
+        /// <summary>
+        /// Guid параметра PGS_ФильтрКоличество = 3f2d437e-6eea-444a-b13d-56620718dd75 (double)
+        /// </summary>
+        public static Guid PGS_FilterCount => Guid.Parse("3f2d437e-6eea-444a-b13d-56620718dd75");
+
+        /// <summary>
         /// Валидация текущего проекта Revit на наличие общих параметров у заданной категории.
         /// </summary>
         /// <param name="doc">Документ Revit.</param>
@@ -278,6 +365,19 @@ namespace MS.Shared
                 }
             }
             return containsAll;
+        }
+
+        public static string CreateErrorMessage(out string message, in List<ElementId> elements)
+        {
+            if (elements.Count > 0)
+            {
+                message = String.Join(", ", elements.Select(e => e.ToString()));
+            }
+            else
+            {
+                message = "отсутствуют";
+            }
+            return message;
         }
     }
 }

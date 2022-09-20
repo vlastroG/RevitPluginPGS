@@ -357,6 +357,39 @@ namespace MS
                 "\n3. В первом столбце не должно быть повторяющихся значений." +
                 "\n4. Оформление таблицы не влияет на работу команды.";
 
+            // ОВиК корректировка имени системы command
+            PushButtonData btnEquipmentInSystemCmd = new PushButtonData("EquipmentInSystemCmd", "Оборудование\nв системах", path, "MS.Commands.MEP.EquipmentInSystemCmd");
+            Uri btnEquipmentInSystemCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            BitmapImage btnEquipmentInSystemCmdImage = new BitmapImage(btnEquipmentInSystemCmdImagePath);
+            btnEquipmentInSystemCmd.LargeImage = btnEquipmentInSystemCmdImage;
+            btnEquipmentInSystemCmd.ToolTip = "Переписывает характеристики и количество воздухонагревателей, воздухоохладителей и фильтров в параметры вентиляторов в системах";
+            btnEquipmentInSystemCmd.LongDescription = "Необходимые общие параметры для воздухонагревателей:" +
+                "\nPGS_Идентификация = 2" +
+                "\nADSK_Потеря давления воздуха в нагревателе" +
+                "\nADSK_Температура воздуха на входе в нагреватель" +
+                "\nADSK_Температура воздуха на выходе из нагревателя" +
+                "\nADSK_Тепловая мощность" +
+                "\nPGS_ВоздухонагревательМощность" +
+                "\nPGS_ВоздухонагревательТип" +
+                "\n\nНеобходимые общие параметры для воздухоохлвдителей:" +
+                "\nPGS_Идентификация = 3" +
+                "\nADSK_Потеря давления воздуха в охладителе" +
+                "\nADSK_Температура воздуха на входе в охладитель" +
+                "\nADSK_Температура воздуха на выходе из охладителя" +
+                "\nADSK_Холодильная мощность" +
+                "\nPGS_ВоздухоохладительМощность" +
+                "\nPGS_ВоздухоохладительТип" +
+                "\n\nНеобходимые общие параметры для фильтров:" +
+                "\nPGS_Идентификация = 4" +
+                "\nADSK_Сопротивление воздушного фильтра" +
+                "\nPGS_ФильтрТип" +
+                "\n\nНеобходимые общие параметры для вентиляторов" +
+                "\nPGS_Идентификация = 1" +
+                "\nPGS_ВоздухонагревательКоличество" +
+                "\nPGS_ВоздухоохладительКоличество" +
+                "\nPGS_ФильтрКоличество" +
+                "\nи ВСЕ параметры для воздухонагревателей, воздухоохладителей и фильтров.";
+
             // General panel
             panelGeneral.AddItem(btnInfo);
             panelGeneral.AddItem(btnPolyLineLength);
@@ -388,6 +421,7 @@ namespace MS
             panelOVVK.AddItem(btnPipelineFittings);
             panelOVVK.AddItem(btnSystemsInSpace);
             panelOVVK.AddItem(btnSystemNameCorrectCmd);
+            panelOVVK.AddItem(btnEquipmentInSystemCmd);
 
             panelBIM.AddItem(btnClashReport);
         }
