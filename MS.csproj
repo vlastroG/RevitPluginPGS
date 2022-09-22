@@ -97,6 +97,8 @@
     <Compile Include="Commands\AR\DTO\MarkWithCountDto.cs" />
     <Compile Include="Commands\AR\DTO\MultiNameRoomsDto.cs" />
     <Compile Include="Commands\AR\DTO\NameWithNumbersDto.cs" />
+    <Compile Include="Commands\AR\DTO\RoomFinishingDto.cs" />
+    <Compile Include="Commands\AR\DTO\ScheduleFinishWallsCeilingsRowDto.cs" />
     <Compile Include="Commands\AR\DTO\WallTypeFinishingDto.cs" />
     <Compile Include="Commands\AR\MasonryMesh.cs" />
     <Compile Include="Commands\AR\MaterialColors.cs" />
@@ -107,6 +109,7 @@
     <Compile Include="Commands\AR\OpeningsArea.cs" />
     <Compile Include="Commands\AR\MarkLintelsInOpenings.cs" />
     <Compile Include="Commands\AR\RoomBoardsFinishingCommand.cs" />
+    <Compile Include="Commands\AR\RoomFinishingScheduleCreationCmd.cs" />
     <Compile Include="Commands\AR\RoomsAreaNew.cs" />
     <Compile Include="Commands\AR\RoomsFinishing.cs" />
     <Compile Include="Commands\AR\RoomsFinishingCreation.cs" />

@@ -279,6 +279,14 @@ namespace MS
                 "(даже если выбраны не только помещения, то они автоматически отфильтруются) " +
                 "или запустить команду и выбрать необходимые на виде помещения.";
 
+            // RoomFinishingScheduleCreationCmd
+            PushButtonData btnRoomFinishingScheduleCreationCmd = new PushButtonData("RoomFinishingScheduleCreationCmd", "Ведомость\nотделки (alpha)", path, "MS.Commands.AR.RoomFinishingScheduleCreationCmd");
+            Uri btnRoomFinishingScheduleCreationCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            BitmapImage btnRoomFinishingScheduleCreationCmdImage = new BitmapImage(btnRoomFinishingScheduleCreationCmdImagePath);
+            btnRoomFinishingScheduleCreationCmd.LargeImage = btnRoomFinishingScheduleCreationCmdImage;
+            btnRoomFinishingScheduleCreationCmd.ToolTip = "Создание спецификации ведомости отделки";
+            btnRoomFinishingScheduleCreationCmd.LongDescription = "Ебок";
+
 
             // StairReinforcement command
             //PushButtonData stairRnfrcmtCmd = new PushButtonData("StairReinforcement", "Армирование\nлестниц", path, "MS.Commands.KR.StairReinforcement");
@@ -409,6 +417,8 @@ namespace MS
             panelAR.AddItem(btnRoomBoardsFinishing);
             panelAR.AddItem(btnMasonryMesh);
             panelAR.AddItem(btnMaterialColors);
+            panelAR.AddSlideOut();
+            panelAR.AddItem(btnRoomFinishingScheduleCreationCmd);
 
             // KR panel
             //panelKR.AddItem(stairRnfrcmtCmd); // в разработке (сырая)
