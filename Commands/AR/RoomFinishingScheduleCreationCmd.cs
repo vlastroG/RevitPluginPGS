@@ -1,6 +1,8 @@
 ﻿using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.Architecture;
 using Autodesk.Revit.UI;
+using Autodesk.Revit.UI.Selection;
 using MS.Commands.AR.DTO;
 using MS.Shared;
 using MS.Utilites;
@@ -9,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace MS.Commands.AR
 {
@@ -196,21 +199,135 @@ namespace MS.Commands.AR
             return schedule;
         }
 
+        /// <summary>
+        /// Валидация проекта Revit на наличие необходимых общих параметров
+        /// </summary>
+        /// <param name="doc">Документ Revit</param>
+        /// <returns>True, если все общие параметры присутствуют, иначе false</returns>
+        private bool ValidateSharedParams(Document doc)
+        {
+            Guid[] _sharedParamsForRooms = new Guid[] {
+            SharedParams.PGS_FinishingTypeOfWalls,
+            SharedParams.PGS_MultiTextMark
+            };
+            if (!SharedParams.IsCategoryOfDocContainsSharedParams(
+                doc,
+                BuiltInCategory.OST_Rooms,
+                _sharedParamsForRooms))
+            {
+                MessageBox.Show("В текущем проекте у категории \"Помещения\"" +
+                    "присутствуют не все необходимые общие параметры" +
+                    "\nPGS_ТипОтделкиСтен" +
+                    "\nPGS_МногострочнаяМарка",
+                    "Ошибка");
+                return false;
+            }
+            Guid[] _sharedParamsForWallsAnsCeiling = new Guid[] {
+            SharedParams.ADSK_RoomNumberInApartment,
+            SharedParams.PGS_FinishingTypeOfWalls
+            };
+            if (!SharedParams.IsCategoryOfDocContainsSharedParams(
+                doc,
+                BuiltInCategory.OST_Walls,
+                _sharedParamsForWallsAnsCeiling))
+            {
+                MessageBox.Show("В текущем проекте у категории \"Стены\"" +
+                    "отсутствуют необходимые общие параметры:" +
+                    "\nADSK_Номер помещения квартиры" +
+                    "\nPGS_ТипОтделкиСтен",
+                    "Ошибка");
+                return false;
+            }
+            if (!SharedParams.IsCategoryOfDocContainsSharedParams(
+                doc,
+                BuiltInCategory.OST_Ceilings,
+                _sharedParamsForWallsAnsCeiling))
+            {
+                MessageBox.Show("В текущем проекте у категории \"Потолки\"" +
+                    "отсутствуют необходимые общие параметры:" +
+                    "\nADSK_Номер помещения квартиры" +
+                    "\nPGS_ТипОтделкиСтен",
+                    "Ошибка");
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Получить помещения с ненулевой площадью с заполненным параметром PGS_ТипОтделкиСтен для дальнейшего расчета
+        /// </summary>
+        /// <param name="uidoc"></param>
+        /// <returns>Список валидных помещений, 
+        /// если операция отменена или пользователь ничего не выбрал, то null</returns>
+        private List<Room> GetRooms(UIDocument uidoc)
+        {
+            Document doc = uidoc.Document;
+            Selection sel = uidoc.Selection;
+
+            // Все выбранные помещения перед запуском команды
+            List<Room> rooms = sel.GetElementIds().Select(id => doc.GetElement(id))
+                    .Where(e => (BuiltInCategory)WorkWithParameters.GetCategoryIdAsInteger(e)
+                    == BuiltInCategory.OST_Rooms)
+                    .Cast<Room>()
+                    .Where(r => r.Area > 0)
+                    .Where(r => !String.IsNullOrEmpty(r.get_Parameter(SharedParams.PGS_FinishingTypeOfWalls).AsValueString()))
+                    .ToList();
+
+            if (rooms.Count == 0)
+            {
+                try
+                {
+                    var filter = new SelectionFilterElementsOfCategory<Element>(
+                        new List<BuiltInCategory> { BuiltInCategory.OST_Rooms },
+                        false);
+                    // Пользователь выбирает помещения
+                    rooms = uidoc.Selection
+                        .PickObjects(
+                            Autodesk.Revit.UI.Selection.ObjectType.Element,
+                            filter,
+                            "Выберите помещения")
+                        .Select(e => doc.GetElement(e))
+                        .Cast<Room>()
+                        .Where(r => r.Area > 0)
+                        .Where(r => !String.IsNullOrEmpty(r.get_Parameter(SharedParams.PGS_FinishingTypeOfWalls).AsValueString()))
+                        .ToList();
+                    if (rooms.Count == 0) return null;
+                }
+                catch (Autodesk.Revit.Exceptions.OperationCanceledException)
+                {
+                    return null;
+                }
+            }
+            return rooms;
+        }
+
+        private List<ScheduleFinishWallsCeilingsRowDto> CreateRoomFinishDtos(UIDocument uidoc)
+        {
+            var rooms = GetRooms(uidoc);
+            if (rooms is null) return null;
+            return null;//////////////////////////////////////////////////////
+        }
+
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             UIApplication uiapp = commandData.Application;
             UIDocument uidoc = uiapp.ActiveUIDocument;
             Document doc = uidoc.Document;
+            if (!ValidateSharedParams(doc)) return Result.Cancelled;
+
             _scheduleName = UserInput.GetStringFromUser("Ведомость отделки", "Введите название спецификации", _scheduleName);
             _header = UserInput.GetStringFromUser("Ведомость отделки", "Введите заголовок", _header);
             View view;
-            List<ScheduleFinishWallsCeilingsRowDto> dtos = new List<ScheduleFinishWallsCeilingsRowDto>();
+            List<ScheduleFinishWallsCeilingsRowDto> dtos = CreateRoomFinishDtos(uidoc);
+            if (dtos is null) return Result.Cancelled;
+
             using (Transaction finishingScheduleTrans = new Transaction(doc))
             {
                 finishingScheduleTrans.Start("Ведомость отделки");
                 view = CreateSchedule(doc, _scheduleName, _header, dtos);
                 finishingScheduleTrans.Commit();
             }
+
             uidoc.ActiveView = view;
             return Result.Succeeded;
         }
