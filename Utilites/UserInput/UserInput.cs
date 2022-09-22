@@ -14,7 +14,7 @@ namespace MS.Utilites
         /// <param name="header">Заголовок диалогового окна</param>
         /// <param name="message">Сообщение для пользователя</param>
         /// <param name="defaultValue">Значение по умолчанию</param>
-        /// <returns>Строка от пользователя в lower case</returns>
+        /// <returns>Строка от пользователя</returns>
         public static string GetStringFromUser(string header, string message, string defaultValue)
         {
             var stringFromUser = Interaction.InputBox(
