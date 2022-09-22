@@ -16,12 +16,30 @@ namespace MS.Commands.AR
     [Regeneration(RegenerationOption.Manual)]
     internal class RoomFinishingScheduleCreationCmd : IExternalCommand
     {
-        private string _header = String.Empty;
-        private string _scheduleName = String.Empty;
+        /// <summary>
+        /// Заголовок в спецификации
+        /// </summary>
+        private static string _header = String.Empty;
 
-        private double _heightHeader = 8 / SharedValues.FootToMillimeters / 10;
-        private double _heightRow = 15 / SharedValues.FootToMillimeters / 10;
-        private List<double> _widths = new List<double>()
+        /// <summary>
+        /// Название спецификации в диспетчере проекта
+        /// </summary>
+        private static string _scheduleName = String.Empty;
+
+        /// <summary>
+        /// Высота заголовка спецификации
+        /// </summary>
+        private readonly double _heightHeader = 8 / SharedValues.FootToMillimeters / 10;
+
+        /// <summary>
+        /// Высота строки для вида отделки
+        /// </summary>
+        private readonly double _heightRow = 15 / SharedValues.FootToMillimeters / 10;
+
+        /// <summary>
+        /// Список ширин столбцов ведомости отделки
+        /// </summary>
+        private readonly List<double> _widths = new List<double>()
         {
             50 / SharedValues.FootToMillimeters,
             20 / SharedValues.FootToMillimeters,
@@ -32,6 +50,11 @@ namespace MS.Commands.AR
             30 / SharedValues.FootToMillimeters
         };
 
+        /// <summary>
+        /// Добавить заголовок к спецификации ведомости отделки и создать заготовку для 1 вида отделки для 1 типа отделки
+        /// </summary>
+        /// <param name="table">Таблица ведомости отделки</param>
+        /// <param name="header">Заголовок спецификации</param>
         private void WriteHeader(ref TableSectionData table, string header)
         {
             int zero = 0;
@@ -52,6 +75,12 @@ namespace MS.Commands.AR
             table.MergeCells(new TableMergedCell(zero, zero, zero, _widths.Count - 1));
         }
 
+        /// <summary>
+        /// Заполняет созданную спецификацию
+        /// </summary>
+        /// <param name="table">Спецификация ведомости отделки</param>
+        /// <param name="header">Заголовок спецификации</param>
+        /// <param name="fintypeRowDtos">Список DTO для видов отделки стен и потолка</param>
         private void FillTable(
             ref TableSectionData table,
             string header,
@@ -64,6 +93,14 @@ namespace MS.Commands.AR
             }
         }
 
+        /// <summary>
+        /// Добавляет в спецификацию тип отделки путем добавления каждого вида отделки как отдельной строки 
+        /// и объединяя пустые оставшиеся строки. 
+        /// Добавление начинается с заполнения последней строки строки спецификации
+        /// и заканчивается добавлением новой заготовки строки в низ спецификации для нового типа отделки.
+        /// </summary>
+        /// <param name="table"></param>
+        /// <param name="fintypeRowDto"></param>
         private void AddFintypeRow(ref TableSectionData table, in ScheduleFinishWallsCeilingsRowDto fintypeRowDto)
         {
             int startRowIndex = table.LastRowNumber;
@@ -86,6 +123,9 @@ namespace MS.Commands.AR
             table.MergeCells(new TableMergedCell(startRowIndex, 6, startRowIndex + rowsCount, 6));
             FillFintypeAreaRows(ref table, fintypeRowDto.CeilingTypeAreas, rowsCount, startRowIndex, colCeilingIndex);
             FillFintypeAreaRows(ref table, fintypeRowDto.WallTypesAreas, rowsCount, startRowIndex, colWalltypeIndex);
+            // Добавить строку вниз для последующего типа отделки
+            table.InsertRow(startRowIndex + rowsCount);
+            table.SetRowHeight(startRowIndex + rowsCount, _heightRow);
         }
 
         /// <summary>
@@ -128,6 +168,14 @@ namespace MS.Commands.AR
             }
         }
 
+        /// <summary>
+        /// Создает фиктивную спецификацию для ведомости отделки
+        /// </summary>
+        /// <param name="doc">Документ, в котором происходит транзакция</param>
+        /// <param name="ScheduleTittle">Название спецификации</param>
+        /// <param name="header">Заголовок спецификации</param>
+        /// <param name="fintypeRowDtos">Список DTO для типов отделки помещений</param>
+        /// <returns>Созданная и заполненная спецификация</returns>
         private ViewSchedule CreateSchedule(
             Document doc,
             string ScheduleTittle,
@@ -142,7 +190,7 @@ namespace MS.Commands.AR
             {
                 schedule.Definition.AddField(schedulableField);
             }
-            schedule.GetTableData().Width = 210 / SharedValues.FootToMillimeters;
+            schedule.GetTableData().Width = _widths.Sum();
             TableSectionData headerTable = schedule.GetTableData().GetSectionData(SectionType.Header);
             FillTable(ref headerTable, header, fintypeRowDtos);
             return schedule;
