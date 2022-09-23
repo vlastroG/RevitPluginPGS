@@ -38,12 +38,12 @@ namespace MS.Commands.AR
         /// <summary>
         /// Высота заголовка спецификации
         /// </summary>
-        private readonly double _heightHeader = 8 / SharedValues.FootToMillimeters / 10;
+        private readonly double _heightHeader = 8 / SharedValues.FootToMillimeters;
 
         /// <summary>
         /// Высота строки для вида отделки
         /// </summary>
-        private readonly double _heightRow = 15 / SharedValues.FootToMillimeters / 10;
+        private readonly double _heightRow = 15 / SharedValues.FootToMillimeters;
 
         /// <summary>
         /// Список ширин столбцов ведомости отделки
@@ -67,7 +67,7 @@ namespace MS.Commands.AR
         private void WriteHeader(ref TableSectionData table, string header)
         {
             int zero = 0;
-            int one = 0;
+            int one = 1;
             table.ClearCell(zero, zero);
             table.SetCellText(zero, zero, header);
             table.SetRowHeight(zero, _heightHeader);
@@ -82,6 +82,7 @@ namespace MS.Commands.AR
                 table.SetColumnWidth(i, _widths[i]);
             }
             table.MergeCells(new TableMergedCell(zero, zero, zero, _widths.Count - 1));
+            table.RefreshData();
         }
 
         /// <summary>
@@ -125,16 +126,18 @@ namespace MS.Commands.AR
             {
                 // Добавить строки по максимальному количеству типов отделки стен или потолка
                 table.InsertRow(i);
+                table.RefreshData();
                 table.SetRowHeight(i, _heightRow);
             }
-            table.MergeCells(new TableMergedCell(startRowIndex, 0, startRowIndex + rowsCount, 0));
-            table.MergeCells(new TableMergedCell(startRowIndex, 1, startRowIndex + rowsCount, 1));
-            table.MergeCells(new TableMergedCell(startRowIndex, 6, startRowIndex + rowsCount, 6));
+            table.MergeCells(new TableMergedCell(startRowIndex, 0, startRowIndex + rowsCount - 1, 0));
+            table.MergeCells(new TableMergedCell(startRowIndex, 1, startRowIndex + rowsCount - 1, 1));
+            table.MergeCells(new TableMergedCell(startRowIndex, 6, startRowIndex + rowsCount - 1, 6));
             FillFintypeAreaRows(ref table, fintypeRowDto.CeilingTypeAreas, rowsCount, startRowIndex, colCeilingIndex);
             FillFintypeAreaRows(ref table, fintypeRowDto.WallTypesAreas, rowsCount, startRowIndex, colWalltypeIndex);
             // Добавить строку вниз для последующего типа отделки
             table.InsertRow(startRowIndex + rowsCount);
             table.SetRowHeight(startRowIndex + rowsCount, _heightRow);
+            table.RefreshData();
         }
 
         /// <summary>
@@ -166,13 +169,13 @@ namespace MS.Commands.AR
                     new TableMergedCell(
                         startRowIndex + fintypes.Count,
                         startColIndex,
-                        startRowIndex + rowsCount,
+                        startRowIndex + rowsCount - 1,
                         startColIndex));
                 table.MergeCells(
                     new TableMergedCell(
                         startRowIndex + fintypes.Count,
                         startColIndex + 1,
-                        startRowIndex + rowsCount,
+                        startRowIndex + rowsCount - 1,
                         startColIndex + 1));
             }
         }
@@ -348,6 +351,7 @@ namespace MS.Commands.AR
                         (wall.WallType.get_Parameter(BuiltInParameter.ALL_MODEL_DESCRIPTION).AsValueString(),
                         Math.Round(wall.get_Parameter(BuiltInParameter.HOST_AREA_COMPUTED).AsDouble() * SharedValues.SqFeetToMeters,
                         3)));
+                    // Назначить номер помещения и тип отделки стене
                     e.get_Parameter(SharedParams.ADSK_RoomNumberInApartment).Set(rNum);
                     e.get_Parameter(SharedParams.PGS_FinishingTypeOfWalls).Set(rFintype);
                 }
@@ -355,15 +359,52 @@ namespace MS.Commands.AR
             return tupleList;
         }
 
+        /// <summary>
+        /// Возвращает список кортежей типов отделки потолков и их площадей для помещения
+        /// </summary>
+        /// <param name="doc">Документ, в котором происходит создание ведомости отделки</param>
+        /// <param name="room">Помещение, для которого составляется список кортежей отделки с площадью</param>
+        /// <param name="ceilingPointsAndIds">Список кортежей точек потолков и Id потолков во всем проекте.
+        /// После нахождения принаджежности потолков из списка помещениям, они удаляются из него.</param>
+        /// <returns>Список кортежей типов отделки потолков с площадями</returns>
         private List<(string Ceiling, double Area)> GetRoomCeilingAreas(
             in Document doc,
             in Room room,
-            in View3D view3d,
-            in List<Ceiling> ceilings)
+            ref List<(XYZ ceilingPoint, ElementId Id)> ceilingPointsAndIds)
         {
-
+            List<(XYZ, ElementId)> ceilingsInRoomToRemove = new List<(XYZ, ElementId)>();
+            List<(string Ceiling, double Area)> ceilingsTuple = new List<(string Ceiling, double Area)>();
+            foreach (var ceilingPointId in ceilingPointsAndIds)
+            {
+                if (room.IsPointInRoom(ceilingPointId.ceilingPoint))
+                {
+                    ceilingsInRoomToRemove.Add(ceilingPointId);
+                    Ceiling ceiling = doc.GetElement(ceilingPointId.Id) as Ceiling;
+                    string description = doc.GetElement(ceiling.GetTypeId())
+                        .get_Parameter(BuiltInParameter.ALL_MODEL_DESCRIPTION)
+                        .AsValueString();
+                    double area =
+                        Math.Round(ceiling.get_Parameter(BuiltInParameter.HOST_AREA_COMPUTED).AsDouble() * SharedValues.SqFeetToMeters,
+                        3);
+                    ceilingsTuple.AddOrUpdate((description, area));
+                    // Назначить номер помещения и тип отделки стен и потолка потолку 
+                    ceiling.get_Parameter(SharedParams.ADSK_RoomNumberInApartment).Set(room.Number);
+                    ceiling.get_Parameter(SharedParams.PGS_FinishingTypeOfWalls)
+                        .Set(room.get_Parameter(SharedParams.PGS_FinishingTypeOfWalls).AsValueString());
+                }
+            }
+            foreach (var ceilintRemove in ceilingsInRoomToRemove)
+            {
+                ceilingPointsAndIds.Remove(ceilintRemove);
+            }
+            return ceilingsTuple;
         }
 
+        /// <summary>
+        /// Создает список DTO для строчек типов отделки в ведомости отделки
+        /// </summary>
+        /// <param name="uidoc">Документ, в котором создается ведомость отделки</param>
+        /// <returns>Список DTO типов отделки для ведомости отделки</returns>
         private List<ScheduleFinishWallsCeilingsRowDto> CreateRoomFinishDtos(in UIDocument uidoc)
         {
             var rooms = GetRooms(uidoc);
@@ -381,24 +422,35 @@ namespace MS.Commands.AR
             }
             SpatialElementBoundaryOptions opts = new SpatialElementBoundaryOptions();
             if (rooms is null) return null;
+            // Изначальное создание списка DTO строчек для типов отделки с заполненными первыми 2 столбцами спецификации:
+            // Список помещений с одинаковой отделкой и Наименование типа отделки
             List<ScheduleFinishWallsCeilingsRowDto> dtos =
                 rooms.DistinctBy(r => r.get_Parameter(SharedParams.PGS_FinishingTypeOfWalls).AsValueString())
-                .Select(r => (r.get_Parameter(SharedParams.PGS_MultiTextMark).AsValueString(),
-                              r.get_Parameter(SharedParams.PGS_FinishingTypeOfWalls).AsValueString()))
+                .Select(r => (r.get_Parameter(SharedParams.PGS_FinishingTypeOfWalls).AsValueString(),
+                              r.get_Parameter(SharedParams.PGS_MultiTextMark).AsValueString()))
                 .Select(tuple => new ScheduleFinishWallsCeilingsRowDto(tuple.Item1, tuple.Item2))
+                .OrderBy(o => o.FintypeWallsCeilings)
                 .ToList();
-            var t = new FilteredElementCollector(uidoc.Document)
-                .OfCategory(BuiltInCategory.OST_Ceilings)
-                .WhereElementIsNotElementType()
-                .Select(c => (c.get_Geometry(optsDetail) as GeometryObject as Solid));
+            List<(XYZ ceilingPoint, ElementId Id)> ceilingPointAndId = new FilteredElementCollector(uidoc.Document)
+                 .OfCategory(BuiltInCategory.OST_Ceilings)
+                 .WhereElementIsNotElementType()
+                 .Cast<Ceiling>()
+                 .Select(c => (c.GetRoomPoint(), c.Id))
+                 .Where(tuple => tuple.Item1 != null)
+                 .ToList();
             foreach (Room room in rooms)
             {
                 string fintype = room.get_Parameter(SharedParams.PGS_FinishingTypeOfWalls).AsValueString();
                 var dto = dtos.First(d => d.FintypeWallsCeilings == fintype);
                 var walltypesAreas = GetRoomWalltypesAreas(uidoc.Document, room, view3d, opts);
+                var ceilingsAreas = GetRoomCeilingAreas(uidoc.Document, room, ref ceilingPointAndId);
                 foreach (var wtArea in walltypesAreas)
                 {
                     dto.AddWallFinType(wtArea);
+                }
+                foreach (var cArea in ceilingsAreas)
+                {
+                    dto.AddCeilingFinType(cArea);
                 }
             }
             return dtos;
@@ -409,24 +461,43 @@ namespace MS.Commands.AR
             UIApplication uiapp = commandData.Application;
             UIDocument uidoc = uiapp.ActiveUIDocument;
             Document doc = uidoc.Document;
-            return Result.Succeeded;
+            if (!(doc.ActiveView is ViewPlan))
+            {
+                MessageBox.Show("Перейдите на план", "Предупреждение");
+                return Result.Cancelled;
+            }
 
             if (!ValidateSharedParams(doc)) return Result.Cancelled;
 
+            // Запуск команды для назначения параметра PGS_МногострочнаяМарка помещениям с одинаковой отделкой
+            var multimarkRoomsFinCmd = new RoomsFinishingMultiMark();
+            multimarkRoomsFinCmd.Execute(commandData, ref message, elements);
+
             _scheduleName = UserInput.GetStringFromUser("Ведомость отделки", "Введите название спецификации", _scheduleName);
+            if (_scheduleName.Length == 0) return Result.Cancelled;
             _header = UserInput.GetStringFromUser("Ведомость отделки", "Введите заголовок", _header);
-            View view;
-            List<ScheduleFinishWallsCeilingsRowDto> dtos = CreateRoomFinishDtos(uidoc);
+            if (_header.Length == 0) return Result.Cancelled;
+            // Формирование DTO для строчек с типами отделки для ведомости отделки
+            List<ScheduleFinishWallsCeilingsRowDto> dtos;
+            using (Transaction wallsCeilingsSetParamsTrans = new Transaction(doc))
+            {
+                wallsCeilingsSetParamsTrans.Start("Принадлежность стен и потолков помещениям");
+                dtos = CreateRoomFinishDtos(uidoc);
+                wallsCeilingsSetParamsTrans.Commit();
+            }
+            // Если в проекте не найдено помещений для обработки, или если команда отменена, или в случае другой ошибки
             if (dtos is null) return Result.Cancelled;
 
+            View view;
             using (Transaction finishingScheduleTrans = new Transaction(doc))
             {
                 finishingScheduleTrans.Start("Ведомость отделки");
+                // Заполнить таблицу спецификации по dto для типов отделки
                 view = CreateSchedule(doc, _scheduleName, _header, dtos);
                 finishingScheduleTrans.Commit();
             }
-
             uidoc.ActiveView = view;
+
             return Result.Succeeded;
         }
     }
