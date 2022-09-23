@@ -6,6 +6,7 @@ using Autodesk.Revit.UI.Selection;
 using MS.Commands.AR.DTO;
 using MS.Shared;
 using MS.Utilites;
+using MS.Utilites.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,6 +24,11 @@ namespace MS.Commands.AR
         /// Заголовок в спецификации
         /// </summary>
         private static string _header = String.Empty;
+
+        /// <summary>
+        /// Строка, которая должна содержаться в названии типа отделочноых стен
+        /// </summary>
+        private readonly string _finWalls = "_F_";
 
         /// <summary>
         /// Название спецификации в диспетчере проекта
@@ -180,7 +186,7 @@ namespace MS.Commands.AR
         /// <param name="fintypeRowDtos">Список DTO для типов отделки помещений</param>
         /// <returns>Созданная и заполненная спецификация</returns>
         private ViewSchedule CreateSchedule(
-            Document doc,
+            in Document doc,
             string ScheduleTittle,
             string header,
             in List<ScheduleFinishWallsCeilingsRowDto> fintypeRowDtos)
@@ -204,7 +210,7 @@ namespace MS.Commands.AR
         /// </summary>
         /// <param name="doc">Документ Revit</param>
         /// <returns>True, если все общие параметры присутствуют, иначе false</returns>
-        private bool ValidateSharedParams(Document doc)
+        private bool ValidateSharedParams(in Document doc)
         {
             Guid[] _sharedParamsForRooms = new Guid[] {
             SharedParams.PGS_FinishingTypeOfWalls,
@@ -259,7 +265,7 @@ namespace MS.Commands.AR
         /// <param name="uidoc"></param>
         /// <returns>Список валидных помещений, 
         /// если операция отменена или пользователь ничего не выбрал, то null</returns>
-        private List<Room> GetRooms(UIDocument uidoc)
+        private List<Room> GetRooms(in UIDocument uidoc)
         {
             Document doc = uidoc.Document;
             Selection sel = uidoc.Selection;
@@ -301,11 +307,101 @@ namespace MS.Commands.AR
             return rooms;
         }
 
-        private List<ScheduleFinishWallsCeilingsRowDto> CreateRoomFinishDtos(UIDocument uidoc)
+        /// <summary>
+        /// Создает список кортежей типов отделки стен и их площадей для коматы.
+        /// Также значениф параметров помещения 'ADSK_Номер помещения квартиры' и 'PGS_ТипОтделкиСтен'
+        /// заносятся в соответствующие параметры отделочных стен стен, 
+        /// имеющих в названии типа <see cref="_finWalls">Строку</see>.
+        /// </summary>
+        /// <param name="doc">Документ, в котором происходит создание ведомости отделки</param>
+        /// <param name="room">Помещение, для которого составляется список</param>
+        /// <param name="view3d">3D вид по умолчанию</param>
+        /// <param name="opts">Опции для обработки геометрии</param>
+        /// <returns>Список кортежей типов отделки стен и их площадей для данной комнаты</returns>
+        private List<(string WallType, double Area)> GetRoomWalltypesAreas(
+            in Document doc,
+            in Room room,
+            in View3D view3d,
+            in SpatialElementBoundaryOptions opts)
+        {
+            IList<IList<BoundarySegment>> loops
+                      = room.GetBoundarySegments(
+                        new SpatialElementBoundaryOptions());
+            List<(string WallType, double Area)> tupleList = new List<(string WallType, double Area)>();
+            string rNum = room.get_Parameter(BuiltInParameter.ROOM_NUMBER).AsValueString();
+            string rFintype = room.get_Parameter(SharedParams.PGS_FinishingTypeOfWalls).AsValueString();
+            foreach (IList<BoundarySegment> loop in loops)
+            {
+                foreach (BoundarySegment seg in loop)
+                {
+                    Element e = doc.GetElement(seg.ElementId);
+
+                    if (null == e)
+                    {
+                        e = WorkWithGeometry.GetElementByRay(doc, view3d,
+                          seg.GetCurve());
+                    }
+                    if (!(e is Wall)) continue;
+                    if (!(e as Wall).Name.Contains(_finWalls)) continue;
+                    Wall wall = (Wall)e;
+                    tupleList.AddOrUpdate(
+                        (wall.WallType.get_Parameter(BuiltInParameter.ALL_MODEL_DESCRIPTION).AsValueString(),
+                        Math.Round(wall.get_Parameter(BuiltInParameter.HOST_AREA_COMPUTED).AsDouble() * SharedValues.SqFeetToMeters,
+                        3)));
+                    e.get_Parameter(SharedParams.ADSK_RoomNumberInApartment).Set(rNum);
+                    e.get_Parameter(SharedParams.PGS_FinishingTypeOfWalls).Set(rFintype);
+                }
+            }
+            return tupleList;
+        }
+
+        private List<(string Ceiling, double Area)> GetRoomCeilingAreas(
+            in Document doc,
+            in Room room,
+            in View3D view3d,
+            in List<Ceiling> ceilings)
+        {
+
+        }
+
+        private List<ScheduleFinishWallsCeilingsRowDto> CreateRoomFinishDtos(in UIDocument uidoc)
         {
             var rooms = GetRooms(uidoc);
+            View3D view3d
+              = new FilteredElementCollector(uidoc.Document)
+                .OfClass(typeof(View3D))
+                .Cast<View3D>()
+                .FirstOrDefault<View3D>(
+                  e => e.Name.Equals("{3D}"));
+            Options optsDetail = new Options();
+            if (null == view3d)
+            {
+                MessageBox.Show("Не найден {3D} вид по умолчанию", "Ошибка");
+                return null;
+            }
+            SpatialElementBoundaryOptions opts = new SpatialElementBoundaryOptions();
             if (rooms is null) return null;
-            return null;//////////////////////////////////////////////////////
+            List<ScheduleFinishWallsCeilingsRowDto> dtos =
+                rooms.DistinctBy(r => r.get_Parameter(SharedParams.PGS_FinishingTypeOfWalls).AsValueString())
+                .Select(r => (r.get_Parameter(SharedParams.PGS_MultiTextMark).AsValueString(),
+                              r.get_Parameter(SharedParams.PGS_FinishingTypeOfWalls).AsValueString()))
+                .Select(tuple => new ScheduleFinishWallsCeilingsRowDto(tuple.Item1, tuple.Item2))
+                .ToList();
+            var t = new FilteredElementCollector(uidoc.Document)
+                .OfCategory(BuiltInCategory.OST_Ceilings)
+                .WhereElementIsNotElementType()
+                .Select(c => (c.get_Geometry(optsDetail) as GeometryObject as Solid));
+            foreach (Room room in rooms)
+            {
+                string fintype = room.get_Parameter(SharedParams.PGS_FinishingTypeOfWalls).AsValueString();
+                var dto = dtos.First(d => d.FintypeWallsCeilings == fintype);
+                var walltypesAreas = GetRoomWalltypesAreas(uidoc.Document, room, view3d, opts);
+                foreach (var wtArea in walltypesAreas)
+                {
+                    dto.AddWallFinType(wtArea);
+                }
+            }
+            return dtos;
         }
 
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
@@ -313,6 +409,8 @@ namespace MS.Commands.AR
             UIApplication uiapp = commandData.Application;
             UIDocument uidoc = uiapp.ActiveUIDocument;
             Document doc = uidoc.Document;
+            return Result.Succeeded;
+
             if (!ValidateSharedParams(doc)) return Result.Cancelled;
 
             _scheduleName = UserInput.GetStringFromUser("Ведомость отделки", "Введите название спецификации", _scheduleName);
