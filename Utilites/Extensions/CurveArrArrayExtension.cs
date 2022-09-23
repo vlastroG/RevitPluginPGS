@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MS.Utilites.Extensions
 {
-    public static class ExtensionCurveArrArray
+    public static class CurveArrArrayExtension
     {
         /// <summary>
         /// Возвращается массив кривых, сумма длин которых наибольшая.

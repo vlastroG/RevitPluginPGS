@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MS.Utilites.Extensions
 {
-    public static class ExtensionWall
+    public static class WallExtension
     {
         /// <summary>
         /// Создает массив кривых, образующих прямоугольный профиль, для прямоугольной стены.

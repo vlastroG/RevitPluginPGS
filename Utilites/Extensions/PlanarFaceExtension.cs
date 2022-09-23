@@ -2,7 +2,7 @@
 
 namespace MS.Utilites
 {
-    public static class ExtensionPlanarFace
+    public static class PlanarFaceExtension
     {
         /// <summary>
         /// Возвращает самый длинный контур грани.

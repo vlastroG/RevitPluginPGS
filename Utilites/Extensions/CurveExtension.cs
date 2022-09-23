@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MS.Utilites.Extensions
 {
-    public static class ExtensionCurve
+    public static class CurveExtension
     {
         /// <summary>
         /// Определяет, лежит ли плоская кривая в плоскости || XOY (горизонтальной плоскости).

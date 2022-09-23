@@ -11,10 +11,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using static MS.Utilites.Extensions.ExtensionCurveArrArray;
-using static MS.Utilites.Extensions.ExtensionCurve;
-using static MS.Utilites.Extensions.ExtensionWall;
-using static MS.Utilites.Extensions.ExtensionCurveArray;
+using static MS.Utilites.Extensions.CurveArrArrayExtension;
+using static MS.Utilites.Extensions.CurveExtension;
+using static MS.Utilites.Extensions.WallExtension;
+using static MS.Utilites.Extensions.CurveArrayExtension;
 
 namespace MS.Commands.AR
 {

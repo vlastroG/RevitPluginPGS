@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MS.Utilites.Extensions
 {
-    public static class ExtensionCurveArray
+    public static class CurveArrayExtension
     {
         /// <summary>
         /// Длина массива кривых в футах
