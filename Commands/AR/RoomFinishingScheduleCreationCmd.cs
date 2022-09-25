@@ -471,7 +471,11 @@ namespace MS.Commands.AR
 
             // Запуск команды для назначения параметра PGS_МногострочнаяМарка помещениям с одинаковой отделкой
             var multimarkRoomsFinCmd = new RoomsFinishingMultiMark();
-            multimarkRoomsFinCmd.Execute(commandData, ref message, elements);
+            Result prevResult = multimarkRoomsFinCmd.Execute(commandData, ref message, elements);
+            if (prevResult != Result.Succeeded)
+            {
+                return Result.Cancelled;
+            }
 
             _scheduleName = UserInput.GetStringFromUser("Ведомость отделки", "Введите название спецификации", _scheduleName);
             if (_scheduleName.Length == 0) return Result.Cancelled;

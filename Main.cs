@@ -269,12 +269,14 @@ namespace MS
                 "или запустить команду и выбрать необходимые на виде помещения.";
 
             // RoomFinishingScheduleCreationCmd
-            PushButtonData btnRoomFinishingScheduleCreationCmd = new PushButtonData("RoomFinishingScheduleCreationCmd", "Ведомость\nотделки (alpha)", path, "MS.Commands.AR.RoomFinishingScheduleCreationCmd");
+            PushButtonData btnRoomFinishingScheduleCreationCmd = new PushButtonData("RoomFinishingScheduleCreationCmd", "Ведомость\nотделки (beta)", path, "MS.Commands.AR.RoomFinishingScheduleCreationCmd");
             Uri btnRoomFinishingScheduleCreationCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
             BitmapImage btnRoomFinishingScheduleCreationCmdImage = new BitmapImage(btnRoomFinishingScheduleCreationCmdImagePath);
             btnRoomFinishingScheduleCreationCmd.LargeImage = btnRoomFinishingScheduleCreationCmdImage;
             btnRoomFinishingScheduleCreationCmd.ToolTip = "Создание спецификации ведомости отделки";
-            btnRoomFinishingScheduleCreationCmd.LongDescription = "Ебок";
+            btnRoomFinishingScheduleCreationCmd.LongDescription = "Необходимо создать отделочные стены в помещениях, " +
+                "в названиях типоразмеров которых содержится '_F_' и создать потолки. Значение параметра типа 'Описание' " +
+                "у стен и потолков будет записываться в соответствующие ячейки сгенерированной ведомости отделки.";
 
 
             // StairReinforcement command
