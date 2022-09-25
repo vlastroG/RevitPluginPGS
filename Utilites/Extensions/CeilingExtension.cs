@@ -60,7 +60,7 @@ namespace MS.Utilites.Extensions
                     XYZ normal = planarFace.FaceNormal;
                     if (Math.Round(normal.Z, 5) == 0)
                     {
-                        roomPoint = planarFace.Origin + normal.Negate() + XYZ.BasisZ.Negate();
+                        roomPoint = planarFace.Origin + planarFace.YVector + normal.Negate() + XYZ.BasisZ.Negate();
                         return roomPoint;
                     }
                 }

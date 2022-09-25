@@ -167,13 +167,13 @@ namespace MS.Commands.AR
                 // Объединить строки для ячеек с отделкой потолка, если остались пустые
                 table.MergeCells(
                     new TableMergedCell(
-                        startRowIndex + fintypes.Count,
+                        startRowIndex + fintypes.Count - 1,
                         startColIndex,
                         startRowIndex + rowsCount - 1,
                         startColIndex));
                 table.MergeCells(
                     new TableMergedCell(
-                        startRowIndex + fintypes.Count,
+                        startRowIndex + fintypes.Count - 1,
                         startColIndex + 1,
                         startRowIndex + rowsCount - 1,
                         startColIndex + 1));
