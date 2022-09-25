@@ -37,7 +37,42 @@ namespace MS.Commands.MEP
         /// </summary>
         private readonly string _identFilter = "4";
 
+        /// <summary>
+        /// Проверяет, присутствует ли общий параметр PGS_Идентификация в экземпляре или типе элемента
+        /// и имеет ли он значение.
+        /// </summary>
+        /// <param name="elem">Экземпляр размещаемого семейства</param>
+        /// <returns>True, если параметр присутствует и имеет значение, иначе False</returns>
+        private bool IsContainsIdentification(FamilyInstance elem)
+        {
+            bool identInInst = elem.get_Parameter(SharedParams.PGS_Identification) != null
+                && !String.IsNullOrEmpty(elem.get_Parameter(SharedParams.PGS_Identification).AsValueString());
+            bool identInSymbol = elem.Symbol.get_Parameter(SharedParams.PGS_Identification) != null
+                && !String.IsNullOrEmpty(elem.Symbol.get_Parameter(SharedParams.PGS_Identification).AsValueString());
+            return identInInst || identInSymbol;
+        }
 
+        /// <summary>
+        /// Возвращает значение параметра PGS_Идентификация из экземпляра или типа элемента
+        /// </summary>
+        /// <param name="elem">Экземпляр семейства, в котором происходит поиск значения параметра</param>
+        /// <returns>Значение параметра</returns>
+        /// <exception cref="ArgumentNullException">
+        /// Исключение, если параметр PGS_Идентификация отсутствует и в типе и в экземпляре элемента
+        /// </exception>
+        private string GetIdentificationValue(FamilyInstance elem)
+        {
+            string identification = String.Empty;
+            if (elem.get_Parameter(SharedParams.PGS_Identification) != null)
+                identification = elem.get_Parameter(SharedParams.PGS_Identification).AsValueString();
+            else if (elem.Symbol.get_Parameter(SharedParams.PGS_Identification) != null)
+                identification = elem.Symbol.get_Parameter(SharedParams.PGS_Identification).AsValueString();
+            else
+            {
+                throw new ArgumentNullException($"Элемент {elem.Id} не содержит параметр PGS_Идентификация");
+            }
+            return identification;
+        }
 
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
@@ -66,27 +101,26 @@ namespace MS.Commands.MEP
                     List<FamilyInstance> equipment = system.DuctNetwork
                         .ToList()
                         .Where(e => e is FamilyInstance)
-                        .Where(e => e.get_Parameter(SharedParams.PGS_Identification) != null
-                            && !String.IsNullOrEmpty(e.get_Parameter(SharedParams.PGS_Identification).AsValueString()))
                         .Cast<FamilyInstance>()
+                        .Where(e => IsContainsIdentification(e))
                         .ToList();
 
                     var fans = equipment.Where(
-                        e => e.get_Parameter(SharedParams.PGS_Identification).AsValueString() == _identFan)
+                        e => GetIdentificationValue(e) == _identFan)
                         .ToList();
 
                     var heaters = equipment.Where(
-                        e => e.get_Parameter(SharedParams.PGS_Identification).AsValueString() == _identAirHeater)
+                        e => GetIdentificationValue(e) == _identAirHeater)
                         .ToList();
                     var heater = heaters.FirstOrDefault();
 
                     var coolers = equipment.Where(
-                        e => e.get_Parameter(SharedParams.PGS_Identification).AsValueString() == _identAirCooler)
+                        e => GetIdentificationValue(e) == _identAirCooler)
                         .ToList();
                     var cooler = coolers.FirstOrDefault();
 
                     var filters = equipment.Where(
-                        e => e.get_Parameter(SharedParams.PGS_Identification).AsValueString() == _identFilter)
+                        e => GetIdentificationValue(e) == _identFilter)
                         .ToList();
                     var filter = filters.FirstOrDefault();
 
