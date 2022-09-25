@@ -90,13 +90,13 @@ namespace MS.Commands.MEP
 
             List<ElementId> errorIds = new List<ElementId>();
 
+            SpatialElementGeometryCalculator calculator = new SpatialElementGeometryCalculator(doc);
             using (Transaction trans = new Transaction(doc))
             {
                 trans.Start("Системы в пространствах назначение");
 
                 foreach (var space in spaces)
                 {
-                    SpatialElementGeometryCalculator calculator = new SpatialElementGeometryCalculator(doc);
                     Solid spaceSolid;
                     try
                     {
