@@ -34,7 +34,10 @@ namespace MS.Commands.MEP
         {
             BuiltInCategory.OST_PipeAccessory,
             BuiltInCategory.OST_MechanicalEquipment,
-            BuiltInCategory.OST_PlumbingFixtures
+            BuiltInCategory.OST_PlumbingFixtures,
+            BuiltInCategory.OST_PipeCurves,
+            BuiltInCategory.OST_PipeFitting,
+            BuiltInCategory.OST_FlexPipeCurves
         };
 
         /// <summary>
@@ -42,16 +45,14 @@ namespace MS.Commands.MEP
         /// </summary>
         /// <param name="doc">Документ, в котором будут находиться элементы MEP</param>
         /// <returns>Коллекция элементов MEP</returns>
-        private IReadOnlyCollection<FamilyInstance> GetMEPelements(Document doc)
+        private IReadOnlyCollection<Element> GetMEPelements(in Document doc)
         {
             var MEPcategories = new ElementMulticategoryFilter(_categories);
             var mepElements = new FilteredElementCollector(doc)
-                .OfClass(typeof(FamilyInstance))
                 .WherePasses(MEPcategories)
                 .WhereElementIsNotElementType()
                 .Where(e => e.LookupParameter(_parSystemName) != null
                  && !String.IsNullOrEmpty(e.LookupParameter(_parSystemName).AsValueString()))
-                .Cast<FamilyInstance>()
                 .ToList();
             return mepElements;
         }
@@ -116,41 +117,78 @@ namespace MS.Commands.MEP
                 foreach (var el in mepEls)
                 {
                     string adskNaming = String.Empty;
-                    if (el.get_Parameter(SharedParams.ADSK_Name).AsValueString() != null)
-                        adskNaming = el.get_Parameter(SharedParams.ADSK_Name).AsValueString().ToLower();
-                    else if (el.Symbol.get_Parameter(SharedParams.ADSK_Name).AsValueString() != null)
-                        adskNaming = el.Symbol.get_Parameter(SharedParams.ADSK_Name).AsValueString().ToLower();
-                    else
+                    if (el is FamilyInstance elFamInst)
                     {
-                        errors.Add(el.Id);
-                        continue;
+                        if (elFamInst.get_Parameter(SharedParams.ADSK_Name).AsValueString() != null)
+                            adskNaming = elFamInst.get_Parameter(SharedParams.ADSK_Name).AsValueString().ToLower();
+                        else if (elFamInst.Symbol.get_Parameter(SharedParams.ADSK_Name).AsValueString() != null)
+                            adskNaming = elFamInst.Symbol.get_Parameter(SharedParams.ADSK_Name).AsValueString().ToLower();
+                        if (String.IsNullOrEmpty(adskNaming))
+                        {
+                            // Пропустить экземпляры элементов семейств,
+                            // у которых отсутствует или пуст параметр ADSK_Наименование
+                            errors.Add(el.Id);
+                            continue;
+                        }
                     }
-                    if (String.IsNullOrEmpty(adskNaming))
-                    {
-                        errors.Add(el.Id);
-                        continue;
-                    }
+                    // Значение параметра элемента ИмяСистемы в нижнем регистре
                     string systemFull = el.LookupParameter(_parSystemName).AsValueString().ToLower();
+                    // Массив значений имен систем элемента, которые были разделены запятой (в нижнем регистре)
                     var systems = systemFull.Split('\u002C');
-                    var namingAndSystemNeed = namingAndSystemTuple.FirstOrDefault(t => adskNaming.Contains(t.Naming));
-                    if (namingAndSystemNeed.System is null) continue;
-                    var system = systems.Where(s => s.Contains(namingAndSystemNeed.System)).ToList();
+                    // Имя системы, которое нужно перезаписать в ИмяСистемы
                     var systemCheck = String.Empty;
-                    if (system.Count > 1)
+
+                    if (systems.Length == 1)
                     {
-                        errors.Add(el.Id);
-                        continue;
+                        // Если у элемента 1 тип системы изначально
+                        systemCheck = trimNumbers
+                            ? systems.First().Split(' ').FirstOrDefault().ToUpper()
+                            : systems.First().ToUpper();
                     }
-                    else if (system.Count == 1)
+                    else if (systems.Length > 1)
                     {
-                        systemCheck = system.First().ToUpper();
+                        // У элемента несколько типов систем
+                        if (!String.IsNullOrEmpty(adskNaming))
+                        {
+                            // Обработка элемента экземпляра семейства с заполненным параметром ADSK_Наименование
+
+                            // буква, заданная в Excel файле для ADSK_Наименование
+                            var namingAndSystemNeed = namingAndSystemTuple.FirstOrDefault(t => adskNaming.Contains(t.Naming));
+                            if (namingAndSystemNeed.System is null)
+                            {
+                                // Пропустить экземпляры семейств, у которых несколько систем
+                                // и ни одна из них не подходит заданной в Excel букве
+                                errors.Add(el.Id);
+                                continue;
+                            }
+                            var system = systems.Where(s => s.Contains(namingAndSystemNeed.System)).ToList();
+                            if (system.Count == 1)
+                            {
+                                systemCheck = trimNumbers
+                                    ? system.First().Split(' ').FirstOrDefault().ToUpper()
+                                    : system.First().ToUpper();
+                            }
+                            else
+                            {
+                                // У экземпляра семейства присутствует несколько систем с одинаковой буквой из Excel
+                                // или ни одна система не содержит букву из Excel
+                                errors.Add(el.Id);
+                                continue;
+                            }
+                        }
+                        else
+                        {
+                            errors.Add(el.Id);
+                            continue;
+                        }
                     }
                     else
                     {
+                        // ИмяСистемы пусто
                         errors.Add(el.Id);
                         continue;
                     }
-                    systemCheck = trimNumbers ? systemCheck.FirstOrDefault().ToString() : systemCheck;
+
                     el.LookupParameter(_parSystemName).Set(systemCheck);
                     count++;
                 }
