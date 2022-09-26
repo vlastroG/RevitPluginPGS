@@ -116,7 +116,7 @@ namespace MS
 
             // MasonryMesh command
             PushButtonData btnMasonryMesh = new PushButtonData("MasonryMesh", "Кладочная\nсетка", path, "MS.Commands.AR.MasonryMesh");
-            Uri btnMasonryMeshImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            Uri btnMasonryMeshImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\MasonryMesh.png");
             BitmapImage btnMasonryMeshImage = new BitmapImage(btnMasonryMeshImagePath);
             btnMasonryMesh.LargeImage = btnMasonryMeshImage;
             btnMasonryMesh.ToolTip = "Расчет длины кладочной сетки в пог.м. для однослойных стен " +
@@ -261,7 +261,7 @@ namespace MS
 
             // RoomBoardsFinishingCommand
             PushButtonData btnRoomBoardsFinishing = new PushButtonData("RoomBoardsFinishing", "Откосы\nи плинтусы\n(Beta)", path, "MS.Commands.AR.RoomBoardsFinishingCommand");
-            Uri btnRoomBoardsFinishingImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            Uri btnRoomBoardsFinishingImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\Plinth.png");
             BitmapImage btnRoomBoardsFinishingImage = new BitmapImage(btnRoomBoardsFinishingImagePath);
             btnRoomBoardsFinishing.LargeImage = btnRoomBoardsFinishingImage;
             btnRoomBoardsFinishing.ToolTip = "Подсчет площадей откосов и длины плинтуса в выбранных помещениях";
