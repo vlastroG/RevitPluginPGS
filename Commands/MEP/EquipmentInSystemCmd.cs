@@ -63,9 +63,11 @@ namespace MS.Commands.MEP
         private string GetIdentificationValue(FamilyInstance elem)
         {
             string identification = String.Empty;
-            if (elem.get_Parameter(SharedParams.PGS_Identification) != null)
+            if (elem.get_Parameter(SharedParams.PGS_Identification) != null
+                && !String.IsNullOrEmpty(elem.get_Parameter(SharedParams.PGS_Identification).AsValueString()))
                 identification = elem.get_Parameter(SharedParams.PGS_Identification).AsValueString();
-            else if (elem.Symbol.get_Parameter(SharedParams.PGS_Identification) != null)
+            else if (elem.Symbol.get_Parameter(SharedParams.PGS_Identification) != null
+                && !String.IsNullOrEmpty(elem.Symbol.get_Parameter(SharedParams.PGS_Identification).AsValueString()))
                 identification = elem.Symbol.get_Parameter(SharedParams.PGS_Identification).AsValueString();
             else
             {
