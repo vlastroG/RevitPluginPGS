@@ -51,14 +51,14 @@ namespace MS
 
             // Info command
             PushButtonData btnInfo = new PushButtonData("Info", "Alt\nсимволы", path, "MS.Info");
-            Uri btnInfoImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            Uri btnInfoImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Alt.png");
             BitmapImage btnInfoImage = new BitmapImage(btnInfoImagePath);
             btnInfo.LargeImage = btnInfoImage;
             btnInfo.ToolTip = "Alt-символы Revit.";
 
             // ClashReport command
             PushButtonData btnClashReport = new PushButtonData("ClashReport", "Clashes\nimport", path, "MS.Commands.BIM.ClashReportImport");
-            Uri btnClashReportImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            Uri btnClashReportImagePath = new Uri(assembly_dir + @"\Images\Icons\BIM\Clashes.png");
             BitmapImage btnClashReportImage = new BitmapImage(btnClashReportImagePath);
             btnClashReport.LargeImage = btnClashReportImage;
             btnClashReport.ToolTip = "Расстановка семейств по координатом пересечений из отчета Navisworks.";
@@ -72,7 +72,7 @@ namespace MS
 
             // PolyLineLength command
             PushButtonData btnPolyLineLength = new PushButtonData("PolyLineLength", "Длина\nполилинии", path, "MS.Commands.General.PolyLineLength");
-            Uri btnPolyLineLengthImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            Uri btnPolyLineLengthImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Sigma.png");
             BitmapImage btnPolyLineLengthImage = new BitmapImage(btnPolyLineLengthImagePath);
             btnPolyLineLength.LargeImage = btnPolyLineLengthImage;
             btnPolyLineLength.ToolTip = "Суммарная длина выбранных линий";
@@ -91,20 +91,32 @@ namespace MS
             //btnLevelName.ToolTip = "Проверка отметок уровней в их названии";
 
 
-            // SelectionRooms command
+            // Selection command
             PushButtonData btnSelection = new PushButtonData("Selection", "Выбор\nэлементов", path, "MS.Selector");
-            Uri btnSelectionImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Selection.png");
+            Uri btnSelectionImagePath = new Uri(assembly_dir + @"\Images\Icons\General\SelectionElements.png");
             BitmapImage btnSelectionImage = new BitmapImage(btnSelectionImagePath);
             btnSelection.LargeImage = btnSelectionImage;
             btnSelection.ToolTip =
                 "Интерфейс переключается в режим выбора только элементов заданной категории.";
             btnSelection.LongDescription =
+                "Категория задается при первом запуске во всплывающем окне " +
+                "и запоминается для последующего использования в сеансе Revit. " +
+                "В последствии можно изменить категорию в настройках, нажав на треуголник под панелью General.";
+
+            // SelectionSettings command
+            PushButtonData btnSelectionSettings = new PushButtonData("SelectionSettings", "Настройка\nкатегории", path, "MS.Commands.General.SelectorSettingsCmd");
+            Uri btnSelectionSettingsImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Settings.png");
+            BitmapImage btnSelectionSettingsImage = new BitmapImage(btnSelectionSettingsImagePath);
+            btnSelectionSettings.LargeImage = btnSelectionSettingsImage;
+            btnSelectionSettings.ToolTip =
+                "Настройка категории для выбора элементов.";
+            btnSelectionSettings.LongDescription =
                 "Категория задается во всплывающем окне и запоминается для последующего использования в сеансе Revit. " +
                 "Доступны все категории Revit, даже группы.";
 
             // MasonryMesh command
             PushButtonData btnMasonryMesh = new PushButtonData("MasonryMesh", "Кладочная\nсетка", path, "MS.Commands.AR.MasonryMesh");
-            Uri btnMasonryMeshImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Selection.png");
+            Uri btnMasonryMeshImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
             BitmapImage btnMasonryMeshImage = new BitmapImage(btnMasonryMeshImagePath);
             btnMasonryMesh.LargeImage = btnMasonryMeshImage;
             btnMasonryMesh.ToolTip = "Расчет длины кладочной сетки в пог.м. для однослойных стен " +
@@ -140,7 +152,7 @@ namespace MS
 
             // ComplexApartmentNumber command
             PushButtonData btnCmplxAprtNum = new PushButtonData("ComplexAprtmntNmbr", "Составные номера\nквартир", path, "MS.Commands.AR.ComplexAprtmntNmbr");
-            Uri btnCmplxAprtNumImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            Uri btnCmplxAprtNumImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\Bricks.png");
             BitmapImage btnCmplxAprtNumImage = new BitmapImage(btnCmplxAprtNumImagePath);
             btnCmplxAprtNum.LargeImage = btnCmplxAprtNumImage;
             btnCmplxAprtNum.ToolTip = "Заполнение составного номера квартиры в Комментирии";
@@ -150,7 +162,7 @@ namespace MS
 
             // OpeningsArea command
             PushButtonData btnOpeningsArea = new PushButtonData("OpeningsArea", "Площадь проемов\nв помещениях", path, "MS.Commands.AR.OpeningsArea");
-            Uri btnOpeningsAreaImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            Uri btnOpeningsAreaImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\BalconyDoor.png");
             BitmapImage btnOpeningsAreaImage = new BitmapImage(btnOpeningsAreaImagePath);
             btnOpeningsArea.LargeImage = btnOpeningsAreaImage;
             btnOpeningsArea.ToolTip = "Площади проемов помещаний будут записаны в параметр \'ADSK_Площадь проемов\'";
@@ -163,7 +175,7 @@ namespace MS
 
             // MarkLintelsInOpenings command
             PushButtonData btnMarkLintelsInOpenings = new PushButtonData("MarkLintelsInOpenings", "Маркировать перемычки\nокон и дверей", path, "MS.Commands.AR.MarkLintelsInOpenings");
-            Uri btnMarkLintelsInOpeningsImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            Uri btnMarkLintelsInOpeningsImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\Beams.png");
             BitmapImage btnMarkLintelsInOpeningsImage = new BitmapImage(btnMarkLintelsInOpeningsImagePath);
             btnMarkLintelsInOpenings.LargeImage = btnMarkLintelsInOpeningsImage;
             btnMarkLintelsInOpenings.ToolTip = "Назначение Марок перемычек в параметры окон и дверей: " +
@@ -176,7 +188,7 @@ namespace MS
 
             // LintelsSections command
             PushButtonData btnLintelsSections = new PushButtonData("LintelsSections", "Разрезы\nпо перемычкам", path, "MS.Commands.AR.CreateSectionsByLintels");
-            Uri btnLintelsSectionsImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            Uri btnLintelsSectionsImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\Section.png");
             BitmapImage btnLintelsSectionsImage = new BitmapImage(btnLintelsSectionsImagePath);
             btnLintelsSections.LargeImage = btnLintelsSectionsImage;
             btnLintelsSections.ToolTip =
@@ -194,7 +206,7 @@ namespace MS
 
             // CreateImagesFromSections command
             PushButtonData btnCreateImagesFromSections = new PushButtonData("CreateImagesFromSections", "Ведомость\nперемычек", path, "MS.Commands.AR.CreateImagesFromSections");
-            Uri btnCreateImagesFromSectionsImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            Uri btnCreateImagesFromSectionsImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\TableLintels.png");
             BitmapImage btnCreateImagesFromSectionsImage = new BitmapImage(btnCreateImagesFromSectionsImagePath);
             btnCreateImagesFromSections.LargeImage = btnCreateImagesFromSectionsImage;
             btnCreateImagesFromSections.ToolTip = "Формирование изображений из разрезов " +
@@ -207,7 +219,7 @@ namespace MS
 
             // RoomsFinishingMultiMark command
             PushButtonData btnRoomsFinishingMultiMark = new PushButtonData("RoomsFinishingMultiMark", "Помещения\nс одинаковой отделкой", path, "MS.Commands.AR.RoomsFinishingMultiMark");
-            Uri btnRoomsFinishingMultiMarkImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            Uri btnRoomsFinishingMultiMarkImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\Equal.png");
             BitmapImage btnRoomsFinishingMultiMarkImage = new BitmapImage(btnRoomsFinishingMultiMarkImagePath);
             btnRoomsFinishingMultiMark.LargeImage = btnRoomsFinishingMultiMarkImage;
             btnRoomsFinishingMultiMark.ToolTip = "Назначение \'PGS_МногострочнаяМарка\' " +
@@ -270,7 +282,7 @@ namespace MS
 
             // RoomFinishingScheduleCreationCmd
             PushButtonData btnRoomFinishingScheduleCreationCmd = new PushButtonData("RoomFinishingScheduleCreationCmd", "Ведомость\nотделки (beta)", path, "MS.Commands.AR.RoomFinishingScheduleCreationCmd");
-            Uri btnRoomFinishingScheduleCreationCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            Uri btnRoomFinishingScheduleCreationCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\TableFinishing.png");
             BitmapImage btnRoomFinishingScheduleCreationCmdImage = new BitmapImage(btnRoomFinishingScheduleCreationCmdImagePath);
             btnRoomFinishingScheduleCreationCmd.LargeImage = btnRoomFinishingScheduleCreationCmdImage;
             btnRoomFinishingScheduleCreationCmd.ToolTip = "Создание спецификации ведомости отделки";
@@ -291,7 +303,7 @@ namespace MS
                 "Маркировка\nсвай",
                 path,
                 "MS.Commands.KR.PilesMarkRange");
-            Uri btnPilesMarkRangeCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            Uri btnPilesMarkRangeCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\KR\PilesMachine.png");
             BitmapImage btnPilesMarkRangeCmdImage = new BitmapImage(btnPilesMarkRangeCmdImagePath);
             btnPilesMarkRangeCmd.LargeImage = btnPilesMarkRangeCmdImage;
             btnPilesMarkRangeCmd.ToolTip = "Назначение диапазона Марок выбранным сваям (несущим колоннам) " +
@@ -309,7 +321,7 @@ namespace MS
 
             // ОВиК арматура трубопроводов и оборудование в помещениях command
             PushButtonData btnPipelineFittings = new PushButtonData("PipelineFittings", "Инженерные элементы\nв пространствах", path, "MS.Commands.MEP.PipelineFittings");
-            Uri btnPipelineFittingsImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            Uri btnPipelineFittingsImagePath = new Uri(assembly_dir + @"\Images\Icons\MEP\WaterPump.png");
             BitmapImage btnPipelineFittingsImage = new BitmapImage(btnPipelineFittingsImagePath);
             btnPipelineFittings.LargeImage = btnPipelineFittingsImage;
             btnPipelineFittings.ToolTip = "Автоматическое заполнение пунктов номера квартиры " +
@@ -325,7 +337,7 @@ namespace MS
 
             // ОВиК системы в пространствах command
             PushButtonData btnSystemsInSpace = new PushButtonData("SystemsInSpace", "Системы\nв пространствах", path, "MS.Commands.MEP.SystemsInSpace");
-            Uri btnSystemsInSpaceImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            Uri btnSystemsInSpaceImagePath = new Uri(assembly_dir + @"\Images\Icons\MEP\Ventilation.png");
             BitmapImage btnSystemsInSpaceImage = new BitmapImage(btnSystemsInSpaceImagePath);
             btnSystemsInSpace.LargeImage = btnSystemsInSpaceImage;
             btnSystemsInSpace.ToolTip = "Автоматическое заполнение пунктов принадлежности " +
@@ -339,17 +351,24 @@ namespace MS
 
             // ОВиК корректировка имени системы command
             PushButtonData btnSystemNameCorrectCmd = new PushButtonData("SystemNameCorrectCmd", "Скорректировать\nИмяСистемы", path, "MS.Commands.MEP.SystemNameCorrectCmd");
-            Uri btnSystemNameCorrectCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            Uri btnSystemNameCorrectCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\MEP\UpdateTable.png");
             BitmapImage btnSystemNameCorrectCmdImage = new BitmapImage(btnSystemNameCorrectCmdImagePath);
             btnSystemNameCorrectCmd.LargeImage = btnSystemNameCorrectCmdImage;
             btnSystemNameCorrectCmd.ToolTip = "Корректировка параметра 'ИмяСистемы' у элементов категорий " +
-                "'Оборудование', 'Сантехническое оборудование' и 'Арматура трубопроводов' по таблице Excel.";
+                "'Оборудование', " +
+                "'Сантехническоие приборы', " +
+                "'Арматура трубопроводов', " +
+                "'Гибкие трубы', " +
+                "'Соединительные детали трубопроводов', " +
+                "'Трубы'." +
+                "По таблице Excel задается буква системы, которую нужно оставить у экземпляра семейства.";
             btnSystemNameCorrectCmd.LongDescription = "Из первого столбца, начиная с первой строки, " +
                 "берется строковое значение, которое должно содержаться в параметре ADSK_Наименование " +
-                "у элементов обрабатываемых категорий. Во втором столбце напротив каждого строкового значения " +
-                "должна быть строка, обозначающая систему, которую необходимо оставить, например 'В'. " +
-                "Если у какого-то элемента несколько систем одного и того же типа, " +
-                "то будет выведено сообщение с Id этого элемента." +
+                "у элементов обрабатываемых категорий с несколькими системами. " +
+                "Во втором столбце напротив каждого строкового значения " +
+                "должна быть буква, обозначающая систему, которую необходимо оставить, например 'В'. " +
+                "Если у какого-то элемента несколько систем одного и того же типа, или нет системы с заданной буквой, " +
+                "а также если не задан параметр ADSK_Наименование, будет выведено сообщение с Id этого элемента." +
                 "\nПравила составления Excel файла:" +
                 "\n1. Заполнять таблицу в первых двух столбцах, начиная с первой строки (шапку не использовать)." +
                 "\n2. В таблице не должно быть пустых строчек, которые разделяют строки со значениями." +
@@ -358,11 +377,12 @@ namespace MS
 
             // ОВиК корректировка имени системы command
             PushButtonData btnEquipmentInSystemCmd = new PushButtonData("EquipmentInSystemCmd", "Оборудование\nв системах", path, "MS.Commands.MEP.EquipmentInSystemCmd");
-            Uri btnEquipmentInSystemCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            Uri btnEquipmentInSystemCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\MEP\SystemEquipment.png");
             BitmapImage btnEquipmentInSystemCmdImage = new BitmapImage(btnEquipmentInSystemCmdImagePath);
             btnEquipmentInSystemCmd.LargeImage = btnEquipmentInSystemCmdImage;
             btnEquipmentInSystemCmd.ToolTip = "Переписывает характеристики и количество воздухонагревателей, воздухоохладителей и фильтров в параметры вентиляторов в системах";
-            btnEquipmentInSystemCmd.LongDescription = "Необходимые общие параметры для воздухонагревателей:" +
+            btnEquipmentInSystemCmd.LongDescription = "Необходимые общие параметры для воздухонагревателей " +
+                "(могут быть добавлены в тип и в экземпляр):" +
                 "\nPGS_Идентификация = 2" +
                 "\nADSK_Потеря давления воздуха в нагревателе" +
                 "\nADSK_Температура воздуха на входе в нагреватель" +
@@ -393,6 +413,9 @@ namespace MS
             panelGeneral.AddItem(btnInfo);
             panelGeneral.AddItem(btnPolyLineLength);
             panelGeneral.AddItem(btnSelection);
+            panelGeneral.AddSlideOut();
+            panelGeneral.AddItem(btnSelectionSettings);
+
             //panelGeneral.AddItem(btnLevelName);
 
             // AR panel
