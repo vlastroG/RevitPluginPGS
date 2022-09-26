@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using MS.GUI.General;
+using MS.Commands.General;
 
 namespace MS
 {
@@ -14,7 +15,33 @@ namespace MS
     [Regeneration(RegenerationOption.Manual)]
     public class Selector : IExternalCommand
     {
-        private static string _category = "Помещения";
+        private static SelectorSettingsCmd _settings = new SelectorSettingsCmd();
+
+        private Category GetCategory(
+            ExternalCommandData commandData,
+            ref string message,
+            ElementSet elements)
+        {
+            if (SelectorSettingsCmd.Category == null)
+            {
+                var result = _settings.Execute(commandData, ref message, elements);
+                if (result != Result.Succeeded)
+                {
+                    return null;
+                }
+            }
+            var categories = commandData.Application.ActiveUIDocument.Document.Settings.Categories;
+            Category category = null;
+            foreach (Category categoryInDoc in categories)
+            {
+                if (categoryInDoc.Name == SelectorSettingsCmd.Category.Name)
+                {
+                    category = categoryInDoc;
+                    break;
+                }
+            }
+            return category;
+        }
 
         /// <summary>
         /// Выбирает элементы заданной категории на текущем виде
@@ -29,29 +56,14 @@ namespace MS
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
             Document doc = uidoc.Document;
 
-            var categories = doc.Settings.Categories;
-            List<Category> categoriesList = new List<Category>();
-            foreach (Category category in categories)
-            {
-                categoriesList.Add(category);
-            }
-            categoriesList.Sort((x, y) => x.Name.CompareTo(y.Name));
-
-            var form = new CategoryInput(categoriesList, _category);
-            form.ShowDialog();
-            if (form.DialogResult != true)
-            {
-                return Result.Cancelled;
-            }
-            _category = form.Category.Name;
-            var categorySelected = form.Category;
-            if (categorySelected == null)
+            Category category = GetCategory(commandData, ref message, elements);
+            if (category == null)
             {
                 return Result.Cancelled;
             }
 
             var filter = new SelectionFilterElementsOfCategory<Element>(
-                new List<BuiltInCategory> { (BuiltInCategory)categorySelected.Id.IntegerValue },
+                new List<BuiltInCategory> { (BuiltInCategory)category.Id.IntegerValue },
                 false);
             List<Element> elems = null;
             try
@@ -60,7 +72,7 @@ namespace MS
                     .PickObjects(
                         Autodesk.Revit.UI.Selection.ObjectType.Element,
                         filter,
-                        $"Выберите элементы категории {_category}")
+                        $"Выберите элементы категории {category}")
                     .Select(e => doc.GetElement(e))
                     .ToList();
             }
