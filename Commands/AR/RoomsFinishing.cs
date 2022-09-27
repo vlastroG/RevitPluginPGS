@@ -23,7 +23,7 @@ namespace MS.Commands.AR
         /// </summary>
         /// <param name="doc">Документ Revit</param>
         /// <returns>True, если все общие параметры присутствуют, иначе false</returns>
-        private bool ValidateSharedParams(Document doc)
+        private bool ValidateSharedParams(in Document doc)
         {
             Guid[] _sharedParamsForWalls = new Guid[] {
             SharedParams.ADSK_RoomNumberInApartment

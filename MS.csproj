@@ -126,6 +126,7 @@
     <Compile Include="Commands\KR\PilesMarkRange.cs" />
     <Compile Include="Commands\KR\StairReinforcement.cs" />
     <Compile Include="Commands\MEP\EquipmentInSystemCmd.cs" />
+    <Compile Include="Commands\MEP\FullSystemNamesCmd.cs" />
     <Compile Include="Commands\MEP\PipelineFittings.cs" />
     <Compile Include="Commands\MEP\SystemNameCorrectCmd.cs" />
     <Compile Include="Commands\MEP\SystemsInSpace.cs" />
@@ -246,6 +247,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Diagrams\TextFile1.txt" />
+    <EmbeddedResource Include="Images\Icons\MEP\Find.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="Images\Icons\AR\MasonryMesh.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>

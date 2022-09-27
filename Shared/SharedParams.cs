@@ -338,6 +338,11 @@ namespace MS.Shared
         public static Guid PGS_FilterCount => Guid.Parse("3f2d437e-6eea-444a-b13d-56620718dd75");
 
         /// <summary>
+        /// Guid параметра PGS_Наименование системы = f2381a1b-8c10-41a3-984b-21c10b911338 (string)
+        /// </summary>
+        public static Guid PGS_SystemName => Guid.Parse("f2381a1b-8c10-41a3-984b-21c10b911338");
+
+        /// <summary>
         /// Валидация текущего проекта Revit на наличие общих параметров у заданной категории.
         /// </summary>
         /// <param name="doc">Документ Revit.</param>
