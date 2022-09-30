@@ -196,7 +196,14 @@ namespace MS.Commands.AR
         {
             ViewSchedule schedule = ViewSchedule.CreateSchedule(doc, new ElementId(BuiltInCategory.OST_Parking));
             doc.Regenerate();
-            schedule.Name = ScheduleTittle;
+            try
+            {
+                schedule.Name = ScheduleTittle;
+            }
+            catch (Autodesk.Revit.Exceptions.ArgumentException)
+            {
+                throw new ArgumentException("Спецификация с заданным названием уже существует, введите другое имя.");
+            }
             SchedulableField schedulableField = schedule.Definition.GetSchedulableFields().First();
             if (schedulableField != null)
             {
@@ -497,7 +504,15 @@ namespace MS.Commands.AR
             {
                 finishingScheduleTrans.Start("Ведомость отделки");
                 // Заполнить таблицу спецификации по dto для типов отделки
-                view = CreateSchedule(doc, _scheduleName, _header, dtos);
+                try
+                {
+                    view = CreateSchedule(doc, _scheduleName, _header, dtos);
+                }
+                catch (ArgumentException e)
+                {
+                    MessageBox.Show(e.Message, "Ошибка");
+                    return Result.Cancelled;
+                }
                 finishingScheduleTrans.Commit();
             }
             uidoc.ActiveView = view;
