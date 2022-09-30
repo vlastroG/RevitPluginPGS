@@ -492,15 +492,16 @@ namespace MS.Utilites
                      BuiltInCategory.OST_GenericModel,
                      BuiltInCategory.OST_Roofs,
                      BuiltInCategory.OST_Floors,
-                     BuiltInCategory.OST_Rooms});
+                     BuiltInCategory.OST_Rooms,
+                     BuiltInCategory.OST_RvtLinks});
 
             ReferenceIntersector intersector
               = new ReferenceIntersector(multicategoryFilter,
                 FindReferenceTarget.Element, view3d)
               {
-                  // We don't want to find elements in linked files
+                  // We want to find elements in linked files
 
-                  FindReferencesInRevitLinks = false
+                  FindReferencesInRevitLinks = true
               };
 
             XYZ toWallDir;

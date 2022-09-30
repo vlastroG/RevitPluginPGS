@@ -43,6 +43,60 @@ namespace MS.Commands.AR
         /// если в модели null или пустая строка
         /// </summary>
         private const string _defaultName = "НЕ НАЗНАЧЕНО";
+
+        /// <summary>
+        /// Получить помещения с ненулевой площадью с заполненным параметром PGS_ТипОтделкиСтен для дальнейшего расчета
+        /// </summary>
+        /// <param name="uidoc"></param>
+        /// <returns>Список валидных помещений, 
+        /// если операция отменена или пользователь ничего не выбрал, то null</returns>
+        private List<Room> GetRooms(in UIDocument uidoc)
+        {
+            Document doc = uidoc.Document;
+            Selection sel = uidoc.Selection;
+
+            // Все выбранные помещения перед запуском команды
+            List<Room> rooms = sel.GetElementIds().Select(id => doc.GetElement(id))
+                    .Where(e => (BuiltInCategory)WorkWithParameters.GetCategoryIdAsInteger(e)
+                    == BuiltInCategory.OST_Rooms)
+                    .Cast<Room>()
+                    .Where(r => r.Area > 0)
+                    .ToList();
+
+            if (rooms.Count == 0)
+            {
+                try
+                {
+                    var filter = new SelectionFilterElementsOfCategory<Element>(
+                        new List<BuiltInCategory> { BuiltInCategory.OST_Rooms },
+                        false);
+                    // Пользователь выбирает помещения
+                    rooms = uidoc.Selection
+                        .PickObjects(
+                            Autodesk.Revit.UI.Selection.ObjectType.Element,
+                            filter,
+                            "Выберите помещения")
+                        .Select(e => doc.GetElement(e))
+                        .Cast<Room>()
+                        .Where(r => r.Area > 0)
+                        .ToList();
+                    if (rooms.Count == 0) return null;
+                }
+                catch (Autodesk.Revit.Exceptions.OperationCanceledException)
+                {
+                    return null;
+                }
+                catch (Autodesk.Revit.Exceptions.InvalidOperationException)
+                {
+                    MessageBox.Show("Нельзя выбирать элементы на текущем виде." +
+                        "\nЛибо выделите помещения в спецификации, либо перейдите на вид, " +
+                        "где можно выбрать помещения вручную.", "Ошибка");
+                    return null;
+                }
+            }
+            return rooms;
+        }
+
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             UIApplication uiapp = commandData.Application;
@@ -75,25 +129,21 @@ namespace MS.Commands.AR
                     "Ошибка");
                 return Result.Cancelled;
             }
-
-            var filter = new SelectionFilterElementsOfCategory<Element>(
-                new List<BuiltInCategory> { BuiltInCategory.OST_Rooms },
-                false);
-            List<Element> rooms = null;
-            try
+            View3D view3d
+                    = new FilteredElementCollector(uidoc.Document)
+                      .OfClass(typeof(View3D))
+                      .Cast<View3D>()
+                      .FirstOrDefault<View3D>(
+                        e => e.Name.Equals("{3D}"));
+            Options optsDetail = new Options();
+            if (null == view3d)
             {
-                rooms = uidoc.Selection
-                    .PickObjects(
-                        Autodesk.Revit.UI.Selection.ObjectType.Element,
-                        filter,
-                        "Выберите помещения для отделки")
-                    .Select(e => doc.GetElement(e))
-                    .ToList();
-            }
-            catch (Autodesk.Revit.Exceptions.OperationCanceledException)
-            {
+                MessageBox.Show("Не найден {3D} вид по умолчанию", "Ошибка");
                 return Result.Cancelled;
             }
+
+            List<Room> rooms = GetRooms(uidoc);
+            if (rooms == null) return Result.Cancelled;
 
             List<string> descriptions = new List<string>();
             List<(BoundarySegment Segment, ElementId LevelId, double HRoom, double HElem, double RoomBottomOffset)> validSegmentsAndH =
@@ -108,7 +158,18 @@ namespace MS.Commands.AR
                 {
                     for (int i = 0; i < loop.Count; i++)
                     {
-                        Element e = doc.GetElement(loop[i].ElementId);
+                        Element borderEl = doc.GetElement(loop[i].ElementId);
+                        Element e = null;
+                        if (borderEl is ModelLine)
+                        {
+                            e = WorkWithGeometry.GetElementByRay_switch(doc,
+                                        view3d,
+                                        loop[i].GetCurve(), true);
+                        }
+                        else
+                        {
+                            e = borderEl;
+                        }
                         if (null == e)
                         {
                             continue;
@@ -190,8 +251,18 @@ namespace MS.Commands.AR
 
                 for (int i = 0; i < validSegmentsAndH.Count; i++)
                 {
-                    Element e = doc.GetElement(validSegmentsAndH[i].Segment.ElementId);
-
+                    Element borderEl = doc.GetElement(validSegmentsAndH[i].Segment.ElementId);
+                    Element e = null;
+                    if (borderEl is ModelLine)
+                    {
+                        e = WorkWithGeometry.GetElementByRay_switch(doc,
+                                    view3d,
+                                    validSegmentsAndH[i].Segment.GetCurve(), true);
+                    }
+                    else
+                    {
+                        e = borderEl;
+                    }
                     if (null == e)
                     {
                         continue;
