@@ -10,7 +10,9 @@ namespace PGSBIM_installer
 {
     internal class Program
     {
-        private static string _pluginDir = @"Q:\!Ресурсы\!PGS-BIM_Plugin\PGS-BIM";
+        private static string _pluginDir = @"\\dsm\rvt\!Ресурсы\!PGS-BIM_Plugin\PGS-BIM";
+
+        //private static string _destDir = @"%ProgramData%\Autodesk\Revit\Addins\2022";
 
         private static string _destDir = @"C:\ProgramData\Autodesk\Revit\Addins\2022";
 
@@ -73,6 +75,16 @@ namespace PGSBIM_installer
 
         static void Main(string[] args)
         {
+            bool destDirExist = Directory.Exists(_destDir);
+            while (!destDirExist)
+            {
+                Console.WriteLine(@"Перейдите в проводнике в папку по пути '%ProgramData%\Autodesk\Revit\Addins\2022'" +
+                                    "\nСкопируйте полный путь, отображающийся в проводнике и вставьте ниже:");
+                Console.Write("-->");
+                _destDir = Console.ReadLine().TrimStart();
+                Console.WriteLine();
+                destDirExist = Directory.Exists(_destDir);
+            }
             Console.WriteLine("Установка плагина PGS-BIM...\n");
             using (var watcher = new FileSystemWatcher(_destDir))
             {
