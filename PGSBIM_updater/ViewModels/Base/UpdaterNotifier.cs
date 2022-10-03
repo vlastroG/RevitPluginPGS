@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Forms;
 
 namespace PGSBIM_updater.ViewModels.Base
 {
@@ -13,12 +14,17 @@ namespace PGSBIM_updater.ViewModels.Base
     {
         public static string Status { get; private set; }
 
-        private static readonly string _pathDest = @"C:\Users\stroganov.vg\Documents\TEST\test.txt";
-        private static readonly string _pathSource = @"C:\Users\stroganov.vg\Documents\TEST_source\test.txt";
+        private static readonly string _pathSource =
+            @"\\dsm\rvt\!Ресурсы\!PGS-BIM_Plugin\PGS-BIM\RevitPluginPGS\MS.dll";
 
+        private static readonly string _pathDest =
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+            @"Autodesk\Revit\Addins\2022\RevitPluginPGS\MS.dll");
 
-        private static readonly string _pathTestOut = @"C:\Users\stroganov.vg\Documents\TEST_source\testOut.txt";
+        private static readonly string _installerPath =
+            @"\\dsm\rvt\!Ресурсы\!PGS-BIM_Plugin\Installer\Release\PGSBIM_installer.exe";
 
+        private static readonly string _title = "PGS-BIM обновление";
 
         //public static void Run(CancellationToken cancellationToken)
         public static void Run()
@@ -27,36 +33,58 @@ namespace PGSBIM_updater.ViewModels.Base
             //while (!cancellationToken.IsCancellationRequested)
             while (true)
             {
-                Thread.Sleep(30000);
-                if (!File.Exists(_pathSource))
+                Thread.Sleep(3600000);
+                try
                 {
-                    Status = "Source отсутствует";
-                    MessageBox.Show($"{Status}", "PGS-BIM обновление");
-
-                }
-                else
-                {
-                    DateTime dateSource = File.GetLastWriteTime(_pathSource);
-                    DateTime dateDest = File.GetLastWriteTime(_pathDest);
-                    if (dateSource > dateDest)
+                    if (!File.Exists(_pathSource))
                     {
-                        Status = "Есть обновление для плагина. Можете закрыть Revit и обновить плагин вручную.";
-                        MessageBox.Show($"{Status}", "PGS-BIM обновление");
+                        Status = "Плагин отсутствует на диске";
+                        System.Windows.MessageBox.Show($"{Status}", _title);
                     }
                     else
                     {
-                        Status = "У Вас самая последняя версия плагина";
-                        MessageBox.Show($"{Status}", "PGS-BIM обновление");
-
+                        if (!File.Exists(_pathDest))
+                        {
+                            Status = "Плагин PGS-BIM отсутствует на данном ПК, установить его сейчас?";
+                            DialogResult dialogResult = System.Windows.Forms.MessageBox.Show(
+                                Status,
+                                _title,
+                                MessageBoxButtons.YesNo);
+                            if (dialogResult == DialogResult.Yes)
+                            {
+                                if (File.Exists(_installerPath))
+                                    System.Diagnostics.Process.Start(_installerPath);
+                            }
+                            continue;
+                        }
+                        DateTime dateSource = File.GetLastWriteTime(_pathSource);
+                        DateTime dateDest = File.GetLastWriteTime(_pathDest);
+                        if (dateSource > dateDest)
+                        {
+                            Status = "Есть обновление для плагина. Обновить сейчас?" +
+                                "\n(нужно будет вручную закрыть Revit)";
+                            DialogResult dialogResult = System.Windows.Forms.MessageBox.Show(
+                                Status,
+                                _title,
+                                MessageBoxButtons.YesNo);
+                            if (dialogResult == DialogResult.Yes)
+                            {
+                                if (File.Exists(_installerPath))
+                                    System.Diagnostics.Process.Start(_installerPath);
+                            }
+                        }
+                        //else
+                        //{
+                        //    Status = "У Вас самая последняя версия плагина";
+                        //    System.Windows.MessageBox.Show($"{Status}", _title);
+                        //}
                     }
                 }
-                TestWriteOut();
+                catch (Exception)
+                {
+                    continue;
+                }
             }
-        }
-
-        private static void TestWriteOut()
-        {
-            File.AppendAllText(_pathTestOut, Status);
         }
     }
 }
