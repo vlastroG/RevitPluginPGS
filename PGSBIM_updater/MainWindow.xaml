@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PGSBIM_updater"
         mc:Ignorable="d"
-        Title="MainWindow" Height="200" Width="350" Loaded="Load">
+        Title="PGS-BIM уведомление об обновлениях" Height="200" Width="350" Loaded="Load">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="254*"/>
@@ -13,6 +13,11 @@
             <ColumnDefinition Width="450*"/>
             <ColumnDefinition Width="65*"/>
         </Grid.ColumnDefinitions>
-        <TextBlock HorizontalAlignment="Left" Margin="75,75,0,0" TextWrapping="Wrap" Text="PGS-BIM уведомление об обновлениях" VerticalAlignment="Top" Grid.ColumnSpan="3"/>
+        <TextBlock Margin="63,0,37,0" TextWrapping="Wrap" 
+                   VerticalAlignment="Center" Grid.ColumnSpan="3" Height="125">
+            <Run Text="Можете закрыть это окно, модуль уведомлений будет работать в фоновом режиме. 
+                 Чтобы закрыть его, воспользуйтесь"/>
+            <Run Text=" диспетчером задач ("/><Run Text="Ctrl+Shift+Esc)"/>
+            <Run Language="ru-ru" Text=". Имя процесса "/><Run Text="PGSBIM_updater"/></TextBlock>
     </Grid>
 </Window>
