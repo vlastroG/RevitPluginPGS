@@ -235,7 +235,8 @@ namespace MS
             Uri btnRmFinCreationImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\RoomsFinishing.png");
             BitmapImage btnRmFinCreationImage = new BitmapImage(btnRmFinCreationImagePath);
             btnRmFinCreation.LargeImage = btnRmFinCreationImage;
-            btnRmFinCreation.ToolTip = "Создание отделочных стен внутри выбранных помещений.";
+            btnRmFinCreation.ToolTip = "Создание отделочных стен внутри выбранных помещений." +
+                "\nПомещения можно выбрать в спецификации и запустить команду, или запустить команду и выбрать их вручную.";
             btnRmFinCreation.LongDescription = "По границам помещения определяются элементы, которые ее образуют и, " +
                 "если это элемент категории 'Стены' или 'Несущие колонны', " +
                 "то строится соединенная с этим элементом отделочная стена. " +
@@ -286,10 +287,12 @@ namespace MS
             Uri btnRoomFinishingScheduleCreationCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\TableFinishing.png");
             BitmapImage btnRoomFinishingScheduleCreationCmdImage = new BitmapImage(btnRoomFinishingScheduleCreationCmdImagePath);
             btnRoomFinishingScheduleCreationCmd.LargeImage = btnRoomFinishingScheduleCreationCmdImage;
-            btnRoomFinishingScheduleCreationCmd.ToolTip = "Создание спецификации ведомости отделки";
+            btnRoomFinishingScheduleCreationCmd.ToolTip = "Создание спецификации ведомости отделки " +
+                "по объемам отделки выбранных помещений";
             btnRoomFinishingScheduleCreationCmd.LongDescription = "Необходимо создать отделочные стены в помещениях, " +
                 "в названиях типоразмеров которых содержится '_F_' и создать потолки. Значение параметра типа 'Описание' " +
-                "у стен и потолков будет записываться в соответствующие ячейки сгенерированной ведомости отделки.";
+                "у стен и потолков будет записываться в соответствующие ячейки сгенерированной ведомости отделки." +
+                "\nПомещения можно выбрать в спецификации и запустить команду, или запустить команду и выбрать их вручную.";
 
 
             // StairReinforcement command
