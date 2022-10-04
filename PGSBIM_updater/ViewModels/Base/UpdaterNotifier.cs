@@ -29,19 +29,17 @@ namespace PGSBIM_updater.ViewModels.Base
         //public static void Run(CancellationToken cancellationToken)
         public static void Run()
         {
-
             //while (!cancellationToken.IsCancellationRequested)
             while (true)
             {
-                Thread.Sleep(3600000);
                 try
                 {
-                    if (!File.Exists(_pathSource))
-                    {
-                        Status = "Плагин отсутствует на диске";
-                        System.Windows.MessageBox.Show($"{Status}", _title);
-                    }
-                    else
+                    //if (!File.Exists(_pathSource))
+                    //{
+                    //    Status = "Плагин отсутствует на диске";
+                    //    System.Windows.MessageBox.Show($"{Status}", _title);
+                    //}
+                    if (File.Exists(_pathSource))
                     {
                         if (!File.Exists(_pathDest))
                         {
@@ -57,33 +55,37 @@ namespace PGSBIM_updater.ViewModels.Base
                             }
                             continue;
                         }
-                        DateTime dateSource = File.GetLastWriteTime(_pathSource);
-                        DateTime dateDest = File.GetLastWriteTime(_pathDest);
-                        if (dateSource > dateDest)
+                        else
                         {
-                            Status = "Есть обновление для плагина. Обновить сейчас?" +
-                                "\n(нужно будет вручную закрыть Revit)";
-                            DialogResult dialogResult = System.Windows.Forms.MessageBox.Show(
-                                Status,
-                                _title,
-                                MessageBoxButtons.YesNo);
-                            if (dialogResult == DialogResult.Yes)
+                            DateTime dateSource = File.GetLastWriteTime(_pathSource);
+                            DateTime dateDest = File.GetLastWriteTime(_pathDest);
+                            if (dateSource > dateDest)
                             {
-                                if (File.Exists(_installerPath))
-                                    System.Diagnostics.Process.Start(_installerPath);
+                                Status = "Есть обновление для плагина. Загрузить его сейчас?" +
+                                    "\n(Вам нужно будет вручную закрыть Revit перед обновлением)";
+                                DialogResult dialogResult = System.Windows.Forms.MessageBox.Show(
+                                    Status,
+                                    _title,
+                                    MessageBoxButtons.YesNo);
+                                if (dialogResult == DialogResult.Yes)
+                                {
+                                    if (File.Exists(_installerPath))
+                                        System.Diagnostics.Process.Start(_installerPath);
+                                }
                             }
+                            //else
+                            //{
+                            //    Status = "У Вас самая последняя версия плагина";
+                            //    System.Windows.MessageBox.Show($"{Status}", _title);
+                            //}
                         }
-                        //else
-                        //{
-                        //    Status = "У Вас самая последняя версия плагина";
-                        //    System.Windows.MessageBox.Show($"{Status}", _title);
-                        //}
                     }
                 }
                 catch (Exception)
                 {
                     continue;
                 }
+                Thread.Sleep(3600000);
             }
         }
     }
