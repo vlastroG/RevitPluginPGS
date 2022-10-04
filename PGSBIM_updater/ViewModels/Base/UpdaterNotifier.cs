@@ -43,7 +43,8 @@ namespace PGSBIM_updater.ViewModels.Base
                     {
                         if (!File.Exists(_pathDest))
                         {
-                            Status = "Плагин PGS-BIM отсутствует на данном ПК, установить его сейчас?";
+                            Status = "Плагин PGS-BIM отсутствует на данном ПК, установить его сейчас?" +
+                                "\n(Закройте Revit и нажмите 'Да', для отмены нажмите 'Нет')";
                             DialogResult dialogResult = System.Windows.Forms.MessageBox.Show(
                                 Status,
                                 _title,
@@ -62,7 +63,7 @@ namespace PGSBIM_updater.ViewModels.Base
                             if (dateSource > dateDest)
                             {
                                 Status = "Есть обновление для плагина. Загрузить его сейчас?" +
-                                    "\n(Вам нужно будет вручную закрыть Revit перед обновлением)";
+                                    "\n(Закройте Revit и нажмите 'Да', для отмены нажмите 'Нет')";
                                 DialogResult dialogResult = System.Windows.Forms.MessageBox.Show(
                                     Status,
                                     _title,
