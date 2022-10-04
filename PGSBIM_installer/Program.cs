@@ -5,16 +5,35 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using System.Timers;
+using IWshRuntimeLibrary;
 
 namespace PGSBIM_installer
 {
     internal class Program
     {
+        /// <summary>
+        /// Место расположения исходных устанавливаемых файлов плагина PGS-BIM
+        /// </summary>
         private static string _pluginDir = @"\\dsm\rvt\!Ресурсы\!PGS-BIM_Plugin\PGS-BIM";
 
-        //private static string _destDir = @"%ProgramData%\Autodesk\Revit\Addins\2022";
+        /// <summary>
+        /// Путь к программе установщика плагина PGS-BIM
+        /// </summary>
+        private static string _installerPath = @"\\dsm\rvt\!Ресурсы\!PGS-BIM_Plugin\Installer\Release\PGSBIM_installer.exe";
 
-        private static string _destDir = @"C:\ProgramData\Autodesk\Revit\Addins\2022";
+        /// <summary>
+        /// Место установки файлов плагина PGS-BIM (...\ProgramData\...\2022)
+        /// </summary>
+        private static string _destDir = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+            @"Autodesk\Revit\Addins\2022");
+
+        /// <summary>
+        /// Пользовательская папка для ярлыков на автозагружаемые приложения (...\AppData\...\Sturtup)
+        /// </summary>
+        private static string _autoRunDir = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            @"Microsoft\Windows\Start Menu\Programs\Startup");
 
         private static void CopyFilesRecursively(string sourcePath, string targetPath)
         {
@@ -27,8 +46,22 @@ namespace PGSBIM_installer
             //Copy all the files & Replaces any files with the same name
             foreach (string newPath in Directory.GetFiles(sourcePath, "*.*", SearchOption.AllDirectories))
             {
-                File.Copy(newPath, newPath.Replace(sourcePath, targetPath), true);
+                System.IO.File.Copy(newPath, newPath.Replace(sourcePath, targetPath), true);
             }
+        }
+
+        private static void CreateShortcut()
+        {
+            string shortcutAddress = Path.Combine(_autoRunDir, @"PGS-BIM_installer.lnk");
+            if (System.IO.File.Exists(shortcutAddress))
+            {
+                return;
+            }
+            WshShell shell = new WshShell();
+            IWshShortcut shortcut = (IWshShortcut)shell.CreateShortcut(shortcutAddress);
+            shortcut.Description = "Ярлык установщика плагина PGS-BIM";
+            shortcut.TargetPath = _installerPath;
+            shortcut.Save();
         }
 
         private static void OnChanged(object sender, FileSystemEventArgs e)
@@ -76,6 +109,15 @@ namespace PGSBIM_installer
         static void Main(string[] args)
         {
             bool destDirExist = Directory.Exists(_destDir);
+            if (!Directory.Exists(_pluginDir))
+            {
+                Console.WriteLine("Ошибка: установочные файлы плагина PGS-BIM отсутствуют." +
+                    "\nНажмите Enter и повторите попытку позже.\n-->");
+                Console.ReadKey();
+                return;
+            }
+            Console.Title = "PGS-BIM обновление плагина";
+            CreateShortcut();
             while (!destDirExist)
             {
                 Console.WriteLine(@"Перейдите в проводнике в папку по пути '%ProgramData%\Autodesk\Revit\Addins\2022'" +
@@ -123,7 +165,7 @@ namespace PGSBIM_installer
                 {
                     Task.Delay(500).Wait();
                     Console.WriteLine();
-                    Console.WriteLine("Готово, нажмите Enter");
+                    Console.WriteLine("Плагин PGS-BIM обновлен, нажмите Enter");
                     Console.ReadKey(true);
                 }
             }
