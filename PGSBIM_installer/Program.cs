@@ -14,12 +14,12 @@ namespace PGSBIM_installer
         /// <summary>
         /// Место расположения исходных устанавливаемых файлов плагина PGS-BIM
         /// </summary>
-        private static string _pluginDir = @"\\dsm\rvt\!Ресурсы\!PGS-BIM_Plugin\PGS-BIM";
+        private static readonly string _pluginDir = @"\\dsm\rvt\!Ресурсы\!PGS-BIM_Plugin\PGS-BIM";
 
         /// <summary>
         /// Путь к программе установщика плагина PGS-BIM
         /// </summary>
-        private static string _installerPath = @"\\dsm\rvt\!Ресурсы\!PGS-BIM_Plugin\Installer\Release\PGSBIM_installer.exe";
+        private static readonly string _installerPath = @"\\dsm\rvt\!Ресурсы\!PGS-BIM_Plugin\Installer\Release\PGSBIM_installer.exe";
 
         /// <summary>
         /// Место установки файлов плагина PGS-BIM (...\ProgramData\...\2022)
@@ -31,7 +31,7 @@ namespace PGSBIM_installer
         /// <summary>
         /// Пользовательская папка для ярлыков на автозагружаемые приложения (...\AppData\...\Sturtup)
         /// </summary>
-        private static string _autoRunDir = Path.Combine(
+        private static readonly string _autoRunDir = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
             @"Microsoft\Windows\Start Menu\Programs\Startup");
 
