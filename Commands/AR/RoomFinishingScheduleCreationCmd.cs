@@ -122,6 +122,7 @@ namespace MS.Commands.AR
             table.SetCellText(startRowIndex, 1, fintypeRowDto.FintypeWallsCeilings);
             int rowsCount =
                 walltypesCount >= ceilingtypesCount ? walltypesCount : ceilingtypesCount;
+            rowsCount = rowsCount > 0 ? rowsCount : 1;
             for (int i = startRowIndex + 1; i < startRowIndex + rowsCount; i++)
             {
                 // Добавить строки по максимальному количеству типов отделки стен или потолка
@@ -129,11 +130,14 @@ namespace MS.Commands.AR
                 table.RefreshData();
                 table.SetRowHeight(i, _heightRow);
             }
-            table.MergeCells(new TableMergedCell(startRowIndex, 0, startRowIndex + rowsCount - 1, 0));
-            table.MergeCells(new TableMergedCell(startRowIndex, 1, startRowIndex + rowsCount - 1, 1));
-            table.MergeCells(new TableMergedCell(startRowIndex, 6, startRowIndex + rowsCount - 1, 6));
-            FillFintypeAreaRows(ref table, fintypeRowDto.CeilingTypeAreas, rowsCount, startRowIndex, colCeilingIndex);
-            FillFintypeAreaRows(ref table, fintypeRowDto.WallTypesAreas, rowsCount, startRowIndex, colWalltypeIndex);
+            if (rowsCount > 1)
+            {
+                table.MergeCells(new TableMergedCell(startRowIndex, 0, startRowIndex + rowsCount - 1, 0));
+                table.MergeCells(new TableMergedCell(startRowIndex, 1, startRowIndex + rowsCount - 1, 1));
+                table.MergeCells(new TableMergedCell(startRowIndex, 6, startRowIndex + rowsCount - 1, 6));
+                FillFintypeAreaRows(ref table, fintypeRowDto.CeilingTypeAreas, rowsCount, startRowIndex, colCeilingIndex);
+                FillFintypeAreaRows(ref table, fintypeRowDto.WallTypesAreas, rowsCount, startRowIndex, colWalltypeIndex);
+            }
             // Добавить строку вниз для последующего типа отделки
             table.InsertRow(startRowIndex + rowsCount);
             table.SetRowHeight(startRowIndex + rowsCount, _heightRow);
@@ -162,18 +166,19 @@ namespace MS.Commands.AR
                 table.SetCellText(i, startColIndex, fintypes[j].FinType);
                 table.SetCellText(i, startColIndex + 1, fintypes[j].Area.ToString());
             }
-            if (fintypes.Count < rowsCount)
+            int fintypesCount = fintypes.Count > 1 ? fintypes.Count : 1;
+            if (fintypesCount < rowsCount)
             {
                 // Объединить строки для ячеек с отделкой потолка, если остались пустые
                 table.MergeCells(
                     new TableMergedCell(
-                        startRowIndex + fintypes.Count - 1,
+                        startRowIndex + fintypesCount - 1,
                         startColIndex,
                         startRowIndex + rowsCount - 1,
                         startColIndex));
                 table.MergeCells(
                     new TableMergedCell(
-                        startRowIndex + fintypes.Count - 1,
+                        startRowIndex + fintypesCount - 1,
                         startColIndex + 1,
                         startRowIndex + rowsCount - 1,
                         startColIndex + 1));
