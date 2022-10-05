@@ -4,6 +4,7 @@ using Autodesk.Revit.DB.Architecture;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
 using MS.Commands.AR.DTO;
+using MS.Commands.AR.DTO.FinishingCreateionCmd;
 using MS.GUI.AR;
 using MS.Shared;
 using MS.Utilites;
@@ -143,144 +144,29 @@ namespace MS.Commands.AR
             return view3d;
         }
 
-        public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
+        private void CreateWalls(
+            in Document doc,
+            in List<WallDto> wallDtos,
+            in FinishingCreation ui,
+            in View3D view3d)
         {
-            UIApplication uiapp = commandData.Application;
-            UIDocument uidoc = uiapp.ActiveUIDocument;
-            Document doc = uidoc.Document;
-            Selection sel = uidoc.Selection;
-
-            if (!ValidateSharedParams(doc)) return Result.Cancelled;
-
-            View3D view3d = Get3DView(uidoc);
-            if (view3d is null) return Result.Cancelled;
-
-            List<Room> rooms = GetRooms(uidoc);
-            if (rooms == null) return Result.Cancelled;
-
-            List<List<CurveLoop>> roomBorderLoops = new List<List<CurveLoop>>();
-            List<string> descriptions = new List<string>();
-            List<(BoundarySegment Segment, ElementId LevelId, double HRoom, double HElem, double RoomBottomOffset)> validSegmentsAndH =
-                new List<(BoundarySegment, ElementId, double, double, double)>();
-            foreach (Room room in rooms)
-            {
-                IList<IList<BoundarySegment>> loops
-                  = room.GetBoundarySegments(
-                    new SpatialElementBoundaryOptions());
-
-                // Autodesk.Revit.DB.IFC.ExporterIFCUtils.GetRoomBoundaryAsCurveLoopArray
-                roomBorderLoops.Add(loops);
-
-                foreach (IList<BoundarySegment> loop in loops)
-                {
-                    for (int i = 0; i < loop.Count; i++)
-                    {
-                        Element borderEl = doc.GetElement(loop[i].ElementId);
-                        Element e = null;
-                        if (borderEl is ModelLine)
-                        {
-                            e = WorkWithGeometry.GetElementByRay_switch(doc,
-                                        view3d,
-                                        loop[i].GetCurve(), true);
-                        }
-                        else
-                        {
-                            e = borderEl;
-                        }
-                        if (null == e)
-                        {
-                            continue;
-                        }
-                        if (!(e is RevitLinkInstance)
-                            && !(e is Wall)
-                            && (WorkWithParameters.GetCategoryIdAsInteger(e)
-                                != (int)BuiltInCategory.OST_StructuralColumns))
-                        {
-                            // Получение границ помещений, которые образованы только связями,
-                            // стенами и несущими колоннами
-                            continue;
-                        }
-                        double roomH = room.get_Parameter(BuiltInParameter.ROOM_HEIGHT).AsDouble();
-                        double elemH = 0;
-                        if (!(e is RevitLinkInstance))
-                        {
-                            var bBox = e.get_Geometry(new Options()).GetBoundingBox();
-                            elemH = Math.Round((bBox.Max.Z - bBox.Min.Z) * SharedValues.FootToMillimeters)
-                                / SharedValues.FootToMillimeters;
-                        }
-                        else
-                        {
-                            elemH = roomH;
-                        }
-                        var bottomOffset = room.get_Parameter(BuiltInParameter.ROOM_LOWER_OFFSET).AsDouble();
-                        validSegmentsAndH.Add((loop[i], room.LevelId, roomH, elemH, bottomOffset));
-                        try
-                        {
-                            string finName = _defaultName;
-                            if (e is Wall)
-                            {
-                                finName = (e as Wall).WallType.get_Parameter(SharedParams.PGS_FinishingName)
-                                    .AsValueString();
-                            }
-                            else if (e is FamilyInstance)
-                            {
-                                finName = (e as FamilyInstance).Symbol.get_Parameter(SharedParams.PGS_FinishingName)
-                                    .AsValueString();
-                            }
-                            if (String.IsNullOrEmpty(finName))
-                            {
-                                finName = _defaultName;
-                            }
-                            if (!descriptions.Contains(finName))
-                            {
-                                descriptions.Add(finName);
-                            }
-                        }
-                        catch (System.NullReferenceException)
-                        {
-                            continue;
-                        }
-                    }
-                }
-            }
-
-            var wallTypesAll = new FilteredElementCollector(doc)
-                .OfCategory(BuiltInCategory.OST_Walls)
-                .WhereElementIsElementType()
-                .Select(w => w as WallType)
-                .Where(w => w.GetCompoundStructure() != null)
-                .ToList();
-            List<WallTypeFinishingDto> dtos = descriptions.Select(d => new WallTypeFinishingDto(d)).ToList();
-
-            var ceilingTypes = new FilteredElementCollector(doc)
-                .OfCategory(BuiltInCategory.OST_Ceilings)
-                .WhereElementIsElementType()
-                .Cast<CeilingType>()
-                .ToList();
-
-            var ui = new FinishingCreation(dtos, wallTypesAll, ceilingTypes);
-            ui.ShowDialog();
-            if (ui.DialogResult != true)
-            {
-                return Result.Cancelled;
-            }
-            IReadOnlyDictionary<string, WallType> dictWT = ui.DictWallTypeByFinName;
             WallType wtDefault = null;
             List<(Element, Element)> pairsToJoin = new List<(Element, Element)>();
+            IReadOnlyDictionary<string, WallType> dictWT = ui.DictWallTypeByFinName;
 
             using (Transaction trans = new Transaction(doc))
             {
                 trans.Start("Создание отделочных стен");
 
-                for (int i = 0; i < validSegmentsAndH.Count; i++)
+                for (int i = 0; i < wallDtos.Count; i++)
                 {
-                    Element borderEl = doc.GetElement(validSegmentsAndH[i].Segment.ElementId);
+                    Element borderEl = doc.GetElement(wallDtos[i].Segment.ElementId);
                     Element e = null;
                     if (borderEl is ModelLine)
                     {
                         e = WorkWithGeometry.GetElementByRay_switch(doc,
                                     view3d,
-                                    validSegmentsAndH[i].Segment.GetCurve(), true);
+                                    wallDtos[i].Segment.GetCurve(), true);
                     }
                     else
                     {
@@ -331,26 +217,26 @@ namespace MS.Commands.AR
 
                     try
                     {
-                        Curve curve = validSegmentsAndH[i].Segment.GetCurve();
+                        Curve curve = wallDtos[i].Segment.GetCurve();
                         Curve wallGrid = curve.CreateOffset(-offset, XYZ.BasisZ);
                         double height = 0;
                         double bottomOffset = 0;
                         switch (ui.FinWallsHeightType)
                         {
                             case FinWallsHeight.ByRoom:
-                                height = validSegmentsAndH[i].HRoom;
-                                bottomOffset = validSegmentsAndH[i].RoomBottomOffset;
+                                height = wallDtos[i].HRoom;
+                                bottomOffset = wallDtos[i].RoomBottomOffset;
                                 break;
                             case FinWallsHeight.ByElement:
-                                height = validSegmentsAndH[i].HElem;
-                                bottomOffset = elemBottomOffset - validSegmentsAndH[i].RoomBottomOffset;
+                                height = wallDtos[i].HElem;
+                                bottomOffset = elemBottomOffset - wallDtos[i].RoomBottomOffset;
                                 break;
                             case FinWallsHeight.ByInput:
                                 height = ui.InputWallsHeight / SharedValues.FootToMillimeters;
-                                bottomOffset = validSegmentsAndH[i].RoomBottomOffset;
+                                bottomOffset = wallDtos[i].RoomBottomOffset;
                                 break;
                         }
-                        var wall = Wall.Create(doc, wallGrid, wt.Id, validSegmentsAndH[i].LevelId, height, bottomOffset, false, false);
+                        var wall = Wall.Create(doc, wallGrid, wt.Id, wallDtos[i].LevelId, height, bottomOffset, false, false);
                         (Element, Element) toJoinPair = (e, wall);
                         pairsToJoin.Add(toJoinPair);
                     }
@@ -405,6 +291,146 @@ namespace MS.Commands.AR
                     }
                 }
                 MessageBox.Show(sb.ToString(), "Ошибка");
+            }
+        }
+
+        private (List<WallDto> WallDtos, List<string> Descriptions) CreateWallsCreationData(in Document doc, in List<Room> rooms, in View3D view3d)
+        {
+            List<string> descriptions = new List<string>();
+            List<WallDto> wallDtos = new List<WallDto>();
+            foreach (Room room in rooms)
+            {
+                IList<IList<BoundarySegment>> loops
+                  = room.GetBoundarySegments(
+                    new SpatialElementBoundaryOptions());
+
+                // Autodesk.Revit.DB.IFC.ExporterIFCUtils.GetRoomBoundaryAsCurveLoopArray
+                //roomBorderLoops.Add(loops);
+
+                foreach (IList<BoundarySegment> loop in loops)
+                {
+                    for (int i = 0; i < loop.Count; i++)
+                    {
+                        Element borderEl = doc.GetElement(loop[i].ElementId);
+                        Element e = null;
+                        if (borderEl is ModelLine)
+                        {
+                            e = WorkWithGeometry.GetElementByRay_switch(doc,
+                                        view3d,
+                                        loop[i].GetCurve(), true);
+                        }
+                        else
+                        {
+                            e = borderEl;
+                        }
+                        if (null == e)
+                        {
+                            continue;
+                        }
+                        if (!(e is RevitLinkInstance)
+                            && !(e is Wall)
+                            && (WorkWithParameters.GetCategoryIdAsInteger(e)
+                                != (int)BuiltInCategory.OST_StructuralColumns))
+                        {
+                            // Получение границ помещений, которые образованы только связями,
+                            // стенами и несущими колоннами
+                            continue;
+                        }
+                        double roomH = room.get_Parameter(BuiltInParameter.ROOM_HEIGHT).AsDouble();
+                        double elemH = 0;
+                        if (!(e is RevitLinkInstance))
+                        {
+                            var bBox = e.get_Geometry(new Options()).GetBoundingBox();
+                            elemH = Math.Round((bBox.Max.Z - bBox.Min.Z) * SharedValues.FootToMillimeters)
+                                / SharedValues.FootToMillimeters;
+                        }
+                        else
+                        {
+                            elemH = roomH;
+                        }
+                        var bottomOffset = room.get_Parameter(BuiltInParameter.ROOM_LOWER_OFFSET).AsDouble();
+                        wallDtos.Add(new WallDto(loop[i], room.LevelId, roomH, elemH, bottomOffset));
+                        try
+                        {
+                            string finName = _defaultName;
+                            if (e is Wall)
+                            {
+                                finName = (e as Wall).WallType.get_Parameter(SharedParams.PGS_FinishingName)
+                                    .AsValueString();
+                            }
+                            else if (e is FamilyInstance)
+                            {
+                                finName = (e as FamilyInstance).Symbol.get_Parameter(SharedParams.PGS_FinishingName)
+                                    .AsValueString();
+                            }
+                            if (String.IsNullOrEmpty(finName))
+                            {
+                                finName = _defaultName;
+                            }
+                            if (!descriptions.Contains(finName))
+                            {
+                                descriptions.Add(finName);
+                            }
+                        }
+                        catch (System.NullReferenceException)
+                        {
+                            continue;
+                        }
+                    }
+                }
+            }
+            return (wallDtos, descriptions);
+        }
+
+        private (List<WallType> WallTypes, List<CeilingType> CeilingTypes) GetWallsAndCeilingsTypes(in Document doc)
+        {
+            var wallTypes = new FilteredElementCollector(doc)
+                .OfCategory(BuiltInCategory.OST_Walls)
+                .WhereElementIsElementType()
+                .Select(w => w as WallType)
+                .Where(w => w.GetCompoundStructure() != null)
+                .ToList();
+            var ceilingTypes = new FilteredElementCollector(doc)
+                .OfCategory(BuiltInCategory.OST_Ceilings)
+                .WhereElementIsElementType()
+                .Cast<CeilingType>()
+                .ToList();
+            return (wallTypes, ceilingTypes);
+        }
+
+        public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
+        {
+            UIApplication uiapp = commandData.Application;
+            UIDocument uidoc = uiapp.ActiveUIDocument;
+            Document doc = uidoc.Document;
+            Selection sel = uidoc.Selection;
+
+            if (!ValidateSharedParams(doc)) return Result.Cancelled;
+
+            View3D view3d = Get3DView(uidoc);
+            if (view3d is null) return Result.Cancelled;
+
+            List<Room> rooms = GetRooms(uidoc);
+            if (rooms == null) return Result.Cancelled;
+
+            List<List<CurveLoop>> roomBorderLoops = new List<List<CurveLoop>>();
+
+            (List<WallDto> wallDtos, List<string> descriptions) = CreateWallsCreationData(doc, rooms, view3d);
+
+            (List<WallType> wallTypes, List<CeilingType> ceilingTypes) = GetWallsAndCeilingsTypes(doc);
+            List<WallTypeFinishingDto> dtos = descriptions.Select(d => new WallTypeFinishingDto(d)).ToList();
+
+            var ui = new FinishingCreation(dtos, wallTypes, ceilingTypes);
+            ui.ShowDialog();
+            if (ui.DialogResult != true)
+            {
+                return Result.Cancelled;
+            }
+            bool createWalls = ui.CreateWalls;
+
+            if (createWalls)
+            {
+                CreateWalls(doc, wallDtos, ui, view3d);
             }
 
             return Result.Succeeded;
