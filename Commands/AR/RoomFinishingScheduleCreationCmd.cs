@@ -318,6 +318,12 @@ namespace MS.Commands.AR
                 {
                     return null;
                 }
+                catch (Autodesk.Revit.Exceptions.InvalidOperationException)
+                {
+                    MessageBox.Show("Перейдите на вид, где можно выбирать помещения, " +
+                        "или выделите их в спецификации и нажмите команду","Ошибка");
+                    return null;
+                }
             }
             return rooms;
         }
@@ -473,11 +479,6 @@ namespace MS.Commands.AR
             UIApplication uiapp = commandData.Application;
             UIDocument uidoc = uiapp.ActiveUIDocument;
             Document doc = uidoc.Document;
-            if (!(doc.ActiveView is ViewPlan))
-            {
-                MessageBox.Show("Перейдите на план", "Предупреждение");
-                return Result.Cancelled;
-            }
 
             if (!ValidateSharedParams(doc)) return Result.Cancelled;
 
