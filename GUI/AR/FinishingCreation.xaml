@@ -57,5 +57,11 @@
                      VerticalAlignment="Top" 
                      IsChecked="True" 
                      Checked="HInput_Checked"/>
+        <ComboBox x:Name="comboBoxCeilingType" HorizontalAlignment="Left" Margin="378,275,0,0" VerticalAlignment="Top" Width="230"/>
+        <TextBlock HorizontalAlignment="Left" Margin="280,278,0,0" TextWrapping="Wrap" Text="Тип потолка" VerticalAlignment="Top" Width="74"/>
+        <CheckBox x:Name="checkBoxCreateCeiling" Content="Создавать потолок" HorizontalAlignment="Left" Margin="378,346,0,0" VerticalAlignment="Top" Width="129" Checked="checkBoxCreateCeiling_Checked" Unchecked="checkBoxCreateCeiling_Unchecked"/>
+        <TextBox x:Name="textBoxCeilingHeight" PreviewTextInput="NumberValidationTextBox" HorizontalAlignment="Left" Margin="378,310,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
+        <TextBlock HorizontalAlignment="Left" Margin="280,312,0,0" TextWrapping="Wrap" Text="Высота потолка" VerticalAlignment="Top"/>
+        <CheckBox x:Name="checkBoxCreateWalls" Content="Создавать стены" HorizontalAlignment="Left" Margin="378,378,0,0" VerticalAlignment="Top" Width="129" Checked="checkBoxCreateWalls_Checked" Unchecked="checkBoxCreateWalls_Unchecked"/>
     </Grid>
 </Window>

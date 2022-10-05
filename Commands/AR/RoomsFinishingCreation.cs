@@ -97,13 +97,8 @@ namespace MS.Commands.AR
             return rooms;
         }
 
-        public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
+        private bool ValidateSharedParams(in Document doc)
         {
-            UIApplication uiapp = commandData.Application;
-            UIDocument uidoc = uiapp.ActiveUIDocument;
-            Document doc = uidoc.Document;
-            Selection sel = uidoc.Selection;
-
             Guid[] _sharedParamsForCommand = new Guid[] {
             SharedParams.PGS_FinishingName
             };
@@ -116,7 +111,7 @@ namespace MS.Commands.AR
                     "в типе отсутствуют необходимые общие параметры:" +
                     "\nPGS_НаименованиеОтделки",
                     "Ошибка");
-                return Result.Cancelled;
+                return false;
             }
             if (!SharedParams.IsCategoryOfDocContainsSharedParams(
                 doc,
@@ -127,24 +122,43 @@ namespace MS.Commands.AR
                     "в типе отсутствуют необходимые общие параметры:" +
                     "\nPGS_НаименованиеОтделки",
                     "Ошибка");
-                return Result.Cancelled;
+                return false;
             }
+            return true;
+        }
+
+        private View3D Get3DView(in UIDocument uidoc)
+        {
             View3D view3d
                     = new FilteredElementCollector(uidoc.Document)
                       .OfClass(typeof(View3D))
                       .Cast<View3D>()
                       .FirstOrDefault<View3D>(
                         e => e.Name.Equals("{3D}"));
-            Options optsDetail = new Options();
             if (null == view3d)
             {
                 MessageBox.Show("Не найден {3D} вид по умолчанию", "Ошибка");
-                return Result.Cancelled;
+                return null;
             }
+            return view3d;
+        }
+
+        public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
+        {
+            UIApplication uiapp = commandData.Application;
+            UIDocument uidoc = uiapp.ActiveUIDocument;
+            Document doc = uidoc.Document;
+            Selection sel = uidoc.Selection;
+
+            if (!ValidateSharedParams(doc)) return Result.Cancelled;
+
+            View3D view3d = Get3DView(uidoc);
+            if (view3d is null) return Result.Cancelled;
 
             List<Room> rooms = GetRooms(uidoc);
             if (rooms == null) return Result.Cancelled;
 
+            List<List<CurveLoop>> roomBorderLoops = new List<List<CurveLoop>>();
             List<string> descriptions = new List<string>();
             List<(BoundarySegment Segment, ElementId LevelId, double HRoom, double HElem, double RoomBottomOffset)> validSegmentsAndH =
                 new List<(BoundarySegment, ElementId, double, double, double)>();
@@ -153,6 +167,9 @@ namespace MS.Commands.AR
                 IList<IList<BoundarySegment>> loops
                   = room.GetBoundarySegments(
                     new SpatialElementBoundaryOptions());
+
+                // Создать extension метод для получения List<CurveLoop> из помещения
+                roomBorderLoops.Add(loops);
 
                 foreach (IList<BoundarySegment> loop in loops)
                 {
@@ -235,7 +252,13 @@ namespace MS.Commands.AR
                 .ToList();
             List<WallTypeFinishingDto> dtos = descriptions.Select(d => new WallTypeFinishingDto(d)).ToList();
 
-            var ui = new FinishingCreation(dtos, wallTypesAll);
+            var ceilingTypes = new FilteredElementCollector(doc)
+                .OfCategory(BuiltInCategory.OST_Ceilings)
+                .WhereElementIsElementType()
+                .Cast<CeilingType>()
+                .ToList();
+
+            var ui = new FinishingCreation(dtos, wallTypesAll, ceilingTypes);
             ui.ShowDialog();
             if (ui.DialogResult != true)
             {
@@ -323,7 +346,7 @@ namespace MS.Commands.AR
                                 bottomOffset = elemBottomOffset - validSegmentsAndH[i].RoomBottomOffset;
                                 break;
                             case FinWallsHeight.ByInput:
-                                height = ui.InputHeight / SharedValues.FootToMillimeters;
+                                height = ui.InputWallsHeight / SharedValues.FootToMillimeters;
                                 bottomOffset = validSegmentsAndH[i].RoomBottomOffset;
                                 break;
                         }
