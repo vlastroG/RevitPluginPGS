@@ -168,7 +168,7 @@ namespace MS.Commands.AR
                   = room.GetBoundarySegments(
                     new SpatialElementBoundaryOptions());
 
-                // Создать extension метод для получения List<CurveLoop> из помещения
+                // Autodesk.Revit.DB.IFC.ExporterIFCUtils.GetRoomBoundaryAsCurveLoopArray
                 roomBorderLoops.Add(loops);
 
                 foreach (IList<BoundarySegment> loop in loops)
