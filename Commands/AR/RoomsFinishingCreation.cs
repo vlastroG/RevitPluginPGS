@@ -45,6 +45,50 @@ namespace MS.Commands.AR
         /// </summary>
         private const string _defaultName = "НЕ НАЗНАЧЕНО";
 
+        public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
+        {
+            UIApplication uiapp = commandData.Application;
+            UIDocument uidoc = uiapp.ActiveUIDocument;
+            Document doc = uidoc.Document;
+            Selection sel = uidoc.Selection;
+
+            if (!ValidateSharedParams(doc)) return Result.Cancelled;
+
+            View3D view3d = Get3DView(uidoc);
+            if (view3d is null) return Result.Cancelled;
+
+            List<Room> rooms = GetRooms(uidoc);
+            if (rooms == null) return Result.Cancelled;
+
+            List<List<CurveLoop>> roomBorderLoops = new List<List<CurveLoop>>();
+
+            (List<WallDto> wallDtos, List<string> descriptions) = GetWallsCreationData(doc, rooms, view3d);
+
+            (List<WallType> wallTypes, List<CeilingType> ceilingTypes) = GetWallsAndCeilingsTypes(doc);
+            List<WallTypeFinishingDto> dtos = descriptions.Select(d => new WallTypeFinishingDto(d)).ToList();
+
+            var ui = new FinishingCreation(dtos, wallTypes, ceilingTypes);
+            ui.ShowDialog();
+            if (ui.DialogResult != true)
+            {
+                return Result.Cancelled;
+            }
+            bool createWalls = ui.CreateWalls;
+            bool createCeilings = ui.CreateCeilings;
+            // Autodesk.Revit.DB.IFC.ExporterIFCUtils.GetRoomBoundaryAsCurveLoopArray
+            //roomBorderLoops.Add(loops);
+            if (createWalls)
+            {
+                CreateWalls(doc, wallDtos, ui, view3d);
+            }
+            if (createCeilings)
+            {
+                CreateCeilings(doc, rooms, ui);
+            }
+
+            return Result.Succeeded;
+        }
+
         /// <summary>
         /// Получить помещения с ненулевой площадью с заполненным параметром PGS_ТипОтделкиСтен для дальнейшего расчета
         /// </summary>
@@ -294,7 +338,7 @@ namespace MS.Commands.AR
             }
         }
 
-        private (List<WallDto> WallDtos, List<string> Descriptions) CreateWallsCreationData(in Document doc, in List<Room> rooms, in View3D view3d)
+        private (List<WallDto> WallDtos, List<string> Descriptions) GetWallsCreationData(in Document doc, in List<Room> rooms, in View3D view3d)
         {
             List<string> descriptions = new List<string>();
             List<WallDto> wallDtos = new List<WallDto>();
@@ -303,9 +347,6 @@ namespace MS.Commands.AR
                 IList<IList<BoundarySegment>> loops
                   = room.GetBoundarySegments(
                     new SpatialElementBoundaryOptions());
-
-                // Autodesk.Revit.DB.IFC.ExporterIFCUtils.GetRoomBoundaryAsCurveLoopArray
-                //roomBorderLoops.Add(loops);
 
                 foreach (IList<BoundarySegment> loop in loops)
                 {
@@ -398,42 +439,17 @@ namespace MS.Commands.AR
             return (wallTypes, ceilingTypes);
         }
 
-        public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
+        private void CreateCeilings(in Document doc, in List<Room> rooms, in FinishingCreation ui)
         {
-            UIApplication uiapp = commandData.Application;
-            UIDocument uidoc = uiapp.ActiveUIDocument;
-            Document doc = uidoc.Document;
-            Selection sel = uidoc.Selection;
-
-            if (!ValidateSharedParams(doc)) return Result.Cancelled;
-
-            View3D view3d = Get3DView(uidoc);
-            if (view3d is null) return Result.Cancelled;
-
-            List<Room> rooms = GetRooms(uidoc);
-            if (rooms == null) return Result.Cancelled;
-
-            List<List<CurveLoop>> roomBorderLoops = new List<List<CurveLoop>>();
-
-            (List<WallDto> wallDtos, List<string> descriptions) = CreateWallsCreationData(doc, rooms, view3d);
-
-            (List<WallType> wallTypes, List<CeilingType> ceilingTypes) = GetWallsAndCeilingsTypes(doc);
-            List<WallTypeFinishingDto> dtos = descriptions.Select(d => new WallTypeFinishingDto(d)).ToList();
-
-            var ui = new FinishingCreation(dtos, wallTypes, ceilingTypes);
-            ui.ShowDialog();
-            if (ui.DialogResult != true)
+            using (Transaction ceilingsCreationTrans = new Transaction(doc))
             {
-                return Result.Cancelled;
-            }
-            bool createWalls = ui.CreateWalls;
+                ceilingsCreationTrans.Start("Создание потолков");
+                foreach (var item in rooms)
+                {
 
-            if (createWalls)
-            {
-                CreateWalls(doc, wallDtos, ui, view3d);
+                }
+                ceilingsCreationTrans.Commit();
             }
-
-            return Result.Succeeded;
         }
     }
 }

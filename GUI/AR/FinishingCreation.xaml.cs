@@ -52,6 +52,8 @@ namespace MS.GUI.AR
 
         public bool CreateCeilings { get; private set; }
 
+        public bool CeilingHeightByRoom { get; private set; }
+
         /// <summary>
         /// Если FinWallsHeightType == FinWallsHeightType.ByInput, 
         /// то возвращается введенное пользователем положительное число.
@@ -135,6 +137,7 @@ namespace MS.GUI.AR
             FinishingDto.ItemsSource = _dtos;
             wallTypesComboBoxColumn.ItemsSource = wallTypes;
             comboBoxCeilingType.ItemsSource = _ceilingTypes;
+            comboBoxCeilingType.DisplayMemberPath = "Name";
             comboBoxCeilingType.SelectedIndex = 0;
             textBoxHeight.Text = _inputWallsHeightString;
             textBoxCeilingHeight.Text = _inputCeilingsHeightString;
@@ -194,5 +197,14 @@ namespace MS.GUI.AR
             CreateCeilings = false;
         }
 
+        private void checkBoxCeilingHeightByRoom_Checked(object sender, RoutedEventArgs e)
+        {
+            CeilingHeightByRoom = true;
+        }
+
+        private void checkBoxCeilingHeightByRoom_Unchecked(object sender, RoutedEventArgs e)
+        {
+            CeilingHeightByRoom = false;
+        }
     }
 }
