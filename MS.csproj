@@ -166,6 +166,7 @@
     <Compile Include="Utilites\Extensions\CurveArrayExtension.cs" />
     <Compile Include="Utilites\Extensions\DictionaryExtension.cs" />
     <Compile Include="Utilites\Extensions\PlanarFaceExtension.cs" />
+    <Compile Include="Utilites\Extensions\RoomExtension.cs" />
     <Compile Include="Utilites\Extensions\StringDoubleTupleExtension.cs" />
     <Compile Include="Utilites\Extensions\WallExtension.cs" />
     <Compile Include="Utilites\Extensions\IEnumerableExtension.cs" />

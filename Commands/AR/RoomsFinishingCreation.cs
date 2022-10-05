@@ -3,11 +3,13 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Architecture;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
+using Microsoft.Office.Interop.Excel;
 using MS.Commands.AR.DTO;
 using MS.Commands.AR.DTO.FinishingCreateionCmd;
 using MS.GUI.AR;
 using MS.Shared;
 using MS.Utilites;
+using MS.Utilites.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -51,7 +53,7 @@ namespace MS.Commands.AR
             UIDocument uidoc = uiapp.ActiveUIDocument;
             Document doc = uidoc.Document;
             Selection sel = uidoc.Selection;
-
+            SpatialElementBoundaryOptions spatialElementBoundaryOptions = new SpatialElementBoundaryOptions();
             if (!ValidateSharedParams(doc)) return Result.Cancelled;
 
             View3D view3d = Get3DView(uidoc);
@@ -60,9 +62,7 @@ namespace MS.Commands.AR
             List<Room> rooms = GetRooms(uidoc);
             if (rooms == null) return Result.Cancelled;
 
-            List<List<CurveLoop>> roomBorderLoops = new List<List<CurveLoop>>();
-
-            (List<WallDto> wallDtos, List<string> descriptions) = GetWallsCreationData(doc, rooms, view3d);
+            (List<WallDto> wallDtos, List<string> descriptions) = GetWallsCreationData(doc, rooms, view3d, spatialElementBoundaryOptions);
 
             (List<WallType> wallTypes, List<CeilingType> ceilingTypes) = GetWallsAndCeilingsTypes(doc);
             List<WallTypeFinishingDto> dtos = descriptions.Select(d => new WallTypeFinishingDto(d)).ToList();
@@ -83,7 +83,13 @@ namespace MS.Commands.AR
             }
             if (createCeilings)
             {
-                CreateCeilings(doc, rooms, ui);
+                var errorRoomsForCeiling = CreateCeilings(doc, rooms, ui, spatialElementBoundaryOptions);
+                if (errorRoomsForCeiling.Count > 0)
+                {
+                    string ids = String.Join(", ", errorRoomsForCeiling.Select(e => e.ToString()));
+                    MessageBox.Show($"Ошибка: Не удалось создать потолок в следующих помещениях Id: {ids}.",
+                        "Создание потолков");
+                }
             }
 
             return Result.Succeeded;
@@ -338,15 +344,20 @@ namespace MS.Commands.AR
             }
         }
 
-        private (List<WallDto> WallDtos, List<string> Descriptions) GetWallsCreationData(in Document doc, in List<Room> rooms, in View3D view3d)
+        private (List<WallDto> WallDtos, List<string> Descriptions) GetWallsCreationData(
+            in Document doc,
+            in List<Room> rooms,
+            in View3D view3d,
+            in SpatialElementBoundaryOptions spatialElementBoundaryOptions)
         {
             List<string> descriptions = new List<string>();
             List<WallDto> wallDtos = new List<WallDto>();
+            Options opts = new Options();
             foreach (Room room in rooms)
             {
                 IList<IList<BoundarySegment>> loops
                   = room.GetBoundarySegments(
-                    new SpatialElementBoundaryOptions());
+                    spatialElementBoundaryOptions);
 
                 foreach (IList<BoundarySegment> loop in loops)
                 {
@@ -381,7 +392,7 @@ namespace MS.Commands.AR
                         double elemH = 0;
                         if (!(e is RevitLinkInstance))
                         {
-                            var bBox = e.get_Geometry(new Options()).GetBoundingBox();
+                            var bBox = e.get_Geometry(opts).GetBoundingBox();
                             elemH = Math.Round((bBox.Max.Z - bBox.Min.Z) * SharedValues.FootToMillimeters)
                                 / SharedValues.FootToMillimeters;
                         }
@@ -439,17 +450,51 @@ namespace MS.Commands.AR
             return (wallTypes, ceilingTypes);
         }
 
-        private void CreateCeilings(in Document doc, in List<Room> rooms, in FinishingCreation ui)
+        /// <summary>
+        /// Создает потолки по помещениям по заданной высоте или по высоте помещения
+        /// </summary>
+        /// <param name="doc">Документ, в котором происходит транзакция</param>
+        /// <param name="rooms">Список помещений, в которых будет создан потолок</param>
+        /// <param name="ui">Форма для ввода настроект генерации отделки</param>
+        /// <param name="opts">Опции для получения геометрии помещений</param>
+        /// <returns>Список Id комнат, в которых не удалось построить потолок</returns>
+        private List<ElementId> CreateCeilings(
+            in Document doc,
+            in List<Room> rooms,
+            in FinishingCreation ui,
+            in SpatialElementBoundaryOptions opts)
         {
+            List<ElementId> errorRoomsForCeilings = new List<ElementId>();
             using (Transaction ceilingsCreationTrans = new Transaction(doc))
             {
                 ceilingsCreationTrans.Start("Создание потолков");
-                foreach (var item in rooms)
+                foreach (Room room in rooms)
                 {
-
+                    try
+                    {
+                        IList<CurveLoop> curveLoops = room.GetCurveLoops(opts);
+                        double height = 0;
+                        if (ui.CeilingHeightByRoom)
+                        {
+                            height = room.get_Parameter(BuiltInParameter.ROOM_HEIGHT).AsDouble();
+                        }
+                        else
+                        {
+                            height = ui.InputCeilingsHeight / SharedValues.FootToMillimeters;
+                        }
+                        ElementId ceilingTypeId = ui.Ceiling.Id;
+                        ElementId levelId = room.LevelId;
+                        var ceiling = Ceiling.Create(doc, curveLoops, ceilingTypeId, levelId);
+                        ceiling.get_Parameter(BuiltInParameter.CEILING_HEIGHTABOVELEVEL_PARAM).Set(height);
+                    }
+                    catch (Exception)
+                    {
+                        errorRoomsForCeilings.Add(room.Id);
+                    }
                 }
                 ceilingsCreationTrans.Commit();
             }
+            return errorRoomsForCeilings;
         }
     }
 }
