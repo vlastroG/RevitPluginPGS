@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MS.Commands.AR.DTO.FinishingCreateionCmd
+namespace MS.Commands.AR.DTO.FinishingCreationCmd
 {
     /// <summary>
     /// DTO для создания стен по границе помещения (команда "Ведомость отделки")

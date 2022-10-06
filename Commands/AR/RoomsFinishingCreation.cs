@@ -5,7 +5,7 @@ using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
 using Microsoft.Office.Interop.Excel;
 using MS.Commands.AR.DTO;
-using MS.Commands.AR.DTO.FinishingCreateionCmd;
+using MS.Commands.AR.DTO.FinishingCreationCmd;
 using MS.GUI.AR;
 using MS.Shared;
 using MS.Utilites;

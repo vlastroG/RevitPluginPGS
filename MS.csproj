@@ -93,7 +93,7 @@
     <Compile Include="Commands\AR\ComplexAprtmntNmbr.cs" />
     <Compile Include="Commands\AR\CreateImagesFromSections.cs" />
     <Compile Include="Commands\AR\CreateSectionsByLintels.cs" />
-    <Compile Include="Commands\AR\DTO\FinishingCreateionCmd\WallDto.cs" />
+    <Compile Include="Commands\AR\DTO\FinishingCreationCmd\WallDto.cs" />
     <Compile Include="Commands\AR\DTO\LintelMultiMarkDto.cs" />
     <Compile Include="Commands\AR\DTO\MarkWithCountDto.cs" />
     <Compile Include="Commands\AR\DTO\MultiNameRoomsDto.cs" />
