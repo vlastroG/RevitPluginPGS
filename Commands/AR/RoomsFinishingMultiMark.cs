@@ -114,7 +114,7 @@ namespace MS.Commands.AR
             var multiNameRange = UserInput.YesNoCancelInput(
                 "Помещения с одинаковой отделкой", "Если считать отделку поэтажно - \"Да\", " +
                 "если сквозной подсчет - \"Нет\"");
-            if (multiNameRange != System.Windows.Forms.DialogResult.Yes 
+            if (multiNameRange != System.Windows.Forms.DialogResult.Yes
                 && multiNameRange != System.Windows.Forms.DialogResult.No)
             {
                 return Result.Cancelled;
@@ -142,7 +142,8 @@ namespace MS.Commands.AR
             Dictionary<string, MultiNameRoomsDto> dictFinFloorMultiName = new Dictionary<string, MultiNameRoomsDto>();
 
             List<Element> roomsWithFinishing = new List<Element>();
-
+            int roomsWithWallFinishing = 0;
+            int roomsWithFloorFinishing = 0;
             foreach (Element room in rooms)
             {
                 string typeFinWall = room.get_Parameter(SharedParams.PGS_FinishingTypeOfWalls).AsValueString();
@@ -160,6 +161,7 @@ namespace MS.Commands.AR
                             roomName,
                             roomNumber);
                         roomsWithFinishing.Add(room);
+                        roomsWithWallFinishing++;
                     }
                     if (!String.IsNullOrEmpty(typeFinFloor))
                     {
@@ -170,6 +172,7 @@ namespace MS.Commands.AR
                             roomName,
                             roomNumber);
                         roomsWithFinishing.Add(room);
+                        roomsWithFloorFinishing++;
                     }
                 }
             }
@@ -230,7 +233,8 @@ namespace MS.Commands.AR
                 transEqualFinishing.Commit();
             }
 
-            MessageBox.Show($"Обработано {roomsWithFinishing.Count} помещений с отделкой" +
+            MessageBox.Show($"Обработано {roomsWithWallFinishing} помещений с отделкой стен, " +
+                $"{roomsWithFloorFinishing} помещений с отделкой пола" +
                 $" из всех {rooms.Count} помещений в проеке с ненулевой площадью." +
                 $"\nPGS_МногострочнаяМарка для одинаковой отделки стен и потолка обновлена {equalFinWallSetCount} раз," +
                 $"\nPGS_МногострочнаяМарка_2 для одинаковой отделки пола обновлена {equalFinFloorSetCount} раз.",

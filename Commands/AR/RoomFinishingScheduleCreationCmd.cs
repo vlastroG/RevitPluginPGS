@@ -321,7 +321,7 @@ namespace MS.Commands.AR
                 catch (Autodesk.Revit.Exceptions.InvalidOperationException)
                 {
                     MessageBox.Show("Перейдите на вид, где можно выбирать помещения, " +
-                        "или выделите их в спецификации и нажмите команду","Ошибка");
+                        "или выделите их в спецификации и нажмите команду", "Ошибка");
                     return null;
                 }
             }
@@ -349,6 +349,7 @@ namespace MS.Commands.AR
                       = room.GetBoundarySegments(
                         new SpatialElementBoundaryOptions());
             List<(string WallType, double Area)> tupleList = new List<(string WallType, double Area)>();
+            List<int> idsInt = new List<int>();
             string rNum = room.get_Parameter(BuiltInParameter.ROOM_NUMBER).AsValueString();
             string rFintype = room.get_Parameter(SharedParams.PGS_FinishingTypeOfWalls).AsValueString();
             foreach (IList<BoundarySegment> loop in loops)
@@ -365,13 +366,22 @@ namespace MS.Commands.AR
                     if (!(e is Wall)) continue;
                     if (!(e as Wall).Name.Contains(_finWalls)) continue;
                     Wall wall = (Wall)e;
-                    tupleList.AddOrUpdate(
-                        (wall.WallType.get_Parameter(BuiltInParameter.ALL_MODEL_DESCRIPTION).AsValueString(),
-                        Math.Round(wall.get_Parameter(BuiltInParameter.HOST_AREA_COMPUTED).AsDouble() * SharedValues.SqFeetToMeters,
-                        3)));
-                    // Назначить номер помещения и тип отделки стене
-                    e.get_Parameter(SharedParams.ADSK_RoomNumberInApartment).Set(rNum);
-                    e.get_Parameter(SharedParams.PGS_FinishingTypeOfWalls).Set(rFintype);
+                    int wallId = wall.Id.IntegerValue;
+                    if (!idsInt.Contains(wallId))
+                    {
+                        idsInt.Add(wallId);
+                        tupleList.AddOrUpdate(
+                            (wall.WallType.get_Parameter(BuiltInParameter.ALL_MODEL_DESCRIPTION).AsValueString(),
+                            Math.Round(wall.get_Parameter(BuiltInParameter.HOST_AREA_COMPUTED).AsDouble() * SharedValues.SqFeetToMeters,
+                            3)));
+                        // Назначить номер помещения и тип отделки стене
+                        e.get_Parameter(SharedParams.ADSK_RoomNumberInApartment).Set(rNum);
+                        e.get_Parameter(SharedParams.PGS_FinishingTypeOfWalls).Set(rFintype);
+                    }
+                    else
+                    {
+                        continue;
+                    }
                 }
             }
             return tupleList;
