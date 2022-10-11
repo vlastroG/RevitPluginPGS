@@ -99,6 +99,7 @@ namespace MS.Commands.AR
             WriteHeader(ref table, header);
             foreach (var dto in fintypeRowDtos)
             {
+                var fintype = dto.FintypeWallsCeilings;
                 AddFintypeRow(ref table, dto);
             }
         }
@@ -130,7 +131,7 @@ namespace MS.Commands.AR
                 table.RefreshData();
                 table.SetRowHeight(i, _heightRow);
             }
-            if (rowsCount > 1)
+            if (rowsCount >= 1)
             {
                 table.MergeCells(new TableMergedCell(startRowIndex, 0, startRowIndex + rowsCount - 1, 0));
                 table.MergeCells(new TableMergedCell(startRowIndex, 1, startRowIndex + rowsCount - 1, 1));
@@ -468,6 +469,7 @@ namespace MS.Commands.AR
                  .ToList();
             foreach (Room room in rooms)
             {
+                string rNumber = room.Number;
                 string fintype = room.get_Parameter(SharedParams.PGS_FinishingTypeOfWalls).AsValueString();
                 var dto = dtos.First(d => d.FintypeWallsCeilings == fintype);
                 var walltypesAreas = GetRoomWalltypesAreas(uidoc.Document, room, view3d, opts);
