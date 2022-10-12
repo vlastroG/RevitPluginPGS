@@ -115,13 +115,23 @@ namespace MS.Commands.AR
 
             // Выбор всех однослойных стен в проекте, у которых значение параметра ТипАрмирования == 1 || 2
             var filter = new FilteredElementCollector(doc);
+            //var walls = filter
+            //    .OfCategory(BuiltInCategory.OST_Walls)
+            //    .WhereElementIsNotElementType()
+            //    .ToElements()
+            //    .Select(e => e as Wall)
+            //    .Where(w => w.WallType.GetCompoundStructure() != null
+            //             && w.WallType.GetCompoundStructure().LayerCount == 1)
+            //    .Where(w => w.get_Parameter(SharedParams.PGS_ArmType).HasValue == true
+            //             && (w.get_Parameter(SharedParams.PGS_ArmType).AsDouble() == 1
+            //             || w.get_Parameter(SharedParams.PGS_ArmType).AsDouble() == 2))
+            //    .ToArray();            
             var walls = filter
                 .OfCategory(BuiltInCategory.OST_Walls)
                 .WhereElementIsNotElementType()
                 .ToElements()
                 .Select(e => e as Wall)
-                .Where(w => w.WallType.GetCompoundStructure() != null
-                         && w.WallType.GetCompoundStructure().LayerCount == 1)
+                .Where(w => w.WallType.GetCompoundStructure() != null)
                 .Where(w => w.get_Parameter(SharedParams.PGS_ArmType).HasValue == true
                          && (w.get_Parameter(SharedParams.PGS_ArmType).AsDouble() == 1
                          || w.get_Parameter(SharedParams.PGS_ArmType).AsDouble() == 2))
@@ -139,8 +149,21 @@ namespace MS.Commands.AR
                         * SharedValues.FootToMillimeters;
                     double wall_length = wall.get_Parameter(BuiltInParameter.CURVE_ELEM_LENGTH).AsDouble()
                         * SharedValues.FootToMillimeters;
-                    double wall_width = wall.WallType.get_Parameter(BuiltInParameter.WALL_ATTR_WIDTH_PARAM).AsDouble()
-                        * SharedValues.FootToMillimeters;
+                    double wall_width = 0;
+                    if (wall.WallType.GetCompoundStructure().LayerCount == 1)
+                    {
+                        wall_width = wall.WallType.get_Parameter(BuiltInParameter.WALL_ATTR_WIDTH_PARAM).AsDouble()
+                            * SharedValues.FootToMillimeters;
+                    }
+                    else
+                    {
+                        wall_width = wall
+                            .WallType
+                            .GetCompoundStructure()
+                            .GetLayers()
+                            .First(l => l.Function == MaterialFunctionAssignment.Structure)
+                            .Width * SharedValues.FootToMillimeters;
+                    }
                     int reinforceType = (int)wall.get_Parameter(SharedParams.PGS_ArmType).AsDouble();
                     int indent = (int)wall.get_Parameter(SharedParams.PGS_ArmIndentFromFace).AsDouble();
                     string meshName = CreateMeshName(wall, reinforceType, wall_width, indent);
