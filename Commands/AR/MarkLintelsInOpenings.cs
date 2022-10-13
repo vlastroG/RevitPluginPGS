@@ -6,6 +6,7 @@ using MS.GUI.AR;
 using MS.Shared;
 using MS.Utilites;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
@@ -99,20 +100,22 @@ namespace MS.Commands.AR
                      BuiltInCategory.OST_Doors});
 
             var openings = filter_openings.WherePasses(filtered_categories)
-            .WhereElementIsNotElementType()
-            .ToElements()
-            .Cast<FamilyInstance>()
-            .Where(f => f.Host != null)
-            .Where(f =>
-              (BuiltInCategory)f.Host.Category.Id.IntegerValue == BuiltInCategory.OST_Walls)
-            .Where(f => f.get_Parameter(SharedParams.PGS_MarkLintel) != null)
-            .Where(f => f.get_Parameter(SharedParams.Mrk_MarkOfConstruction) != null)
-            .Where(f => f.GetSubComponentIds().FirstOrDefault(
-                             id => (doc.GetElement(id) as FamilyInstance).Symbol
-                             .get_Parameter(BuiltInParameter.ALL_MODEL_DESCRIPTION)
-                             .AsValueString() == SharedValues.LintelDescription) != null)
-            .Select(f => new OpeningDto(doc, f, !marking))
-            .ToList();
+                .WhereElementIsNotElementType()
+                .ToElements()
+                .Cast<FamilyInstance>()
+                .Where(f => f.Host != null)
+                .Where(f =>
+                  (BuiltInCategory)f.Host.Category.Id.IntegerValue == BuiltInCategory.OST_Walls)
+                .Where(f => f.get_Parameter(SharedParams.PGS_MarkLintel) != null)
+                .Where(f => f.get_Parameter(SharedParams.Mrk_MarkOfConstruction) != null)
+                .Where(f => f.GetSubComponentIds().FirstOrDefault(
+                                 id => (doc.GetElement(id) as FamilyInstance).Symbol
+                                 .get_Parameter(BuiltInParameter.ALL_MODEL_DESCRIPTION)
+                                 .AsValueString() == SharedValues.LintelDescription) != null)
+                .Select(f => new OpeningDto(doc, f, !marking))
+                .ToList();
+
+
 
             int lintelMarkSetCount = 0;
             int mrkMarkConstrSetCount = 0;
