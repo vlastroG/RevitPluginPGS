@@ -161,6 +161,14 @@ namespace MS
                 "\'ADKS_Количество комнат\', \'ADSK_Тип квартиры\' и \'ADSK_Индекс квартиры\'." +
                 " Полученное значение будет записано в параметр \'Комментарии\'";
 
+            // OpeningsByDuct command
+            PushButtonData btnOpeningsByDuctCmd = new PushButtonData("OpeningByDuct", "Проем по\nвоздуховоду", path, "MS.Commands.AR.OpeningByDuctCmd");
+            Uri btnOpeningsByDuctCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            BitmapImage btnOpeningsByDuctCmdImage = new BitmapImage(btnOpeningsByDuctCmdImagePath);
+            btnOpeningsByDuctCmd.LargeImage = btnOpeningsByDuctCmdImage;
+            btnOpeningsByDuctCmd.ToolTip = "Проем по воздуховоду";
+            btnOpeningsByDuctCmd.LongDescription = "";
+
             // OpeningsArea command
             PushButtonData btnOpeningsArea = new PushButtonData("OpeningsArea", "Площадь проемов\nв помещениях", path, "MS.Commands.AR.OpeningsArea");
             Uri btnOpeningsAreaImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\BalconyDoor.png");
@@ -450,7 +458,8 @@ namespace MS
             panelAR.AddItem(btnRoomBoardsFinishing);
             panelAR.AddItem(btnMasonryMesh);
             panelAR.AddItem(btnMaterialColors);
-            //panelAR.AddSlideOut();
+            panelAR.AddSlideOut();
+            panelAR.AddItem(btnOpeningsByDuctCmd);
 
             // KR panel
             //panelKR.AddItem(stairRnfrcmtCmd); // в разработке (сырая)

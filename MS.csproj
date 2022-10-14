@@ -107,6 +107,7 @@
     <Compile Include="Commands\Archive\RoomsArea.cs" />
     <Compile Include="Commands\AR\DTO\OpeningDto.cs" />
     <Compile Include="Commands\AR\DTO\RoomDto.cs" />
+    <Compile Include="Commands\AR\OpeningByDuctCmd.cs" />
     <Compile Include="Commands\AR\OpeningsArea.cs" />
     <Compile Include="Commands\AR\MarkLintelsInOpenings.cs" />
     <Compile Include="Commands\AR\RoomBoardsFinishingCommand.cs" />
@@ -171,6 +172,7 @@
     <Compile Include="Utilites\Extensions\WallExtension.cs" />
     <Compile Include="Utilites\Extensions\IEnumerableExtension.cs" />
     <Compile Include="Utilites\GetBoundarySegmentElement.cs" />
+    <Compile Include="Utilites\SelectionFilters\ElementInLinkSelectionFilter.cs" />
     <Compile Include="Utilites\SelectionFilters\SelectionFilterEdges.cs" />
     <Compile Include="Utilites\SelectionFilters\SelectionFilterPlanarFaces.cs" />
     <Compile Include="Utilites\SelectionFilters\SelectionFilterRooms.cs" />
