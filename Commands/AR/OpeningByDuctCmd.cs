@@ -20,35 +20,41 @@ namespace MS.Commands.AR
     [Regeneration(RegenerationOption.Manual)]
     public class OpeningByDuctCmd : IExternalCommand
     {
-        private readonly string _familyName = "231_Проем прямоуг (Окно_Стена)";
+        private readonly string _familyNameOpening = "231_Проем прямоуг (Окно_Стена)";
 
-        private readonly string _name = "231_Проем прямоуг (Окно_Стена)";
+        private readonly string _familyTypeOpening = "231_Проем прямоуг (Окно_Стена)";
+
+        private readonly string _familyNameLintelAngles = "ADSK_Обобщенная модель_Перемычка из уголков";
+
+        private readonly string _familyTypeLintelAngles = "ADSK_Обобщенная модель_Перемычка из уголков";
+
+        private readonly string _familyNameLintelBars = "PGS_Перемычка_Стержни_v0.1";
+
+        private readonly string _familyTypeLintelBars = "Тип 1";
+
+        private readonly double _openingWidthNeed = 500 / SharedValues.FootToMillimeters;
 
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             Document doc = commandData.Application.ActiveUIDocument.Document;
-            Element duct = GetDuct(commandData);
+            (Element duct, Line ductLine) = GetDuct(commandData);
             Wall wall = GetWall(commandData);
             if ((duct is null) || (wall is null))
             {
                 return Result.Cancelled;
             }
-            var ductH = duct.get_Parameter(BuiltInParameter.RBS_CURVE_HEIGHT_PARAM).AsDouble();
-            var ductW = duct.get_Parameter(BuiltInParameter.RBS_CURVE_WIDTH_PARAM).AsDouble();
-            var openingH = ductH + 2 * 50 / SharedValues.FootToMillimeters;
-            var openingW = ductW + 2 * 50 / SharedValues.FootToMillimeters;
+            double ductH = duct.get_Parameter(BuiltInParameter.RBS_CURVE_HEIGHT_PARAM).AsDouble();
+            double ductW = duct.get_Parameter(BuiltInParameter.RBS_CURVE_WIDTH_PARAM).AsDouble();
+            double openingH = ductH + 2 * 50 / SharedValues.FootToMillimeters;
+            double openingW = ductW + 2 * 50 / SharedValues.FootToMillimeters;
 
-            var ductCurve = (duct.Location as LocationCurve).Curve as Line;
             var plane = GetWallPlane(wall).GetSurface() as Plane;
-            var point = GetPlaneAndLineIntersection(plane, ductCurve);
-            using (Transaction trans = new Transaction(doc))
+            var point = GetPlaneAndLineIntersection(plane, ductLine);
+            FamilyInstance opening = PlaceOpening(doc, point, wall, openingH, openingW);
+            FamilyInstance lintel = PlaceLintel(doc, point, wall, opening);
+            if (lintel is null)
             {
-                trans.Start("Разместить проем");
-                var opening = PlaceOpening(doc, point, wall);
-                opening.get_Parameter(BuiltInParameter.INSTANCE_SILL_HEIGHT_PARAM).Set(point.Z - 0.5 * openingH);
-                opening.get_Parameter(SharedParams.ADSK_DimensionHeight).Set(openingH);
-                opening.get_Parameter(SharedParams.ADSK_DimensionWidth).Set(openingW);
-                trans.Commit();
+                return Result.Failed;
             }
             return Result.Succeeded;
         }
@@ -141,15 +147,124 @@ namespace MS.Commands.AR
             return null;
         }
 
-        private FamilyInstance PlaceOpening(in Document doc, XYZ point, in Wall hostWall)
+        /// <summary>
+        /// Размещает семейство проема
+        /// </summary>
+        /// <param name="doc"></param>
+        /// <param name="point">Точка размещения</param>
+        /// <param name="hostWall">Стена, в которой будет расположен проем</param>
+        /// <param name="openingH">Высота проема</param>
+        /// <param name="openingW">Ширина проема</param>
+        /// <returns>Экземпляр семейства проема</returns>
+        private FamilyInstance PlaceOpening(in Document doc, XYZ point, in Wall hostWall, double openingH, double openingW)
         {
             var openingSymb = new FilteredElementCollector(doc)
                 .OfClass(typeof(FamilySymbol))
                 .WhereElementIsElementType()
                 .Cast<FamilySymbol>()
-                .FirstOrDefault(ft => ft.FamilyName == _familyName && ft.Name == _name);
-            var opening = doc.Create.NewFamilyInstance(point, openingSymb, hostWall, StructuralType.NonStructural);
-            return opening;
+                .FirstOrDefault(ft => ft.FamilyName == _familyNameOpening && ft.Name == _familyTypeOpening);
+            if (!openingSymb.IsActive)
+            {
+                openingSymb.Activate();
+            }
+            Level level = (doc.GetElement(hostWall.LevelId)) as Level;
+            using (Transaction trans = new Transaction(doc))
+            {
+                trans.Start("Разместить проем");
+                var opening = doc.Create.NewFamilyInstance(point, openingSymb, hostWall, level, StructuralType.NonStructural);
+                opening.get_Parameter(BuiltInParameter.INSTANCE_SILL_HEIGHT_PARAM).Set(point.Z - 0.5 * openingH - level.Elevation);
+                opening.get_Parameter(SharedParams.ADSK_DimensionHeight).Set(openingH);
+                opening.get_Parameter(SharedParams.ADSK_DimensionWidth).Set(openingW);
+                trans.Commit();
+                return opening;
+            }
+        }
+
+        private FamilyInstance PlaceLintel(in Document doc, XYZ point, in Wall hostWall, in FamilyInstance opening)
+        {
+            try
+            {
+                double openingBaseOffset = opening.get_Parameter(BuiltInParameter.INSTANCE_SILL_HEIGHT_PARAM).AsDouble();
+                double openingH = opening.get_Parameter(SharedParams.ADSK_DimensionHeight).AsDouble();
+                double openingW = opening.get_Parameter(SharedParams.ADSK_DimensionWidth).AsDouble();
+                double lintelH = openingBaseOffset + openingH;
+                Level level = (doc.GetElement(hostWall.LevelId)) as Level;
+                if (openingW >= _openingWidthNeed)
+                {
+                    var lintelSymb = new FilteredElementCollector(doc)
+                        .OfClass(typeof(FamilySymbol))
+                        .WhereElementIsElementType()
+                        .Cast<FamilySymbol>()
+                        .FirstOrDefault(ft => ft.FamilyName == _familyNameLintelAngles && ft.Name == _familyTypeLintelAngles);
+                    if (!lintelSymb.IsActive)
+                    {
+                        lintelSymb.Activate();
+                    }
+                    using (Transaction trans = new Transaction(doc))
+                    {
+                        trans.Start("Перемычка из уголков");
+                        var lintel = doc.Create.NewFamilyInstance(point, lintelSymb, hostWall, level, StructuralType.NonStructural);
+                        lintel.get_Parameter(BuiltInParameter.INSTANCE_ELEVATION_PARAM).Set(0);
+                        lintel.LookupParameter("Отметка перемычки").Set(lintelH);
+                        lintel.LookupParameter("Ширина проема").Set(openingW);
+                        trans.Commit();
+                        return lintel;
+                    }
+                }
+                else
+                {
+                    var lintelSymb = new FilteredElementCollector(doc)
+                        .OfClass(typeof(FamilySymbol))
+                        .WhereElementIsElementType()
+                        .Cast<FamilySymbol>()
+                        .FirstOrDefault(ft => ft.FamilyName == _familyNameLintelBars && ft.Name == _familyTypeLintelBars);
+                    if (!lintelSymb.IsActive)
+                    {
+                        lintelSymb.Activate();
+                    }
+                    using (Transaction trans = new Transaction(doc))
+                    {
+                        trans.Start("Перемычка из стержней");
+                        var lintel = doc.Create.NewFamilyInstance(point, lintelSymb, hostWall, level, StructuralType.NonStructural);
+                        lintel.get_Parameter(BuiltInParameter.INSTANCE_ELEVATION_PARAM).Set(0);
+                        lintel.LookupParameter("Отметка перемычки").Set(lintelH);
+                        lintel.LookupParameter("Ширина проема").Set(openingW);
+                        trans.Commit();
+                        return lintel;
+                    }
+                }
+                //{
+                //    var lintelSymb = new FilteredElementCollector(doc)
+                //        .OfClass(typeof(FamilySymbol))
+                //        .WhereElementIsElementType()
+                //        .Cast<FamilySymbol>()
+                //        .FirstOrDefault(ft => ft.FamilyName == _familyNameLintelBars && ft.Name == _familyTypeLintelBars);
+                //    if (!lintelSymb.IsActive)
+                //    {
+                //        lintelSymb.Activate();
+                //    }
+                //    // Отметка верха проема - 20 мм + радиус стержней
+                //    double lintelBarsElevation = lintelH - (2100 - 6) / SharedValues.FootToMillimeters;
+                //    Reference levelRef = (doc.GetElement(hostWall.LevelId) as Level).GetPlaneReference();
+                //    using (Transaction trans = new Transaction(doc))
+                //    {
+                //        trans.Start("Перемычка из стержней");
+                //        var lintel = doc.Create.NewFamilyInstance(point, lintelSymb, level, StructuralType.NonStructural);
+                //        //lintel.get_Parameter(BuiltInParameter.SCHEDULE_LEVEL_PARAM).Set(hostWall.LevelId);
+                //        lintel.get_Parameter(BuiltInParameter.INSTANCE_ELEVATION_PARAM).Set(lintelBarsElevation);
+                //        lintel.LookupParameter("Ширина проема").Set(openingW);
+                //        //var lintel1 = doc.Create.NewFamilyInstance(levelRef, point, new XYZ(), lintelSymb);
+                //        var pType = lintelSymb.Family.FamilyPlacementType;
+                //        trans.Commit();
+                //        return lintel;
+                //    }
+                //}
+            }
+            catch (Autodesk.Revit.Exceptions.InvalidObjectException)
+            {
+                MessageBox.Show("Не удалось создать проем и перемычку. Удалите существующий проем.", "Ошибка");
+                return null;
+            }
         }
 
 
@@ -158,11 +273,10 @@ namespace MS.Commands.AR
         /// </summary>
         /// <param name="commandData"></param>
         /// <returns>Воздуховод, или null, если операция отменена или не валидна</returns>
-        private Element GetDuct(in ExternalCommandData commandData)
+        private (Element duct, Line ductLine) GetDuct(in ExternalCommandData commandData)
         {
             var uidoc = commandData.Application.ActiveUIDocument;
             var doc = uidoc.Document;
-
             Selection sel = uidoc.Selection;
             ElementInLinkSelectionFilter<Duct> filter
                 = new ElementInLinkSelectionFilter<Duct>(
@@ -175,19 +289,26 @@ namespace MS.Commands.AR
                     filter,
                     "Выберите воздуховод из связанного файла");
                 duct = filter.LinkedDocument.GetElement(ductRef.LinkedElementId);
+                var link = doc.GetElement(ductRef.ElementId) as RevitLinkInstance;
+                var ductCurve = (duct.Location as LocationCurve).Curve;
+                Transform transform = link.GetTransform();
+                if (!transform.AlmostEqual(Transform.Identity))
+                {
+                    ductCurve = ductCurve.CreateTransformed(transform);
+                }
+                return (duct, ductCurve as Line);
             }
             catch (Autodesk.Revit.Exceptions.OperationCanceledException)
             {
-                return null;
+                return (null, null);
             }
             catch (Autodesk.Revit.Exceptions.InvalidOperationException)
             {
                 MessageBox.Show(
                     "Перейдите на вид, где можно выбирать воздуховоды из связанных файлов",
                     "Ошибка");
-                return null;
+                return (null, null);
             }
-            return duct;
         }
 
         /// <summary>
