@@ -20,6 +20,8 @@ namespace MS.Commands.AR
     [Regeneration(RegenerationOption.Manual)]
     public class RoomsFinishingMultiMark : IExternalCommand
     {
+        private static string _phase = "Новая конструкция";
+
         private bool ValidateParams(ExternalCommandData commandData)
         {
             Document doc = commandData.Application.ActiveUIDocument.Document;
@@ -128,11 +130,19 @@ namespace MS.Commands.AR
             {
                 byLevel = false;
             }
+            var user_input = UserInput.GetStringFromUser("Выбор стадии", "Введите стадию для расчета площадей:", _phase);
+            if (user_input.Length == 0)
+            {
+                return Result.Cancelled;
+            }
+            _phase = user_input;
+
 
             var rooms = new FilteredElementCollector(doc)
                 .OfCategory(BuiltInCategory.OST_Rooms)
                 .WhereElementIsNotElementType()
                 .ToElements()
+                .Where(r => r.get_Parameter(BuiltInParameter.ROOM_PHASE).AsValueString() == _phase)
                 .Where(e => e.get_Parameter(BuiltInParameter.ROOM_AREA).AsDouble() > 0)
                 .ToList();
 
