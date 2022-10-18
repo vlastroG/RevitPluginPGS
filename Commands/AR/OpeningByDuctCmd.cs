@@ -12,7 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows;
+using System.Windows.Forms;
 
 namespace MS.Commands.AR
 {
@@ -20,9 +20,9 @@ namespace MS.Commands.AR
     [Regeneration(RegenerationOption.Manual)]
     public class OpeningByDuctCmd : IExternalCommand
     {
-        private readonly string _familyNameOpening = "231_Проем прямоуг (Окно_Стена)";
+        private readonly string _familyNameOpeningRectangle = "231_Проем прямоуг (Окно_Стена)";
 
-        private readonly string _familyTypeOpening = "231_Проем прямоуг (Окно_Стена)";
+        private readonly string _familyTypeOpeningRectangle = "231_Проем прямоуг (Окно_Стена)";
 
         private readonly string _familyNameLintelAngles = "ADSK_Обобщенная модель_Перемычка из уголков";
 
@@ -43,20 +43,60 @@ namespace MS.Commands.AR
             {
                 return Result.Cancelled;
             }
-            double ductH = duct.get_Parameter(BuiltInParameter.RBS_CURVE_HEIGHT_PARAM).AsDouble();
-            double ductW = duct.get_Parameter(BuiltInParameter.RBS_CURVE_WIDTH_PARAM).AsDouble();
-            double openingH = ductH + 2 * 50 / SharedValues.FootToMillimeters;
-            double openingW = ductW + 2 * 50 / SharedValues.FootToMillimeters;
-
             var plane = GetWallPlane(wall).GetSurface() as Plane;
             var point = GetPlaneAndLineIntersection(plane, ductLine);
-            FamilyInstance opening = PlaceOpening(doc, point, wall, openingH, openingW);
-            FamilyInstance lintel = PlaceLintel(doc, point, wall, opening);
-            if (lintel is null)
+            if (point is null)
             {
-                return Result.Failed;
+                MessageBox.Show("Не найдена точка пересечения оси воздуховода и стены", "Ошибка");
+                return Result.Cancelled;
+            }
+            double ductH = 0;
+            double ductW = 0;
+            double openingH;
+            double openingW;
+            try
+            {
+                // Если воздуховод прямоугольный или овальный
+                ductH = duct.get_Parameter(BuiltInParameter.RBS_CURVE_HEIGHT_PARAM).AsDouble();
+                ductW = duct.get_Parameter(BuiltInParameter.RBS_CURVE_WIDTH_PARAM).AsDouble();
+            }
+            catch (System.NullReferenceException)
+            {
+                // Воздуховод круглого сечения
+                ductH = duct.get_Parameter(BuiltInParameter.RBS_CURVE_DIAMETER_PARAM).AsDouble();
+                ductW = ductH;
+            }
+            openingH = ductH + 2 * 50 / SharedValues.FootToMillimeters;
+            openingW = ductW + 2 * 50 / SharedValues.FootToMillimeters;
+
+            FamilyInstance opening = PlaceOpeningRectangle(doc, point, wall, openingH, openingW);
+            if (opening is null)
+            {
+                return Result.Cancelled;
+            }
+            var createLintel = MessageBox.Show(
+                "Создавать перемычку?",
+                "Проемы по воздуховодам",
+                MessageBoxButtons.YesNo);
+            if (createLintel == DialogResult.Yes)
+            {
+                FamilyInstance lintel = PlaceLintel(doc, point, wall, opening);
+                if (lintel is null)
+                {
+                    return Result.Cancelled;
+                }
             }
             return Result.Succeeded;
+        }
+
+        private void ShowError(string familyName, string typeName)
+        {
+            MessageBox.Show(
+                $"В проекте не найдено семейство:" +
+                $"\n{familyName}" +
+                $"\nс типом" +
+                $"\n{typeName}",
+                "Ошибка");
         }
 
         /// <summary>
@@ -67,7 +107,6 @@ namespace MS.Commands.AR
         /// <returns>Поверхность стены, или null, если что-то пошло не так</returns>
         private PlanarFace GetWallPlane(Wall wall)
         {
-            Plane plane = null;
             Solid wallSolid = null;
             GeometryElement geomElem = wall.get_Geometry(new Options());
             foreach (GeometryObject geomObj in geomElem)
@@ -156,13 +195,18 @@ namespace MS.Commands.AR
         /// <param name="openingH">Высота проема</param>
         /// <param name="openingW">Ширина проема</param>
         /// <returns>Экземпляр семейства проема</returns>
-        private FamilyInstance PlaceOpening(in Document doc, XYZ point, in Wall hostWall, double openingH, double openingW)
+        private FamilyInstance PlaceOpeningRectangle(in Document doc, XYZ point, in Wall hostWall, double openingH, double openingW)
         {
             var openingSymb = new FilteredElementCollector(doc)
                 .OfClass(typeof(FamilySymbol))
                 .WhereElementIsElementType()
                 .Cast<FamilySymbol>()
-                .FirstOrDefault(ft => ft.FamilyName == _familyNameOpening && ft.Name == _familyTypeOpening);
+                .FirstOrDefault(ft => ft.FamilyName == _familyNameOpeningRectangle && ft.Name == _familyTypeOpeningRectangle);
+            if (openingSymb is null)
+            {
+                ShowError(_familyNameOpeningRectangle, _familyTypeOpeningRectangle);
+                return null;
+            }
             if (!openingSymb.IsActive)
             {
                 openingSymb.Activate();
@@ -170,7 +214,7 @@ namespace MS.Commands.AR
             Level level = (doc.GetElement(hostWall.LevelId)) as Level;
             using (Transaction trans = new Transaction(doc))
             {
-                trans.Start("Разместить проем");
+                trans.Start("Прямоугольный проем");
                 var opening = doc.Create.NewFamilyInstance(point, openingSymb, hostWall, level, StructuralType.NonStructural);
                 opening.get_Parameter(BuiltInParameter.INSTANCE_SILL_HEIGHT_PARAM).Set(point.Z - 0.5 * openingH - level.Elevation);
                 opening.get_Parameter(SharedParams.ADSK_DimensionHeight).Set(openingH);
@@ -189,13 +233,18 @@ namespace MS.Commands.AR
                 double openingW = opening.get_Parameter(SharedParams.ADSK_DimensionWidth).AsDouble();
                 double lintelH = openingBaseOffset + openingH;
                 Level level = (doc.GetElement(hostWall.LevelId)) as Level;
-                if (openingW >= _openingWidthNeed)
+                if (openingW > _openingWidthNeed)
                 {
                     var lintelSymb = new FilteredElementCollector(doc)
                         .OfClass(typeof(FamilySymbol))
                         .WhereElementIsElementType()
                         .Cast<FamilySymbol>()
                         .FirstOrDefault(ft => ft.FamilyName == _familyNameLintelAngles && ft.Name == _familyTypeLintelAngles);
+                    if (lintelSymb is null)
+                    {
+                        ShowError(_familyNameLintelAngles, _familyTypeLintelAngles);
+                        return null;
+                    }
                     if (!lintelSymb.IsActive)
                     {
                         lintelSymb.Activate();
@@ -218,6 +267,11 @@ namespace MS.Commands.AR
                         .WhereElementIsElementType()
                         .Cast<FamilySymbol>()
                         .FirstOrDefault(ft => ft.FamilyName == _familyNameLintelBars && ft.Name == _familyTypeLintelBars);
+                    if (lintelSymb is null)
+                    {
+                        ShowError(_familyNameLintelBars, _familyTypeLintelBars);
+                        return null;
+                    }
                     if (!lintelSymb.IsActive)
                     {
                         lintelSymb.Activate();
@@ -233,32 +287,6 @@ namespace MS.Commands.AR
                         return lintel;
                     }
                 }
-                //{
-                //    var lintelSymb = new FilteredElementCollector(doc)
-                //        .OfClass(typeof(FamilySymbol))
-                //        .WhereElementIsElementType()
-                //        .Cast<FamilySymbol>()
-                //        .FirstOrDefault(ft => ft.FamilyName == _familyNameLintelBars && ft.Name == _familyTypeLintelBars);
-                //    if (!lintelSymb.IsActive)
-                //    {
-                //        lintelSymb.Activate();
-                //    }
-                //    // Отметка верха проема - 20 мм + радиус стержней
-                //    double lintelBarsElevation = lintelH - (2100 - 6) / SharedValues.FootToMillimeters;
-                //    Reference levelRef = (doc.GetElement(hostWall.LevelId) as Level).GetPlaneReference();
-                //    using (Transaction trans = new Transaction(doc))
-                //    {
-                //        trans.Start("Перемычка из стержней");
-                //        var lintel = doc.Create.NewFamilyInstance(point, lintelSymb, level, StructuralType.NonStructural);
-                //        //lintel.get_Parameter(BuiltInParameter.SCHEDULE_LEVEL_PARAM).Set(hostWall.LevelId);
-                //        lintel.get_Parameter(BuiltInParameter.INSTANCE_ELEVATION_PARAM).Set(lintelBarsElevation);
-                //        lintel.LookupParameter("Ширина проема").Set(openingW);
-                //        //var lintel1 = doc.Create.NewFamilyInstance(levelRef, point, new XYZ(), lintelSymb);
-                //        var pType = lintelSymb.Family.FamilyPlacementType;
-                //        trans.Commit();
-                //        return lintel;
-                //    }
-                //}
             }
             catch (Autodesk.Revit.Exceptions.InvalidObjectException)
             {

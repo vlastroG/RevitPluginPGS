@@ -113,6 +113,11 @@ namespace MS.Shared
         public static Guid ADSK_DimensionHeight => Guid.Parse("da753fe3-ecfa-465b-9a2c-02f55d0c2ff1");
 
         /// <summary>
+        /// Guid параметра ADSK_Размер_Диаметр = 9b679ab7-ea2e-49ce-90ab-0549d5aa36ff (double)
+        /// </summary>
+        public static Guid ADSK_DimensionDiameter => Guid.Parse("9b679ab7-ea2e-49ce-90ab-0549d5aa36ff");
+
+        /// <summary>
         /// Guid параметра PGS_ИтогАрмСетки = 40f2c9af-2986-4330-a6d9-4c9ae9419342 (double)
         /// </summary>
         public static Guid PGS_TotalMasonryMesh => Guid.Parse("40f2c9af-2986-4330-a6d9-4c9ae9419342");
@@ -341,6 +346,7 @@ namespace MS.Shared
         /// Guid параметра PGS_Наименование системы = f2381a1b-8c10-41a3-984b-21c10b911338 (string)
         /// </summary>
         public static Guid PGS_SystemName => Guid.Parse("f2381a1b-8c10-41a3-984b-21c10b911338");
+
 
         /// <summary>
         /// Валидация текущего проекта Revit на наличие общих параметров у заданной категории.
