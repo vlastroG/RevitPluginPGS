@@ -105,6 +105,18 @@ namespace MS.Commands.AR
         }
 
         /// <summary>
+        /// Находит высоту строки по ее длине
+        /// </summary>
+        /// <param name="data">Строковые данные</param>
+        /// <returns>Высота строки в футах</returns>
+        private double GetRowHeight(string data)
+        {
+            double heightMM = Math.Ceiling((data.Length * 0.1642 + 10.709) / 5.0) * 5;
+            double heightFoot = heightMM >= 15 ? heightMM : 15;
+            return heightFoot / SharedValues.FootToMillimeters;
+        }
+
+        /// <summary>
         /// Добавляет в спецификацию тип отделки путем добавления каждого вида отделки как отдельной строки 
         /// и объединяя пустые оставшиеся строки. 
         /// Добавление начинается с заполнения последней строки строки спецификации
@@ -123,6 +135,7 @@ namespace MS.Commands.AR
             table.SetCellText(startRowIndex, 1, fintypeRowDto.FintypeWallsCeilings);
             int rowsCount =
                 walltypesCount >= ceilingtypesCount ? walltypesCount : ceilingtypesCount;
+            int fintypesCount = rowsCount;
             rowsCount = rowsCount > 0 ? rowsCount : 1;
             for (int i = startRowIndex + 1; i < startRowIndex + rowsCount; i++)
             {
@@ -136,8 +149,29 @@ namespace MS.Commands.AR
                 table.MergeCells(new TableMergedCell(startRowIndex, 0, startRowIndex + rowsCount - 1, 0));
                 table.MergeCells(new TableMergedCell(startRowIndex, 1, startRowIndex + rowsCount - 1, 1));
                 table.MergeCells(new TableMergedCell(startRowIndex, 6, startRowIndex + rowsCount - 1, 6));
-                FillFintypeAreaRows(ref table, fintypeRowDto.CeilingTypeAreas, rowsCount, startRowIndex, colCeilingIndex);
-                FillFintypeAreaRows(ref table, fintypeRowDto.WallTypesAreas, rowsCount, startRowIndex, colWalltypeIndex);
+                double rowsCeilingHeight = FillFintypeAreaRows(ref table, fintypeRowDto.CeilingTypeAreas, rowsCount, startRowIndex, colCeilingIndex);
+                double rowsWallsHeight = FillFintypeAreaRows(ref table, fintypeRowDto.WallTypesAreas, rowsCount, startRowIndex, colWalltypeIndex);
+                double roomNamesCellHeightNeed = GetRowHeight(fintypeRowDto.RoomNames);
+                double roomNamesCellHeightExist = Math.Max(rowsCeilingHeight, rowsWallsHeight);
+                if (roomNamesCellHeightExist < roomNamesCellHeightNeed)
+                {
+                    if (fintypesCount >= 1)
+                    {
+                        for (int i = startRowIndex; i < startRowIndex + fintypesCount; i++)
+                        {
+                            double existRowHeightForType = table.GetRowHeight(i);
+                            if (existRowHeightForType > (roomNamesCellHeightNeed / rowsCount))
+                            {
+                                continue;
+                            }
+                            table.SetRowHeight(i, roomNamesCellHeightNeed / rowsCount);
+                        }
+                    }
+                    else
+                    {
+                        table.SetRowHeight(startRowIndex, roomNamesCellHeightNeed);
+                    }
+                }
             }
             // Добавить строку вниз для последующего типа отделки
             table.InsertRow(startRowIndex + rowsCount);
@@ -154,18 +188,23 @@ namespace MS.Commands.AR
         /// по видам отделки (стены/потолок) для данного типа отделки помещений</param>
         /// <param name="startRowIndex">Индекс первой строки, куда писать наименование вида отделки</param>
         /// <param name="startColIndex">Индекс первой колонки, куда писать значение площади отделки</param>
-        private void FillFintypeAreaRows(
+        private double FillFintypeAreaRows(
             ref TableSectionData table,
             in IReadOnlyList<(string FinType, double Area)> fintypes,
             int rowsCount,
             int startRowIndex,
             int startColIndex)
         {
+            double rowsSumHeight = 0;
             for (int i = startRowIndex, j = 0; i < startRowIndex + fintypes.Count; i++, j++)
             {
+                string data = fintypes[j].FinType;
+                double height = GetRowHeight(data);
                 // заполнить ячейки для типов отделки потолка
                 table.SetCellText(i, startColIndex, fintypes[j].FinType);
                 table.SetCellText(i, startColIndex + 1, fintypes[j].Area.ToString());
+                table.SetRowHeight(i, height);
+                rowsSumHeight += height;
             }
             int fintypesCount = fintypes.Count > 1 ? fintypes.Count : 1;
             if (fintypesCount < rowsCount)
@@ -184,6 +223,7 @@ namespace MS.Commands.AR
                         startRowIndex + rowsCount - 1,
                         startColIndex + 1));
             }
+            return rowsSumHeight;
         }
 
         /// <summary>
