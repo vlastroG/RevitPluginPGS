@@ -30,5 +30,20 @@ namespace MS.Commands.AR.DTO
         {
             this.FinishingName = FinishingName;
         }
+
+        public override bool Equals(object obj)
+        {
+            return (obj is WallTypeFinishingDto objAsDto) && (FinishingName == objAsDto.FinishingName);
+        }
+
+        public override int GetHashCode()
+        {
+            string wtName = String.Empty;
+            if (WallType != null)
+            {
+                wtName = WallType.Name;
+            }
+            return (FinishingName + wtName).GetHashCode();
+        }
     }
 }

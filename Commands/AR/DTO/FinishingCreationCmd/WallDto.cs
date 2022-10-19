@@ -12,32 +12,22 @@ namespace MS.Commands.AR.DTO.FinishingCreationCmd
     /// </summary>
     public class WallDto
     {
-        /// <summary>
-        /// Конструктор DTO для создания отделочных стен по границам помещений
-        /// </summary>
-        /// <param name="Segment">Граница помещения</param>
-        /// <param name="LevelId">Id уровня, на котором должна располагаться стена</param>
-        /// <param name="HRoom">Высота помещения, которому принадлежит граница для создания отделочной стены</param>
-        /// <param name="HElem">Высота элемента, который образуетграницу помещения</param>
-        /// <param name="RoomBottomOffset">Смещение снизу от уровня</param>
-        public WallDto(BoundarySegment Segment, ElementId LevelId, double HRoom, double HElem, double RoomBottomOffset)
-        {
-            this.Segment = Segment;
-            this.LevelId = LevelId;
-            this.HRoom = HRoom;
-            this.HElem = HElem;
-            this.RoomBottomOffset = RoomBottomOffset;
-        }
+        private List<ElementId> _elementsToJoin = new List<ElementId>();
 
         /// <summary>
         /// Линия границы помещения
         /// </summary>
-        public BoundarySegment Segment { get; }
+        public Curve Curve { get; }
 
         /// <summary>
         /// Id уровня, на котором должна располагаться отделочная стена
         /// </summary>
         public ElementId LevelId { get; }
+
+        /// <summary>
+        /// Значение параметра элемента PGS_ТипОтделкиСтен, по которому выполняется отделка
+        /// </summary>
+        public string FinTypeName { get; }
 
         /// <summary>
         /// Высота помещения, в котором будет расположена отделочная стена
@@ -53,5 +43,46 @@ namespace MS.Commands.AR.DTO.FinishingCreationCmd
         /// Смещение снизу от уровня для стены
         /// </summary>
         public double RoomBottomOffset { get; }
+
+        /// <summary>
+        /// Смещение снизу от уровня для элемента, по которому будет создаваться отделка
+        /// </summary>
+        public double ElementBottomOffset { get; }
+
+        /// <summary>
+        /// Список элементов, с которыми нужно будет соединить созданную отделочную стену
+        /// </summary>
+        public IReadOnlyList<ElementId> ElementsToJoin { get { return _elementsToJoin; } }
+
+        /// <summary>
+        /// Конструктор DTO для создания отделочных стен по границам помещений
+        /// </summary>
+        /// <param name="Curve">Граница помещения</param>
+        /// <param name="FinTypeName">Значение параметра элемента PGS_ТипОтделкиСтен, 
+        /// по которому выполняется отделка</param>
+        /// <param name="LevelId">Id уровня, на котором должна располагаться стена</param>
+        /// <param name="HRoom">Высота помещения, которому принадлежит граница для создания отделочной стены</param>
+        /// <param name="HElem">Высота элемента, который образуетграницу помещения</param>
+        /// <param name="RoomBottomOffset">Смещение снизу от уровня для помещения, в котором создается отделка</param>
+        /// <param name="ElemBottomOffset">Смещение снизу от уровня для элемента, по которому создается отделка</param>
+        public WallDto(
+            Curve Curve,
+            ElementId LevelId,
+            string FinTypeName,
+            double HRoom,
+            double HElem,
+            double RoomBottomOffset,
+            double ElemBottomOffset,
+            IEnumerable<ElementId> elementsToJoin)
+        {
+            this.Curve = Curve;
+            this.LevelId = LevelId;
+            this.FinTypeName = FinTypeName;
+            this.HRoom = HRoom;
+            this.HElem = HElem;
+            this.RoomBottomOffset = RoomBottomOffset;
+            this.ElementBottomOffset = ElemBottomOffset;
+            _elementsToJoin.AddRange(elementsToJoin);
+        }
     }
 }

@@ -62,12 +62,11 @@ namespace MS.Commands.AR
             List<Room> rooms = GetRooms(uidoc);
             if (rooms == null) return Result.Cancelled;
 
-            (List<WallDto> wallDtos, List<string> descriptions) = GetWallsCreationData(doc, rooms, view3d, spatialElementBoundaryOptions);
+            (List<WallDto> wallDtos, List<WallTypeFinishingDto> descriptions) = GetWallsCreationData(doc, rooms, view3d, spatialElementBoundaryOptions);
 
             (List<WallType> wallTypes, List<CeilingType> ceilingTypes) = GetWallsAndCeilingsTypes(doc);
-            List<WallTypeFinishingDto> dtos = descriptions.Select(d => new WallTypeFinishingDto(d)).ToList();
 
-            var ui = new FinishingCreation(dtos, wallTypes, ceilingTypes);
+            var ui = new FinishingCreation(descriptions, wallTypes, ceilingTypes);
             ui.ShowDialog();
             if (ui.DialogResult != true)
             {
@@ -75,8 +74,6 @@ namespace MS.Commands.AR
             }
             bool createWalls = ui.CreateWalls;
             bool createCeilings = ui.CreateCeilings;
-            // Autodesk.Revit.DB.IFC.ExporterIFCUtils.GetRoomBoundaryAsCurveLoopArray
-            //roomBorderLoops.Add(loops);
             if (createWalls)
             {
                 CreateWalls(doc, wallDtos, ui, view3d);
@@ -201,7 +198,7 @@ namespace MS.Commands.AR
             in View3D view3d)
         {
             WallType wtDefault = null;
-            List<(Element, Element)> pairsToJoin = new List<(Element, Element)>();
+            List<(ElementId, ElementId)> pairsToJoin = new List<(ElementId, ElementId)>();
             IReadOnlyDictionary<string, WallType> dictWT = ui.DictWallTypeByFinName;
 
             using (Transaction trans = new Transaction(doc))
@@ -210,65 +207,18 @@ namespace MS.Commands.AR
 
                 for (int i = 0; i < wallDtos.Count; i++)
                 {
-                    Element borderEl = doc.GetElement(wallDtos[i].Segment.ElementId);
-                    Element e = null;
-                    if (borderEl is ModelLine)
-                    {
-                        e = WorkWithGeometry.GetElementByRay_switch(doc,
-                                    view3d,
-                                    wallDtos[i].Segment.GetCurve(), true);
-                    }
-                    else
-                    {
-                        e = borderEl;
-                    }
-                    if (null == e)
-                    {
-                        continue;
-                    }
-                    if (!(e is RevitLinkInstance)
-                        && !(e is Wall)
-                        && (WorkWithParameters.GetCategoryIdAsInteger(e)
-                            != (int)BuiltInCategory.OST_StructuralColumns))
-                    {
-                        // Получение границ помещений, которые образованы только связями,
-                        // стенами и несущими колоннами
-                        continue;
-                    }
-
                     var wt = wtDefault;
-                    double offset = 0;
-                    string finName = _defaultName;
-                    double elemBottomOffset = 0;
-                    if (e is Wall)
-                    {
-                        elemBottomOffset = e
-                            .get_Parameter(BuiltInParameter.WALL_BASE_OFFSET).AsDouble();
-                        finName = (e as Wall).WallType
-                            .get_Parameter(SharedParams.PGS_FinishingName).AsValueString();
-                    }
-                    else if (e is FamilyInstance)
-                    {
-                        elemBottomOffset = e
-                            .get_Parameter(BuiltInParameter.FAMILY_BASE_LEVEL_OFFSET_PARAM).AsDouble();
-                        finName = (e as FamilyInstance).Symbol
-                            .get_Parameter(SharedParams.PGS_FinishingName).AsValueString();
-                    }
-                    if (String.IsNullOrEmpty(finName))
-                    {
-                        finName = _defaultName;
-                    }
-                    wt = dictWT[finName];
+                    double wallGridOffset = 0;
+                    wt = dictWT[wallDtos[i].FinTypeName];
                     if (ReferenceEquals(null, wt))
                     {
                         continue;
                     }
-                    offset = wt.Width / 2;
+                    wallGridOffset = wt.Width / 2;
 
                     try
                     {
-                        Curve curve = wallDtos[i].Segment.GetCurve();
-                        Curve wallGrid = curve.CreateOffset(-offset, XYZ.BasisZ);
+                        Curve wallGrid = wallDtos[i].Curve.CreateOffset(-wallGridOffset, XYZ.BasisZ);
                         double height = 0;
                         double bottomOffset = 0;
                         switch (ui.FinWallsHeightType)
@@ -279,7 +229,7 @@ namespace MS.Commands.AR
                                 break;
                             case FinWallsHeight.ByElement:
                                 height = wallDtos[i].HElem;
-                                bottomOffset = elemBottomOffset - wallDtos[i].RoomBottomOffset;
+                                bottomOffset = wallDtos[i].ElementBottomOffset - wallDtos[i].RoomBottomOffset;
                                 break;
                             case FinWallsHeight.ByInput:
                                 height = ui.InputWallsHeight / SharedValues.FootToMillimeters;
@@ -287,8 +237,14 @@ namespace MS.Commands.AR
                                 break;
                         }
                         var wall = Wall.Create(doc, wallGrid, wt.Id, wallDtos[i].LevelId, height, bottomOffset, false, false);
-                        (Element, Element) toJoinPair = (e, wall);
-                        pairsToJoin.Add(toJoinPair);
+                        foreach (var elemToJoin in wallDtos[i].ElementsToJoin)
+                        {
+                            (ElementId, ElementId) toJoinPair = (elemToJoin, wall.Id);
+                            if (!pairsToJoin.Contains(toJoinPair))
+                            {
+                                pairsToJoin.Add(toJoinPair);
+                            }
+                        }
                     }
                     catch (Autodesk.Revit.Exceptions.InvalidOperationException)
                     {
@@ -298,7 +254,12 @@ namespace MS.Commands.AR
                 }
                 trans.Commit();
             }
-            List<(Element, Element)> errorsList = new List<(Element, Element)>();
+            JoinWalls(doc, pairsToJoin);
+        }
+
+        private void JoinWalls(in Document doc, List<(ElementId, ElementId)> pairsToJoin)
+        {
+            List<(ElementId, ElementId)> errorsList = new List<(ElementId, ElementId)>();
             using (Transaction joining = new Transaction(doc))
             {
                 joining.Start("Соединение стен");
@@ -306,7 +267,7 @@ namespace MS.Commands.AR
                 {
                     try
                     {
-                        JoinGeometryUtils.JoinGeometry(doc, pair.Item1, pair.Item2);
+                        JoinGeometryUtils.JoinGeometry(doc, doc.GetElement(pair.Item1), doc.GetElement(pair.Item2));
                     }
                     catch (Autodesk.Revit.Exceptions.ArgumentException)
                     {
@@ -324,8 +285,8 @@ namespace MS.Commands.AR
             {
                 StringBuilder sb = new StringBuilder();
                 sb.AppendLine("Не удалось соединить элементы! Id:");
-                var errsGroups = errorsList.Where(errs => errs.Item1.IsValidObject && errs.Item2.IsValidObject)
-                    .GroupBy(group => group.Item1.Id);
+                var errsGroups = errorsList.Where(errs => (errs.Item1.IntegerValue > 0) && (errs.Item2.IntegerValue > 0))
+                    .GroupBy(group => group.Item1);
                 foreach (var groupId in errsGroups)
                 {
                     if (groupId.Count() > 10)
@@ -336,7 +297,7 @@ namespace MS.Commands.AR
                     {
                         foreach (var item in groupId)
                         {
-                            sb.AppendLine($"{item.Item1.Id} и {item.Item2.Id};");
+                            sb.AppendLine($"{item.Item1} и {item.Item2};");
                         }
                     }
                 }
@@ -344,13 +305,113 @@ namespace MS.Commands.AR
             }
         }
 
-        private (List<WallDto> WallDtos, List<string> Descriptions) GetWallsCreationData(
+        /// <summary>
+        /// Получает значение параметра PGS_ТипОтделкиСтен у элемента
+        /// </summary>
+        /// <param name="elem">Элемент, для которого находится значение</param>
+        /// <returns>Значение параметра элемента PGS_ТипОтделкиСтен</returns>
+        private string GetFinName(in Element elem)
+        {
+            string finName = _defaultName;
+            try
+            {
+                if (elem is Wall)
+                {
+                    finName = (elem as Wall).WallType
+                        .get_Parameter(SharedParams.PGS_FinishingName).AsValueString();
+                }
+                else if (elem is FamilyInstance)
+                {
+                    finName = (elem as FamilyInstance).Symbol
+                        .get_Parameter(SharedParams.PGS_FinishingName).AsValueString();
+                }
+            }
+            catch (System.NullReferenceException)
+            {
+                finName = _defaultName;
+            }
+            if (String.IsNullOrEmpty(finName))
+            {
+                finName = _defaultName;
+            }
+            return finName;
+        }
+
+        /// <summary>
+        /// Получить высоту элемента
+        /// </summary>
+        /// <param name="element"></param>
+        /// <param name="roomHeight">Высота помещения, границу которого образует элемент</param>
+        /// <param name="opts"></param>
+        /// <returns>высота элемента. Если это связь, то будет возвращена высота помещения</returns>
+        private double GetElemHeight(in Element element, double roomHeight, in Options opts)
+        {
+            double elemH = 0;
+            if (!(element is RevitLinkInstance))
+            {
+                var bBox = element.get_Geometry(opts).GetBoundingBox();
+                elemH = Math.Round((bBox.Max.Z - bBox.Min.Z) * SharedValues.FootToMillimeters)
+                    / SharedValues.FootToMillimeters;
+            }
+            else
+            {
+                elemH = roomHeight;
+            }
+            return elemH;
+        }
+
+        /// <summary>
+        /// Получить смещение снизу для отделываемого элемента
+        /// </summary>
+        /// <param name="element"></param>
+        /// <returns>Смещение снизу</returns>
+        private double GetElemBottomOffset(Element element)
+        {
+            double elemBottomOffset = 0;
+            if (element is Wall)
+            {
+                elemBottomOffset = element
+                    .get_Parameter(BuiltInParameter.WALL_BASE_OFFSET).AsDouble();
+            }
+            else if (element is FamilyInstance)
+            {
+                elemBottomOffset = element
+                    .get_Parameter(BuiltInParameter.FAMILY_BASE_LEVEL_OFFSET_PARAM).AsDouble();
+            }
+            return elemBottomOffset;
+        }
+
+        /// <summary>
+        /// Находит элемент, который образует границу помещения
+        /// </summary>
+        /// <param name="doc"></param>
+        /// <param name="boundarySegment"></param>
+        /// <param name="view3D"></param>
+        /// <returns></returns>
+        private Element GetBoundaryElement(in Document doc, in BoundarySegment boundarySegment, in View3D view3D)
+        {
+            Element borderEl = doc.GetElement(boundarySegment.ElementId);
+            Element e = null;
+            if (borderEl is ModelLine)
+            {
+                e = WorkWithGeometry.GetElementByRay_switch(doc,
+                            view3D,
+                            boundarySegment.GetCurve(), true);
+            }
+            else
+            {
+                e = borderEl;
+            }
+            return e;
+        }
+
+        private (List<WallDto> WallDtos, List<WallTypeFinishingDto> Descriptions) GetWallsCreationData(
             in Document doc,
             in List<Room> rooms,
             in View3D view3d,
             in SpatialElementBoundaryOptions spatialElementBoundaryOptions)
         {
-            List<string> descriptions = new List<string>();
+            List<WallTypeFinishingDto> descriptions = new List<WallTypeFinishingDto>();
             List<WallDto> wallDtos = new List<WallDto>();
             Options opts = new Options();
             foreach (Room room in rooms)
@@ -358,23 +419,20 @@ namespace MS.Commands.AR
                 IList<IList<BoundarySegment>> loops
                   = room.GetBoundarySegments(
                     spatialElementBoundaryOptions);
+                var roomBottomOffset = room.get_Parameter(BuiltInParameter.ROOM_LOWER_OFFSET).AsDouble();
 
                 foreach (IList<BoundarySegment> loop in loops)
                 {
+                    string finNamePrev = _defaultName;
+                    double elemHPrev = 0;
+                    Curve curvePrev = null;
+                    double elemBottomOffsetPrev = 0;
+                    List<ElementId> elementsToJoin = new List<ElementId>();
                     for (int i = 0; i < loop.Count; i++)
                     {
-                        Element borderEl = doc.GetElement(loop[i].ElementId);
-                        Element e = null;
-                        if (borderEl is ModelLine)
-                        {
-                            e = WorkWithGeometry.GetElementByRay_switch(doc,
-                                        view3d,
-                                        loop[i].GetCurve(), true);
-                        }
-                        else
-                        {
-                            e = borderEl;
-                        }
+                        Curve curveCurrent = loop[i].GetCurve();
+                        Element e = GetBoundaryElement(doc, loop[i], view3d);
+                        //int eIdInt = e.Id.IntegerValue; 1057189
                         if (null == e)
                         {
                             continue;
@@ -384,50 +442,96 @@ namespace MS.Commands.AR
                             && (WorkWithParameters.GetCategoryIdAsInteger(e)
                                 != (int)BuiltInCategory.OST_StructuralColumns))
                         {
-                            // Получение границ помещений, которые образованы только связями,
-                            // стенами и несущими колоннами
                             continue;
+                        }
+                        string finNameCurrent = GetFinName(e);
+                        WallTypeFinishingDto finCurrent = new WallTypeFinishingDto(finNameCurrent);
+                        if (!descriptions.Contains(finCurrent))
+                        {
+                            descriptions.Add(finCurrent);
                         }
                         double roomH = room.get_Parameter(BuiltInParameter.ROOM_HEIGHT).AsDouble();
-                        double elemH = 0;
-                        if (!(e is RevitLinkInstance))
+                        double elemH = GetElemHeight(e, roomH, opts);
+                        double elemBottomOffset = GetElemBottomOffset(e);
+                        bool isCurveAdded = CurveExtension.AppendCurve(ref curvePrev, curveCurrent);
+                        if (i == 0 || (curvePrev is null))
                         {
-                            var bBox = e.get_Geometry(opts).GetBoundingBox();
-                            elemH = Math.Round((bBox.Max.Z - bBox.Min.Z) * SharedValues.FootToMillimeters)
-                                / SharedValues.FootToMillimeters;
-                        }
-                        else
-                        {
-                            elemH = roomH;
-                        }
-                        var bottomOffset = room.get_Parameter(BuiltInParameter.ROOM_LOWER_OFFSET).AsDouble();
-                        wallDtos.Add(new WallDto(loop[i], room.LevelId, roomH, elemH, bottomOffset));
-                        try
-                        {
-                            string finName = _defaultName;
-                            if (e is Wall)
-                            {
-                                finName = (e as Wall).WallType.get_Parameter(SharedParams.PGS_FinishingName)
-                                    .AsValueString();
-                            }
-                            else if (e is FamilyInstance)
-                            {
-                                finName = (e as FamilyInstance).Symbol.get_Parameter(SharedParams.PGS_FinishingName)
-                                    .AsValueString();
-                            }
-                            if (String.IsNullOrEmpty(finName))
-                            {
-                                finName = _defaultName;
-                            }
-                            if (!descriptions.Contains(finName))
-                            {
-                                descriptions.Add(finName);
-                            }
-                        }
-                        catch (System.NullReferenceException)
-                        {
+                            finNamePrev = finNameCurrent;
+                            curvePrev = curveCurrent;
+                            elemHPrev = elemH;
+                            elemBottomOffsetPrev = elemBottomOffset;
+                            elementsToJoin.Add(e.Id);
                             continue;
                         }
+                        if ((finNameCurrent != finNamePrev) || !isCurveAdded)
+                        {
+                            elementsToJoin.DistinctBy(t => t.IntegerValue);
+                            wallDtos.Add(new WallDto(
+                                curvePrev,
+                                room.LevelId,
+                                finNamePrev,
+                                roomH,
+                                elemHPrev,
+                                roomBottomOffset,
+                                elemBottomOffsetPrev,
+                                elementsToJoin));
+                            finNamePrev = finNameCurrent;
+                            curvePrev = curveCurrent;
+                            elemHPrev = elemH;
+                            elemBottomOffsetPrev = elemBottomOffset;
+                            elementsToJoin.Clear();
+                            elementsToJoin.Add(e.Id);
+                            continue;
+                        }
+                        if (i == loop.Count - 1)
+                        {
+                            if ((finNameCurrent == finNamePrev) && isCurveAdded)
+                            {
+                                finNamePrev = finNameCurrent;
+                                elemHPrev = elemH;
+                                elemBottomOffsetPrev = elemBottomOffset;
+                                elementsToJoin.Add(e.Id);
+                                elementsToJoin.DistinctBy(t => t.IntegerValue);
+                                wallDtos.Add(new WallDto(
+                                    curvePrev,
+                                    room.LevelId,
+                                    finNamePrev,
+                                    roomH,
+                                    elemHPrev,
+                                    roomBottomOffset,
+                                    elemBottomOffsetPrev,
+                                    elementsToJoin));
+                            }
+                            else
+                            {
+                                elementsToJoin.DistinctBy(t => t.IntegerValue);
+                                wallDtos.Add(new WallDto(
+                                    curvePrev,
+                                    room.LevelId,
+                                    finNamePrev,
+                                    roomH,
+                                    elemHPrev,
+                                    roomBottomOffset,
+                                    elemBottomOffsetPrev,
+                                    elementsToJoin));
+                                finNamePrev = finNameCurrent;
+                                curvePrev = curveCurrent;
+                                elemHPrev = elemH;
+                                elemBottomOffsetPrev = elemBottomOffset;
+                                elementsToJoin.Clear();
+                                elementsToJoin.Add(e.Id);
+                                wallDtos.Add(new WallDto(
+                                    curvePrev,
+                                    room.LevelId,
+                                    finNamePrev,
+                                    roomH,
+                                    elemHPrev,
+                                    roomBottomOffset,
+                                    elemBottomOffsetPrev,
+                                    elementsToJoin));
+                            }
+                        }
+                        elementsToJoin.Add(e.Id);
                     }
                 }
             }
