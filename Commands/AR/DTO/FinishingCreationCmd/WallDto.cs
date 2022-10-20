@@ -55,6 +55,16 @@ namespace MS.Commands.AR.DTO.FinishingCreationCmd
         public IReadOnlyList<ElementId> ElementsToJoin { get { return _elementsToJoin; } }
 
         /// <summary>
+        /// Значение номера помещения, в котором будет создана отделочная стена
+        /// </summary>
+        public string RoomNumber { get; }
+
+        /// <summary>
+        /// Значение параметра PGS_ТипОтделкиСтен помещения, в котором будет создана отделка
+        /// </summary>
+        public string RoomFinTypeWalls { get; }
+
+        /// <summary>
         /// Конструктор DTO для создания отделочных стен по границам помещений
         /// </summary>
         /// <param name="Curve">Граница помещения</param>
@@ -73,7 +83,9 @@ namespace MS.Commands.AR.DTO.FinishingCreationCmd
             double HElem,
             double RoomBottomOffset,
             double ElemBottomOffset,
-            IEnumerable<ElementId> elementsToJoin)
+            IEnumerable<ElementId> elementsToJoin,
+            string RoomNumber,
+            string RoomFinTypeWalls)
         {
             this.Curve = Curve;
             this.LevelId = LevelId;
@@ -83,6 +95,8 @@ namespace MS.Commands.AR.DTO.FinishingCreationCmd
             this.RoomBottomOffset = RoomBottomOffset;
             this.ElementBottomOffset = ElemBottomOffset;
             _elementsToJoin.AddRange(elementsToJoin);
+            this.RoomNumber = RoomNumber;
+            this.RoomFinTypeWalls = RoomFinTypeWalls;
         }
     }
 }

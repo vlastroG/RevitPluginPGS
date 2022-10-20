@@ -147,28 +147,69 @@ namespace MS.Commands.AR
 
         private bool ValidateSharedParams(in Document doc)
         {
-            Guid[] _sharedParamsForCommand = new Guid[] {
-            SharedParams.PGS_FinishingName
+            Guid[] _sharedParamsForWalls = new Guid[] {
+            SharedParams.PGS_FinishingName,
+            SharedParams.ADSK_RoomNumberInApartment,
+            SharedParams.PGS_FinishingTypeOfWalls
             };
             if (!SharedParams.IsCategoryOfDocContainsSharedParams(
                 doc,
                 BuiltInCategory.OST_Walls,
-                _sharedParamsForCommand))
+                _sharedParamsForWalls))
             {
                 MessageBox.Show("В текущем проекте у категории \"Стены\" " +
+                    "в типе отсутствуют необходимые общие параметры:" +
+                    "\nPGS_НаименованиеОтделки" +
+                    "\nВ экземпляре:" +
+                    "\nADSK_Номер помещения квартиры" +
+                    "\nPGS_ТипОтделкиСтен",
+                    "Ошибка");
+                return false;
+            }
+
+            Guid[] _sharedParamsForCeilings = new Guid[] {
+            SharedParams.ADSK_RoomNumberInApartment,
+            SharedParams.PGS_FinishingTypeOfWalls
+            };
+            if (!SharedParams.IsCategoryOfDocContainsSharedParams(
+                doc,
+                BuiltInCategory.OST_Ceilings,
+                _sharedParamsForCeilings))
+            {
+                MessageBox.Show("В текущем проекте у категории \"Потолки\" " +
+                    "\nв экземпляре отсутствуют необходимые общие параметры:" +
+                    "\nADSK_Номер помещения квартиры" +
+                    "\nPGS_ТипОтделкиСтен",
+                    "Ошибка");
+                return false;
+            }
+
+            Guid[] _sharedParamsForColumns = new Guid[] {
+            SharedParams.PGS_FinishingName
+            };
+            if (!SharedParams.IsCategoryOfDocContainsSharedParams(
+                doc,
+                BuiltInCategory.OST_StructuralColumns,
+                _sharedParamsForColumns))
+            {
+                MessageBox.Show("В текущем проекте у категории \"Несущие колонны\" " +
                     "в типе отсутствуют необходимые общие параметры:" +
                     "\nPGS_НаименованиеОтделки",
                     "Ошибка");
                 return false;
             }
+
+            Guid[] _sharedParamsForRooms = new Guid[] {
+            SharedParams.PGS_FinishingTypeOfWalls
+            };
             if (!SharedParams.IsCategoryOfDocContainsSharedParams(
                 doc,
-                BuiltInCategory.OST_StructuralColumns,
-                _sharedParamsForCommand))
+                BuiltInCategory.OST_Rooms,
+                _sharedParamsForRooms))
             {
-                MessageBox.Show("В текущем проекте у категории \"Несущие колонны\" " +
-                    "в типе отсутствуют необходимые общие параметры:" +
-                    "\nPGS_НаименованиеОтделки",
+                MessageBox.Show("В текущем проекте у категории \"Помещения\" " +
+                    "в экземпляре отсутствуют необходимые общие параметры:" +
+                    "\nPGS_ТипОтделкиСтен",
                     "Ошибка");
                 return false;
             }
@@ -237,6 +278,8 @@ namespace MS.Commands.AR
                                 break;
                         }
                         var wall = Wall.Create(doc, wallGrid, wt.Id, wallDtos[i].LevelId, height, bottomOffset, false, false);
+                        wall.get_Parameter(SharedParams.ADSK_RoomNumberInApartment).Set(wallDtos[i].RoomNumber);
+                        wall.get_Parameter(SharedParams.PGS_FinishingTypeOfWalls).Set(wallDtos[i].RoomFinTypeWalls);
                         foreach (var elemToJoin in wallDtos[i].ElementsToJoin)
                         {
                             (ElementId, ElementId) toJoinPair = (elemToJoin, wall.Id);
@@ -420,7 +463,8 @@ namespace MS.Commands.AR
                   = room.GetBoundarySegments(
                     spatialElementBoundaryOptions);
                 var roomBottomOffset = room.get_Parameter(BuiltInParameter.ROOM_LOWER_OFFSET).AsDouble();
-
+                string roomNumber = room.get_Parameter(BuiltInParameter.ROOM_NUMBER).AsValueString();
+                string roomFinTypeName = room.get_Parameter(SharedParams.PGS_FinishingTypeOfWalls).AsValueString();
                 foreach (IList<BoundarySegment> loop in loops)
                 {
                     string finNamePrev = _defaultName;
@@ -453,7 +497,7 @@ namespace MS.Commands.AR
                         double roomH = room.get_Parameter(BuiltInParameter.ROOM_HEIGHT).AsDouble();
                         double elemH = GetElemHeight(e, roomH, opts);
                         double elemBottomOffset = GetElemBottomOffset(e);
-                        bool isCurveAdded = CurveExtension.AppendCurve(ref curvePrev, curveCurrent);
+                        bool isCurveAdded = (finNameCurrent == finNamePrev) ? CurveExtension.AppendCurve(ref curvePrev, curveCurrent) : false;
                         if (i == 0 || (curvePrev is null))
                         {
                             finNamePrev = finNameCurrent;
@@ -463,7 +507,7 @@ namespace MS.Commands.AR
                             elementsToJoin.Add(e.Id);
                             continue;
                         }
-                        if ((finNameCurrent != finNamePrev) || !isCurveAdded)
+                        if ((i != loop.Count - 1) && !isCurveAdded)
                         {
                             elementsToJoin.DistinctBy(t => t.IntegerValue);
                             wallDtos.Add(new WallDto(
@@ -474,7 +518,9 @@ namespace MS.Commands.AR
                                 elemHPrev,
                                 roomBottomOffset,
                                 elemBottomOffsetPrev,
-                                elementsToJoin));
+                                elementsToJoin,
+                                roomNumber,
+                                roomFinTypeName));
                             finNamePrev = finNameCurrent;
                             curvePrev = curveCurrent;
                             elemHPrev = elemH;
@@ -500,7 +546,9 @@ namespace MS.Commands.AR
                                     elemHPrev,
                                     roomBottomOffset,
                                     elemBottomOffsetPrev,
-                                    elementsToJoin));
+                                    elementsToJoin,
+                                    roomNumber,
+                                    roomFinTypeName));
                             }
                             else
                             {
@@ -513,7 +561,9 @@ namespace MS.Commands.AR
                                     elemHPrev,
                                     roomBottomOffset,
                                     elemBottomOffsetPrev,
-                                    elementsToJoin));
+                                    elementsToJoin,
+                                    roomNumber,
+                                    roomFinTypeName));
                                 finNamePrev = finNameCurrent;
                                 curvePrev = curveCurrent;
                                 elemHPrev = elemH;
@@ -528,7 +578,9 @@ namespace MS.Commands.AR
                                     elemHPrev,
                                     roomBottomOffset,
                                     elemBottomOffsetPrev,
-                                    elementsToJoin));
+                                    elementsToJoin,
+                                    roomNumber,
+                                    roomFinTypeName));
                             }
                         }
                         elementsToJoin.Add(e.Id);
@@ -576,7 +628,7 @@ namespace MS.Commands.AR
                 {
                     try
                     {
-                        IList<CurveLoop> curveLoops = room.GetCurveLoops(opts);
+                        IList<CurveLoop> curveLoops = room.GetCurveLoops(opts).Select(loop => loop.Simplify()).ToList();
                         double height = 0;
                         if (ui.CeilingHeightByRoom)
                         {
@@ -588,7 +640,11 @@ namespace MS.Commands.AR
                         }
                         ElementId ceilingTypeId = ui.Ceiling.Id;
                         ElementId levelId = room.LevelId;
+                        string roomNumber = room.get_Parameter(BuiltInParameter.ROOM_NUMBER).AsValueString();
+                        string roomFinTypeWalls = room.get_Parameter(SharedParams.PGS_FinishingTypeOfWalls).AsValueString();
                         var ceiling = Ceiling.Create(doc, curveLoops, ceilingTypeId, levelId);
+                        ceiling.get_Parameter(SharedParams.ADSK_RoomNumberInApartment).Set(roomNumber);
+                        ceiling.get_Parameter(SharedParams.PGS_FinishingTypeOfWalls).Set(roomFinTypeWalls);
                         ceiling.get_Parameter(BuiltInParameter.CEILING_HEIGHTABOVELEVEL_PARAM).Set(height);
                     }
                     catch (Exception)
