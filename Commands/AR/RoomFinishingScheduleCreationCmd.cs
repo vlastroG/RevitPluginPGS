@@ -409,9 +409,7 @@ namespace MS.Commands.AR
                     if (!(e is Wall)) continue;
                     if (!(e as Wall).Name.Contains(_finWalls)) continue;
                     Wall wall = (Wall)e;
-                    string wallTestDescription = wall.WallType.get_Parameter(BuiltInParameter.ALL_MODEL_DESCRIPTION).AsValueString();
-                    var wallToRemove = finWalls.FirstOrDefault(w => w.Id == wall.Id);
-                    int indexOfWall = finWalls.IndexOf(wallToRemove);
+
                     finWalls.RemoveAll(w => w.Id == wall.Id);
                     int wallId = wall.Id.IntegerValue;
                     if (!idsInt.Contains(wallId))
@@ -439,8 +437,6 @@ namespace MS.Commands.AR
                 List<int> wallIndexesToRemove = new List<int>();
                 foreach (var wall in finWallsRemainder)
                 {
-                    string wallTestDescription = wall.WallType.get_Parameter(BuiltInParameter.ALL_MODEL_DESCRIPTION).AsValueString();
-
                     tupleList.AddOrUpdate(
                         (wall.WallType.get_Parameter(BuiltInParameter.ALL_MODEL_DESCRIPTION).AsValueString(),
                         Math.Round(wall.get_Parameter(BuiltInParameter.HOST_AREA_COMPUTED).AsDouble() * SharedValues.SqFeetToMeters,
@@ -448,11 +444,7 @@ namespace MS.Commands.AR
                     // Назначить номер помещения и тип отделки стене
                     wall.get_Parameter(SharedParams.PGS_FinishingTypeOfWalls).Set(rFintype);
                     finWalls.RemoveAll(w => w.Id == wall.Id);
-                    //wallIndexesToRemove.Add(finWalls.IndexOf(wall));
                 }
-                //foreach (var index in wallIndexesToRemove)
-                //{
-                //}
             }
             return tupleList;
         }
