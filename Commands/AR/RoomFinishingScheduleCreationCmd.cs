@@ -26,7 +26,7 @@ namespace MS.Commands.AR
         private static string _header = String.Empty;
 
         /// <summary>
-        /// Строка, которая должна содержаться в названии типа отделочноых стен
+        /// Строка, которая должна содержаться в названии типа отделочноых стен "_F_"
         /// </summary>
         private readonly string _finWalls = "_F_";
 
@@ -384,7 +384,8 @@ namespace MS.Commands.AR
             in Document doc,
             in Room room,
             in View3D view3d,
-            in SpatialElementBoundaryOptions opts)
+            in SpatialElementBoundaryOptions opts,
+            ref List<Wall> finWalls)
         {
             IList<IList<BoundarySegment>> loops
                       = room.GetBoundarySegments(
@@ -393,6 +394,7 @@ namespace MS.Commands.AR
             List<int> idsInt = new List<int>();
             string rNum = room.get_Parameter(BuiltInParameter.ROOM_NUMBER).AsValueString();
             string rFintype = room.get_Parameter(SharedParams.PGS_FinishingTypeOfWalls).AsValueString();
+            ElementId rId = room.LevelId;
             foreach (IList<BoundarySegment> loop in loops)
             {
                 foreach (BoundarySegment seg in loop)
@@ -407,6 +409,10 @@ namespace MS.Commands.AR
                     if (!(e is Wall)) continue;
                     if (!(e as Wall).Name.Contains(_finWalls)) continue;
                     Wall wall = (Wall)e;
+                    string wallTestDescription = wall.WallType.get_Parameter(BuiltInParameter.ALL_MODEL_DESCRIPTION).AsValueString();
+                    var wallToRemove = finWalls.FirstOrDefault(w => w.Id == wall.Id);
+                    int indexOfWall = finWalls.IndexOf(wallToRemove);
+                    finWalls.RemoveAll(w => w.Id == wall.Id);
                     int wallId = wall.Id.IntegerValue;
                     if (!idsInt.Contains(wallId))
                     {
@@ -424,6 +430,29 @@ namespace MS.Commands.AR
                         continue;
                     }
                 }
+            }
+            var finWallsRemainder = finWalls.Where(
+                w => w.get_Parameter(SharedParams.ADSK_RoomNumberInApartment).AsValueString() == rNum
+                && w.LevelId == rId).ToList();
+            if (finWallsRemainder.Count() > 0)
+            {
+                List<int> wallIndexesToRemove = new List<int>();
+                foreach (var wall in finWallsRemainder)
+                {
+                    string wallTestDescription = wall.WallType.get_Parameter(BuiltInParameter.ALL_MODEL_DESCRIPTION).AsValueString();
+
+                    tupleList.AddOrUpdate(
+                        (wall.WallType.get_Parameter(BuiltInParameter.ALL_MODEL_DESCRIPTION).AsValueString(),
+                        Math.Round(wall.get_Parameter(BuiltInParameter.HOST_AREA_COMPUTED).AsDouble() * SharedValues.SqFeetToMeters,
+                        3)));
+                    // Назначить номер помещения и тип отделки стене
+                    wall.get_Parameter(SharedParams.PGS_FinishingTypeOfWalls).Set(rFintype);
+                    finWalls.RemoveAll(w => w.Id == wall.Id);
+                    //wallIndexesToRemove.Add(finWalls.IndexOf(wall));
+                }
+                //foreach (var index in wallIndexesToRemove)
+                //{
+                //}
             }
             return tupleList;
         }
@@ -507,12 +536,19 @@ namespace MS.Commands.AR
                  .Select(c => (c.GetRoomPoint(), c.Id))
                  .Where(tuple => tuple.Item1 != null)
                  .ToList();
+            List<Wall> finWalls = new FilteredElementCollector(uidoc.Document)
+                .OfCategory(BuiltInCategory.OST_Walls)
+                .WhereElementIsNotElementType()
+                .Cast<Wall>()
+                .Where(w => w.Name.Contains(_finWalls))
+                .Where(w => !String.IsNullOrEmpty(w.get_Parameter(SharedParams.ADSK_RoomNumberInApartment).AsValueString()))
+                .ToList();
             foreach (Room room in rooms)
             {
                 string rNumber = room.Number;
                 string fintype = room.get_Parameter(SharedParams.PGS_FinishingTypeOfWalls).AsValueString();
                 var dto = dtos.First(d => d.FintypeWallsCeilings == fintype);
-                var walltypesAreas = GetRoomWalltypesAreas(uidoc.Document, room, view3d, opts);
+                var walltypesAreas = GetRoomWalltypesAreas(uidoc.Document, room, view3d, opts, ref finWalls);
                 var ceilingsAreas = GetRoomCeilingAreas(uidoc.Document, room, ref ceilingPointAndId);
                 foreach (var wtArea in walltypesAreas)
                 {
