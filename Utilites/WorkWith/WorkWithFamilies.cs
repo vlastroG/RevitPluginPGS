@@ -9,16 +9,15 @@ namespace MS.Utilites
 {
     public static class WorkWithFamilies
     {
-        public static string GetSymbolDescription(FamilyInstance lintel)
+        public static string GetSymbolDescription(in FamilyInstance lintel)
         {
             return lintel.Symbol
                 .get_Parameter(BuiltInParameter.ALL_MODEL_DESCRIPTION)
                 .AsValueString();
         }
 
-        public static List<string> GetSubComponentsAdskNames(FamilyInstance lintel)
+        public static List<string> GetSubComponentsAdskNames(in FamilyInstance lintel)
         {
-            Document doc = lintel.Document;
             var subComponents = GetSubComponentsAlong(lintel);
             List<string> adskNames = new List<string>();
             foreach (var subComp in subComponents)
@@ -48,7 +47,7 @@ namespace MS.Utilites
             }
         }
 
-        private static List<FamilyInstance> GetSubComponentsAlong(FamilyInstance lintel)
+        private static List<FamilyInstance> GetSubComponentsAlong(in FamilyInstance lintel)
         {
             List<FamilyInstance> result = new List<FamilyInstance>();
             Document doc = lintel.Document;
@@ -72,7 +71,7 @@ namespace MS.Utilites
             return result;
         }
 
-        public static double GetMaxWidthOfLintel(FamilyInstance lintel)
+        public static double GetMaxWidthOfLintel(in FamilyInstance lintel)
         {
             XYZ origin = (lintel.Location as LocationPoint).Point;
             XYZ normal = lintel.FacingOrientation.Normalize();
@@ -111,7 +110,7 @@ namespace MS.Utilites
         /// </summary>
         /// <param name="lintel"></param>
         /// <returns></returns>
-        public static double GetWallWidth(FamilyInstance lintel)
+        public static double GetWallWidth(in FamilyInstance lintel)
         {
             double wallWidth = 0;
             if (lintel.get_Parameter(SharedParams.ADSK_ThicknessOfWall) != null)
@@ -132,7 +131,7 @@ namespace MS.Utilites
         /// <param name="lintel">Перемычка</param>
         /// <param name="addLevel">Считать одинаковые перемычки на разных уровнях разными: True/False</param>
         /// <returns>Уникальное название по поперечному сечению перемычки</returns>
-        public static string GetLintelUniqueName(FamilyInstance lintel, bool addLevel)
+        public static string GetLintelUniqueName(in FamilyInstance lintel, bool addLevel)
         {
             StringBuilder sb = new StringBuilder();
 
@@ -171,7 +170,7 @@ namespace MS.Utilites
         /// <param name="symbol">Типоразмер семейства</param>
         /// <param name="center">Координаты центра в ФУТАХ</param>
         /// <returns>Созданный элемент</returns>
-        public static Element CreateAdaptiveComponentInstance(Document document, FamilySymbol symbol, XYZ center)
+        public static Element CreateAdaptiveComponentInstance(in Document document, in FamilySymbol symbol, in XYZ center)
         {
             // Create a new instance of an adaptive component family
             FamilyInstance instance = AdaptiveComponentInstanceUtils.CreateAdaptiveComponentInstance(document, symbol);

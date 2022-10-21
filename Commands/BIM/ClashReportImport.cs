@@ -120,21 +120,35 @@ namespace MS.Commands.BIM
                     return ErrorMessage("Xml файл поврежден, нельзя определить clashresult!");
                 }
             }
+            Transform docTransform = doc.ActiveProjectLocation.GetTotalTransform();
+            PlaceClashes(doc, clashResults, clashFamSymb, clashTestName, docTransform);
+            return Result.Succeeded;
+        }
+
+        private void PlaceClashes(
+            in Document doc,
+            in List<Clashresult> clashResults,
+            in FamilySymbol clashFamSymb,
+            in string clashTestName,
+            in Transform docTransform)
+        {
             var count = 0;
             using (Transaction placeFams = new Transaction(doc))
             {
                 placeFams.Start("Placed clash families");
+
                 foreach (var clash in clashResults)
                 {
                     double xClash = Double.Parse(clash.Clashpoint.Pos3f.X, CultureInfo.InvariantCulture);
                     double yClash = Double.Parse(clash.Clashpoint.Pos3f.Y, CultureInfo.InvariantCulture);
                     double zClash = Double.Parse(clash.Clashpoint.Pos3f.Z, CultureInfo.InvariantCulture);
-                    XYZ center = new XYZ(
+                    XYZ centerSharedCoordinates = new XYZ(
                         xClash / SharedValues.FootToMillimeters * 1000,
                         yClash / SharedValues.FootToMillimeters * 1000,
                         zClash / SharedValues.FootToMillimeters * 1000
                     );
-                    Element clashEl = WorkWithFamilies.CreateAdaptiveComponentInstance(doc, clashFamSymb, center);
+                    XYZ centerInternalCoordinates = docTransform.OfPoint(centerSharedCoordinates);
+                    Element clashEl = WorkWithFamilies.CreateAdaptiveComponentInstance(doc, clashFamSymb, centerInternalCoordinates);
                     count++;
                     clashEl.get_Parameter(BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS).Set(clash.Assignedto);
                     try
@@ -176,7 +190,6 @@ namespace MS.Commands.BIM
                 $"\nname1 записано в 'ADSK_Наименование'" +
                 $"\nname2 записано в 'ADSK_Обозначение'" +
                 $"\nclashresult записан в 'ADSK_Примечание'", "Clashes import");
-            return Result.Succeeded;
         }
     }
 }
