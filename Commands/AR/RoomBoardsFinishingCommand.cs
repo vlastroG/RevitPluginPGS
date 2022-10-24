@@ -30,6 +30,20 @@ namespace MS.Commands.AR
         /// </summary>
         private readonly double _tolerance = 1.5;
 
+        private static string _phase = "Новая конструкция";
+
+        /// <summary>
+        /// PGS_Окно_Проем_Высота
+        /// </summary>
+        private readonly string _windowHeight = "PGS_Окно_Проем_Высота";
+
+        /// <summary>
+        /// Допуск на поиск витражей возле комнат.
+        /// Допуск означает максимальное расстояние от середины оси витража
+        /// до границы геометрии помещения (В футах)
+        /// </summary>
+        private static readonly double _curtainWallIntersectTolerance = 2;
+
         /// <summary>
         /// Удаляет из списка кривых нижнюю горизонтальную линию
         /// </summary>
@@ -98,11 +112,13 @@ namespace MS.Commands.AR
         /// <returns>Кортеж сегмента профиля откоса и его глубины</returns>
         private List<(Curve Curve, double Slope)> GetSlopeCurvesWithDepth(Document doc)
         {
+            // Только для витражей с глубиной откосов > 0 и высотой больше 20 футов (6,096 м)
             List<(Wall, double, XYZ)> curtainWallsSlopeDepth = new FilteredElementCollector(doc)
                 .OfCategory(BuiltInCategory.OST_Walls)
                 .WhereElementIsNotElementType()
                 .Where(w => (w as Wall).CurtainGrid != null)
                 .Where(w => w.get_Parameter(SharedParams.PGS_SlopeDepth).AsDouble() > 0)
+                .Where(w => w.get_Parameter(BuiltInParameter.WALL_USER_HEIGHT_PARAM).AsDouble() > 20)
                 .Select(w => ((w as Wall), w.get_Parameter(SharedParams.PGS_SlopeDepth).AsDouble(), (w as Wall).Orientation))
                 .ToList();
 
@@ -131,7 +147,7 @@ namespace MS.Commands.AR
             List<(Curve Curve, double Slope)> curvesSlopes = new List<(Curve, double)>();
             foreach (var sketch in sketches)
             {
-                // Зполнение списка кривых составляющих провилей откосов, смещенных в обе стороны по направлению
+                // Заполнение списка кривых составляющих профилей откосов, смещенных в обе стороны по направлению
                 Transform frontTranslation = Transform.CreateTranslation(sketch.Item3 * _tolerance);
                 Transform backTranslation = Transform.CreateTranslation(sketch.Item3.Negate() * _tolerance);
                 double slopeDepth = sketch.Item2;
@@ -151,7 +167,7 @@ namespace MS.Commands.AR
         /// </summary>
         /// <param name="doc"></param>
         /// <returns></returns>
-        private IReadOnlyDictionary<ElementId, double> GetRoomIdAndDoorsWidthDict(Document doc)
+        private IReadOnlyDictionary<ElementId, double> GetRoomIdAndDoorsWidthDict(in Document doc, in Phase phase)
         {
             var doors = new FilteredElementCollector(doc)
                 .OfCategory(BuiltInCategory.OST_Doors)
@@ -159,14 +175,15 @@ namespace MS.Commands.AR
                 .Where(d => (d as FamilyInstance).Host is Wall
                         && ((d as FamilyInstance).Host as Wall).CurtainGrid == null)
                 .Where(d => d.get_Parameter(BuiltInParameter.FURNITURE_WIDTH) != null)
+                .Where(r => r.get_Parameter(BuiltInParameter.PHASE_CREATED).AsValueString() == _phase)
                 .Cast<FamilyInstance>();
 
             Dictionary<ElementId, double> _dictRoomIdDoorsWidth = new Dictionary<ElementId, double>();
             foreach (var door in doors)
             {
                 var doorWidth = door.get_Parameter(BuiltInParameter.FURNITURE_WIDTH).AsDouble();
-                Element fromRoom = door.FromRoom;
-                Element toRoom = door.ToRoom;
+                Element fromRoom = door.get_FromRoom(phase);
+                Element toRoom = door.get_ToRoom(phase);
                 if (fromRoom != null)
                 {
                     _dictRoomIdDoorsWidth.MapIncrease(fromRoom.Id, doorWidth);
@@ -184,9 +201,9 @@ namespace MS.Commands.AR
         /// </summary>
         /// <param name="doc">Документ, в котором производится подсчет</param>
         /// <param name="rooms">Обрабатываемые помещения в документе</param>
-        private void SetPlinthLength(Document doc, List<Room> rooms)
+        private void SetPlinthLength(in Document doc, in List<Room> rooms, in Phase phase)
         {
-            var _dictRoomIdDoorsWidth = GetRoomIdAndDoorsWidthDict(doc);
+            var _dictRoomIdDoorsWidth = GetRoomIdAndDoorsWidthDict(doc, phase);
             SpatialElementBoundaryOptions boundaryOptions = new SpatialElementBoundaryOptions();
             View3D view3d = new FilteredElementCollector(doc)
                 .OfClass(typeof(View3D))
@@ -266,17 +283,31 @@ namespace MS.Commands.AR
             }
         }
 
+        private List<Element> GetCurtainWallsWithWindows(in Document doc)
+        {
+            // Только для витражей с глубиной откосов > 0 и высотой больше 10 футов (3,048 м)
+            return new FilteredElementCollector(doc)
+                .OfCategory(BuiltInCategory.OST_Walls)
+                .WhereElementIsNotElementType()
+                .Where(w => (w as Wall).CurtainGrid != null)
+                .Where(w => w.get_Parameter(SharedParams.PGS_SlopeDepth).AsDouble() > 0)
+                .Where(w => w.LookupParameter(_windowHeight).AsDouble() < 10)
+                .Cast<Element>()
+                .ToList();
+        }
+
         /// <summary>
         /// Назначает помещениям площадь откосов витражей
         /// </summary>
         /// <param name="doc">Документ, в котором происзодит транзакция</param>
         /// <param name="rooms">Обрабатываемые помещения</param>
         /// <returns>Список Id необработанных помещений (ошибок)</returns>
-        private List<ElementId> SetSlopeArea(Document doc, List<Room> rooms)
+        private List<ElementId> SetSlopeArea(in Document doc, in List<Room> rooms, in Phase phase)
         {
             SolidCurveIntersectionOptions intersectionOptions = new SolidCurveIntersectionOptions();
             SpatialElementGeometryCalculator calculator = new SpatialElementGeometryCalculator(doc);
             List<(Curve Curve, double Slope)> curvesSlopes = GetSlopeCurvesWithDepth(doc);
+            var dictRoomIdDoorsSlopesArea = GetRoomIdAndDoorsSlopesAreaDict(doc, phase);
             List<ElementId> errors = new List<ElementId>();
             using (Transaction setSlopesTrans = new Transaction(doc))
             {
@@ -286,6 +317,11 @@ namespace MS.Commands.AR
                     Solid solid;
                     SpatialElement spatial = room;
                     double slopeArea = 0;
+                    if (dictRoomIdDoorsSlopesArea.ContainsKey(room.Id))
+                    {
+                        // площадь в м кв.
+                        slopeArea += dictRoomIdDoorsSlopesArea[room.Id];
+                    }
                     try
                     {
                         SpatialElementGeometryResults results = calculator.CalculateSpatialElementGeometry(spatial);
@@ -306,14 +342,80 @@ namespace MS.Commands.AR
                         SolidCurveIntersection result = solid.IntersectWithCurve(curveSlope.Curve, intersectionOptions);
                         foreach (var intersectCurve in result)
                         {
-                            slopeArea += (intersectCurve.Length * curveSlope.Slope / SharedValues.FootToMillimeters);
+                            // Площадь в м кв.
+                            slopeArea += (intersectCurve.Length * curveSlope.Slope * SharedValues.FootToMillimeters / 1000000);
                         }
                     }
-                    room.get_Parameter(SharedParams.PGS_SlopesArea).Set(slopeArea);
+
+                    // обработка витражей с вложенными окнами
+                    var glassWallsWithWindows = GetCurtainWallsWithWindows(doc);
+
+                    foreach (var glassWall in glassWallsWithWindows)
+                    {
+                        var wall_curve = (glassWall.Location as LocationCurve).Curve;
+                        var curve_intersect = WorkWithGeometry
+                            .CreateNormalCenterCurve(wall_curve, 1, _curtainWallIntersectTolerance);
+
+                        SolidCurveIntersection curve_room_intersect = solid
+                            .IntersectWithCurve(
+                            curve_intersect,
+                            intersectionOptions);
+
+                        if (curve_room_intersect.SegmentCount > 0)
+                        {
+                            Wall wall = glassWall as Wall;
+                            var length = wall.get_Parameter(BuiltInParameter.CURVE_ELEM_LENGTH).AsDouble()
+                                * SharedValues.FootToMillimeters;
+                            var height = wall.LookupParameter(_windowHeight).AsDouble()
+                                * SharedValues.FootToMillimeters;
+                            var slopeDepth = wall.get_Parameter(SharedParams.PGS_SlopeDepth).AsDouble();
+                            // Площадь в м кв.
+                            var glassWallArea = (length + height * 2) * slopeDepth / 1000000;
+                            slopeArea += glassWallArea;
+                        }
+                    }
+
+                    room.get_Parameter(SharedParams.PGS_SlopesArea).Set(slopeArea / SharedValues.SqFeetToMeters);
                 }
                 setSlopesTrans.Commit();
             }
             return errors;
+        }
+
+        /// <summary>
+        /// Формирует словарь Id помещения и сумму площадей откосов дверей,
+        /// открывающихся в сторону выхода из этого помещения
+        /// </summary>
+        /// <param name="doc"></param>
+        /// <returns></returns>
+        private IReadOnlyDictionary<ElementId, double> GetRoomIdAndDoorsSlopesAreaDict(in Document doc, in Phase phase)
+        {
+            var doors = new FilteredElementCollector(doc)
+                .OfCategory(BuiltInCategory.OST_Doors)
+                .WhereElementIsNotElementType()
+                .Where(d => (d as FamilyInstance).Host is Wall
+                        && ((d as FamilyInstance).Host as Wall).CurtainGrid == null)
+                .Where(d => d.get_Parameter(BuiltInParameter.FURNITURE_WIDTH) != null)
+                .Where(d => d.get_Parameter(BuiltInParameter.PHASE_CREATED).AsValueString() == _phase)
+                .Where(d => d.get_Parameter(SharedParams.PGS_SlopesArea) != null)
+                .Where(d => d.get_Parameter(SharedParams.PGS_SlopesArea).AsDouble() > 0)
+                .Cast<FamilyInstance>();
+
+
+            Dictionary<ElementId, double> dictRoomIdDoorsSlopesArea = new Dictionary<ElementId, double>();
+            foreach (var door in doors)
+            {
+                var test = door.get_Parameter(SharedParams.PGS_SlopesArea).AsDouble();
+                var test2 = door.get_Parameter(SharedParams.PGS_SlopesArea).AsValueString();
+                var doorSlopesArea = door.get_Parameter(SharedParams.PGS_SlopesArea).AsDouble() * SharedValues.SqFeetToMeters;
+                Element fromRoom = door.get_FromRoom(phase);
+                if (fromRoom != null)
+                {
+                    // площадь в м кв.
+                    dictRoomIdDoorsSlopesArea.MapIncrease(fromRoom.Id, doorSlopesArea);
+                }
+            }
+            return dictRoomIdDoorsSlopesArea;
         }
 
 
@@ -326,12 +428,24 @@ namespace MS.Commands.AR
             if (!ValidateSharedParams(doc)) return Result.Cancelled;
             Selection sel = uidoc.Selection;
 
+            var user_input = UserInput.GetStringFromUser("Выбор стадии", "Введите стадию для расчета площадей:", _phase);
+            if (user_input.Length == 0)
+            {
+                return Result.Cancelled;
+            }
+            _phase = user_input;
+            Phase phase = new FilteredElementCollector(doc)
+                .OfClass(typeof(Phase))
+                .WhereElementIsNotElementType()
+                .FirstOrDefault(ph => ph.Name == _phase) as Phase;
+
             // Все выбранные помещения перед запуском команды
             List<Room> rooms = sel.GetElementIds().Select(id => doc.GetElement(id))
                     .Where(e => (BuiltInCategory)WorkWithParameters.GetCategoryIdAsInteger(e)
                     == BuiltInCategory.OST_Rooms)
                     .Cast<Room>()
                     .Where(r => r.Area > 0)
+                    .Where(r => r.get_Parameter(BuiltInParameter.ROOM_PHASE).AsValueString() == _phase)
                     .ToList();
 
             if (rooms.Count == 0)
@@ -359,8 +473,8 @@ namespace MS.Commands.AR
                 }
             }
 
-            var errors = SetSlopeArea(doc, rooms);
-            SetPlinthLength(doc, rooms);
+            var errors = SetSlopeArea(doc, rooms, phase);
+            SetPlinthLength(doc, rooms, phase);
 
             if (errors.Count > 0)
             {
