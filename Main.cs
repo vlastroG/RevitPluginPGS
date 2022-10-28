@@ -324,6 +324,32 @@ namespace MS
                 " должны быть общие параметры \'Мрк.МаркаКонструкции\' и \'Орг.Диапазон позиций\'";
             btnPilesMarkRangeCmd.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, @"https://google.com"));
 
+            //Проемы по инженерке
+            PushButtonData btnOpeningByMEPCmd = new PushButtonData(
+                "OpeningByMEP",
+                "Проемы\nпо инженерке",
+                path,
+                "MS.Commands.KR.OpeningByMEPCmd");
+            Uri btnOpeningByMEPCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            BitmapImage btnOpeningByMEPCmdImage = new BitmapImage(btnOpeningByMEPCmdImagePath);
+            btnOpeningByMEPCmd.LargeImage = btnOpeningByMEPCmdImage;
+            btnOpeningByMEPCmd.ToolTip = "Размещение проемов по воздуховодам и трубам";
+            btnOpeningByMEPCmd.LongDescription = "В месте пересечения выделенной трубы/воздуховода и стены/плиты" +
+                " размещается заданный типоразмер семейства проема с заданным отступом";
+            btnOpeningByMEPCmd.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, @"https://google.com"));
+
+            //Проемы по инженерке настройка
+            PushButtonData btnChangeSettingsKRCmd = new PushButtonData(
+                "SettingsKR",
+                "Настройки",
+                path,
+                "MS.Commands.KR.ChangeSettingsCmd");
+            Uri btnChangeSettingsKRCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            BitmapImage btnChangeSettingsKRCmdImage = new BitmapImage(btnChangeSettingsKRCmdImagePath);
+            btnChangeSettingsKRCmd.LargeImage = btnChangeSettingsKRCmdImage;
+            btnChangeSettingsKRCmd.ToolTip = "Настройка размещения проемов по воздуховодам и трубам";
+            btnChangeSettingsKRCmd.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, @"https://google.com"));
+
 
             // SS Numerator command
             //PushButtonData btnNumerator = new PushButtonData("Numerator", "Маркировка", path, "MS.Numerator");
@@ -464,6 +490,9 @@ namespace MS
             // KR panel
             //panelKR.AddItem(stairRnfrcmtCmd); // в разработке (сырая)
             panelKR.AddItem(btnPilesMarkRangeCmd);
+            panelKR.AddSlideOut();
+            panelKR.AddItem(btnOpeningByMEPCmd);
+            panelKR.AddItem(btnChangeSettingsKRCmd);
 
             // SS panel
             // panelSS.AddItem(btnNumerator);

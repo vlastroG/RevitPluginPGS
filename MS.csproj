@@ -69,6 +69,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Drawing.Common, Version=6.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
@@ -123,10 +124,13 @@
     <Compile Include="Commands\General\PolyLineLength.cs" />
     <Compile Include="Commands\General\Selector.cs" />
     <Compile Include="Commands\General\SelectorSettingsCmd.cs" />
+    <Compile Include="Commands\KR\ChangeSettingsCmd.cs" />
     <Compile Include="Commands\KR\Models\StairFlight.cs" />
     <Compile Include="Commands\KR\Models\StairModel.cs" />
+    <Compile Include="Commands\KR\OpeningByMEPCmd.cs" />
     <Compile Include="Commands\KR\PilesMarkRange.cs" />
     <Compile Include="Commands\KR\StairReinforcement.cs" />
+    <Compile Include="GUI\ViewModels\KR\SettingsViewModelKR.cs" />
     <Compile Include="Commands\MEP\EquipmentInSystemCmd.cs" />
     <Compile Include="Commands\MEP\FullSystemNamesCmd.cs" />
     <Compile Include="Commands\MEP\PipelineFittings.cs" />
@@ -151,9 +155,13 @@
     <Compile Include="GUI\General\CategoryInput.xaml.cs">
       <DependentUpon>CategoryInput.xaml</DependentUpon>
     </Compile>
+    <Compile Include="GUI\KR\SettingsKRview.xaml.cs">
+      <DependentUpon>SettingsKRview.xaml</DependentUpon>
+    </Compile>
     <Compile Include="GUI\MEP\MEPinSpatials.xaml.cs">
       <DependentUpon>MEPinSpatials.xaml</DependentUpon>
     </Compile>
+    <Compile Include="GUI\ViewModels\Base\ViewModelBase.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Shared\SharedParams.cs" />
@@ -218,6 +226,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Commands\KR\ViewModels\" />
     <Folder Include="Images\Content\" />
   </ItemGroup>
   <ItemGroup>
@@ -242,6 +251,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="GUI\General\CategoryInput.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GUI\KR\SettingsKRview.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
