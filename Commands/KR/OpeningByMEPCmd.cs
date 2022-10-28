@@ -1,6 +1,7 @@
 ﻿using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Mechanical;
+using Autodesk.Revit.DB.Plumbing;
 using Autodesk.Revit.DB.Structure;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
@@ -22,13 +23,24 @@ namespace MS.Commands.KR
     [Regeneration(RegenerationOption.Manual)]
     public class OpeningByMEPCmd : IExternalCommand
     {
+        /// <summary>
+        /// Настройки команды
+        /// </summary>
         private readonly SettingsViewModelKR _settings = new SettingsViewModelKR();
 
+        /// <summary>
+        /// Категории элементов MEP, которые можно выбирать
+        /// </summary>
         private readonly List<BuiltInCategory> _categories = new List<BuiltInCategory>()
         {
             BuiltInCategory.OST_DuctCurves,
             BuiltInCategory.OST_PipeCurves
         };
+
+        /// <summary>
+        /// Максимальный отступ от MEP элемента
+        /// </summary>
+        private readonly int _maxOffset = 1000;
 
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
@@ -43,7 +55,7 @@ namespace MS.Commands.KR
                     return Result.Cancelled;
                 }
             }
-            if (_settings.OpeningOffset > 1000)
+            if (_settings.OpeningOffset > _maxOffset)
             {
                 MessageBox.Show($"Слишком большой отступ: {_settings.OpeningOffset} мм", "Ошибка");
                 var settingsKRview = new SettingsKRview();
@@ -51,38 +63,28 @@ namespace MS.Commands.KR
             }
 
             Document doc = commandData.Application.ActiveUIDocument.Document;
-            (Element duct, Line ductLine) = GetDuct(commandData);
+            (Element mep, Line mepLine) = GetMEPelement(commandData);
             Wall wall = GetWall(commandData);
-            return Result.Succeeded;
-            if ((duct is null) || (wall is null))
+            if ((mep is null) || (wall is null))
             {
                 return Result.Cancelled;
             }
             var plane = GetWallPlane(wall).GetSurface() as Plane;
-            var point = GetPlaneAndLineIntersection(plane, ductLine);
+            var point = GetPlaneAndLineIntersection(plane, mepLine);
             if (point is null)
             {
                 MessageBox.Show("Не найдена точка пересечения оси воздуховода и стены", "Ошибка");
                 return Result.Cancelled;
             }
-            double ductH = 0;
-            double ductW = 0;
-            double openingH;
-            double openingW;
-            try
+            (double openingH, double openingW) = GetOpeningDimensions(mep);
+            if (openingH == openingW && openingW == 0)
             {
-                // Если воздуховод прямоугольный или овальный
-                ductH = duct.get_Parameter(BuiltInParameter.RBS_CURVE_HEIGHT_PARAM).AsDouble();
-                ductW = duct.get_Parameter(BuiltInParameter.RBS_CURVE_WIDTH_PARAM).AsDouble();
+                MessageBox.Show("Нельзя определить геометрию выбранного воздуховода/трубы",
+                    "Ошибка");
+                return Result.Failed;
             }
-            catch (System.NullReferenceException)
-            {
-                // Воздуховод круглого сечения
-                ductH = duct.get_Parameter(BuiltInParameter.RBS_CURVE_DIAMETER_PARAM).AsDouble();
-                ductW = ductH;
-            }
-            openingH = ductH + 2 * _settings.OpeningOffset / SharedValues.FootToMillimeters;
-            openingW = ductW + 2 * _settings.OpeningOffset / SharedValues.FootToMillimeters;
+            var test1 = openingH;
+            var test2 = openingW;
 
             FamilyInstance opening = PlaceOpeningRectangle(doc, point, wall, openingH, openingW);
             if (opening is null)
@@ -92,6 +94,53 @@ namespace MS.Commands.KR
             return Result.Succeeded;
         }
 
+        /// <summary>
+        /// Возвращает габариты проема, 
+        /// который должен быть размещен по центру пересечения MEP элемента и стены/плиты
+        /// </summary>
+        /// <param name="mepEl"></param>
+        /// <returns></returns>
+        private (double OpeningH, double OpeningW) GetOpeningDimensions(in Element mepEl)
+        {
+            double mepH = 0;
+            double mepW = 0;
+            double openingH;
+            double openingW;
+            if (mepEl is Duct)
+            {
+                try
+                {
+                    // Если воздуховод прямоугольный или овальный
+                    mepH = mepEl.get_Parameter(BuiltInParameter.RBS_CURVE_HEIGHT_PARAM).AsDouble();
+                    mepW = mepEl.get_Parameter(BuiltInParameter.RBS_CURVE_WIDTH_PARAM).AsDouble();
+                }
+                catch (System.NullReferenceException)
+                {
+                    // Воздуховод круглого сечения
+                    mepH = mepEl.get_Parameter(BuiltInParameter.RBS_CURVE_DIAMETER_PARAM).AsDouble();
+                    mepW = mepH;
+                }
+            }
+            else if (mepEl is Pipe)
+            {
+                // Труба
+                mepH = mepEl.get_Parameter(BuiltInParameter.RBS_PIPE_DIAMETER_PARAM).AsDouble();
+                mepW = mepH;
+            }
+            else
+            {
+                return (0, 0);
+            }
+            openingH = mepH + 2 * _settings.OpeningOffset / SharedValues.FootToMillimeters;
+            openingW = mepW + 2 * _settings.OpeningOffset / SharedValues.FootToMillimeters;
+            return (openingH, openingW);
+        }
+
+        /// <summary>
+        /// Вывод сообщения о не найденом семействе и типоразмере
+        /// </summary>
+        /// <param name="familyName">Название семейства</param>
+        /// <param name="typeName">Название типоразмера</param>
         private void ShowError(string familyName, string typeName)
         {
             MessageBox.Show(
@@ -220,8 +269,15 @@ namespace MS.Commands.KR
                 trans.Start("Отверстие КР по инженерке");
                 var opening = doc.Create.NewFamilyInstance(point, openingSymb, hostWall, level, StructuralType.NonStructural);
                 opening.get_Parameter(BuiltInParameter.INSTANCE_SILL_HEIGHT_PARAM).Set(point.Z - 0.5 * openingH - level.Elevation);
-                opening.get_Parameter(SharedParams.ADSK_DimensionHeight).Set(openingH);
-                opening.get_Parameter(SharedParams.ADSK_DimensionWidth).Set(openingW);
+                try
+                {
+                    opening.get_Parameter(SharedParams.ADSK_DimensionHeight).Set(openingH);
+                    opening.get_Parameter(SharedParams.ADSK_DimensionWidth).Set(openingW);
+                }
+                catch (NullReferenceException)
+                {
+                    // Параметр отсутствует у экземпляра или доступен только на чтение
+                }
                 trans.Commit();
                 return opening;
             }
@@ -233,7 +289,7 @@ namespace MS.Commands.KR
         /// </summary>
         /// <param name="commandData"></param>
         /// <returns>Воздуховод, или null, если операция отменена или не валидна</returns>
-        private (Element duct, Line ductLine) GetDuct(in ExternalCommandData commandData)
+        private (Element duct, Line ductLine) GetMEPelement(in ExternalCommandData commandData)
         {
             var uidoc = commandData.Application.ActiveUIDocument;
             var doc = uidoc.Document;
@@ -241,22 +297,22 @@ namespace MS.Commands.KR
             MulticategoryInLinkSelectionFilter filter
                 = new MulticategoryInLinkSelectionFilter(
                   doc, _categories);
-            Element duct = null;
+            Element mepEl = null;
             try
             {
-                Reference ductRef = uidoc.Selection.PickObject(
+                Reference mepElRef = uidoc.Selection.PickObject(
                     ObjectType.LinkedElement,
                     filter,
                     "Выберите воздуховод или трубу из связи");
-                duct = filter.LinkedDocument.GetElement(ductRef.LinkedElementId);
-                var link = doc.GetElement(ductRef.ElementId) as RevitLinkInstance;
-                var ductCurve = (duct.Location as LocationCurve).Curve;
+                mepEl = filter.LinkedDocument.GetElement(mepElRef.LinkedElementId);
+                var link = doc.GetElement(mepElRef.ElementId) as RevitLinkInstance;
+                var mepElCurve = (mepEl.Location as LocationCurve).Curve;
                 Transform transform = link.GetTransform();
                 if (!transform.AlmostEqual(Transform.Identity))
                 {
-                    ductCurve = ductCurve.CreateTransformed(transform);
+                    mepElCurve = mepElCurve.CreateTransformed(transform);
                 }
-                return (duct, ductCurve as Line);
+                return (mepEl, mepElCurve as Line);
             }
             catch (Autodesk.Revit.Exceptions.OperationCanceledException)
             {
@@ -265,7 +321,7 @@ namespace MS.Commands.KR
             catch (Autodesk.Revit.Exceptions.InvalidOperationException)
             {
                 MessageBox.Show(
-                    "Перейдите на вид, где можно выбирать воздуховоды из связанных файлов",
+                    "Перейдите на вид, где можно выбирать воздуховоды и трубы из связанных файлов",
                     "Ошибка");
                 return (null, null);
             }
@@ -304,7 +360,7 @@ namespace MS.Commands.KR
             catch (Autodesk.Revit.Exceptions.InvalidOperationException)
             {
                 MessageBox.Show(
-                    "Перейдите на вид, где можно стены",
+                    "Перейдите на вид, где можно выделить стены",
                     "Ошибка");
                 return null;
             }
