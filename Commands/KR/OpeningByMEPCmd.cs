@@ -276,7 +276,11 @@ namespace MS.Commands.KR
                 }
                 catch (NullReferenceException)
                 {
-                    // Параметр отсутствует у экземпляра или доступен только на чтение
+                    // Параметр отсутствует у экземпляра 
+                }
+                catch(Autodesk.Revit.Exceptions.InvalidOperationException)
+                {
+                    // Параметр доступен только на чтение
                 }
                 trans.Commit();
                 return opening;
