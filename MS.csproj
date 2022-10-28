@@ -181,6 +181,7 @@
     <Compile Include="Utilites\Extensions\WallExtension.cs" />
     <Compile Include="Utilites\Extensions\IEnumerableExtension.cs" />
     <Compile Include="Utilites\GetBoundarySegmentElement.cs" />
+    <Compile Include="Utilites\SelectionFilters\MulticategoryInLinkSelectionFilter.cs" />
     <Compile Include="Utilites\SelectionFilters\ElementInLinkSelectionFilter.cs" />
     <Compile Include="Utilites\SelectionFilters\SelectionFilterEdges.cs" />
     <Compile Include="Utilites\SelectionFilters\SelectionFilterPlanarFaces.cs" />

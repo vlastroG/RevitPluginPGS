@@ -24,6 +24,12 @@ namespace MS.Commands.KR
     {
         private readonly SettingsViewModelKR _settings = new SettingsViewModelKR();
 
+        private readonly List<BuiltInCategory> _categories = new List<BuiltInCategory>()
+        {
+            BuiltInCategory.OST_DuctCurves,
+            BuiltInCategory.OST_PipeCurves
+        };
+
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             if (String.IsNullOrEmpty(_settings.OpeningFamName)
@@ -47,6 +53,7 @@ namespace MS.Commands.KR
             Document doc = commandData.Application.ActiveUIDocument.Document;
             (Element duct, Line ductLine) = GetDuct(commandData);
             Wall wall = GetWall(commandData);
+            return Result.Succeeded;
             if ((duct is null) || (wall is null))
             {
                 return Result.Cancelled;
@@ -231,16 +238,16 @@ namespace MS.Commands.KR
             var uidoc = commandData.Application.ActiveUIDocument;
             var doc = uidoc.Document;
             Selection sel = uidoc.Selection;
-            ElementInLinkSelectionFilter<Duct> filter
-                = new ElementInLinkSelectionFilter<Duct>(
-                  doc);
+            MulticategoryInLinkSelectionFilter filter
+                = new MulticategoryInLinkSelectionFilter(
+                  doc, _categories);
             Element duct = null;
             try
             {
                 Reference ductRef = uidoc.Selection.PickObject(
                     ObjectType.LinkedElement,
                     filter,
-                    "Выберите воздуховод из связанного файла");
+                    "Выберите воздуховод или трубу из связи");
                 duct = filter.LinkedDocument.GetElement(ductRef.LinkedElementId);
                 var link = doc.GetElement(ductRef.ElementId) as RevitLinkInstance;
                 var ductCurve = (duct.Location as LocationCurve).Curve;
