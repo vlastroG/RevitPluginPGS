@@ -118,6 +118,7 @@
     <Compile Include="Commands\AR\RoomsFinishingCreation.cs" />
     <Compile Include="Commands\AR\RoomsFinishingMultiMark.cs" />
     <Compile Include="Commands\BIM\ClashReportImport.cs" />
+    <Compile Include="Commands\BIM\DTO\ScheduleToCSVExportDto.cs" />
     <Compile Include="Commands\BIM\XmlData\ClashReportXml.cs" />
     <Compile Include="Commands\General\Info.cs" />
     <Compile Include="Commands\General\LevelName.cs" />
@@ -130,6 +131,7 @@
     <Compile Include="Commands\KR\OpeningByMEPCmd.cs" />
     <Compile Include="Commands\KR\PilesMarkRange.cs" />
     <Compile Include="Commands\KR\StairReinforcement.cs" />
+    <Compile Include="GUI\ViewModels\BIM\SchedulesToCSVExportViewModel.cs" />
     <Compile Include="GUI\ViewModels\KR\SettingsViewModelKR.cs" />
     <Compile Include="Commands\MEP\EquipmentInSystemCmd.cs" />
     <Compile Include="Commands\MEP\FullSystemNamesCmd.cs" />
