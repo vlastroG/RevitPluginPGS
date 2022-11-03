@@ -40,8 +40,7 @@ namespace MS.Commands.KR
                 25,
                 100,
                 200,
-                XYZ.BasisZ.Negate(),
-                XYZ.BasisY);
+                XYZ.BasisZ.Negate());
 
             return Result.Succeeded;
         }

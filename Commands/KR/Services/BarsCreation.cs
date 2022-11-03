@@ -29,10 +29,13 @@ namespace MS.Commands.KR.Services
             int rebarCover,
             int barsStepHorizont,
             int barsStepVert,
-            XYZ toBottomDir,
-            XYZ toStepDir)
+            XYZ toBottomDir)
         {
             Document doc = host.Document;
+
+            var anglePlane = GetAnglePlane(host);
+            var anglePlaneNormal = anglePlane.ComputeNormal(new UV());
+            XYZ toStepDir = new XYZ(anglePlaneNormal.X, anglePlaneNormal.Y, 0);
 
             Curve cCorner = CreateStairStepCornerBarCurve(
                 curve,
@@ -40,7 +43,6 @@ namespace MS.Commands.KR.Services
                 rebarCover,
                 toStepDir);
 
-            var anglePlane = GetAnglePlane(host);
             if (anglePlane is null)
             {
                 return null;
@@ -50,8 +52,7 @@ namespace MS.Commands.KR.Services
                 cCorner,
                 anglePlane,
                 rebarDiameter,
-                barsVertSideOffset,
-                toStepDir);
+                barsVertSideOffset);
 
             Rebar barX = null;
             Rebar barY = null;
@@ -271,19 +272,17 @@ namespace MS.Commands.KR.Services
         /// <param name="anglePlane">Наклонная плоскость лестницы</param>
         /// <param name="rebarDiameter">Диаметр Г-стержня</param>
         /// <param name="barsVertSideOffset">Отступ оси крайнего Г-стержня от торца горизонтального углового стержня</param>
-        /// <param name="toStepDir">Вектор направления движения вверх по лестнице</param>
         /// <returns>Список линий, составляющих эскиз Г-стержня</returns>
         private static IList<Curve> GetStairStepAngleBarCurves(
             in Curve cornerBarCurve,
             in PlanarFace anglePlane,
             int rebarDiameter,
-            double barsVertSideOffset,
-            XYZ toStepDir
+            double barsVertSideOffset
             )
         {
             double angleStair = anglePlane.ComputeNormal(new UV()).AngleTo(XYZ.BasisZ);
-            var test = anglePlane.ComputeNormal(new UV());
-            XYZ test1 = new XYZ(test.X, test.Y, 0);
+            var anglePlaneNormal = anglePlane.ComputeNormal(new UV());
+            XYZ toStepDir = new XYZ(anglePlaneNormal.X, anglePlaneNormal.Y, 0);
             // Расстояние в футах от центра угла Г-стержня
             // до плоскости нижнего защитного слоя наклонной плоскости марша
             double distanceToCoverPlane =
