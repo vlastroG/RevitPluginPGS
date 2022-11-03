@@ -3,6 +3,7 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Architecture;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
+using MS.Commands.KR.Services;
 using MS.Utilites;
 using System;
 using System.Collections.Generic;
@@ -26,28 +27,21 @@ namespace MS.Commands.KR
             Document doc = commandData.Application.ActiveUIDocument.Document;
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
 
-            // Фильтр выбора лестниц, созданных инструментом "лестницы",
-            // загружаемым семейством или моделью в контексте категории "лестницы".
-            List<BuiltInCategory> categoryList = new List<BuiltInCategory>()
-            {
-                BuiltInCategory.OST_Stairs,
-                BuiltInCategory.OST_StructuralFraming
-            };
-            var filter = new SelectionFilterElementsOfCategory<Stairs>(categoryList, true);
-            // Выбранные элементы - лестницы
-            List<Element> selectedElements = null;
-            try
-            {
-                selectedElements = uidoc.Selection.PickObjects(ObjectType.Element, filter, "Выберите лестницы.").Select(e => doc.GetElement(e.ElementId)).ToList();
-            }
-            catch (OperationCanceledException)
-            {
-                return Result.Cancelled;
-            }
+            Edge edge = UserInput.GetEdgeFromUser(commandData);
 
-            // Тестовый выбор первой лестницы из списка
-            var testStair = selectedElements.FirstOrDefault();
-            var stair = new StairModel(testStair);
+            Reference edgeRef = uidoc.Selection.PickObject(ObjectType.Edge, new SelectionFilterEdges(doc), "Выберите лестницу");
+            Element elem = doc.GetElement(edgeRef);
+
+            BarsCreation.CreateStairStepBarsFrame(
+                elem,
+                edge.AsCurve(),
+                6,
+                25,
+                100,
+                200,
+                30,
+                XYZ.BasisZ.Negate(),
+                XYZ.BasisY);
 
             return Result.Succeeded;
         }

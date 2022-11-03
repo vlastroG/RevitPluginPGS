@@ -303,11 +303,11 @@ namespace MS
                 "\nПомещения можно выбрать в спецификации и запустить команду, или запустить команду и выбрать их вручную.";
 
 
-            // StairReinforcement command
-            //PushButtonData stairRnfrcmtCmd = new PushButtonData("StairReinforcement", "Армирование\nлестниц", path, "MS.Commands.KR.StairReinforcement");
-            //Uri stairRnfrcmtCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\KR\StairRnfrcmt.png");
-            //BitmapImage stairRnfrcmtCmdImage = new BitmapImage(stairRnfrcmtCmdImagePath);
-            //stairRnfrcmtCmd.LargeImage = stairRnfrcmtCmdImage;
+            //StairReinforcement command
+            PushButtonData stairRnfrcmtCmd = new PushButtonData("StairReinforcement", "Армирование\nлестниц", path, "MS.Commands.KR.StairReinforcement");
+            Uri stairRnfrcmtCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\KR\StairRnfrcmt.png");
+            BitmapImage stairRnfrcmtCmdImage = new BitmapImage(stairRnfrcmtCmdImagePath);
+            stairRnfrcmtCmd.LargeImage = stairRnfrcmtCmdImage;
 
             //Диапазон марок свай command
             PushButtonData btnPilesMarkRangeCmd = new PushButtonData(
@@ -488,7 +488,7 @@ namespace MS
             panelAR.AddItem(btnOpeningsByDuctCmd);
 
             // KR panel
-            //panelKR.AddItem(stairRnfrcmtCmd); // в разработке (сырая)
+            panelKR.AddItem(stairRnfrcmtCmd); // в разработке (сырая)
             panelKR.AddItem(btnPilesMarkRangeCmd);
             panelKR.AddSlideOut();
             panelKR.AddItem(btnOpeningByMEPCmd);
