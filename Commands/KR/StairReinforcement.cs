@@ -27,9 +27,10 @@ namespace MS.Commands.KR
             Document doc = commandData.Application.ActiveUIDocument.Document;
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
 
-            Edge edge = UserInput.GetEdgeFromUser(commandData);
+            Reference edgeRef = uidoc.Selection.PickObject(ObjectType.Edge, new SelectionFilterEdges(doc), "Выберите ребро ступени лестницы");
+            GeometryObject geoObjectEdge = doc.GetElement(edgeRef).GetGeometryObjectFromReference(edgeRef);
+            Edge edge = geoObjectEdge as Edge;
 
-            Reference edgeRef = uidoc.Selection.PickObject(ObjectType.Edge, new SelectionFilterEdges(doc), "Выберите лестницу");
             Element elem = doc.GetElement(edgeRef);
 
             BarsCreation.CreateStairStepBarsFrame(
@@ -39,7 +40,6 @@ namespace MS.Commands.KR
                 25,
                 100,
                 200,
-                30,
                 XYZ.BasisZ.Negate(),
                 XYZ.BasisY);
 
