@@ -13,9 +13,9 @@ namespace MS.Utilites.SelectionFilters
     /// </summary>
     public class SelectionFilterPlanarFacesOfElement : ISelectionFilter
     {
-        private Document _doc = null;
+        private protected Document _doc = null;
 
-        private int _elementId = -1;
+        private protected int _elementId = -1;
 
         /// <summary>
         /// Конструктор фильтра по документу и Id элемента, грани которого разрешены для выбора
@@ -34,7 +34,7 @@ namespace MS.Utilites.SelectionFilters
             return elem.Id.IntegerValue == _elementId;
         }
 
-        public bool AllowReference(Reference reference, XYZ position)
+        public virtual bool AllowReference(Reference reference, XYZ position)
         {
             return _doc.GetElement(reference).GetGeometryObjectFromReference(reference) is PlanarFace;
         }

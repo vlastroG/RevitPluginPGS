@@ -4,6 +4,7 @@ using Autodesk.Revit.DB.Architecture;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
 using MS.Commands.KR.Services;
+using MS.Commands.KR.Services.SelectionFilters;
 using MS.Utilites;
 using MS.Utilites.Extensions;
 using MS.Utilites.SelectionFilters;
@@ -82,14 +83,14 @@ namespace MS.Commands.KR
 
             Reference edgeRef = uidoc.Selection.PickObject(
                 ObjectType.Edge,
-                new SelectionFilterEdgesOfElement(doc, elem.Id.IntegerValue),
+                new SelectionFilterStairStepEdges(doc, elem.Id.IntegerValue),
                 "Выберите ребро ступени лестницы, или нажмите Esc для отмены");
             GeometryObject geoObjectEdge = doc.GetElement(edgeRef).GetGeometryObjectFromReference(edgeRef);
             Edge edge = geoObjectEdge as Edge;
 
             Reference faceRef = uidoc.Selection.PickObject(
                 ObjectType.Face,
-                new SelectionFilterPlanarFacesOfElement(doc, elem.Id.IntegerValue),
+                new SelectionFilterStairAnglePlane(doc, elem.Id.IntegerValue),
                 "Выберите наклонную грань лестничного марша, или нажмите Esc для отмены");
             GeometryObject geoObject = doc.GetElement(faceRef).GetGeometryObjectFromReference(faceRef);
             PlanarFace planarFace = geoObject as PlanarFace;

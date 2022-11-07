@@ -130,6 +130,8 @@
     <Compile Include="Commands\KR\OpeningByMEPCmd.cs" />
     <Compile Include="Commands\KR\PilesMarkRange.cs" />
     <Compile Include="Commands\KR\Services\BarsCreation.cs" />
+    <Compile Include="Commands\KR\Services\SelectionFilters\SelectionFilterStairAnglePlane.cs" />
+    <Compile Include="Commands\KR\Services\SelectionFilters\SelectionFilterStairStepEdges.cs" />
     <Compile Include="Commands\KR\StairReinforcement.cs" />
     <Compile Include="GUI\ViewModels\BIM\SchedulesToCSVExportViewModel.cs" />
     <Compile Include="GUI\ViewModels\KR\SettingsViewModelKR.cs" />
