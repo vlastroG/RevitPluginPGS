@@ -187,9 +187,11 @@
     <Compile Include="Utilites\SelectionFilters\MulticategoryInLinkSelectionFilter.cs" />
     <Compile Include="Utilites\SelectionFilters\ElementInLinkSelectionFilter.cs" />
     <Compile Include="Utilites\SelectionFilters\SelectionFilterEdges.cs" />
+    <Compile Include="Utilites\SelectionFilters\SelectionFilterEdgesOfElement.cs" />
     <Compile Include="Utilites\SelectionFilters\SelectionFilterPlanarFaces.cs" />
+    <Compile Include="Utilites\SelectionFilters\SelectionFilterPlanarFacesOfElement.cs" />
     <Compile Include="Utilites\SelectionFilters\SelectionFilterRooms.cs" />
-    <Compile Include="Utilites\SelectionFilters\SelectionFilterElementsOfClass.cs" />
+    <Compile Include="Utilites\SelectionFilters\SelectionFilterElementsOfCategory.cs" />
     <Compile Include="Utilites\UserInput\UserInput.cs" />
     <Compile Include="Utilites\WorkWith\WorkWithFamilies.cs" />
     <Compile Include="Utilites\WorkWith\WorkWithGeometry.cs" />

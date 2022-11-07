@@ -6,6 +6,7 @@ using Autodesk.Revit.UI.Selection;
 using MS.Commands.KR.Services;
 using MS.Utilites;
 using MS.Utilites.Extensions;
+using MS.Utilites.SelectionFilters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,6 +32,10 @@ namespace MS.Commands.KR
             try
             {
                 (Curve curve, PlanarFace planarFace, Element elem) = GetCurveAndFaceFromUser(doc, uidoc);
+                if (curve is null || planarFace is null || elem is null)
+                {
+                    return Result.Cancelled;
+                }
                 BarsCreation.CreateStairStepBarsFrame(
                     elem,
                     curve,
@@ -60,13 +65,32 @@ namespace MS.Commands.KR
             in Document doc,
             in UIDocument uidoc)
         {
-            Reference edgeRef = uidoc.Selection.PickObject(ObjectType.Edge, new SelectionFilterEdges(doc), "Выберите ребро ступени лестницы");
+            var filter = new SelectionFilterElementsOfCategory<Element>(
+                new List<BuiltInCategory>
+                {
+                    BuiltInCategory.OST_Stairs,
+                    BuiltInCategory.OST_GenericModel,
+                    BuiltInCategory.OST_StructuralFraming
+                },
+                false);
+            // Пользователь лестницу
+            Element elem = doc.GetElement(uidoc.Selection
+                .PickObject(
+                    Autodesk.Revit.UI.Selection.ObjectType.Element,
+                    filter,
+                    "Выберите лестницу, или нажмите Esc для отмены"));
+
+            Reference edgeRef = uidoc.Selection.PickObject(
+                ObjectType.Edge,
+                new SelectionFilterEdgesOfElement(doc, elem.Id.IntegerValue),
+                "Выберите ребро ступени лестницы, или нажмите Esc для отмены");
             GeometryObject geoObjectEdge = doc.GetElement(edgeRef).GetGeometryObjectFromReference(edgeRef);
             Edge edge = geoObjectEdge as Edge;
 
-            Element elem = doc.GetElement(edgeRef);
-
-            Reference faceRef = uidoc.Selection.PickObject(ObjectType.Face, new SelectionFilterPlanarFaces(doc), "Please pick a planar face to set the work plane. ESC for cancel.");
+            Reference faceRef = uidoc.Selection.PickObject(
+                ObjectType.Face,
+                new SelectionFilterPlanarFacesOfElement(doc, elem.Id.IntegerValue),
+                "Выберите наклонную грань лестничного марша, или нажмите Esc для отмены");
             GeometryObject geoObject = doc.GetElement(faceRef).GetGeometryObjectFromReference(faceRef);
             PlanarFace planarFace = geoObject as PlanarFace;
 
