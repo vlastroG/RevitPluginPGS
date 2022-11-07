@@ -142,6 +142,25 @@ namespace MS.Utilites
         }
 
         /// <summary>
+        /// Находит пересечение 2-х прямых
+        /// </summary>
+        /// <param name="line1"></param>
+        /// <param name="line2"></param>
+        /// <returns>Первая точка пересечения, или null</returns>
+        public static XYZ GetIntersectPoint(in Line line1, in Line line2)
+        {
+            var intersects = line1.Intersect(line2, out var intersections);
+            if (intersects == SetComparisonResult.Disjoint)
+            {
+                // They don't intersect;
+                return null;
+            }
+            var intersection = intersections.Cast<IntersectionResult>().First();
+
+            return intersection.XYZPoint;
+        }
+
+        /// <summary>
         /// Функция находит ширину и высоту вырезаемой проемом части стены,
         /// выполненным прямоугольным семейством или прямоугольным вложенным витражом.
         /// Релизовано 5 случаев:

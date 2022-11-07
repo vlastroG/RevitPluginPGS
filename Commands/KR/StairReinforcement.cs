@@ -32,20 +32,22 @@ namespace MS.Commands.KR
 
             try
             {
-                (Curve curve, PlanarFace planarFace, Element elem) = GetCurveAndFaceFromUser(doc, uidoc);
-                if (curve is null || planarFace is null || elem is null)
+                (List<Curve> curves, PlanarFace planarFace, Element elem) = GetCurveAndFaceFromUser(uidoc);
+                if (curves.Count == 0 || planarFace is null || elem is null)
                 {
                     return Result.Cancelled;
                 }
-                BarsCreation.CreateStairStepBarsFrame(
+                BarsCreation.CreateStairReinforcement(
                     elem,
-                    curve,
+                    curves,
                     planarFace,
                     6,
+                    12,
                     25,
+                    30,
+                    40,
                     100,
-                    200,
-                    XYZ.BasisZ.Negate());
+                    200);
             }
             catch (Autodesk.Revit.Exceptions.OperationCanceledException)
             {
@@ -59,13 +61,12 @@ namespace MS.Commands.KR
         /// Возвращает кортеж линии ступени и наклонной плоскости марша, выбранные пользователем
         /// с учетом трансформирования, если это модель в контексте
         /// </summary>
-        /// <param name="doc">Документ, в котором выбираются элементы</param>
         /// <param name="uidoc">Интерфейс документа, в котором выбираются элементы</param>
         /// <returns></returns>
-        private static (Curve curve, PlanarFace planarFacem, Element elem) GetCurveAndFaceFromUser(
-            in Document doc,
+        private static (List<Curve> curves, PlanarFace planarFacem, Element elem) GetCurveAndFaceFromUser(
             in UIDocument uidoc)
         {
+            Document doc = uidoc.Document;
             var filter = new SelectionFilterElementsOfCategory<Element>(
                 new List<BuiltInCategory>
                 {
@@ -74,19 +75,20 @@ namespace MS.Commands.KR
                     BuiltInCategory.OST_StructuralFraming
                 },
                 false);
-            // Пользователь лестницу
+            // Пользователь выбирает лестницу
             Element elem = doc.GetElement(uidoc.Selection
                 .PickObject(
                     Autodesk.Revit.UI.Selection.ObjectType.Element,
                     filter,
                     "Выберите лестницу, или нажмите Esc для отмены"));
 
-            Reference edgeRef = uidoc.Selection.PickObject(
+            List<Curve> curves = uidoc.Selection.PickObjects(
                 ObjectType.Edge,
                 new SelectionFilterStairStepEdges(doc, elem.Id.IntegerValue),
-                "Выберите ребро ступени лестницы, или нажмите Esc для отмены");
-            GeometryObject geoObjectEdge = doc.GetElement(edgeRef).GetGeometryObjectFromReference(edgeRef);
-            Edge edge = geoObjectEdge as Edge;
+                "Выберите ребра ступени лестницы и нажмите Готово, или нажмите Отмена")
+                .Select(r => doc.GetElement(r).GetGeometryObjectFromReference(r) as Edge)
+                .Select(edg => GetSelectedEdgeTransformed(elem, edg))
+                .ToList();
 
             Reference faceRef = uidoc.Selection.PickObject(
                 ObjectType.Face,
@@ -95,10 +97,9 @@ namespace MS.Commands.KR
             GeometryObject geoObject = doc.GetElement(faceRef).GetGeometryObjectFromReference(faceRef);
             PlanarFace planarFace = geoObject as PlanarFace;
 
-            Curve curveTrans = GetSelectedEdgeTransformed(elem, edge);
             PlanarFace planarFaceTrans = GetSelectedPlaneTransformed(elem, planarFace);
 
-            return (curveTrans, planarFaceTrans, elem);
+            return (curves, planarFaceTrans, elem);
         }
 
         /// <summary>
