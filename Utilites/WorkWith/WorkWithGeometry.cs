@@ -124,6 +124,24 @@ namespace MS.Utilites
         }
 
         /// <summary>
+        /// Находит Transform элемента, являющегося моделью в контексте, 
+        /// или, если элемент не модель в контексте, то возвращается Transform по умолчанию (0,0,0) с 0 поворотом.
+        /// </summary>
+        /// <param name="element">Элемент</param>
+        /// <returns>Точка начала элемента</returns>
+        public static Transform GetPointAndRotation(in Element element)
+        {
+            if (element is FamilyInstance famInst)
+            {
+                if (famInst.Symbol.Family.IsInPlace)
+                {
+                    return famInst.GetTransform();
+                }
+            }
+            return Transform.Identity;
+        }
+
+        /// <summary>
         /// Функция находит ширину и высоту вырезаемой проемом части стены,
         /// выполненным прямоугольным семейством или прямоугольным вложенным витражом.
         /// Релизовано 5 случаев:

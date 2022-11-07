@@ -25,6 +25,7 @@ namespace MS.Commands.KR.Services
         public static Element CreateStairStepBarsFrame(
             in Element host,
             in Curve curve,
+            in PlanarFace anglePlane,
             int rebarDiameter,
             int rebarCover,
             int barsStepHorizont,
@@ -33,8 +34,7 @@ namespace MS.Commands.KR.Services
         {
             Document doc = host.Document;
 
-            var anglePlane = GetAnglePlane(host);
-            var anglePlaneNormal = anglePlane.ComputeNormal(new UV());
+            var anglePlaneNormal = anglePlane.FaceNormal;
             XYZ toStepDir = new XYZ(anglePlaneNormal.X, anglePlaneNormal.Y, 0);
 
             Curve cCorner = CreateStairStepCornerBarCurve(
@@ -43,10 +43,6 @@ namespace MS.Commands.KR.Services
                 rebarCover,
                 toStepDir);
 
-            if (anglePlane is null)
-            {
-                return null;
-            }
             var barsVertSideOffset = GetVerticalAngleBarsSideOffset(cCorner, barsStepVert);
             var cAngle = GetStairStepAngleBarCurves(
                 cCorner,
@@ -148,6 +144,7 @@ namespace MS.Commands.KR.Services
         {
             return cornerCurve.Length * SharedValues.FootToMillimeters % barsStepVert / 2;
         }
+
 
         /// <summary>
         /// Возвращает наклонную плоскость с ниабольшей площадью
@@ -280,8 +277,8 @@ namespace MS.Commands.KR.Services
             double barsVertSideOffset
             )
         {
-            double angleStair = anglePlane.ComputeNormal(new UV()).AngleTo(XYZ.BasisZ);
-            var anglePlaneNormal = anglePlane.ComputeNormal(new UV());
+            double angleStair = anglePlane.FaceNormal.AngleTo(XYZ.BasisZ);
+            var anglePlaneNormal = anglePlane.FaceNormal;
             XYZ toStepDir = new XYZ(anglePlaneNormal.X, anglePlaneNormal.Y, 0);
             // Расстояние в футах от центра угла Г-стержня
             // до плоскости нижнего защитного слоя наклонной плоскости марша
