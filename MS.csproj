@@ -105,7 +105,6 @@
     <Compile Include="Commands\AR\MasonryMesh.cs" />
     <Compile Include="Commands\AR\MaterialColors.cs" />
     <Compile Include="Commands\AR\Models\Apartment.cs" />
-    <Compile Include="Commands\Archive\RoomsArea.cs" />
     <Compile Include="Commands\AR\DTO\OpeningDto.cs" />
     <Compile Include="Commands\AR\DTO\RoomDto.cs" />
     <Compile Include="Commands\AR\OpeningByDuctCmd.cs" />
