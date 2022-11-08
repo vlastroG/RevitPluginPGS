@@ -1,5 +1,7 @@
-﻿using Autodesk.Revit.DB.Structure;
+﻿using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.Structure;
 using MS.GUI.ViewModels.Base;
+using MS.Utilites.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -161,6 +163,21 @@ namespace MS.GUI.ViewModels.KR
         {
             get => _barsStepMainAngle;
             set => Set(ref _barsStepMainAngle, value);
+        }
+
+        /// <summary>
+        /// Конструктор формы для настроек армирования лестницы
+        /// </summary>
+        /// <param name="doc">Документ, в котором будет армироваться лестница</param>
+        public StairReinforcementViewModel(in Document doc)
+        {
+            var rebarTypes = new FilteredElementCollector(doc)
+                .OfClass(typeof(RebarBarType))
+                .WhereElementIsElementType()
+                .Cast<RebarBarType>();
+
+            RebarTypesSteps = new ObservableCollection<RebarBarType>(rebarTypes);
+            RebarTypesMain = new ObservableCollection<RebarBarType>(rebarTypes);
         }
     }
 }
