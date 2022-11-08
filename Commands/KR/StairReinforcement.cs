@@ -32,7 +32,7 @@ namespace MS.Commands.KR
 
             try
             {
-                (List<Curve> curves, PlanarFace planarFace, Element elem) = GetCurveAndFaceFromUser(uidoc);
+                (List<Curve> curves, Edge edge, PlanarFace planarFace, Element elem) = GetCurveAndFaceFromUser(uidoc);
                 if (curves.Count == 0 || planarFace is null || elem is null)
                 {
                     return Result.Cancelled;
@@ -41,6 +41,7 @@ namespace MS.Commands.KR
                     elem,
                     curves,
                     planarFace,
+                    edge,
                     6,
                     12,
                     25,
@@ -65,7 +66,7 @@ namespace MS.Commands.KR
         /// </summary>
         /// <param name="uidoc">Интерфейс документа, в котором выбираются элементы</param>
         /// <returns></returns>
-        private static (List<Curve> curves, PlanarFace planarFacem, Element elem) GetCurveAndFaceFromUser(
+        private static (List<Curve> curves, Edge edge, PlanarFace planarFacem, Element elem) GetCurveAndFaceFromUser(
             in UIDocument uidoc)
         {
             Document doc = uidoc.Document;
@@ -84,13 +85,17 @@ namespace MS.Commands.KR
                     filter,
                     "Выберите лестницу, или нажмите Esc для отмены"));
 
-            List<Curve> curves = uidoc.Selection.PickObjects(
+            var edges = uidoc.Selection.PickObjects(
                 ObjectType.Edge,
                 new SelectionFilterStairStepEdges(doc, elem.Id.IntegerValue),
                 "Выберите ребра ступени лестницы и нажмите Готово, или нажмите Отмена")
-                .Select(r => doc.GetElement(r).GetGeometryObjectFromReference(r) as Edge)
+                .Select(r => doc.GetElement(r).GetGeometryObjectFromReference(r) as Edge);
+
+            List<Curve> curves = edges
                 .Select(edg => GetSelectedEdgeTransformed(elem, edg))
                 .ToList();
+
+            var edge = edges.First();
 
             Reference faceRef = uidoc.Selection.PickObject(
                 ObjectType.Face,
@@ -101,7 +106,7 @@ namespace MS.Commands.KR
 
             PlanarFace planarFaceTrans = GetSelectedPlaneTransformed(elem, planarFace);
 
-            return (curves, planarFaceTrans, elem);
+            return (curves, edge, planarFaceTrans, elem);
         }
 
         /// <summary>

@@ -48,6 +48,7 @@ namespace MS.Commands.KR.Services
             in Element host,
             in List<Curve> curves,
             in PlanarFace anglePlane,
+            in Edge edge,
             int rebarDiameterSteps,
             int rebarDiameterMain,
             int rebarCoverSteps,
@@ -81,6 +82,7 @@ namespace MS.Commands.KR.Services
                 CreateStairStepMainBars(
                     host,
                     anglePlane,
+                    edge,
                     rebarDiameterMain,
                     rebarCoverMainAngle,
                     rebarCoverMainHoriz,
@@ -307,7 +309,7 @@ namespace MS.Commands.KR.Services
         {
             double angleStair = anglePlane.FaceNormal.AngleTo(XYZ.BasisZ);
             var anglePlaneNormal = anglePlane.FaceNormal;
-            XYZ toStepDir = new XYZ(anglePlaneNormal.X, anglePlaneNormal.Y, 0);
+            XYZ toStepDir = new XYZ(anglePlaneNormal.X, anglePlaneNormal.Y, 0).Normalize();
             // Расстояние в футах от центра угла Г-стержня
             // до плоскости нижнего защитного слоя наклонной плоскости марша
             double distanceToCoverPlane =
@@ -344,6 +346,7 @@ namespace MS.Commands.KR.Services
         /// </summary>
         /// <param name="host">Элемент - основа арматуры</param>
         /// <param name="anglePlane">Нижняя наклонная плоскость марша</param>
+        /// <param name="edge">Ребро ступени</param>
         /// <param name="rebarDiameter">Диаметр рабочих стержней</param>
         /// <param name="rebarCoverMainAngle">Защитный слой у наклонной грани</param>
         /// <param name="rebarCoverMainHoriz">Защитный слой у горизонтальных граней</param>
@@ -352,6 +355,7 @@ namespace MS.Commands.KR.Services
         private static void CreateStairStepMainBars(
             in Element host,
             in PlanarFace anglePlane,
+            in Edge edge,
             int rebarDiameter,
             int rebarCoverMainAngle,
             int rebarCoverMainHoriz,
@@ -414,11 +418,57 @@ namespace MS.Commands.KR.Services
                 true,
                 true,
                 true);
+
             #endregion
+
+            var zTranslation = GetMainAngleBarsVertTranslation(edge, anglePlane, rebarCoverMainAngle, rebarDiameter);
+            // Копирование нижней сетки наверх
+            ElementTransformUtils.CopyElement(host.Document, barZ.Id, zTranslation);
+            ElementTransformUtils.CopyElement(host.Document, barHoriz.Id, zTranslation);
         }
 
         /// <summary>
-        /// Возвращает линию эскиза Z - стержня мерша
+        /// Находит расстояние, на которое нужно скопировать нижние стержни на место верхних
+        /// </summary>
+        /// <param name="edge">Ребро ступени</param>
+        /// <param name="anglePlane">Нижняя наклонная плоскость марша</param>
+        /// <param name="rebarCoverMainAngle">Защитный слой арматуры у наклонной грани</param>
+        /// <param name="rebarDiameter">Диаметр рабочей арматуры</param>
+        /// <returns>Вектор смещения, направленный вверх, с длиной, равной смещению осей стержей</returns>
+        private static XYZ GetMainAngleBarsVertTranslation(
+            in Edge edge,
+            in PlanarFace anglePlane,
+            int rebarCoverMainAngle,
+            int rebarDiameter)
+        {
+            XYZ point = edge.AsCurve().GetEndPoint(0);
+            double distance = Math.Abs(WorkWithGeometry.SignedDistanceTo(anglePlane.GetSurface() as Plane, point));
+
+            double angleCos = Math.Abs(Math.Cos(anglePlane.FaceNormal.AngleTo(XYZ.BasisZ)));
+
+            Face vertFace = edge.GetFace(0).ComputeNormal(new UV()).IsAlmostEqualTo(XYZ.BasisZ)
+                ? edge.GetFace(1)
+                : edge.GetFace(0);
+
+            var stepH = vertFace
+                .GetEdgesAsCurveLoops()
+                .OrderBy(l => l.GetExactLength())
+                .Last()
+                .Simplify()
+                .OrderBy(c => c.Length)
+                .First()
+                .Length;
+
+            var offsetZ = (distance - stepH * angleCos 
+                - 2 * (rebarCoverMainAngle + rebarDiameter / 2.0) 
+                / SharedValues.FootToMillimeters) 
+                / angleCos;
+
+            return new XYZ(0, 0, offsetZ);
+        }
+
+        /// <summary>
+        /// Возвращает линию эскиза Z - стержня марша
         /// </summary>
         /// <param name="anglePlane">Наклонная плоскость марша</param>
         /// <param name="rebarDiameter">Диаметр рабочей арматуры марша</param>
