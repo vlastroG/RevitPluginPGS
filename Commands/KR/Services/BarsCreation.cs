@@ -103,7 +103,7 @@ namespace MS.Commands.KR.Services
         /// <param name="barsStepHorizont">Шаг горизонтальных прямых стержней каркаса</param>
         /// <param name="barsStepVert">Шаг вертикальных Г- образных стержней каркаса</param>
         /// <returns></returns>
-        private static Element CreateStairStepBarsFrame(
+        private static void CreateStairStepBarsFrame(
             in Element host,
             in Curve curve,
             in PlanarFace anglePlane,
@@ -130,9 +130,9 @@ namespace MS.Commands.KR.Services
                 rebarDiameter,
                 barsVertSideOffset);
 
-            Rebar barX = null;
-            Rebar barY = null;
-            Rebar barL = null;
+            Rebar barX;
+            Rebar barY;
+            Rebar barL;
 
             // Стержни проступи
             #region Прямые горизонтальные стержни каркаса
@@ -208,9 +208,7 @@ namespace MS.Commands.KR.Services
                 true,
                 true);
 
-            #endregion
-
-            return barX;
+            #endregion;
         }
 
         /// <summary>
@@ -459,9 +457,9 @@ namespace MS.Commands.KR.Services
                 .First()
                 .Length;
 
-            var offsetZ = (distance - stepH * angleCos 
-                - 2 * (rebarCoverMainAngle + rebarDiameter / 2.0) 
-                / SharedValues.FootToMillimeters) 
+            var offsetZ = (distance - stepH * angleCos
+                - 2 * (rebarCoverMainAngle + rebarDiameter / 2.0)
+                / SharedValues.FootToMillimeters)
                 / angleCos;
 
             return new XYZ(0, 0, offsetZ);
