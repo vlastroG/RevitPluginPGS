@@ -47,6 +47,8 @@ namespace MS.Commands.KR
                     30,
                     40,
                     100,
+                    200,
+                    200,
                     200);
             }
             catch (Autodesk.Revit.Exceptions.OperationCanceledException)

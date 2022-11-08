@@ -2,6 +2,7 @@
 using Autodesk.Revit.DB.Structure;
 using MS.Shared;
 using MS.Utilites;
+using MS.Utilites.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,6 +28,22 @@ namespace MS.Commands.KR.Services
         /// </summary>
         private static readonly string _rbtD12 = "ø12";
 
+
+        /// <summary>
+        /// Создает армирование лестничного марша
+        /// </summary>
+        /// <param name="host">Основа арматуры</param>
+        /// <param name="curves">Ребра ступеней, выбранные пользователем</param>
+        /// <param name="anglePlane">Нижняя наклонная плоскость марша, выбранная пользователем</param>
+        /// <param name="rebarDiameterSteps">Диаметр стержней каркасов ступеней</param>
+        /// <param name="rebarDiameterMain">Диаметр рабочих стержней марша</param>
+        /// <param name="rebarCoverSteps">Защитный слой для арматуры каркасов ступеней</param>
+        /// <param name="rebarCoverMainAngle">Защитный слой рабочей арматуры у наклонной грани</param>
+        /// <param name="rebarCoverMainHoriz">Защитный слой рабочей арматуры у горизонтальных граней</param>
+        /// <param name="barsStepStepsHorizont">Шаг горизонтальных прямых стержней каркасов ступеней</param>
+        /// <param name="barsStepStepsVert">Шаг вертикальных Г - стержней каркасов ступеней</param> 
+        /// <param name="barsStepMainHorizont">Шаг рабочих горизонтальных прямых стержней</param>
+        /// <param name="barsStepMainVert">Шаг рабочих наклонных Z - стержней</param>
         public static void CreateStairReinforcement(
             in Element host,
             in List<Curve> curves,
@@ -36,8 +53,10 @@ namespace MS.Commands.KR.Services
             int rebarCoverSteps,
             int rebarCoverMainAngle,
             int rebarCoverMainHoriz,
-            int barsStepHorizont,
-            int barsStepVert)
+            int barsStepStepsHorizont,
+            int barsStepStepsVert,
+            int barsStepMainHorizont,
+            int barsStepMainVert)
         {
             using (Transaction transSteps = new Transaction(host.Document))
             {
@@ -50,8 +69,8 @@ namespace MS.Commands.KR.Services
                          anglePlane,
                          rebarDiameterSteps,
                          rebarCoverSteps,
-                         barsStepHorizont,
-                         barsStepVert);
+                         barsStepStepsHorizont,
+                         barsStepStepsVert);
                 }
                 transSteps.Commit();
             }
@@ -65,8 +84,8 @@ namespace MS.Commands.KR.Services
                     rebarDiameterMain,
                     rebarCoverMainAngle,
                     rebarCoverMainHoriz,
-                    200,
-                    200);
+                    barsStepMainHorizont,
+                    barsStepMainVert);
                 transMain.Commit();
             }
         }
@@ -192,6 +211,13 @@ namespace MS.Commands.KR.Services
             return barX;
         }
 
+        /// <summary>
+        /// Отступ осей вертикальных Г - стержней каркаса ступеней
+        /// от торца горизонтального прямого стержня каркаса ступени
+        /// </summary>
+        /// <param name="cornerCurve">Линия оси прямого углового горизонтального стержня ступени</param>
+        /// <param name="barsStepVert">Шаг вертикальных стержней</param>
+        /// <returns>Отступ в мм</returns>
         private static double GetVerticalAngleBarsSideOffset(
             in Curve cornerCurve,
             int barsStepVert)
@@ -250,6 +276,12 @@ namespace MS.Commands.KR.Services
         }
 
 
+        /// <summary>
+        /// Возвращает тип арматурного стержня по имени типа
+        /// </summary>
+        /// <param name="doc">Документ для поиска</param>
+        /// <param name="rbtName">Наименование типа арматурного стержня</param>
+        /// <returns>Тип арматурного стержня</returns>
         private static RebarBarType GetRebarBarType(in Document doc, string rbtName)
         {
             return new FilteredElementCollector(doc)
@@ -307,6 +339,16 @@ namespace MS.Commands.KR.Services
         }
 
 
+        /// <summary>
+        /// Создает рабочую арматуру марша
+        /// </summary>
+        /// <param name="host">Элемент - основа арматуры</param>
+        /// <param name="anglePlane">Нижняя наклонная плоскость марша</param>
+        /// <param name="rebarDiameter">Диаметр рабочих стержней</param>
+        /// <param name="rebarCoverMainAngle">Защитный слой у наклонной грани</param>
+        /// <param name="rebarCoverMainHoriz">Защитный слой у горизонтальных граней</param>
+        /// <param name="barsStepHorizont">Шаг горизонтальных прямых стержней</param>
+        /// <param name="barsStepVert">Шаг наклонных Z - стержней</param>
         private static void CreateStairStepMainBars(
             in Element host,
             in PlanarFace anglePlane,
@@ -415,12 +457,12 @@ namespace MS.Commands.KR.Services
         /// <returns>Наклонная линия, или null</returns>
         private static Curve GetAngleCurve(in PlanarFace anglePlane)
         {
-            var curves = anglePlane.GetMaxLengthEdgeArray();
-            foreach (Edge edge in curves)
+            var curves = anglePlane.GetEdgesAsCurveLoops().OrderBy(l => l.GetExactLength()).Last().Simplify();
+            foreach (Curve curve in curves)
             {
-                if (edge.AsCurve() is Line line)
+                if (curve is Line line)
                 {
-                    var z = line.Direction.Z;
+                    var z = Math.Round(line.Direction.Z, 6);
                     if (z != 0 && z != 1)
                     {
                         return line;
