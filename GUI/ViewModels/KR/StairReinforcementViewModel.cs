@@ -1,63 +1,94 @@
-﻿using Autodesk.Revit.DB;
-using Autodesk.Revit.DB.Structure;
-using MS.GUI.ViewModels.Base;
-using MS.Utilites.Extensions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.Structure;
+using MS.GUI.ViewModels.Base;
+using MS.Utilites.Extensions;
 
 namespace MS.GUI.ViewModels.KR
 {
     public class StairReinforcementViewModel : ViewModelBase
     {
         /// <summary>
-        /// Коллекция типов арматурных стержней для каркасов ступеней
+        /// Создавать армирование ступеней?
         /// </summary>
-        public ObservableCollection<RebarBarType> RebarTypesSteps { get; }
+        private static bool _createStepFrames = true;
 
         /// <summary>
-        /// Тип арматурных стержней каркаса лестницы
+        /// Создавать армирование ступеней?
         /// </summary>
-        private static RebarBarType _selectedRebarTypeSteps;
-
-        /// <summary>
-        /// Выбранный тип арматурного стержня для каркаса ступени
-        /// </summary>
-        public RebarBarType SelectedRebarTypeSteps
+        public bool CreateStepFrames
         {
-            get => _selectedRebarTypeSteps;
-            set => Set(ref _selectedRebarTypeSteps, value);
+            get => _createStepFrames;
+            set => Set(ref _createStepFrames, value);
         }
 
 
         /// <summary>
-        /// Коллекция типов арматурных стержней для рабочей арматуры марша
+        /// Отступ концов арматурных стержней от торца бетонной грани
         /// </summary>
-        public ObservableCollection<RebarBarType> RebarTypesMain { get; }
+        private static int _rebarCoverEnd = 20;
 
         /// <summary>
-        /// Тип рабочих арматурных стержней лестничного марша
+        /// Отступ концов арматурных стержней от торца бетонной грани
         /// </summary>
-        private static RebarBarType _selectedRebarTypeMain;
-
-        /// <summary>
-        /// Выбранный тип арматурного стержня для каркаса ступени
-        /// </summary>
-        public RebarBarType SelectedRebarTypeMain
+        [RegexStringValidator(@"^[1-7][0-9]$")]
+        public int RebarCoverEnd
         {
-            get => _selectedRebarTypeMain;
-            set => Set(ref _selectedRebarTypeMain, value);
+            get => _rebarCoverEnd;
+            set => Set(ref _rebarCoverEnd, value);
         }
+
+
+        ///// <summary>
+        ///// Коллекция типов арматурных стержней для каркасов ступеней
+        ///// </summary>
+        //public ObservableCollection<RebarBarType> RebarTypesSteps { get; }
+
+        ///// <summary>
+        ///// Тип арматурных стержней каркаса лестницы
+        ///// </summary>
+        //private static RebarBarType _selectedRebarTypeSteps;
+
+        ///// <summary>
+        ///// Выбранный тип арматурного стержня для каркаса ступени
+        ///// </summary>
+        //public RebarBarType SelectedRebarTypeSteps
+        //{
+        //    get => _selectedRebarTypeSteps;
+        //    set => Set(ref _selectedRebarTypeSteps, value);
+        //}
+
+
+        ///// <summary>
+        ///// Коллекция типов арматурных стержней для рабочей арматуры марша
+        ///// </summary>
+        //public ObservableCollection<RebarBarType> RebarTypesMain { get; }
+
+        ///// <summary>
+        ///// Тип рабочих арматурных стержней лестничного марша
+        ///// </summary>
+        //private static RebarBarType _selectedRebarTypeMain;
+
+        ///// <summary>
+        ///// Выбранный тип арматурного стержня для каркаса ступени
+        ///// </summary>
+        //public RebarBarType SelectedRebarTypeMain
+        //{
+        //    get => _selectedRebarTypeMain;
+        //    set => Set(ref _selectedRebarTypeMain, value);
+        //}
 
 
         /// <summary>
         /// Защитный слой арматурных стержней каркасов ступеней
         /// </summary>
-        private static int _rebarCoverSteps;
+        private static int _rebarCoverSteps = 20;
 
         /// <summary>
         /// Защитный слой арматурных стержней каркасов ступеней
@@ -73,7 +104,7 @@ namespace MS.GUI.ViewModels.KR
         /// <summary>
         /// Защитный слой рабочих арматурных стержней марша по наклонной грани
         /// </summary>
-        private static int _rebarCoverMainAngle;
+        private static int _rebarCoverMainAngle = 25;
 
         /// <summary>
         /// Защитный слой рабочих арматурных стержней марша по наклонной грани
@@ -89,7 +120,7 @@ namespace MS.GUI.ViewModels.KR
         /// <summary>
         /// Защитный слой рабочих арматурных стержней марша по горизонтальным граням
         /// </summary>
-        private static int _rebarCoverMainHoriz;
+        private static int _rebarCoverMainHoriz = 30;
 
         /// <summary>
         /// Защитный слой рабочих арматурных стержней марша по горизонтальным граням
@@ -105,7 +136,7 @@ namespace MS.GUI.ViewModels.KR
         /// <summary>
         /// Шаг Г- стержней каркасов ступеней
         /// </summary>
-        private static int _barsStepStepsHorizont;
+        private static int _barsStepStepsHorizont = 200;
 
         /// <summary>
         /// Шаг Г- стержней каркасов ступеней
@@ -121,7 +152,7 @@ namespace MS.GUI.ViewModels.KR
         /// <summary>
         /// Шаг горизонтальных стержней каркасов ступеней
         /// </summary>
-        private static int _barsStepStepsVert;
+        private static int _barsStepStepsVert = 100;
 
         /// <summary>
         /// Шаг горизонтальных стержней каркасов ступеней
@@ -137,7 +168,7 @@ namespace MS.GUI.ViewModels.KR
         /// <summary>
         /// Шаг поперечных горизонтальных стержней марша
         /// </summary>
-        private static int _barsStepMainHorizont;
+        private static int _barsStepMainHorizont = 200;
 
         /// <summary>
         /// Шаг поперечных горизонтальных стержней марша
@@ -153,7 +184,7 @@ namespace MS.GUI.ViewModels.KR
         /// <summary>
         /// Шаг рабочих продольных Z - стержней марша
         /// </summary>
-        private static int _barsStepMainAngle;
+        private static int _barsStepMainAngle = 200;
 
         /// <summary>
         /// Шаг рабочих продольных Z - стержней марша
@@ -169,15 +200,21 @@ namespace MS.GUI.ViewModels.KR
         /// Конструктор формы для настроек армирования лестницы
         /// </summary>
         /// <param name="doc">Документ, в котором будет армироваться лестница</param>
-        public StairReinforcementViewModel(in Document doc)
-        {
-            var rebarTypes = new FilteredElementCollector(doc)
-                .OfClass(typeof(RebarBarType))
-                .WhereElementIsElementType()
-                .Cast<RebarBarType>();
+        //public StairReinforcementViewModel(in Document doc)
+        //{
+        //    var rebarTypes = new FilteredElementCollector(doc)
+        //        .OfClass(typeof(RebarBarType))
+        //        .WhereElementIsElementType()
+        //        .Cast<RebarBarType>();
 
-            RebarTypesSteps = new ObservableCollection<RebarBarType>(rebarTypes);
-            RebarTypesMain = new ObservableCollection<RebarBarType>(rebarTypes);
+        //    RebarTypesSteps = new ObservableCollection<RebarBarType>(rebarTypes);
+        //    RebarTypesMain = new ObservableCollection<RebarBarType>(rebarTypes);
+        //}
+
+        public StairReinforcementViewModel()
+        {
+            //RebarTypesSteps = new ObservableCollection<RebarBarType>();
+            //RebarTypesMain = new ObservableCollection<RebarBarType>();
         }
     }
 }

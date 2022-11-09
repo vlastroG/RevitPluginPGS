@@ -5,6 +5,8 @@ using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
 using MS.Commands.KR.Services;
 using MS.Commands.KR.Services.SelectionFilters;
+using MS.GUI.KR;
+using MS.GUI.ViewModels.KR;
 using MS.Utilites;
 using MS.Utilites.Extensions;
 using MS.Utilites.SelectionFilters;
@@ -19,6 +21,12 @@ namespace MS.Commands.KR
     public class StairReinforcement : IExternalCommand
     {
         /// <summary>
+        /// Настройки команды
+        /// </summary>
+        private readonly StairReinforcementViewModel _settings = new StairReinforcementViewModel();
+
+
+        /// <summary>
         /// Армирование лестничного марша
         /// </summary>
         /// <param name="commandData"></param>
@@ -30,6 +38,16 @@ namespace MS.Commands.KR
             Document doc = commandData.Application.ActiveUIDocument.Document;
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
 
+            var ui = new StairReinforcementView();
+            if (ui.DialogResult != true)
+            {
+                return Result.Cancelled;
+            }
+
+            var test = _settings.BarsStepMainHorizont;
+            var test1 = _settings.BarsStepMainAngle;
+
+            return Result.Succeeded;
             try
             {
                 (List<Curve> curves, Edge edge, PlanarFace planarFace, Element elem) = GetCurveAndFaceFromUser(uidoc);

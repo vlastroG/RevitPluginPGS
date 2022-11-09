@@ -133,6 +133,9 @@
     <Compile Include="Commands\KR\Services\SelectionFilters\SelectionFilterStairAnglePlane.cs" />
     <Compile Include="Commands\KR\Services\SelectionFilters\SelectionFilterStairStepEdges.cs" />
     <Compile Include="Commands\KR\StairReinforcement.cs" />
+    <Compile Include="GUI\KR\StairReinforcementView.xaml.cs">
+      <DependentUpon>StairReinforcementView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="GUI\ViewModels\BIM\SchedulesToCSVExportViewModel.cs" />
     <Compile Include="GUI\ViewModels\KR\SettingsViewModelKR.cs" />
     <Compile Include="Commands\MEP\EquipmentInSystemCmd.cs" />
@@ -264,6 +267,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="GUI\KR\SettingsKRview.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GUI\KR\StairReinforcementView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
