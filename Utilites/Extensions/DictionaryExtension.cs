@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace MS.Utilites
 {
-    public static class ExtensionDictionary
+    public static class DictionaryExtension
     {
         /// <summary>
         /// Метод расширения для словаря Id элемента Revit и double числа.

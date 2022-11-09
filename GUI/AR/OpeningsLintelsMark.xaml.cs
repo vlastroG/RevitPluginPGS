@@ -39,6 +39,19 @@ namespace MS.GUI.AR
                     // Предварительная сортировка по массе перемычки
                     return dto1.MassOfLintel.CompareTo(dto2.MassOfLintel);
                 });
+            var groupedDtos = _openings
+                .GroupBy(opening => opening.Level)
+                .Select(opening => opening.ToList().OrderBy(open => open.MassOfLintel).ToList())
+                .ToList();
+
+            foreach (var group in groupedDtos)
+            {
+                for (int i = 0; i < group.Count; i++)
+                {
+                    int markNumber = i + 1;
+                    group[i].LintelMark = "ПР-" + markNumber;
+                }
+            }
             // Если сквозная маркировка
             if (endToEndNumbering)
             {

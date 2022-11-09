@@ -9,8 +9,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace MS.Commands.AR
@@ -101,21 +99,23 @@ namespace MS.Commands.AR
                      BuiltInCategory.OST_Windows,
                      BuiltInCategory.OST_Doors});
 
-            var ops1 = filter_openings.WherePasses(filtered_categories);
-            var ops2 = ops1.WhereElementIsNotElementType();
-            var ops3 = ops2.ToElements();
-            var ops4 = ops3.Cast<FamilyInstance>();
-            var ops5 = ops4.Where(f => f.Host != null);
-            var ops6 = ops5.Where(f =>
-                             (BuiltInCategory)f.Host.Category.Id.IntegerValue == BuiltInCategory.OST_Walls);
-            var ops7 = ops6.Where(f => f.get_Parameter(SharedParams.PGS_MarkLintel) != null);
-            var ops8 = ops7.Where(f => f.get_Parameter(SharedParams.Mrk_MarkOfConstruction) != null);
-            var ops9 = ops8.Where(f => f.GetSubComponentIds().FirstOrDefault(
-                             id => (doc.GetElement(id) as FamilyInstance).Symbol
-                             .get_Parameter(BuiltInParameter.ALL_MODEL_DESCRIPTION)
-                             .AsValueString() == SharedValues.LintelDescription) != null);
-            var openings = ops9.Select(f => new OpeningDto(doc, f, !marking))
-                  .ToList();
+            var openings = filter_openings.WherePasses(filtered_categories)
+                .WhereElementIsNotElementType()
+                .ToElements()
+                .Cast<FamilyInstance>()
+                .Where(f => f.Host != null)
+                .Where(f =>
+                  (BuiltInCategory)f.Host.Category.Id.IntegerValue == BuiltInCategory.OST_Walls)
+                .Where(f => f.get_Parameter(SharedParams.PGS_MarkLintel) != null)
+                .Where(f => f.get_Parameter(SharedParams.Mrk_MarkOfConstruction) != null)
+                .Where(f => f.GetSubComponentIds().FirstOrDefault(
+                                 id => (doc.GetElement(id) as FamilyInstance).Symbol
+                                 .get_Parameter(BuiltInParameter.ALL_MODEL_DESCRIPTION)
+                                 .AsValueString() == SharedValues.LintelDescription) != null)
+                .Select(f => new OpeningDto(doc, f, !marking))
+                .ToList();
+
+
 
             int lintelMarkSetCount = 0;
             int mrkMarkConstrSetCount = 0;
@@ -134,7 +134,7 @@ namespace MS.Commands.AR
 
             using (Transaction trans = new Transaction(doc))
             {
-                trans.Start("PGS set _marks lintels");
+                trans.Start("PGS set marks lintels");
 
                 foreach (OpeningDto opening in openings)
                 {

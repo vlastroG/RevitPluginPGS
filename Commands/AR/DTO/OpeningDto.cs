@@ -2,11 +2,9 @@
 using MS.Shared;
 using MS.Utilites;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace MS.Commands.AR.DTO
@@ -227,6 +225,21 @@ namespace MS.Commands.AR.DTO
                 return false;
         }
 
+        private string GetSubComponentsADSKNames()
+        {
+            var subs = Lintel.GetSubComponentIds().Select(sc => Doc.GetElement(sc)).ToList();
+            StringBuilder sb = new StringBuilder();
+            foreach (var sub in subs)
+            {
+                var adskName = sub.get_Parameter(SharedParams.ADSK_Name);
+                if (adskName != null)
+                {
+                    sb.Append(adskName.AsValueString());
+                }
+            }
+            return sb.ToString();
+        }
+
 
 
         /// <summary>
@@ -240,11 +253,11 @@ namespace MS.Commands.AR.DTO
         {
             if (HashWithLevel)
             {
-                return (Level + MassOfLintel + Width + WallWidth + LintelSubComponentsCount).GetHashCode();
+                return (Level + MassOfLintel + Width + WallWidth + LintelSubComponentsCount + GetSubComponentsADSKNames()).GetHashCode();
             }
             else
             {
-                return (MassOfLintel + Width + WallWidth + LintelSubComponentsCount).GetHashCode();
+                return (MassOfLintel + Width + WallWidth + LintelSubComponentsCount + GetSubComponentsADSKNames()).GetHashCode();
             }
         }
 

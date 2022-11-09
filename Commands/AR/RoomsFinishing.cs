@@ -4,19 +4,53 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Architecture;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
+using MS.Shared;
+using MS.Utilites;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Windows;
 
-namespace MS
+namespace MS.Commands.AR
 {
     [Transaction(TransactionMode.Manual)]
     [Regeneration(RegenerationOption.Manual)]
     public class RoomsFinishing : IExternalCommand
     {
+        /// <summary>
+        /// Валидация проекта Revit на наличие необходимых общих параметров
+        /// </summary>
+        /// <param name="doc">Документ Revit</param>
+        /// <returns>True, если все общие параметры присутствуют, иначе false</returns>
+        private bool ValidateSharedParams(in Document doc)
+        {
+            Guid[] _sharedParamsForWalls = new Guid[] {
+            SharedParams.ADSK_RoomNumberInApartment
+            };
+            if (!SharedParams.IsCategoryOfDocContainsSharedParams(
+                doc,
+                BuiltInCategory.OST_Walls,
+                _sharedParamsForWalls))
+            {
+                MessageBox.Show("В текущем проекте у категории \"Стены\"" +
+                    "в экземпляре отсутствует необходимый общий параметр:" +
+                    "\nADSK_Номер помещения квартиры",
+                    "Ошибка");
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Команда для назначения элементам, образующим границы помещения и являющихся внутренней отделкой, 
+        /// номер этого помещения. Команда в разработке, необходимо определиться с параметрами, 
+        /// куда писать номера помещений и проверить логику работы функции нахождения элементов.
+        /// </summary>
+        /// <param name="commandData"></param>
+        /// <param name="message"></param>
+        /// <param name="elements"></param>
+        /// <returns></returns>
         public Result Execute(
             ExternalCommandData commandData,
             ref string message,
@@ -24,19 +58,41 @@ namespace MS
         {
             UIApplication uiapp = commandData.Application;
             UIDocument uidoc = uiapp.ActiveUIDocument;
-            Application app = uiapp.Application;
             Document doc = uidoc.Document;
+            if (!ValidateSharedParams(doc)) return Result.Cancelled;
             Selection sel = uidoc.Selection;
 
-            List<Room> rooms = new List<Room>(
-              sel.PickElementsByRectangle()
-              .Cast<Room>());
+            // Все выбранные помещения перед запуском команды
+            List<Room> rooms = sel.GetElementIds().Select(id => doc.GetElement(id))
+                    .Where(e => (BuiltInCategory)WorkWithParameters.GetCategoryIdAsInteger(e)
+                    == BuiltInCategory.OST_Rooms)
+                    .Cast<Room>()
+                    .Where(r => r.Area > 0)
+                    .ToList();
 
-            if (1 != rooms.Count)
+            if (rooms.Count == 0)
             {
-                message = "Please select exactly one room.";
-
-                return Result.Failed;
+                try
+                {
+                    var filter = new SelectionFilterElementsOfCategory<Element>(
+                        new List<BuiltInCategory> { BuiltInCategory.OST_Rooms },
+                        false);
+                    // Пользователь выбирает помещения
+                    rooms = uidoc.Selection
+                        .PickObjects(
+                            Autodesk.Revit.UI.Selection.ObjectType.Element,
+                            filter,
+                            "Выберите помещения")
+                        .Select(e => doc.GetElement(e))
+                        .Cast<Room>()
+                        .Where(r => r.Area > 0)
+                        .ToList();
+                    if (rooms.Count == 0) return Result.Cancelled;
+                }
+                catch (Autodesk.Revit.Exceptions.OperationCanceledException)
+                {
+                    return Result.Cancelled;
+                }
             }
 
             View3D view3d
@@ -48,180 +104,42 @@ namespace MS
 
             if (null == view3d)
             {
-                message = "No 3D view named '{3D}' found.";
+                MessageBox.Show("Не нейден {3D} вид по умолчанию", "Ошибка");
 
                 return Result.Failed;
             }
 
-            foreach (Room room in rooms)
+            using (Transaction rNumsToWallsTrans = new Transaction(doc))
             {
-                IList<IList<BoundarySegment>> loops
-                  = room.GetBoundarySegments(
-                    new SpatialElementBoundaryOptions());
-
-                int n = loops.Count;
-
-                string testOut = "";
-                StringBuilder sb = new StringBuilder();
-                foreach (IList<BoundarySegment> loop in loops)
+                rNumsToWallsTrans.Start("Номера помещений отделочным стенам");
+                foreach (Room room in rooms)
                 {
-                    n = loop.Count;
+                    IList<IList<BoundarySegment>> loops
+                      = room.GetBoundarySegments(
+                        new SpatialElementBoundaryOptions());
 
-                    foreach (BoundarySegment seg in loop)
+                    foreach (IList<BoundarySegment> loop in loops)
                     {
-                        Element e = doc.GetElement(seg.ElementId);
-
-                        if (null == e)
+                        foreach (BoundarySegment seg in loop)
                         {
-                            e = GetElementByRay(uiapp, doc, view3d,
-                              seg.GetCurve());
-                        }
+                            Element e = doc.GetElement(seg.ElementId);
 
-                        ElementId eTypeId = e.GetTypeId();
-
-                        ElementType type = doc.GetElement(eTypeId) as ElementType;
-
-
-                        try
-                        {
-                            sb.Append(type.LookupParameter("Имя типа").AsString());
-
-
-                        }
-                        catch (Exception)
-                        {
-
-                            throw;
+                            if (null == e)
+                            {
+                                e = WorkWithGeometry.GetElementByRay(doc, view3d,
+                                  seg.GetCurve());
+                            }
+                            if (!(e is Wall)) continue;
+                            string rNum = room.get_Parameter(BuiltInParameter.ROOM_NUMBER).AsValueString();
+                            e.get_Parameter(SharedParams.ADSK_RoomNumberInApartment).Set(rNum);
                         }
                     }
                 }
-                testOut = sb.ToString();
-
-                using (Transaction trans = new Transaction(doc))
-                {
-                    trans.Start("PGS_RoomsFinishing");
-
-                    room.LookupParameter("Отделка потолка").Set(testOut);
-
-                    trans.Commit();
-                }
+                rNumsToWallsTrans.Commit();
             }
             return Result.Succeeded;
         }
 
-        /// <summary>
-        /// Return direction turning 90 degrees 
-        /// left from given input vector.
-        /// </summary>
-        public XYZ GetLeftDirection(XYZ direction)
-        {
-            double x = -direction.Y;
-            double y = direction.X;
-            double z = direction.Z;
-            return new XYZ(x, y, z);
-        }
 
-        /// <summary>
-        /// Return direction turning 90 degrees 
-        /// right from given input vector.
-        /// </summary>
-        public XYZ GetRightDirection(XYZ direction)
-        {
-            return GetLeftDirection(direction.Negate());
-        }
-
-        /// <summary>
-        /// Return the neighbouring BIM element generating 
-        /// the given room boundary curve c, assuming it
-        /// is oriented counter-clockwise around the room
-        /// if part of an interior loop, and vice versa.
-        /// </summary>
-        public Element GetElementByRay(
-          UIApplication app,
-          Document doc,
-          View3D view3d,
-          Curve c)
-        {
-            Element boundaryElement = null;
-
-            // Tolerances
-
-            const double minTolerance = 0.00000001;
-            const double maxTolerance = 0.01;
-
-            // Height of ray above room level:
-            // ray starts from one foot above room level
-
-            const double elevation = 1;
-
-            // Ray starts not directly from the room border
-            // but from a point offset slightly into it.
-
-            const double stepInRoom = 0.1;
-
-            // We could use Line.Direction if Curve c is a 
-            // Line, but since c also might be an Arc, we 
-            // calculate direction like this:
-
-            XYZ lineDirection
-              = (c.GetEndPoint(1) - c.GetEndPoint(0))
-                .Normalize();
-
-            XYZ upDir = elevation * XYZ.BasisZ;
-
-            // Assume that the room is on the left side of 
-            // the room boundary curve and wall on the right.
-            // This is valid for both outer and inner room 
-            // boundaries (outer are counter-clockwise, inner 
-            // are clockwise). Start point is slightly inside 
-            // the room, one foot above room level.
-
-            XYZ toRoomVec = stepInRoom * GetLeftDirection(
-              lineDirection);
-
-            XYZ pointBottomInRoom = c.Evaluate(0.5, true)
-              + toRoomVec;
-
-            XYZ startPoint = pointBottomInRoom + upDir;
-
-            // We are searching for walls only
-
-            ElementFilter wallFilter
-              = new ElementCategoryFilter(
-                BuiltInCategory.OST_Walls);
-
-            ReferenceIntersector intersector
-              = new ReferenceIntersector(wallFilter,
-                FindReferenceTarget.Element, view3d);
-
-            // We don't want to find elements in linked files
-
-            intersector.FindReferencesInRevitLinks = false;
-
-            XYZ toWallDir = GetRightDirection(
-              lineDirection);
-
-            ReferenceWithContext context = intersector
-              .FindNearest(startPoint, toWallDir);
-
-            Reference closestReference = null;
-
-            if (context != null)
-            {
-                if ((context.Proximity > minTolerance)
-                  && (context.Proximity < maxTolerance
-                    + stepInRoom))
-                {
-                    closestReference = context.GetReference();
-
-                    if (closestReference != null)
-                    {
-                        boundaryElement = doc.GetElement(
-                          closestReference);
-                    }
-                }
-            }
-            return boundaryElement;
-        }
     }
 }

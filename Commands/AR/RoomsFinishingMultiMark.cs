@@ -8,8 +8,6 @@ using MS.Utilites;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace MS.Commands.AR
@@ -22,6 +20,8 @@ namespace MS.Commands.AR
     [Regeneration(RegenerationOption.Manual)]
     public class RoomsFinishingMultiMark : IExternalCommand
     {
+        private static string _phase = "Новая конструкция";
+
         private bool ValidateParams(ExternalCommandData commandData)
         {
             Document doc = commandData.Application.ActiveUIDocument.Document;
@@ -113,8 +113,11 @@ namespace MS.Commands.AR
                 return Result.Cancelled;
             }
 
-            var multiNameRange = UserInput.YesNoCancelInput("Помещения с одинаковой отделкой", "Если считать отделку поэтажно - \"Да\", если сквозной подсчет - \"Нет\"");
-            if (multiNameRange != System.Windows.Forms.DialogResult.Yes && multiNameRange != System.Windows.Forms.DialogResult.No)
+            var multiNameRange = UserInput.YesNoCancelInput(
+                "Помещения с одинаковой отделкой", "Если считать отделку поэтажно - \"Да\", " +
+                "если сквозной подсчет - \"Нет\"");
+            if (multiNameRange != System.Windows.Forms.DialogResult.Yes
+                && multiNameRange != System.Windows.Forms.DialogResult.No)
             {
                 return Result.Cancelled;
             }
@@ -127,11 +130,19 @@ namespace MS.Commands.AR
             {
                 byLevel = false;
             }
+            var user_input = UserInput.GetStringFromUser("Выбор стадии", "Введите стадию для расчета площадей:", _phase);
+            if (user_input.Length == 0)
+            {
+                return Result.Cancelled;
+            }
+            _phase = user_input;
+
 
             var rooms = new FilteredElementCollector(doc)
                 .OfCategory(BuiltInCategory.OST_Rooms)
                 .WhereElementIsNotElementType()
                 .ToElements()
+                .Where(r => r.get_Parameter(BuiltInParameter.ROOM_PHASE).AsValueString() == _phase)
                 .Where(e => e.get_Parameter(BuiltInParameter.ROOM_AREA).AsDouble() > 0)
                 .ToList();
 
@@ -141,7 +152,8 @@ namespace MS.Commands.AR
             Dictionary<string, MultiNameRoomsDto> dictFinFloorMultiName = new Dictionary<string, MultiNameRoomsDto>();
 
             List<Element> roomsWithFinishing = new List<Element>();
-
+            int roomsWithWallFinishing = 0;
+            int roomsWithFloorFinishing = 0;
             foreach (Element room in rooms)
             {
                 string typeFinWall = room.get_Parameter(SharedParams.PGS_FinishingTypeOfWalls).AsValueString();
@@ -159,6 +171,7 @@ namespace MS.Commands.AR
                             roomName,
                             roomNumber);
                         roomsWithFinishing.Add(room);
+                        roomsWithWallFinishing++;
                     }
                     if (!String.IsNullOrEmpty(typeFinFloor))
                     {
@@ -169,6 +182,7 @@ namespace MS.Commands.AR
                             roomName,
                             roomNumber);
                         roomsWithFinishing.Add(room);
+                        roomsWithFloorFinishing++;
                     }
                 }
             }
@@ -229,7 +243,8 @@ namespace MS.Commands.AR
                 transEqualFinishing.Commit();
             }
 
-            MessageBox.Show($"Обработано {roomsWithFinishing.Count} помещений с отделкой" +
+            MessageBox.Show($"Обработано {roomsWithWallFinishing} помещений с отделкой стен, " +
+                $"{roomsWithFloorFinishing} помещений с отделкой пола" +
                 $" из всех {rooms.Count} помещений в проеке с ненулевой площадью." +
                 $"\nPGS_МногострочнаяМарка для одинаковой отделки стен и потолка обновлена {equalFinWallSetCount} раз," +
                 $"\nPGS_МногострочнаяМарка_2 для одинаковой отделки пола обновлена {equalFinFloorSetCount} раз.",

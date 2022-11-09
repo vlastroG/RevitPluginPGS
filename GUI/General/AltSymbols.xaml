@@ -1,0 +1,16 @@
+﻿<Window x:Class="MS.GUI.General.AltSymbols"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:MS.GUI.General"
+             mc:Ignorable="d" Width="900" MinWidth="900" MaxWidth="900" Height="900" MinHeight="870" MaxHeight="900"
+        Title="Alt-символы">
+    <Grid Background="White" Margin="10,0,10,10">
+        <Image HorizontalAlignment="Left" Height="775" MinHeight="365" Margin="10,0,0,0" VerticalAlignment="Center" Width="865" MinWidth="420">
+            <Image.Source>
+                <BitmapImage DecodePixelWidth="2160" UriSource="Alt_symbols.png"/>
+            </Image.Source>
+        </Image>
+    </Grid>
+</Window>

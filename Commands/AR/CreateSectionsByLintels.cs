@@ -7,8 +7,6 @@ using MS.Utilites.Comparers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace MS.Commands.AR
@@ -25,7 +23,7 @@ namespace MS.Commands.AR
         /// <summary>
         /// Смещение области обрезки разреза вниз от центра перемычки
         /// </summary>
-        private double _offsetBottom = 0.165;
+        private double _offsetBottom = 0.33;
 
         /// <summary>
         /// Смещение области обрезки разреза вверх от центра перемычки
@@ -61,8 +59,10 @@ namespace MS.Commands.AR
                 return Result.Cancelled;
             }
 
-            var addLevelResult = UserInput.YesNoCancelInput("Разрезы по перемычкам", "Если считать перемычки поэтажно - \"Да\", иначе - \"Нет\"");
-            if (addLevelResult != System.Windows.Forms.DialogResult.Yes && addLevelResult != System.Windows.Forms.DialogResult.No)
+            var addLevelResult = UserInput.YesNoCancelInput("Разрезы по перемычкам",
+                "Если считать перемычки поэтажно - \"Да\", иначе - \"Нет\"");
+            if (addLevelResult != System.Windows.Forms.DialogResult.Yes 
+                && addLevelResult != System.Windows.Forms.DialogResult.No)
             {
                 return Result.Cancelled;
             }

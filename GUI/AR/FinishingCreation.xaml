@@ -1,0 +1,68 @@
+﻿<Window x:Class="MS.GUI.AR.FinishingCreation"
+        x:Name="window"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:MS.GUI.AR"
+             mc:Ignorable="d" Height="460" MinHeight="470" MaxHeight="470" Width="618" MinWidth="618" MaxWidth="618">
+    <Grid Background="White" Height="439" VerticalAlignment="Center">
+        <DataGrid Name="FinishingDto"
+                  Margin="10,30,10,190" 
+                  AutoGenerateColumns="False" 
+                  IsSynchronizedWithCurrentItem="True"
+                  SelectionUnit="FullRow"
+                  MinRowHeight="20"
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False">
+            <DataGrid.Columns>
+                <DataGridTextColumn Binding="{Binding Path = FinishingName}"
+                                        IsReadOnly="True" 
+                                        Header="PGS__НаименованиеОтделки" 
+                                        MinWidth="150" 
+                                        Width="1*"/>
+                <DataGridComboBoxColumn x:Name="wallTypesComboBoxColumn" 
+                                        Header="WallType" 
+                                        SelectedItemBinding="{Binding Path=WallType}"
+                                        DisplayMemberPath="Name"
+                                        MinWidth="150"
+                                        Width="1*"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        <Button x:Name="Submit" Content="Готово" HorizontalAlignment="Left" VerticalAlignment="Top" RenderTransformOrigin="0.69,0.303" Width="60" Click="SubmitButton_Click" Margin="10,10,0,0"/>
+        <Button x:Name="Cancel" Content="Отмена" HorizontalAlignment="Left" Margin="70,10,0,0" VerticalAlignment="Top" Width="60" Click="CancelButton_Click"/>
+        <TextBox x:Name="textBoxHeight" PreviewTextInput="NumberValidationTextBox" HorizontalAlignment="Left" Margin="189,277,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="60"/>
+        <TextBlock HorizontalAlignment="Left" 
+                   Margin="30,278,0,0" 
+                   TextWrapping="Wrap"
+                   VerticalAlignment="Top" 
+                   Width="138">
+            <Run Text="Высота "/><Run Language="ru-ru" Text="отделочных "/><Run Text="стен"/>
+        </TextBlock>
+        <RadioButton Content="Высота стен по элементам" 
+                     HorizontalAlignment="Left" 
+                     Margin="30,313,0,0" 
+                     VerticalAlignment="Top"
+                     IsChecked="True" 
+                     Checked="HElems_Checked"/>
+        <RadioButton Content="Высота стен по помещению"
+                     HorizontalAlignment="Left"
+                     Margin="30,346,0,0" 
+                     VerticalAlignment="Top" 
+                     IsChecked="True" 
+                     Checked="HRooms_Checked"/>
+        <RadioButton Content="Заданная высота стен" 
+                     HorizontalAlignment="Left" 
+                     Margin="30,378,0,0" 
+                     VerticalAlignment="Top" 
+                     IsChecked="True" 
+                     Checked="HInput_Checked"/>
+        <ComboBox x:Name="comboBoxCeilingType" Margin="0,275,20,0" VerticalAlignment="Top" MinWidth="230" MaxWidth="230" HorizontalAlignment="Right" Width="230"/>
+        <TextBlock Margin="0,278,258,0" TextWrapping="Wrap" Text="Тип потолка" VerticalAlignment="Top" HorizontalAlignment="Right" Width="90"/>
+        <CheckBox x:Name="checkBoxCreateCeiling" Content="Создавать потолок" Margin="0,346,121,0" VerticalAlignment="Top" Checked="checkBoxCreateCeiling_Checked" Unchecked="checkBoxCreateCeiling_Unchecked" HorizontalAlignment="Right" Width="129"/>
+        <TextBox x:Name="textBoxCeilingHeight" PreviewTextInput="NumberValidationTextBox" Margin="0,310,190,0" TextWrapping="Wrap" VerticalAlignment="Top" HorizontalAlignment="Right" Width="60"/>
+        <TextBlock HorizontalAlignment="Right" Margin="0,312,258,0" TextWrapping="Wrap" Text="Высота потолка" VerticalAlignment="Top" Width="90"/>
+        <CheckBox x:Name="checkBoxCreateWalls" Content="Создавать стены" Margin="0,378,121,0" VerticalAlignment="Top" Checked="checkBoxCreateWalls_Checked" Unchecked="checkBoxCreateWalls_Unchecked" HorizontalAlignment="Right" Width="129"/>
+        <CheckBox x:Name="checkBoxCeilingHeightByRoom" Content="Высота по помещению" Margin="0,313,20,0" VerticalAlignment="Top" Checked="checkBoxCeilingHeightByRoom_Checked" Unchecked="checkBoxCeilingHeightByRoom_Unchecked" HorizontalAlignment="Right" Width="148"/>
+    </Grid>
+</Window>
