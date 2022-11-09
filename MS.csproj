@@ -238,7 +238,6 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Commands\KR\ViewModels\" />
     <Folder Include="Images\Content\" />
   </ItemGroup>
   <ItemGroup>

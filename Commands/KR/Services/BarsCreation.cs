@@ -35,8 +35,8 @@ namespace MS.Commands.KR.Services
         /// <param name="host">Основа арматуры</param>
         /// <param name="curves">Ребра ступеней, выбранные пользователем</param>
         /// <param name="anglePlane">Нижняя наклонная плоскость марша, выбранная пользователем</param>
-        /// <param name="rebarDiameterSteps">Диаметр стержней каркасов ступеней</param>
-        /// <param name="rebarDiameterMain">Диаметр рабочих стержней марша</param>
+        /// <param name="rebarTypeSteps">Диаметр стержней каркасов ступеней</param>
+        /// <param name="rebarTypeMain">Диаметр рабочих стержней марша</param>
         /// <param name="rebarCoverSteps">Защитный слой для арматуры каркасов ступеней</param>
         /// <param name="rebarCoverMainAngle">Защитный слой рабочей арматуры у наклонной грани</param>
         /// <param name="rebarCoverMainHoriz">Защитный слой рабочей арматуры у горизонтальных граней</param>
@@ -49,8 +49,9 @@ namespace MS.Commands.KR.Services
             in List<Curve> curves,
             in PlanarFace anglePlane,
             in Edge edge,
-            int rebarDiameterSteps,
-            int rebarDiameterMain,
+            bool createStepFrame,
+            in RebarBarType rebarTypeSteps,
+            in RebarBarType rebarTypeMain,
             int rebarCoverSteps,
             int rebarCoverMainAngle,
             int rebarCoverMainHoriz,
@@ -59,21 +60,26 @@ namespace MS.Commands.KR.Services
             int barsStepMainHorizont,
             int barsStepMainAngle)
         {
-            using (Transaction transSteps = new Transaction(host.Document))
+            int rebarDiameterMain = (int)Math.Round(rebarTypeMain.BarNominalDiameter * SharedValues.FootToMillimeters);
+            if (createStepFrame)
             {
-                transSteps.Start("Каркасы ступеней");
-                foreach (var curve in curves)
+                using (Transaction transSteps = new Transaction(host.Document))
                 {
-                    CreateStairStepBarsFrame(
-                         host,
-                         curve,
-                         anglePlane,
-                         rebarDiameterSteps,
-                         rebarCoverSteps,
-                         barsStepStepsHorizont,
-                         barsStepStepsVert);
+                    int rebarDiameterSteps = (int)Math.Round(rebarTypeSteps.BarNominalDiameter * SharedValues.FootToMillimeters);
+                    transSteps.Start("Каркасы ступеней");
+                    foreach (var curve in curves)
+                    {
+                        CreateStairStepBarsFrame(
+                             host,
+                             curve,
+                             anglePlane,
+                             rebarDiameterSteps,
+                             rebarCoverSteps,
+                             barsStepStepsHorizont,
+                             barsStepStepsVert);
+                    }
+                    transSteps.Commit();
                 }
-                transSteps.Commit();
             }
 
             using (Transaction transMain = new Transaction(host.Document))

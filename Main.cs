@@ -304,10 +304,15 @@ namespace MS
 
 
             //StairReinforcement command
-            PushButtonData stairRnfrcmtCmd = new PushButtonData("StairReinforcement", "Армирование\nлестниц", path, "MS.Commands.KR.StairReinforcement");
-            Uri stairRnfrcmtCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\KR\StairRnfrcmt.png");
-            BitmapImage stairRnfrcmtCmdImage = new BitmapImage(stairRnfrcmtCmdImagePath);
-            stairRnfrcmtCmd.LargeImage = stairRnfrcmtCmdImage;
+            PushButtonData btnStairRnfrcmtCmd = new PushButtonData("StairReinforcement", "Армирование\nлестниц", path, "MS.Commands.KR.StairReinforcement");
+            Uri btnStairRnfrcmtCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\KR\StairRnfrcmt.png");
+            BitmapImage btnStairRnfrcmtCmdImage = new BitmapImage(btnStairRnfrcmtCmdImagePath);
+            btnStairRnfrcmtCmd.LargeImage = btnStairRnfrcmtCmdImage;
+            btnStairRnfrcmtCmd.ToolTip = "Нужно выбрать лестницу, " +
+                "затем выбрать ребра ступеней одного марша " +
+                "(минимум 1 ребро, и если выбираете 1 ребро - то оно должно быть у типовой ступени), " +
+                "после этого выбрать наклонную грань этого марша.";
+            btnStairRnfrcmtCmd.LongDescription = "Параметры армирования задаются в настройках после выбора геометрии.";
 
             //Диапазон марок свай command
             PushButtonData btnPilesMarkRangeCmd = new PushButtonData(
@@ -473,7 +478,7 @@ namespace MS
 
             // AR panel
             panelAR.AddItem(btnRmArea);
-            panelAR.AddItem(btnCmplxAprtNum);
+            panelAR.AddItem(btnOpeningsByDuctCmd);
             panelAR.AddItem(btnOpeningsArea);
             panelAR.AddItem(btnMarkLintelsInOpenings);
             panelAR.AddItem(btnLintelsSections);
@@ -481,17 +486,17 @@ namespace MS
             panelAR.AddItem(btnRoomsFinishingMultiMark);
             panelAR.AddItem(btnRmFinCreation);
             panelAR.AddItem(btnRoomFinishingScheduleCreationCmd);
+            panelAR.AddSlideOut();
+            panelAR.AddItem(btnCmplxAprtNum);
             panelAR.AddItem(btnRoomBoardsFinishing);
             panelAR.AddItem(btnMasonryMesh);
             panelAR.AddItem(btnMaterialColors);
-            panelAR.AddSlideOut();
-            panelAR.AddItem(btnOpeningsByDuctCmd);
 
             // KR panel
-            panelKR.AddItem(stairRnfrcmtCmd); // в разработке (сырая)
-            panelKR.AddItem(btnPilesMarkRangeCmd);
-            panelKR.AddSlideOut();
+            panelKR.AddItem(btnStairRnfrcmtCmd);
             panelKR.AddItem(btnOpeningByMEPCmd);
+            panelKR.AddSlideOut();
+            panelKR.AddItem(btnPilesMarkRangeCmd);
             panelKR.AddItem(btnChangeSettingsKRCmd);
 
             // SS panel

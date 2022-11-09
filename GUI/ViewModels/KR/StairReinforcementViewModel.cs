@@ -15,6 +15,21 @@ namespace MS.GUI.ViewModels.KR
     public class StairReinforcementViewModel : ViewModelBase
     {
         /// <summary>
+        /// Путь к документу, в котором армируется лестница
+        /// </summary>
+        private static string _docPath = String.Empty;
+
+        /// <summary>
+        /// Путь к документу, в котором армируется лестница
+        /// </summary>
+        public string DocPath
+        {
+            get => _docPath;
+            private set => Set(ref _docPath, value);
+        }
+
+
+        /// <summary>
         /// Создавать армирование ступеней?
         /// </summary>
         private static bool _createStepFrames = true;
@@ -45,44 +60,44 @@ namespace MS.GUI.ViewModels.KR
         }
 
 
-        ///// <summary>
-        ///// Коллекция типов арматурных стержней для каркасов ступеней
-        ///// </summary>
-        //public ObservableCollection<RebarBarType> RebarTypesSteps { get; }
+        /// <summary>
+        /// Коллекция типов арматурных стержней для каркасов ступеней
+        /// </summary>
+        public static ObservableCollection<RebarBarType> RebarTypesSteps { get; private set; } = new ObservableCollection<RebarBarType>();
 
-        ///// <summary>
-        ///// Тип арматурных стержней каркаса лестницы
-        ///// </summary>
-        //private static RebarBarType _selectedRebarTypeSteps;
+        /// <summary>
+        /// Тип арматурных стержней каркаса лестницы
+        /// </summary>
+        private static RebarBarType _selectedRebarTypeSteps;
 
-        ///// <summary>
-        ///// Выбранный тип арматурного стержня для каркаса ступени
-        ///// </summary>
-        //public RebarBarType SelectedRebarTypeSteps
-        //{
-        //    get => _selectedRebarTypeSteps;
-        //    set => Set(ref _selectedRebarTypeSteps, value);
-        //}
+        /// <summary>
+        /// Выбранный тип арматурного стержня для каркаса ступени
+        /// </summary>
+        public RebarBarType SelectedRebarTypeSteps
+        {
+            get => _selectedRebarTypeSteps;
+            set => Set(ref _selectedRebarTypeSteps, value);
+        }
 
 
-        ///// <summary>
-        ///// Коллекция типов арматурных стержней для рабочей арматуры марша
-        ///// </summary>
-        //public ObservableCollection<RebarBarType> RebarTypesMain { get; }
+        /// <summary>
+        /// Коллекция типов арматурных стержней для рабочей арматуры марша
+        /// </summary>
+        public static ObservableCollection<RebarBarType> RebarTypesMain { get; private set; } = new ObservableCollection<RebarBarType>();
 
-        ///// <summary>
-        ///// Тип рабочих арматурных стержней лестничного марша
-        ///// </summary>
-        //private static RebarBarType _selectedRebarTypeMain;
+        /// <summary>
+        /// Тип рабочих арматурных стержней лестничного марша
+        /// </summary>
+        private static RebarBarType _selectedRebarTypeMain;
 
-        ///// <summary>
-        ///// Выбранный тип арматурного стержня для каркаса ступени
-        ///// </summary>
-        //public RebarBarType SelectedRebarTypeMain
-        //{
-        //    get => _selectedRebarTypeMain;
-        //    set => Set(ref _selectedRebarTypeMain, value);
-        //}
+        /// <summary>
+        /// Выбранный тип арматурного стержня для каркаса ступени
+        /// </summary>
+        public RebarBarType SelectedRebarTypeMain
+        {
+            get => _selectedRebarTypeMain;
+            set => Set(ref _selectedRebarTypeMain, value);
+        }
 
 
         /// <summary>
@@ -134,12 +149,12 @@ namespace MS.GUI.ViewModels.KR
 
 
         /// <summary>
-        /// Шаг Г- стержней каркасов ступеней
+        /// Шаг горизонтальных стержней каркасов ступеней
         /// </summary>
-        private static int _barsStepStepsHorizont = 200;
+        private static int _barsStepStepsHorizont = 100;
 
         /// <summary>
-        /// Шаг Г- стержней каркасов ступеней
+        /// Шаг горизонтальных стержней каркасов ступеней
         /// </summary>
         [RegexStringValidator(@"^[1-9][0-9]{2}$")]
         public int BarsStepStepsHorizont
@@ -150,12 +165,12 @@ namespace MS.GUI.ViewModels.KR
 
 
         /// <summary>
-        /// Шаг горизонтальных стержней каркасов ступеней
+        /// Шаг Г- стержней каркасов ступеней
         /// </summary>
-        private static int _barsStepStepsVert = 100;
+        private static int _barsStepStepsVert = 200;
 
         /// <summary>
-        /// Шаг горизонтальных стержней каркасов ступеней
+        /// Шаг Г- стержней каркасов ступеней
         /// </summary>
         [RegexStringValidator(@"^[1-9][0-9]{2}$")]
         public int BarsStepStepsVert
@@ -200,21 +215,15 @@ namespace MS.GUI.ViewModels.KR
         /// Конструктор формы для настроек армирования лестницы
         /// </summary>
         /// <param name="doc">Документ, в котором будет армироваться лестница</param>
-        //public StairReinforcementViewModel(in Document doc)
-        //{
-        //    var rebarTypes = new FilteredElementCollector(doc)
-        //        .OfClass(typeof(RebarBarType))
-        //        .WhereElementIsElementType()
-        //        .Cast<RebarBarType>();
-
-        //    RebarTypesSteps = new ObservableCollection<RebarBarType>(rebarTypes);
-        //    RebarTypesMain = new ObservableCollection<RebarBarType>(rebarTypes);
-        //}
+        public StairReinforcementViewModel(in IEnumerable<RebarBarType> rebarTypesNames, string docPath)
+        {
+            RebarTypesSteps = new ObservableCollection<RebarBarType>(rebarTypesNames);
+            RebarTypesMain = new ObservableCollection<RebarBarType>(rebarTypesNames);
+            DocPath = docPath;
+        }
 
         public StairReinforcementViewModel()
         {
-            //RebarTypesSteps = new ObservableCollection<RebarBarType>();
-            //RebarTypesMain = new ObservableCollection<RebarBarType>();
         }
     }
 }

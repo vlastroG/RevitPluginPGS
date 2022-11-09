@@ -1,6 +1,7 @@
 ﻿using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Architecture;
+using Autodesk.Revit.DB.Structure;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
 using MS.Commands.KR.Services;
@@ -13,6 +14,7 @@ using MS.Utilites.SelectionFilters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows;
 
 namespace MS.Commands.KR
 {
@@ -23,7 +25,7 @@ namespace MS.Commands.KR
         /// <summary>
         /// Настройки команды
         /// </summary>
-        private readonly StairReinforcementViewModel _settings = new StairReinforcementViewModel();
+        private StairReinforcementViewModel _settings = new StairReinforcementViewModel();
 
 
         /// <summary>
@@ -37,38 +39,63 @@ namespace MS.Commands.KR
         {
             Document doc = commandData.Application.ActiveUIDocument.Document;
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
-
-            var ui = new StairReinforcementView();
-            if (ui.DialogResult != true)
+            string docPath = doc.PathName;
+            var rebarTypes = new FilteredElementCollector(doc)
+                .OfClass(typeof(RebarBarType))
+                .WhereElementIsElementType()
+                .OrderBy(n => n.Name)
+                .Cast<RebarBarType>();
+            var rebarTypesCount = rebarTypes.Count();
+            if (rebarTypesCount == 0)
             {
+                MessageBox.Show(
+                    "В проект не загружен ни один тип арматурного стержня, загрузите их и повторите команду.",
+                    "Ошибка");
                 return Result.Cancelled;
             }
 
-            var test = _settings.BarsStepMainHorizont;
-            var test1 = _settings.BarsStepMainAngle;
+            if (!_settings.DocPath.Equals(docPath)
+                || (StairReinforcementViewModel.RebarTypesMain.Count != rebarTypesCount))
+            {
+                _settings = new StairReinforcementViewModel(rebarTypes, docPath);
+            }
 
-            return Result.Succeeded;
             try
             {
                 (List<Curve> curves, Edge edge, PlanarFace planarFace, Element elem) = GetCurveAndFaceFromUser(uidoc);
-                if (curves.Count == 0 || planarFace is null || elem is null)
+                if (curves is null || curves.Count == 0 || planarFace is null || elem is null)
                 {
                     return Result.Cancelled;
                 }
+
+                var ui = new StairReinforcementView();
+                ui.ShowDialog();
+                if (ui.DialogResult != true)
+                {
+                    return Result.Cancelled;
+                }
+
+                if (_settings.SelectedRebarTypeMain is null
+                    || (_settings.CreateStepFrames && (_settings.SelectedRebarTypeSteps is null)))
+                {
+                    return Result.Cancelled;
+                }
+
                 BarsCreation.CreateStairReinforcement(
                     elem,
                     curves,
                     planarFace,
                     edge,
-                    6,
-                    12,
-                    25,
-                    30,
-                    40,
-                    100,
-                    200,
-                    200,
-                    200);
+                    _settings.CreateStepFrames,
+                    _settings.SelectedRebarTypeSteps,
+                    _settings.SelectedRebarTypeMain,
+                    _settings.RebarCoverSteps,
+                    _settings.RebarCoverMainAngle,
+                    _settings.RebarCoverMainHoriz,
+                    _settings.BarsStepStepsHorizont,
+                    _settings.BarsStepStepsVert,
+                    _settings.BarsStepMainHorizont,
+                    _settings.BarsStepMainAngle);
             }
             catch (Autodesk.Revit.Exceptions.OperationCanceledException)
             {
@@ -96,35 +123,42 @@ namespace MS.Commands.KR
                     BuiltInCategory.OST_StructuralFraming
                 },
                 false);
-            // Пользователь выбирает лестницу
-            Element elem = doc.GetElement(uidoc.Selection
-                .PickObject(
-                    Autodesk.Revit.UI.Selection.ObjectType.Element,
-                    filter,
-                    "Выберите лестницу, или нажмите Esc для отмены"));
+            try
+            {
+                // Пользователь выбирает лестницу
+                Element elem = doc.GetElement(uidoc.Selection
+                    .PickObject(
+                        Autodesk.Revit.UI.Selection.ObjectType.Element,
+                        filter,
+                        "Выберите лестницу, или нажмите Esc для отмены"));
 
-            var edges = uidoc.Selection.PickObjects(
-                ObjectType.Edge,
-                new SelectionFilterStairStepEdges(doc, elem.Id.IntegerValue),
-                "Выберите ребра ступени лестницы и нажмите Готово, или нажмите Отмена")
-                .Select(r => doc.GetElement(r).GetGeometryObjectFromReference(r) as Edge);
+                var edges = uidoc.Selection.PickObjects(
+                    ObjectType.Edge,
+                    new SelectionFilterStairStepEdges(doc, elem.Id.IntegerValue),
+                    "Выберите ребра ступени лестницы и нажмите Готово, или нажмите Отмена")
+                    .Select(r => doc.GetElement(r).GetGeometryObjectFromReference(r) as Edge);
 
-            List<Curve> curves = edges
-                .Select(edg => GetSelectedEdgeTransformed(elem, edg))
-                .ToList();
+                List<Curve> curves = edges
+                    .Select(edg => GetSelectedEdgeTransformed(elem, edg))
+                    .ToList();
 
-            var edge = edges.First();
+                var edge = edges.Last();
 
-            Reference faceRef = uidoc.Selection.PickObject(
-                ObjectType.Face,
-                new SelectionFilterStairAnglePlane(doc, elem.Id.IntegerValue),
-                "Выберите наклонную грань лестничного марша, или нажмите Esc для отмены");
-            GeometryObject geoObject = doc.GetElement(faceRef).GetGeometryObjectFromReference(faceRef);
-            PlanarFace planarFace = geoObject as PlanarFace;
+                Reference faceRef = uidoc.Selection.PickObject(
+                    ObjectType.Face,
+                    new SelectionFilterStairAnglePlane(doc, elem.Id.IntegerValue),
+                    "Выберите наклонную грань лестничного марша, или нажмите Esc для отмены");
+                GeometryObject geoObject = doc.GetElement(faceRef).GetGeometryObjectFromReference(faceRef);
+                PlanarFace planarFace = geoObject as PlanarFace;
 
-            PlanarFace planarFaceTrans = GetSelectedPlaneTransformed(elem, planarFace);
+                PlanarFace planarFaceTrans = GetSelectedPlaneTransformed(elem, planarFace);
 
-            return (curves, edge, planarFaceTrans, elem);
+                return (curves, edge, planarFaceTrans, elem);
+            }
+            catch (System.InvalidOperationException)
+            {
+                return (null, null, null, null);
+            }
         }
 
         /// <summary>
