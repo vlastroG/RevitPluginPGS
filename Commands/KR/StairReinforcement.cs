@@ -43,8 +43,8 @@ namespace MS.Commands.KR
             var rebarTypes = new FilteredElementCollector(doc)
                 .OfClass(typeof(RebarBarType))
                 .WhereElementIsElementType()
-                .OrderBy(n => n.Name)
-                .Cast<RebarBarType>();
+                .Cast<RebarBarType>()
+                .OrderBy(r => r.BarNominalDiameter);
             var rebarTypesCount = rebarTypes.Count();
             if (rebarTypesCount == 0)
             {
@@ -89,6 +89,7 @@ namespace MS.Commands.KR
                     _settings.CreateStepFrames,
                     _settings.SelectedRebarTypeSteps,
                     _settings.SelectedRebarTypeMain,
+                    _settings.RebarCoverEnd,
                     _settings.RebarCoverSteps,
                     _settings.RebarCoverMainAngle,
                     _settings.RebarCoverMainHoriz,

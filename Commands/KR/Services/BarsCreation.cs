@@ -14,29 +14,14 @@ namespace MS.Commands.KR.Services
     public static class BarsCreation
     {
         /// <summary>
-        /// Защитный слой торцов стержней = 20 мм
-        /// </summary>
-        private static readonly int _rebarCoverStepsEnd = 20;
-
-        /// <summary>
-        /// Название типа арматурного стрежния ø6 A240
-        /// </summary>
-        private static readonly string _rbtD6A240 = "ø6 A240";
-
-        /// <summary>
-        /// Название типа арматурного стержня ø12
-        /// </summary>
-        private static readonly string _rbtD12 = "ø12";
-
-
-        /// <summary>
         /// Создает армирование лестничного марша
         /// </summary>
         /// <param name="host">Основа арматуры</param>
         /// <param name="curves">Ребра ступеней, выбранные пользователем</param>
         /// <param name="anglePlane">Нижняя наклонная плоскость марша, выбранная пользователем</param>
-        /// <param name="rebarTypeSteps">Диаметр стержней каркасов ступеней</param>
-        /// <param name="rebarTypeMain">Диаметр рабочих стержней марша</param>
+        /// <param name="rebarTypeSteps">Тип стержней каркасов ступеней</param>
+        /// <param name="rebarTypeMain">Тип рабочих стержней марша</param>
+        /// <param name="rebarCoverEnd">Отступ концов стержней от граней</param>
         /// <param name="rebarCoverSteps">Защитный слой для арматуры каркасов ступеней</param>
         /// <param name="rebarCoverMainAngle">Защитный слой рабочей арматуры у наклонной грани</param>
         /// <param name="rebarCoverMainHoriz">Защитный слой рабочей арматуры у горизонтальных граней</param>
@@ -52,6 +37,7 @@ namespace MS.Commands.KR.Services
             bool createStepFrame,
             in RebarBarType rebarTypeSteps,
             in RebarBarType rebarTypeMain,
+            int rebarCoverEnd,
             int rebarCoverSteps,
             int rebarCoverMainAngle,
             int rebarCoverMainHoriz,
@@ -73,10 +59,12 @@ namespace MS.Commands.KR.Services
                              host,
                              curve,
                              anglePlane,
+                             rebarTypeSteps,
                              rebarDiameterSteps,
                              rebarCoverSteps,
                              barsStepStepsHorizont,
-                             barsStepStepsVert);
+                             barsStepStepsVert,
+                             rebarCoverEnd);
                     }
                     transSteps.Commit();
                 }
@@ -89,11 +77,13 @@ namespace MS.Commands.KR.Services
                     host,
                     anglePlane,
                     edge,
+                    rebarTypeMain,
                     rebarDiameterMain,
                     rebarCoverMainAngle,
                     rebarCoverMainHoriz,
                     barsStepMainHorizont,
-                    barsStepMainAngle);
+                    barsStepMainAngle,
+                    rebarCoverEnd);
                 transMain.Commit();
             }
         }
@@ -108,15 +98,18 @@ namespace MS.Commands.KR.Services
         /// <param name="rebarCoverSteps">Защитный слой стержней каркаса ступеней</param>
         /// <param name="barsStepHorizont">Шаг горизонтальных прямых стержней каркаса</param>
         /// <param name="barsStepVert">Шаг вертикальных Г- образных стержней каркаса</param>
+        /// <param name="rebarCoverEnd">Отступ концов стержней от граней</param>
         /// <returns></returns>
         private static void CreateStairStepBarsFrame(
             in Element host,
             in Curve curve,
             in PlanarFace anglePlane,
+            in RebarBarType rebarType,
             int rebarDiameter,
             int rebarCoverSteps,
             int barsStepHorizont,
-            int barsStepVert)
+            int barsStepVert,
+            int rebarCoverEnd)
         {
             Document doc = host.Document;
             XYZ toBottomDir = XYZ.BasisZ.Negate();
@@ -127,6 +120,7 @@ namespace MS.Commands.KR.Services
                 curve,
                 rebarDiameter,
                 rebarCoverSteps,
+                rebarCoverEnd,
                 toStepDir);
 
             var barsVertSideOffset = GetVerticalStepBarsSideOffset(cCorner, barsStepVert);
@@ -134,6 +128,7 @@ namespace MS.Commands.KR.Services
                 cCorner,
                 anglePlane,
                 rebarDiameter,
+                rebarCoverEnd,
                 barsVertSideOffset);
 
             Rebar barX;
@@ -145,7 +140,7 @@ namespace MS.Commands.KR.Services
             barX = Rebar.CreateFromCurves(
                 doc,
                 RebarStyle.Standard,
-                GetRebarBarType(doc, _rbtD6A240),
+                rebarType,
                 null,
                 null,
                 host,
@@ -167,7 +162,7 @@ namespace MS.Commands.KR.Services
             barY = Rebar.CreateFromCurves(
                 doc,
                 RebarStyle.Standard,
-                GetRebarBarType(doc, _rbtD6A240),
+                rebarType,
                 null,
                 null,
                 host,
@@ -192,7 +187,7 @@ namespace MS.Commands.KR.Services
             barL = Rebar.CreateFromCurves(
                 doc,
                 RebarStyle.Standard,
-                GetRebarBarType(doc, _rbtD6A240),
+                rebarType,
                 null,
                 null,
                 host,
@@ -238,12 +233,14 @@ namespace MS.Commands.KR.Services
         /// <param name="curve">Ребро ступени</param>
         /// <param name="rebarDiameter">Диаметр стержня каркаса ступени</param>
         /// <param name="rebarCoverSteps">Защитный слой стержней каркаса ступени</param>
+        /// <param name="rebarCoverEnd">Отступ концов стержней от граней</param>
         /// <param name="toStepDir">Вектор направления движения вверх по лестнице</param>
         /// <returns>Эскиз стержня с учетом всех отступов</returns>
         private static Curve CreateStairStepCornerBarCurve(
             in Curve curve,
             int rebarDiameter,
             int rebarCoverSteps,
+            int rebarCoverEnd,
             XYZ toStepDir
             )
         {
@@ -258,13 +255,13 @@ namespace MS.Commands.KR.Services
             XYZ cCornerStartOffsetV = (curve as Line)
                 .Direction
                 .Normalize()
-                .Multiply(_rebarCoverStepsEnd / SharedValues.FootToMillimeters);
+                .Multiply(rebarCoverEnd / SharedValues.FootToMillimeters);
 
             XYZ cCornerEndOffsetV = (curve as Line)
                 .Direction
                 .Negate()
                 .Normalize()
-                .Multiply(_rebarCoverStepsEnd / SharedValues.FootToMillimeters);
+                .Multiply(rebarCoverEnd / SharedValues.FootToMillimeters);
 
             XYZ cCornerStart = curve
                 .GetEndPoint(0)
@@ -283,31 +280,19 @@ namespace MS.Commands.KR.Services
 
 
         /// <summary>
-        /// Возвращает тип арматурного стержня по имени типа
-        /// </summary>
-        /// <param name="doc">Документ для поиска</param>
-        /// <param name="rbtName">Наименование типа арматурного стержня</param>
-        /// <returns>Тип арматурного стержня</returns>
-        private static RebarBarType GetRebarBarType(in Document doc, string rbtName)
-        {
-            return new FilteredElementCollector(doc)
-                .OfClass(typeof(RebarBarType))
-                .WhereElementIsElementType()
-                .First(rbt => rbt.Name.Equals(rbtName)) as RebarBarType;
-        }
-
-        /// <summary>
         /// Создает эскиз Г-стержня для каркаса ступени
         /// </summary>
         /// <param name="cornerBarCurve">Угловой горизонтальный стержень</param>
         /// <param name="anglePlane">Наклонная плоскость лестницы</param>
         /// <param name="rebarDiameter">Диаметр Г-стержня</param>
+        /// <param name="rebarCoverEnd">Отступ концов стержней от граней</param>
         /// <param name="barsVertSideOffset">Отступ оси крайнего Г-стержня от торца горизонтального углового стержня</param>
         /// <returns>Список линий, составляющих эскиз Г-стержня</returns>
         private static IList<Curve> GetStairStepAngleBarCurves(
             in Curve cornerBarCurve,
             in PlanarFace anglePlane,
             int rebarDiameter,
+            int rebarCoverEnd,
             double barsVertSideOffset
             )
         {
@@ -318,7 +303,7 @@ namespace MS.Commands.KR.Services
             // до плоскости нижнего защитного слоя наклонной плоскости марша
             double distanceToCoverPlane =
                 Math.Abs(anglePlane.DistanceTo(cornerBarCurve.GetEndPoint(0), out _)) +
-                (rebarDiameter - _rebarCoverStepsEnd) / SharedValues.FootToMillimeters;
+                (rebarDiameter - rebarCoverEnd) / SharedValues.FootToMillimeters;
 
             // Длина вертикального сегмента в футах
             double lengthVert = distanceToCoverPlane / Math.Abs(Math.Cos(angleStair));
@@ -351,20 +336,24 @@ namespace MS.Commands.KR.Services
         /// <param name="host">Элемент - основа арматуры</param>
         /// <param name="anglePlane">Нижняя наклонная плоскость марша</param>
         /// <param name="edge">Ребро ступени</param>
+        /// <param name="barType">Тип арматурных стержней</param>
         /// <param name="rebarDiameter">Диаметр рабочих стержней</param>
         /// <param name="rebarCoverMainAngle">Защитный слой у наклонной грани</param>
         /// <param name="rebarCoverMainHoriz">Защитный слой у горизонтальных граней</param>
         /// <param name="barsStepMainHorizont">Шаг горизонтальных прямых стержней</param>
         /// <param name="barsStepMainVert">Шаг наклонных Z - стержней</param>
+        /// <param name="rebarCoverEnd">Отступ концов стержней от граней</param>
         private static void CreateStairStepMainBars(
             in Element host,
             in PlanarFace anglePlane,
             in Edge edge,
+            in RebarBarType barType,
             int rebarDiameter,
             int rebarCoverMainAngle,
             int rebarCoverMainHoriz,
             int barsStepMainHorizont,
-            int barsStepMainVert)
+            int barsStepMainVert,
+            int rebarCoverEnd)
         {
             (IList<Curve> curvesAngle, int barsCountAngle, double sideOffsetAngle) = CreateStairMainAngleBarCurves(anglePlane, rebarDiameter, rebarCoverMainAngle, rebarCoverMainHoriz, barsStepMainVert);
 
@@ -373,7 +362,7 @@ namespace MS.Commands.KR.Services
             Rebar barZ = Rebar.CreateFromCurves(
                 host.Document,
                 RebarStyle.Standard,
-                GetRebarBarType(host.Document, _rbtD12),
+                barType,
                 null,
                 null,
                 host,
@@ -399,12 +388,13 @@ namespace MS.Commands.KR.Services
                 curvesAngle,
                 rebarDiameter,
                 barsStepMainHorizont,
+                rebarCoverEnd,
                 sideOffsetAngle);
 
             Rebar barHoriz = Rebar.CreateFromCurves(
                 host.Document,
                 RebarStyle.Standard,
-                GetRebarBarType(host.Document, _rbtD12),
+                barType,
                 null,
                 null,
                 host,
@@ -566,6 +556,7 @@ namespace MS.Commands.KR.Services
         /// <param name="curves">Список линий эскиза Z - стержня</param>
         /// <param name="rebarDiameter">Диаметр рабочих стержней</param>
         /// <param name="barsStepMainHorizont">Шаг прямых горизонтальных стержней</param>
+        /// <param name="rebarCoverEnd">Отступ концов стержней от граней</param>
         /// <param name="sideOffsetAngle">Отступ оси Z - стержня от боковой грани марша</param>
         /// <returns>Кортеж эскиза стержня и их количества</returns>
         private static (Curve curve, int count) CreateStairMainHorizBarCurves(
@@ -573,6 +564,7 @@ namespace MS.Commands.KR.Services
             in IList<Curve> curves,
             int rebarDiameter,
             int barsStepMainHorizont,
+            int rebarCoverEnd,
             double sideOffsetAngle)
         {
             var angleCurveDir = (curves[1] as Line).Direction.Normalize();
@@ -581,11 +573,11 @@ namespace MS.Commands.KR.Services
 
             double offsetFromAngle = barsStepMainHorizont / (4 * SharedValues.FootToMillimeters);
             var length = GetMainHorizontalCurve(anglePlane).Length
-                - _rebarCoverStepsEnd * 2 / SharedValues.FootToMillimeters;
+                - rebarCoverEnd * 2 / SharedValues.FootToMillimeters;
 
             XYZ startP = curves[0].GetEndPoint(1)
                 .Add(curveDir.Negate().Multiply(sideOffsetAngle))
-                .Add(curveDir.Multiply(_rebarCoverStepsEnd / SharedValues.FootToMillimeters))
+                .Add(curveDir.Multiply(rebarCoverEnd / SharedValues.FootToMillimeters))
                 .Add(angleCurveDir.Multiply(offsetFromAngle))
                 .Add(anglePlane.FaceNormal.Negate().Multiply(rebarDiameter / SharedValues.FootToMillimeters));
 
