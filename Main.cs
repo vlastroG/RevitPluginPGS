@@ -393,7 +393,7 @@ namespace MS
             btnSystemsInSpace.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, @"https://google.com"));
 
             // ОВиК корректировка имени системы command
-            PushButtonData btnSystemNameCorrectCmd = new PushButtonData("SystemNameCorrectCmd", "Скорректировать\nИмяСистемы", path, "MS.Commands.MEP.SystemNameCorrectCmd");
+            PushButtonData btnSystemNameCorrectCmd = new PushButtonData("SystemNameCorrectCmd", "Формирование\nспецификации", path, "MS.Commands.MEP.SystemNameCorrectCmd");
             Uri btnSystemNameCorrectCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\MEP\UpdateTable.png");
             BitmapImage btnSystemNameCorrectCmdImage = new BitmapImage(btnSystemNameCorrectCmdImagePath);
             btnSystemNameCorrectCmd.LargeImage = btnSystemNameCorrectCmdImage;
@@ -453,20 +453,6 @@ namespace MS
                 "\nи ВСЕ параметры для воздухонагревателей, воздухоохладителей и фильтров.";
 
 
-            // ОВиК корректировка имени системы command
-            PushButtonData btnFullSystemNamesCmd = new PushButtonData("FullSystemNamesCmd", "Полные имена\nсистем", path, "MS.Commands.MEP.FullSystemNamesCmd");
-            Uri btnFullSystemNamesCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\MEP\Find.png");
-            BitmapImage btnFullSystemNamesCmdImage = new BitmapImage(btnFullSystemNamesCmdImagePath);
-            btnFullSystemNamesCmd.LargeImage = btnFullSystemNamesCmdImage;
-            btnFullSystemNamesCmd.ToolTip = "Записывает полное имя системы по значению параметра 'ИмяСистемы' " +
-                "в соответствии с заданным значением в Excel.";
-            btnFullSystemNamesCmd.LongDescription = "\nПравила составления Excel файла:" +
-                "\n1. Заполнять таблицу в первых двух столбцах, начиная с первой строки (шапку не использовать)." +
-                "\n2. В таблице не должно быть пустых строчек, которые разделяют строки со значениями." +
-                "\n3. В первом столбце не должно быть повторяющихся значений." +
-                "\n4. Регистр имеет значение." +
-                "\n5. Оформление таблицы не влияет на работу команды.";
-
             // General panel
             panelGeneral.AddItem(btnInfo);
             panelGeneral.AddItem(btnPolyLineLength);
@@ -509,7 +495,6 @@ namespace MS
 
             // ВК panel
             panelVK.AddItem(btnSystemNameCorrectCmd);
-            panelVK.AddItem(btnFullSystemNamesCmd);
 
             // BIM panel
             panelBIM.AddItem(btnClashReport);

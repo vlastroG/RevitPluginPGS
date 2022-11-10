@@ -15,11 +15,16 @@ namespace MS.Utilites.DataParsers
         private readonly Workbook wb;
         private readonly Worksheet ws;
 
-        public Excel(string Path)
+        /// <summary>
+        /// Конструктор для работы с листом Excel по пути к файлу и номеру листа
+        /// </summary>
+        /// <param name="Path">Полный путь к файлу Excel</param>
+        /// <param name="sheetNumber">Номер листа Excel, начиная с 1</param>
+        public Excel(string Path, int sheetNumber)
         {
             this.Path = Path;
             wb = excel.Workbooks.Open(Path);
-            ws = wb.Worksheets[1];
+            ws = wb.Worksheets[sheetNumber];
         }
 
         /// <summary>
@@ -31,7 +36,7 @@ namespace MS.Utilites.DataParsers
         /// <returns>Строковое значение ячейки</returns>
         public string ReadCell(int row, object column)
         {
-            return ws.Cells[row, column].Value2 ?? String.Empty;
+            return Convert.ToString(ws.Cells[row, column].Value2) ?? String.Empty;
         }
 
         public void Dispose()
