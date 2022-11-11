@@ -26,10 +26,25 @@ namespace MS.Commands.MEP
         private static string _startPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
         /// <summary>
+        /// Путь к файлу Excel
+        /// </summary>
+        private static string _excelPath = String.Empty;
+
+        /// <summary>
         /// Название параметра проекта ИмяСистемы
         /// </summary>
         private readonly string _parSystemName = "ИмяСистемы";
 
+        /// <summary>
+        /// Категории элементов для обработки параметра ИмяСистемы:
+        /// OST_PipeAccessory       Арматура трубопроводов,
+        /// OST_MechanicalEquipment Оборудование,
+        /// OST_PlumbingFixtures    Сантехнические приборы,
+        /// OST_PipeCurves          Трубы,
+        /// OST_PipeFitting         Соединительные детали трубопроводов,
+        /// OST_FlexPipeCurves      Гибкие трубы
+        /// OST_PipeInsulations     Материалы изоляции труб
+        /// </summary>
         private readonly List<BuiltInCategory> _categories = new List<BuiltInCategory>()
         {
             BuiltInCategory.OST_PipeAccessory,
@@ -37,7 +52,8 @@ namespace MS.Commands.MEP
             BuiltInCategory.OST_PlumbingFixtures,
             BuiltInCategory.OST_PipeCurves,
             BuiltInCategory.OST_PipeFitting,
-            BuiltInCategory.OST_FlexPipeCurves
+            BuiltInCategory.OST_FlexPipeCurves,
+            BuiltInCategory.OST_PipeInsulations
         };
 
         /// <summary>
@@ -45,9 +61,9 @@ namespace MS.Commands.MEP
         /// </summary>
         /// <param name="doc">Документ, в котором будут находиться элементы MEP</param>
         /// <returns>Коллекция элементов MEP</returns>
-        private IReadOnlyCollection<Element> GetMEPelements(in Document doc)
+        private ICollection<Element> GetMEPelements(in Document doc, in ICollection<BuiltInCategory> categories)
         {
-            var MEPcategories = new ElementMulticategoryFilter(_categories);
+            var MEPcategories = new ElementMulticategoryFilter(categories);
             var mepElements = new FilteredElementCollector(doc)
                 .WherePasses(MEPcategories)
                 .WhereElementIsNotElementType()
@@ -62,12 +78,12 @@ namespace MS.Commands.MEP
         /// который необходимо оставить в ИмяСистемы.
         /// </summary>
         /// <returns>Кортеж строк. Если произошла отмена или ошибка, то null</returns>
-        private List<(string Naming, string System)> GetNamingAndSystemTuple()
+        private List<(string Naming, string System)> GetNamingAndSystemTuple(int sheetNumber)
         {
-            string excelPath = GetPath(ref _startPath, "Excel Files|*.xlsx", "Выберите файл таблицы Excel", ".xlsx");
-            if (String.IsNullOrEmpty(excelPath)) return null;
+            _excelPath = GetPath(ref _startPath, "Excel Files|*.xlsx", "Выберите файл таблицы Excel", ".xlsx");
+            if (String.IsNullOrEmpty(_excelPath)) return null;
             List<(string Naming, string System)> namingAndSystemTuple = new List<(string Naming, string System)>();
-            using (Excel excel = new Excel(excelPath))
+            using (Excel excel = new Excel(_excelPath, sheetNumber))
             {
                 var row = 1;
                 var col = 1;
@@ -91,24 +107,12 @@ namespace MS.Commands.MEP
             Document doc = commandData.Application.ActiveUIDocument.Document;
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
 
-            System.Windows.Forms.DialogResult trimNumbersUI = UserInput.YesNoCancelInput("Корректировка параметра ИмяСистемы", "Удалять цифры из наименования системы?");
-            bool trimNumbers = false;
-            switch (trimNumbersUI)
-            {
-                case System.Windows.Forms.DialogResult.Yes:
-                    trimNumbers = true;
-                    break;
-                case System.Windows.Forms.DialogResult.No:
-                    trimNumbers = false;
-                    break;
-                default:
-                    return Result.Cancelled;
-            }
+            bool trimNumbers = true;
 
-            List<(string Naming, string System)> namingAndSystemTuple = GetNamingAndSystemTuple();
+            List<(string Naming, string System)> namingAndSystemTuple = GetNamingAndSystemTuple(1);
             if (namingAndSystemTuple is null) return Result.Cancelled;
 
-            var mepEls = GetMEPelements(doc);
+            var mepEls = GetMEPelements(doc, _categories);
             List<ElementId> errors = new List<ElementId>();
             int count = 0;
             using (Transaction correctSystemNames = new Transaction(doc))
@@ -131,8 +135,9 @@ namespace MS.Commands.MEP
                             continue;
                         }
                     }
+                    string systemNameBefore = el.LookupParameter(_parSystemName).AsValueString();
                     // Значение параметра элемента ИмяСистемы в нижнем регистре
-                    string systemFull = el.LookupParameter(_parSystemName).AsValueString().ToLower();
+                    string systemFull = systemNameBefore.ToLower();
                     // Массив значений имен систем элемента, которые были разделены запятой (в нижнем регистре)
                     var systems = systemFull.Split('\u002C');
                     // Имя системы, которое нужно перезаписать в ИмяСистемы
@@ -156,24 +161,45 @@ namespace MS.Commands.MEP
                             var namingAndSystemNeed = namingAndSystemTuple.FirstOrDefault(t => adskNaming.Contains(t.Naming));
                             if (namingAndSystemNeed.System is null)
                             {
-                                // Пропустить экземпляры семейств, у которых несколько систем
-                                // и ни одна из них не подходит заданной в Excel букве
-                                errors.Add(el.Id);
-                                continue;
-                            }
-                            var system = systems.Where(s => s.Contains(namingAndSystemNeed.System)).ToList();
-                            if (system.Count == 1)
-                            {
-                                systemCheck = trimNumbers
-                                    ? system.First().Split(' ').FirstOrDefault().ToUpper()
-                                    : system.First().ToUpper();
+                                var shortNames = systems.Select(sysLong => sysLong.Split(' ').First());
+                                if (AreEquals(shortNames))
+                                {
+                                    // у элемента несколько одинаковых систем
+                                    systemCheck = shortNames.First();
+                                }
+                                else
+                                {
+                                    // Пропустить экземпляры семейств, у которых несколько разных систем
+                                    // и ни одна из них не подходит заданной в Excel букве
+                                    errors.Add(el.Id);
+                                    continue;
+                                }
                             }
                             else
                             {
-                                // У экземпляра семейства присутствует несколько систем с одинаковой буквой из Excel
-                                // или ни одна система не содержит букву из Excel
-                                errors.Add(el.Id);
-                                continue;
+                                var system = systems.Where(s => s.Contains(namingAndSystemNeed.System)).ToList();
+                                if (system.Count == 1)
+                                {
+                                    systemCheck = trimNumbers
+                                        ? system.First().Split(' ').FirstOrDefault().ToUpper()
+                                        : system.First();
+                                }
+                                else
+                                {
+                                    var shortNames = systems.Select(sysLong => sysLong.Split(' ').First());
+                                    if (AreEquals(shortNames))
+                                    {
+                                        // у элемента несколько одинаковых систем
+                                        systemCheck = shortNames.First();
+                                    }
+                                    else
+                                    {
+                                        // У экземпляра семейства присутствует несколько разных систем
+                                        // и ни одна система не содержит букву из Excel
+                                        errors.Add(el.Id);
+                                        continue;
+                                    }
+                                }
                             }
                         }
                         else
@@ -189,8 +215,11 @@ namespace MS.Commands.MEP
                         continue;
                     }
 
-                    el.LookupParameter(_parSystemName).Set(systemCheck);
-                    count++;
+                    if (!systemNameBefore.Equals(systemCheck.ToUpper()))
+                    {
+                        el.LookupParameter(_parSystemName).Set(systemCheck.ToUpper());
+                        count++;
+                    }
                 }
                 correctSystemNames.Commit();
             }
@@ -209,7 +238,176 @@ namespace MS.Commands.MEP
                 MessageBox.Show($"\n\n'ИмяСистемы' скорректировано у {count} элементов.",
                     "Корректировка параметра 'ИмяСистемы'");
             }
+            InvokeFullSystemNamesCmd(
+                commandData,
+                ref message,
+                elements,
+                _excelPath,
+                2);
+
+
+            CorrectGrouping(doc);
+
             return Result.Succeeded;
+        }
+
+        /// <summary>
+        /// Возвращает, одинаковы ли строки в перечислении
+        /// </summary>
+        /// <param name="strings">Перечисление строк</param>
+        /// <returns>True, если все строки одинаковые, иначе false</returns>
+        private bool AreEquals(in IEnumerable<string> strings)
+        {
+            bool areEquals = false;
+            string first = strings.First();
+            foreach (string str in strings)
+            {
+                areEquals = first.Equals(str);
+            }
+            return areEquals;
+        }
+
+
+        /// <summary>
+        /// Вызов команды "Полные имена систем"
+        /// </summary>
+        /// <param name="commandData"></param>
+        /// <param name="message"></param>
+        /// <param name="elements"></param>
+        /// <param name="excelPath">Путь к файлу Excel</param>
+        /// <param name="sheetNumber">Номер листа, скоторого читаются данные (начинается с 1)</param>
+        private void InvokeFullSystemNamesCmd(
+                ExternalCommandData commandData,
+                ref string message,
+                ElementSet elements,
+                string excelPath,
+                int sheetNumber)
+        {
+            var fullSystemNamesCmd = new FullSystemNamesCmd();
+            fullSystemNamesCmd.Execute(
+                commandData,
+                ref message,
+                elements,
+                excelPath,
+                sheetNumber);
+        }
+
+        /// <summary>
+        /// Назначить элементам значение параметра ADSK_Группирование по значению категории
+        /// </summary>
+        /// <param name="doc">Документ, в котором корректируется группирование</param>
+        private void CorrectGrouping(in Document doc)
+        {
+            var elems = GetMEPelements(doc, _categories);
+            using (Transaction transGrouping = new Transaction(doc))
+            {
+                transGrouping.Start("Скорректировать ADSK_Группирование");
+                foreach (Element elem in elems)
+                {
+                    BuiltInCategory category = (BuiltInCategory)elem.Category.Id.IntegerValue;
+                    // 1 - экземпляр, 2 - тип, else - нет параметра
+                    int groupParamPlace = 3;
+                    if (!(elem is FamilyInstance inst1) ||
+                        (elem is FamilyInstance
+                        && !(inst1.get_Parameter(SharedParams.ADSK_Grouping) is null)))
+                    {
+                        groupParamPlace = 1;
+                    }
+                    else if (elem is FamilyInstance inst
+                        && !(inst.Symbol.get_Parameter(SharedParams.ADSK_Grouping) is null))
+                    {
+                        groupParamPlace = 2;
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                    if (groupParamPlace == 1)
+                    {
+                        bool isReadOnly = elem.get_Parameter(SharedParams.ADSK_Grouping).IsReadOnly;
+                        if (!isReadOnly)
+                        {
+                            string grouping = elem.get_Parameter(SharedParams.ADSK_Grouping).AsValueString() ?? String.Empty;
+                            switch (category)
+                            {
+                                case BuiltInCategory.OST_MechanicalEquipment:
+                                    if (!grouping.Equals("1"))
+                                        elem.get_Parameter(SharedParams.ADSK_Grouping).Set("1");
+                                    break;
+                                case BuiltInCategory.OST_PlumbingFixtures:
+                                    if (!grouping.Equals("2"))
+                                        elem.get_Parameter(SharedParams.ADSK_Grouping).Set("2");
+                                    break;
+                                case BuiltInCategory.OST_PipeAccessory:
+                                    if (!grouping.Equals("3"))
+                                        elem.get_Parameter(SharedParams.ADSK_Grouping).Set("3");
+                                    break;
+                                case BuiltInCategory.OST_PipeCurves:
+                                    if (!grouping.Equals("4"))
+                                        elem.get_Parameter(SharedParams.ADSK_Grouping).Set("4");
+                                    break;
+                                case BuiltInCategory.OST_PipeFitting:
+                                    if (!grouping.Equals("4"))
+                                        elem.get_Parameter(SharedParams.ADSK_Grouping).Set("4");
+                                    break;
+                                case BuiltInCategory.OST_FlexPipeCurves:
+                                    if (!grouping.Equals("4"))
+                                        elem.get_Parameter(SharedParams.ADSK_Grouping).Set("4");
+                                    break;
+                                case BuiltInCategory.OST_PipeInsulations:
+                                    if (!grouping.Equals("5"))
+                                        elem.get_Parameter(SharedParams.ADSK_Grouping).Set("5");
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                    }
+                    else if (groupParamPlace == 2)
+                    {
+                        var symb = (elem as FamilyInstance).Symbol;
+                        bool isReadOnly = symb.get_Parameter(SharedParams.ADSK_Grouping).IsReadOnly;
+                        if (!isReadOnly)
+                        {
+                            string grouping = symb.get_Parameter(SharedParams.ADSK_Grouping).AsValueString() ?? String.Empty;
+                            switch (category)
+                            {
+                                case BuiltInCategory.OST_MechanicalEquipment:
+                                    if (!grouping.Equals("1"))
+                                        symb.get_Parameter(SharedParams.ADSK_Grouping).Set("1");
+                                    break;
+                                case BuiltInCategory.OST_PlumbingFixtures:
+                                    if (!grouping.Equals("2"))
+                                        symb.get_Parameter(SharedParams.ADSK_Grouping).Set("2");
+                                    break;
+                                case BuiltInCategory.OST_PipeAccessory:
+                                    if (!grouping.Equals("3"))
+                                        symb.get_Parameter(SharedParams.ADSK_Grouping).Set("3");
+                                    break;
+                                case BuiltInCategory.OST_PipeCurves:
+                                    if (!grouping.Equals("4"))
+                                        symb.get_Parameter(SharedParams.ADSK_Grouping).Set("4");
+                                    break;
+                                case BuiltInCategory.OST_PipeFitting:
+                                    if (!grouping.Equals("4"))
+                                        symb.get_Parameter(SharedParams.ADSK_Grouping).Set("4");
+                                    break;
+                                case BuiltInCategory.OST_FlexPipeCurves:
+                                    if (!grouping.Equals("4"))
+                                        symb.get_Parameter(SharedParams.ADSK_Grouping).Set("4");
+                                    break;
+                                case BuiltInCategory.OST_PipeInsulations:
+                                    if (!grouping.Equals("5"))
+                                        symb.get_Parameter(SharedParams.ADSK_Grouping).Set("5");
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                    }
+                }
+                transGrouping.Commit();
+            }
         }
     }
 }

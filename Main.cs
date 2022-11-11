@@ -393,30 +393,50 @@ namespace MS
             btnSystemsInSpace.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, @"https://google.com"));
 
             // ОВиК корректировка имени системы command
-            PushButtonData btnSystemNameCorrectCmd = new PushButtonData("SystemNameCorrectCmd", "Скорректировать\nИмяСистемы", path, "MS.Commands.MEP.SystemNameCorrectCmd");
+            PushButtonData btnSystemNameCorrectCmd = new PushButtonData("SystemNameCorrectCmd", "Формирование\nспецификации", path, "MS.Commands.MEP.SystemNameCorrectCmd");
             Uri btnSystemNameCorrectCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\MEP\UpdateTable.png");
             BitmapImage btnSystemNameCorrectCmdImage = new BitmapImage(btnSystemNameCorrectCmdImagePath);
             btnSystemNameCorrectCmd.LargeImage = btnSystemNameCorrectCmdImage;
-            btnSystemNameCorrectCmd.ToolTip = "Корректировка параметра 'ИмяСистемы' у элементов категорий " +
+            btnSystemNameCorrectCmd.ToolTip = "Корректировка параметров: " +
+                "'ИмяСистемы', " +
+                "'PGS_Наименование системы' " +
+                "'Спецификация_Последовательность по системам' " +
+                "'ADSK_Группирование'" +
+                "\nу элементов категорий: " +
                 "'Оборудование', " +
                 "'Сантехническоие приборы', " +
                 "'Арматура трубопроводов', " +
                 "'Гибкие трубы', " +
                 "'Соединительные детали трубопроводов', " +
-                "'Трубы'." +
-                "По таблице Excel задается буква системы, которую нужно оставить у экземпляра семейства.";
-            btnSystemNameCorrectCmd.LongDescription = "Из первого столбца, начиная с первой строки, " +
+                "'Трубы', " +
+                "'Материалы изоляции труб." +
+                "\nДанные заполняются в одном файле Excel на двух листах.";
+            btnSystemNameCorrectCmd.LongDescription = 
+                "I. Корректировка параметра 'ИмяСистемы'" +
+                "\nИз первого столбца 1 листа Excel, начиная с первой строки, " +
                 "берется строковое значение, которое должно содержаться в параметре ADSK_Наименование " +
                 "у элементов обрабатываемых категорий с несколькими системами. " +
                 "Во втором столбце напротив каждого строкового значения " +
-                "должна быть буква, обозначающая систему, которую необходимо оставить, например 'В'. " +
+                "должна быть буква (или буква с цифрой), " +
+                "обозначающая систему, которую необходимо оставить, например 'В' (или 'В1'). " +
                 "Если у какого-то элемента несколько систем одного и того же типа, или нет системы с заданной буквой, " +
                 "а также если не задан параметр ADSK_Наименование, будет выведено сообщение с Id этого элемента." +
-                "\nПравила составления Excel файла:" +
-                "\n1. Заполнять таблицу в первых двух столбцах, начиная с первой строки (шапку не использовать)." +
+                "\n\nII. Полное наименование и последовательность по системам" +
+                "\nНа 2 листе Excel в первом столбце записать сокращение системы ('ИмяСистемы'). " +
+                "\nВо втором столбце написать соответствующее значение полного имени системы." +
+                "\nВ третьем столюце написать значение для 'Спецификация_Последовательность по системам'" +
+                "\n\nIII. Правила составления Excel файла:" +
+                "\n1. Заполнять таблицу в первых двух столбцах 1 листа и первых трех столбцах 2 листа, " +
+                "начиная с первой строки (шапку не использовать)." +
                 "\n2. В таблице не должно быть пустых строчек, которые разделяют строки со значениями." +
                 "\n3. В первом столбце не должно быть повторяющихся значений." +
-                "\n4. Оформление таблицы не влияет на работу команды.";
+                "\n4. Оформление таблицы не влияет на работу команды." +
+                "\n\nIV. Назначение группирования\n'ADSK_Группирование назначается в соответствии:" +
+                "\n1 - Оборудование" +
+                "\n2 - Сантехнические приборы" +
+                "\n3 - Арматура трубопровода" +
+                "\n4 - Трубы, Соединительные детали трубопроводов, Гибкие трубы" +
+                "\n5 - Материалы изоляции трубопроводов";
 
             // ОВиК корректировка имени системы command
             PushButtonData btnEquipmentInSystemCmd = new PushButtonData("EquipmentInSystemCmd", "Оборудование\nв системах", path, "MS.Commands.MEP.EquipmentInSystemCmd");
@@ -452,20 +472,6 @@ namespace MS
                 "\nPGS_ФильтрКоличество" +
                 "\nи ВСЕ параметры для воздухонагревателей, воздухоохладителей и фильтров.";
 
-
-            // ОВиК корректировка имени системы command
-            PushButtonData btnFullSystemNamesCmd = new PushButtonData("FullSystemNamesCmd", "Полные имена\nсистем", path, "MS.Commands.MEP.FullSystemNamesCmd");
-            Uri btnFullSystemNamesCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\MEP\Find.png");
-            BitmapImage btnFullSystemNamesCmdImage = new BitmapImage(btnFullSystemNamesCmdImagePath);
-            btnFullSystemNamesCmd.LargeImage = btnFullSystemNamesCmdImage;
-            btnFullSystemNamesCmd.ToolTip = "Записывает полное имя системы по значению параметра 'ИмяСистемы' " +
-                "в соответствии с заданным значением в Excel.";
-            btnFullSystemNamesCmd.LongDescription = "\nПравила составления Excel файла:" +
-                "\n1. Заполнять таблицу в первых двух столбцах, начиная с первой строки (шапку не использовать)." +
-                "\n2. В таблице не должно быть пустых строчек, которые разделяют строки со значениями." +
-                "\n3. В первом столбце не должно быть повторяющихся значений." +
-                "\n4. Регистр имеет значение." +
-                "\n5. Оформление таблицы не влияет на работу команды.";
 
             // General panel
             panelGeneral.AddItem(btnInfo);
@@ -509,7 +515,6 @@ namespace MS
 
             // ВК panel
             panelVK.AddItem(btnSystemNameCorrectCmd);
-            panelVK.AddItem(btnFullSystemNamesCmd);
 
             // BIM panel
             panelBIM.AddItem(btnClashReport);
