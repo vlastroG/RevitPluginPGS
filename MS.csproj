@@ -119,6 +119,7 @@
     <Compile Include="Commands\BIM\ClashReportImport.cs" />
     <Compile Include="Commands\BIM\DTO\ScheduleToCSVExportDto.cs" />
     <Compile Include="Commands\BIM\XmlData\ClashReportXml.cs" />
+    <Compile Include="Commands\General\ElementInViewsCmd.cs" />
     <Compile Include="Commands\General\Info.cs" />
     <Compile Include="Commands\General\LevelName.cs" />
     <Compile Include="Commands\General\PolyLineLength.cs" />
@@ -133,10 +134,14 @@
     <Compile Include="Commands\KR\Services\SelectionFilters\SelectionFilterStairAnglePlane.cs" />
     <Compile Include="Commands\KR\Services\SelectionFilters\SelectionFilterStairStepEdges.cs" />
     <Compile Include="Commands\KR\StairReinforcement.cs" />
+    <Compile Include="GUI\General\ElementInViews.xaml.cs">
+      <DependentUpon>ElementInViews.xaml</DependentUpon>
+    </Compile>
     <Compile Include="GUI\KR\StairReinforcementView.xaml.cs">
       <DependentUpon>StairReinforcementView.xaml</DependentUpon>
     </Compile>
     <Compile Include="GUI\ViewModels\BIM\SchedulesToCSVExportViewModel.cs" />
+    <Compile Include="GUI\ViewModels\General\ElementInViewsViewModel.cs" />
     <Compile Include="GUI\ViewModels\KR\SettingsViewModelKR.cs" />
     <Compile Include="Commands\MEP\EquipmentInSystemCmd.cs" />
     <Compile Include="Commands\MEP\FullSystemNamesCmd.cs" />
@@ -194,6 +199,7 @@
     <Compile Include="Utilites\SelectionFilters\ElementInLinkSelectionFilter.cs" />
     <Compile Include="Utilites\SelectionFilters\SelectionFilterEdges.cs" />
     <Compile Include="Utilites\SelectionFilters\SelectionFilterEdgesOfElement.cs" />
+    <Compile Include="Utilites\SelectionFilters\SelectionFilterElementsOfCategoryType.cs" />
     <Compile Include="Utilites\SelectionFilters\SelectionFilterPlanarFaces.cs" />
     <Compile Include="Utilites\SelectionFilters\SelectionFilterPlanarFacesOfElement.cs" />
     <Compile Include="Utilites\SelectionFilters\SelectionFilterRooms.cs" />
@@ -262,6 +268,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="GUI\General\CategoryInput.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GUI\General\ElementInViews.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
