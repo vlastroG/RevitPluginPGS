@@ -43,6 +43,7 @@ namespace MS.Commands.MEP
         /// OST_PipeCurves          Трубы,
         /// OST_PipeFitting         Соединительные детали трубопроводов,
         /// OST_FlexPipeCurves      Гибкие трубы
+        /// OST_PipeInsulations     Материалы изоляции труб
         /// </summary>
         private readonly List<BuiltInCategory> _categories = new List<BuiltInCategory>()
         {
@@ -51,7 +52,8 @@ namespace MS.Commands.MEP
             BuiltInCategory.OST_PlumbingFixtures,
             BuiltInCategory.OST_PipeCurves,
             BuiltInCategory.OST_PipeFitting,
-            BuiltInCategory.OST_FlexPipeCurves
+            BuiltInCategory.OST_FlexPipeCurves,
+            BuiltInCategory.OST_PipeInsulations
         };
 
         /// <summary>
@@ -296,17 +298,7 @@ namespace MS.Commands.MEP
         /// <param name="doc">Документ, в котором корректируется группирование</param>
         private void CorrectGrouping(in Document doc)
         {
-            List<BuiltInCategory> categories = new List<BuiltInCategory>()
-                {
-                    BuiltInCategory.OST_PipeAccessory,
-                    BuiltInCategory.OST_MechanicalEquipment,
-                    BuiltInCategory.OST_PlumbingFixtures,
-                    BuiltInCategory.OST_PipeCurves,
-                    BuiltInCategory.OST_PipeFitting,
-                    BuiltInCategory.OST_FlexPipeCurves,
-                    BuiltInCategory.OST_PipeInsulations
-                };
-            var elems = GetMEPelements(doc, categories);
+            var elems = GetMEPelements(doc, _categories);
             using (Transaction transGrouping = new Transaction(doc))
             {
                 transGrouping.Start("Скорректировать ADSK_Группирование");

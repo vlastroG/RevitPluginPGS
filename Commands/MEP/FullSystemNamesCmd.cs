@@ -28,6 +28,16 @@ namespace MS.Commands.MEP
         /// </summary>
         private readonly string _parSystemName = "ИмяСистемы";
 
+        /// <summary>
+        /// Категории элементов для обработки параметра ИмяСистемы:
+        /// OST_PipeAccessory       Арматура трубопроводов,
+        /// OST_MechanicalEquipment Оборудование,
+        /// OST_PlumbingFixtures    Сантехнические приборы,
+        /// OST_PipeCurves          Трубы,
+        /// OST_PipeFitting         Соединительные детали трубопроводов,
+        /// OST_FlexPipeCurves      Гибкие трубы
+        /// OST_PipeInsulations     Материалы изоляции труб
+        /// </summary>
         private readonly List<BuiltInCategory> _categories = new List<BuiltInCategory>()
         {
             BuiltInCategory.OST_PipeAccessory,
@@ -35,7 +45,8 @@ namespace MS.Commands.MEP
             BuiltInCategory.OST_PlumbingFixtures,
             BuiltInCategory.OST_PipeCurves,
             BuiltInCategory.OST_PipeFitting,
-            BuiltInCategory.OST_FlexPipeCurves
+            BuiltInCategory.OST_FlexPipeCurves,
+            BuiltInCategory.OST_PipeInsulations
         };
 
         /// <summary>
