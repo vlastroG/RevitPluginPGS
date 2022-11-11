@@ -182,7 +182,7 @@ namespace MS.Commands.MEP
                                 {
                                     systemCheck = trimNumbers
                                         ? system.First().Split(' ').FirstOrDefault().ToUpper()
-                                        : system.First().ToUpper();
+                                        : system.First();
                                 }
                                 else
                                 {
@@ -190,7 +190,7 @@ namespace MS.Commands.MEP
                                     if (AreEquals(shortNames))
                                     {
                                         // у элемента несколько одинаковых систем
-                                        systemCheck = shortNames.First().ToUpper();
+                                        systemCheck = shortNames.First();
                                     }
                                     else
                                     {
@@ -215,9 +215,9 @@ namespace MS.Commands.MEP
                         continue;
                     }
 
-                    if (!systemNameBefore.Equals(systemCheck))
+                    if (!systemNameBefore.Equals(systemCheck.ToUpper()))
                     {
-                        el.LookupParameter(_parSystemName).Set(systemCheck);
+                        el.LookupParameter(_parSystemName).Set(systemCheck.ToUpper());
                         count++;
                     }
                 }
@@ -304,7 +304,6 @@ namespace MS.Commands.MEP
                 transGrouping.Start("Скорректировать ADSK_Группирование");
                 foreach (Element elem in elems)
                 {
-                    var elId = elem.Id.IntegerValue;
                     BuiltInCategory category = (BuiltInCategory)elem.Category.Id.IntegerValue;
                     // 1 - экземпляр, 2 - тип, else - нет параметра
                     int groupParamPlace = 3;
