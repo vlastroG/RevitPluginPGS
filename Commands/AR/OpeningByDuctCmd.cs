@@ -34,11 +34,15 @@ namespace MS.Commands.AR
 
         private readonly double _openingWidthNeed = 500 / SharedValues.FootToMillimeters;
 
+        private static Document _doc;
+
+        private static UIDocument _uidoc;
+
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
-            Document doc = commandData.Application.ActiveUIDocument.Document;
-            (Element duct, Line ductLine) = GetDuct(commandData);
-            Wall wall = GetWall(commandData);
+            _doc = commandData.Application.ActiveUIDocument.Document;
+            (Element duct, Line ductLine) = GetDuct();
+            Wall wall = GetWall();
             if ((duct is null) || (wall is null))
             {
                 return Result.Cancelled;
@@ -69,7 +73,7 @@ namespace MS.Commands.AR
             openingH = ductH + 2 * 50 / SharedValues.FootToMillimeters;
             openingW = ductW + 2 * 50 / SharedValues.FootToMillimeters;
 
-            FamilyInstance opening = PlaceOpeningRectangle(doc, point, wall, openingH, openingW);
+            FamilyInstance opening = PlaceOpeningRectangle(_doc, point, wall, openingH, openingW);
             if (opening is null)
             {
                 return Result.Cancelled;
@@ -80,7 +84,7 @@ namespace MS.Commands.AR
                 MessageBoxButtons.YesNo);
             if (createLintel == DialogResult.Yes)
             {
-                FamilyInstance lintel = PlaceLintel(doc, point, wall, opening);
+                FamilyInstance lintel = PlaceLintel(_doc, point, wall, opening);
                 if (lintel is null)
                 {
                     return Result.Cancelled;
@@ -301,23 +305,20 @@ namespace MS.Commands.AR
         /// </summary>
         /// <param name="commandData"></param>
         /// <returns>Воздуховод, или null, если операция отменена или не валидна</returns>
-        private (Element duct, Line ductLine) GetDuct(in ExternalCommandData commandData)
+        private (Element duct, Line ductLine) GetDuct()
         {
-            var uidoc = commandData.Application.ActiveUIDocument;
-            var doc = uidoc.Document;
-            Selection sel = uidoc.Selection;
             ElementInLinkSelectionFilter<Duct> filter
                 = new ElementInLinkSelectionFilter<Duct>(
-                  doc);
+                  _doc);
             Element duct = null;
             try
             {
-                Reference ductRef = uidoc.Selection.PickObject(
+                Reference ductRef = _uidoc.Selection.PickObject(
                     ObjectType.LinkedElement,
                     filter,
                     "Выберите воздуховод из связанного файла");
                 duct = filter.LinkedDocument.GetElement(ductRef.LinkedElementId);
-                var link = doc.GetElement(ductRef.ElementId) as RevitLinkInstance;
+                var link = _doc.GetElement(ductRef.ElementId) as RevitLinkInstance;
                 var ductCurve = (duct.Location as LocationCurve).Curve;
                 Transform transform = link.GetTransform();
                 if (!transform.AlmostEqual(Transform.Identity))
@@ -344,12 +345,8 @@ namespace MS.Commands.AR
         /// </summary>
         /// <param name="commandData"></param>
         /// <returns>Стена, или null, если операция отменена или не валидна</returns>
-        private Wall GetWall(in ExternalCommandData commandData)
+        private Wall GetWall()
         {
-            var uidoc = commandData.Application.ActiveUIDocument;
-            var doc = uidoc.Document;
-
-            Selection sel = uidoc.Selection;
             SelectionFilterElementsOfCategory<Wall> filter
                 = new SelectionFilterElementsOfCategory<Wall>(
                     new List<BuiltInCategory> {
@@ -359,11 +356,11 @@ namespace MS.Commands.AR
             Wall wall = null;
             try
             {
-                Reference wallRef = uidoc.Selection.PickObject(
+                Reference wallRef = _uidoc.Selection.PickObject(
                     ObjectType.Element,
                     filter,
                     "Выберите воздуховод из связанного файла");
-                wall = doc.GetElement(wallRef) as Wall;
+                wall = _doc.GetElement(wallRef) as Wall;
             }
             catch (Autodesk.Revit.Exceptions.OperationCanceledException)
             {
