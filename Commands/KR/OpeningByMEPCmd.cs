@@ -37,6 +37,10 @@ namespace MS.Commands.KR
             BuiltInCategory.OST_PipeCurves
         };
 
+        private static Document _doc;
+
+        private static UIDocument _uidoc;
+
         /// <summary>
         /// Максимальный отступ от MEP элемента
         /// </summary>
@@ -44,6 +48,9 @@ namespace MS.Commands.KR
 
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
+            _uidoc = commandData.Application.ActiveUIDocument;
+            _doc = _uidoc.Document;
+
             if (String.IsNullOrEmpty(_settings.OpeningFamName)
                 || String.IsNullOrEmpty(_settings.OpeningTypeName)
                 || String.IsNullOrEmpty(_settings.OpeningOffsetString))
@@ -61,9 +68,8 @@ namespace MS.Commands.KR
                 var settingsKRview = new SettingsKRview();
                 settingsKRview.ShowDialog();
             }
-            Document doc = commandData.Application.ActiveUIDocument.Document;
 
-            FamilySymbol openingFamSymb = GetOpeningSymbol(doc);
+            FamilySymbol openingFamSymb = GetOpeningSymbol();
             if (openingFamSymb is null)
             {
                 return Result.Cancelled;
@@ -72,7 +78,7 @@ namespace MS.Commands.KR
             int familyHostType = openingFamSymb.Family
                 .get_Parameter(BuiltInParameter.FAMILY_HOSTING_BEHAVIOR).AsInteger();
 
-            (Element mep, Line mepLine) = GetMEPelement(commandData);
+            (Element mep, Line mepLine) = GetMEPelement();
             if (mep is null) return Result.Cancelled;
 
             Element hostElement = null;
@@ -80,14 +86,14 @@ namespace MS.Commands.KR
             {
                 // основа семейства - стена
                 case 1:
-                    hostElement = GetHostElement(commandData, new List<BuiltInCategory>
+                    hostElement = GetHostElement(new List<BuiltInCategory>
                     {
                         BuiltInCategory.OST_Walls
                     });
                     break;
                 // основа семейства - перекрытие
                 case 2:
-                    hostElement = GetHostElement(commandData, new List<BuiltInCategory>
+                    hostElement = GetHostElement(new List<BuiltInCategory>
                     {
                         BuiltInCategory.OST_Floors,
                         BuiltInCategory.OST_StructuralFoundation
@@ -95,7 +101,7 @@ namespace MS.Commands.KR
                     break;
                 // основа семейства - грань
                 case 5:
-                    hostElement = GetHostElement(commandData, new List<BuiltInCategory>
+                    hostElement = GetHostElement(new List<BuiltInCategory>
                     {
                         BuiltInCategory.OST_Walls,
                         BuiltInCategory.OST_Floors,
@@ -130,15 +136,15 @@ namespace MS.Commands.KR
             {
                 // основа семейства - стена
                 case 1:
-                    openingPlaced = PlaceOpeningByWall(doc, point, hostElement, openingH, openingW, openingFamSymb);
+                    openingPlaced = PlaceOpeningByWall(_doc, point, hostElement, openingH, openingW, openingFamSymb);
                     break;
                 // основа семейства - перекрытие
                 case 2:
-                    openingPlaced = PlaceOpeningByFloor(doc, point, hostElement, openingH, openingW, openingFamSymb);
+                    openingPlaced = PlaceOpeningByFloor(_doc, point, hostElement, openingH, openingW, openingFamSymb);
                     break;
                 // основа семейства - грань
                 case 5:
-                    openingPlaced = PlaceOpeningByFace(doc, point, face, openingH, openingW, openingFamSymb, hostElement.LevelId);
+                    openingPlaced = PlaceOpeningByFace(_doc, point, face, openingH, openingW, openingFamSymb, hostElement.LevelId);
                     break;
                 default:
                     MessageBox.Show("Нельзя определить основу заданного семейства", "Ошибка");
@@ -304,12 +310,11 @@ namespace MS.Commands.KR
         /// <summary>
         /// Возвращает типоразмер семейства проема, который нкжно разместить
         /// </summary>
-        /// <param name="doc">Документ, в котором размещается семейство проема</param>
         /// <returns>Заданный в <seealso cref="SettingsViewModelKR">настройках</seealso> типоразмер семейства,
         /// или null, если типоразмер отсутствует в проекте</returns>
-        private FamilySymbol GetOpeningSymbol(in Document doc)
+        private FamilySymbol GetOpeningSymbol()
         {
-            var openingSymb = new FilteredElementCollector(doc)
+            var openingSymb = new FilteredElementCollector(_doc)
                 .OfClass(typeof(FamilySymbol))
                 .WhereElementIsElementType()
                 .Cast<FamilySymbol>()
@@ -638,25 +643,22 @@ namespace MS.Commands.KR
         /// <summary>
         /// Выбор воздуховода из связанного файла пользователем
         /// </summary>
-        /// <param name="commandData"></param>
         /// <returns>Воздуховод, или null, если операция отменена или не валидна</returns>
-        private (Element duct, Line ductLine) GetMEPelement(in ExternalCommandData commandData)
+        private (Element duct, Line ductLine) GetMEPelement()
         {
-            var uidoc = commandData.Application.ActiveUIDocument;
-            var doc = uidoc.Document;
-            Selection sel = uidoc.Selection;
+            Selection sel = _uidoc.Selection;
             MulticategoryInLinkSelectionFilter filter
                 = new MulticategoryInLinkSelectionFilter(
-                  doc, _categories);
+                  _doc, _categories);
             Element mepEl = null;
             try
             {
-                Reference mepElRef = uidoc.Selection.PickObject(
+                Reference mepElRef = _uidoc.Selection.PickObject(
                     ObjectType.LinkedElement,
                     filter,
                     "Выберите воздуховод или трубу из связи");
                 mepEl = filter.LinkedDocument.GetElement(mepElRef.LinkedElementId);
-                var link = doc.GetElement(mepElRef.ElementId) as RevitLinkInstance;
+                var link = _doc.GetElement(mepElRef.ElementId) as RevitLinkInstance;
                 var mepElCurve = (mepEl.Location as LocationCurve).Curve;
                 Transform transform = link.GetTransform();
                 if (!transform.AlmostEqual(Transform.Identity))
@@ -681,14 +683,10 @@ namespace MS.Commands.KR
         /// <summary>
         /// Выбор стены пользователем
         /// </summary>
-        /// <param name="commandData"></param>
         /// <returns>Стена, или null, если операция отменена или не валидна</returns>
-        private Element GetHostElement(in ExternalCommandData commandData, List<BuiltInCategory> categories)
+        private Element GetHostElement(List<BuiltInCategory> categories)
         {
-            var uidoc = commandData.Application.ActiveUIDocument;
-            var doc = uidoc.Document;
-
-            Selection sel = uidoc.Selection;
+            Selection sel = _uidoc.Selection;
             SelectionFilterElementsOfCategory<Element> filter
                 = new SelectionFilterElementsOfCategory<Element>(
                     categories,
@@ -696,11 +694,11 @@ namespace MS.Commands.KR
             Element hostElement = null;
             try
             {
-                Reference wallRef = uidoc.Selection.PickObject(
+                Reference wallRef = _uidoc.Selection.PickObject(
                     ObjectType.Element,
                     filter,
                     "Выберите основу для заданного семейства");
-                hostElement = doc.GetElement(wallRef);
+                hostElement = _doc.GetElement(wallRef);
             }
             catch (Autodesk.Revit.Exceptions.OperationCanceledException)
             {
