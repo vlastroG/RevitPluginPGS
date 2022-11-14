@@ -400,6 +400,13 @@ namespace MS
                 "написать \"не обрабатывать\" (регистр не важен)";
             btnSystemsInSpace.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, @"https://google.com"));
 
+            // ОВиК толщины воздуховодов command
+            PushButtonData btnDuctsThicknessCmd = new PushButtonData("DuctsThicknessCmd", "Толщины\nвоздуховодов", path, "MS.Commands.MEP.DuctsThicknessCmd");
+            Uri btnDuctsThicknessCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\MEP\Thickness.png");
+            BitmapImage btnDuctsThicknessCmdImage = new BitmapImage(btnDuctsThicknessCmdImagePath);
+            btnDuctsThicknessCmd.LargeImage = btnDuctsThicknessCmdImage;
+            btnDuctsThicknessCmd.ToolTip = "Назначение 'ADSK_Толщина стенки' воздуховодам";
+
             // ОВиК корректировка имени системы command
             PushButtonData btnSystemNameCorrectCmd = new PushButtonData("SystemNameCorrectCmd", "Формирование\nспецификации", path, "MS.Commands.MEP.SystemNameCorrectCmd");
             Uri btnSystemNameCorrectCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\MEP\UpdateTable.png");
@@ -522,6 +529,7 @@ namespace MS
             panelOV.AddItem(btnPipelineFittings);
             panelOV.AddItem(btnSystemsInSpace);
             panelOV.AddItem(btnEquipmentInSystemCmd);
+            panelOV.AddItem(btnDuctsThicknessCmd);
 
             // ВК panel
             panelVK.AddItem(btnSystemNameCorrectCmd);

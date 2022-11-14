@@ -349,6 +349,12 @@ namespace MS.Shared
 
 
         /// <summary>
+        /// Guid параметра ADSK_Толщина стенки = 381b467b-3518-42bb-b183-35169c9bdfb3 (double)
+        /// </summary>
+        public static Guid ADSK_SideThickness => Guid.Parse("381b467b-3518-42bb-b183-35169c9bdfb3");
+
+
+        /// <summary>
         /// Валидация текущего проекта Revit на наличие общих параметров у заданной категории.
         /// </summary>
         /// <param name="doc">Документ Revit.</param>
