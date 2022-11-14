@@ -62,7 +62,8 @@ namespace MS
             Uri btnElementInViewsImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
             BitmapImage btnElementInViewsImage = new BitmapImage(btnElementInViewsImagePath);
             btnElementInViews.LargeImage = btnElementInViewsImage;
-            btnElementInViews.ToolTip = "Перейти на вид (лист), на котором виден выбранный элемент";
+            btnElementInViews.ToolTip = "Перейти на вид (лист), на котором виден выбранный элемент." +
+                "\n~5+ минут в большом файле";
 
             // ClashReport command
             PushButtonData btnClashReport = new PushButtonData("ClashReport", "Clashes\nimport", path, "MS.Commands.BIM.ClashReportImport");
@@ -484,8 +485,8 @@ namespace MS
             panelGeneral.AddItem(btnInfo);
             panelGeneral.AddItem(btnPolyLineLength);
             panelGeneral.AddItem(btnSelection);
-            panelGeneral.AddItem(btnElementInViews);
             panelGeneral.AddSlideOut();
+            panelGeneral.AddItem(btnElementInViews);
             panelGeneral.AddItem(btnSelectionSettings);
 
 
