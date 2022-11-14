@@ -57,6 +57,14 @@ namespace MS
             btnInfo.LargeImage = btnInfoImage;
             btnInfo.ToolTip = "Alt-символы Revit.";
 
+            // Test command
+            PushButtonData btnElementInViews = new PushButtonData("ElementInViewsViewModel", "Элемент\nна видах", path, "MS.Commands.General.ElementInViewsCmd");
+            Uri btnElementInViewsImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            BitmapImage btnElementInViewsImage = new BitmapImage(btnElementInViewsImagePath);
+            btnElementInViews.LargeImage = btnElementInViewsImage;
+            btnElementInViews.ToolTip = "Перейти на вид (лист), на котором виден выбранный элемент." +
+                "\n~5+ минут в большом файле";
+
             // ClashReport command
             PushButtonData btnClashReport = new PushButtonData("ClashReport", "Clashes\nimport", path, "MS.Commands.BIM.ClashReportImport");
             Uri btnClashReportImagePath = new Uri(assembly_dir + @"\Images\Icons\BIM\Clashes.png");
@@ -411,7 +419,7 @@ namespace MS
                 "'Трубы', " +
                 "'Материалы изоляции труб." +
                 "\nДанные заполняются в одном файле Excel на двух листах.";
-            btnSystemNameCorrectCmd.LongDescription = 
+            btnSystemNameCorrectCmd.LongDescription =
                 "I. Корректировка параметра 'ИмяСистемы'" +
                 "\nИз первого столбца 1 листа Excel, начиная с первой строки, " +
                 "берется строковое значение, которое должно содержаться в параметре ADSK_Наименование " +
@@ -478,7 +486,9 @@ namespace MS
             panelGeneral.AddItem(btnPolyLineLength);
             panelGeneral.AddItem(btnSelection);
             panelGeneral.AddSlideOut();
+            panelGeneral.AddItem(btnElementInViews);
             panelGeneral.AddItem(btnSelectionSettings);
+
 
             //panelGeneral.AddItem(btnLevelName);
 
