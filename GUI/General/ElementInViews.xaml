@@ -6,7 +6,8 @@
              xmlns:local="clr-namespace:MS.GUI.General"
              xmlns:vm="clr-namespace:MS.GUI.ViewModels.General"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="500" MinHeight="450" MinWidth="500">
+             d:DesignHeight="450" d:DesignWidth="500" MinHeight="450" MinWidth="500"
+             Title="Виды, на которых виден выбранный элемент">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>

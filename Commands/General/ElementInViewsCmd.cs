@@ -28,9 +28,13 @@ namespace MS.Commands.General
                 .OfClass(typeof(View))
                 .WhereElementIsNotElementType()
                 .Cast<View>()
-                .Where(v => !(v is ViewSchedule) && !(v is ViewSheet) && !(v is View3D))
+                .Where(v => (v is ViewPlan) || (v is ViewSection))
+                .Where(
+                v => (v.ViewType == ViewType.Section)
+                || (v.ViewType == ViewType.EngineeringPlan))
                 .Where(v => FilteredElementCollector.IsViewValidForElementIteration(doc, v.Id))
                 .Where(v => IsElementVisibleInView(v, el));
+
 
             ElementInViewsViewModel vm = new ElementInViewsViewModel(views);
             ElementInViews ui = new ElementInViews(vm);
