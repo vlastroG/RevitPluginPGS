@@ -6,11 +6,11 @@
              xmlns:local="clr-namespace:MS.GUI.General"
              xmlns:vm="clr-namespace:MS.GUI.ViewModels.General"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="450" d:DesignWidth="500" MinHeight="450" MinWidth="500">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="6*"/>
-            <RowDefinition Height="1*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="60"/>
         </Grid.RowDefinitions>
         <DataGrid Grid.Row="0"
                   Name="Views"
@@ -23,21 +23,25 @@
                   ItemsSource="{Binding Path=Views}"
                   SelectedItem="{Binding Path=SelectedView}">
             <DataGrid.Columns>
-                <DataGridTextColumn Binding="{Binding Path=Name}"
+                <DataGridTextColumn Binding="{Binding Path=View.Name}"
                                     IsReadOnly="True"
                                     Header="Имя вида"
                                     Width="*"/>
-                <DataGridTextColumn IsReadOnly="True"
-                                    Header="Размещен на листе"
-                                    Width="120"/>
+                <DataGridTextColumn Binding="{Binding Path=SheetNumber}"
+                                    IsReadOnly="True"
+                                    Header="Лист"
+                                    Width="50"/>
             </DataGrid.Columns>
         </DataGrid>
         <DockPanel Grid.Row="1"
-                   Margin="0,0,0,30">
+                   Margin="0,0,0,30"
+                   MinHeight="30"
+                   MaxHeight="30">
             <DockPanel Margin="0,5,0,5"
                        HorizontalAlignment="Center">
-                <Button x:Name="Ok" Content="Ок" Width="50" Click="Ok_Click"/>
-                <Button x:Name="Cancel" Content="Отмена" Width="50" Click="Cancel_Click"/>
+                <Button x:Name="ToList" Content="Перейти на лист" Width="100" Click="ToList_Click"/>
+                <Button x:Name="Ok" Content="Перейти на вид" Width="100" Click="Ok_Click"/>
+                <Button x:Name="Cancel" Content="Отмена" Width="100" Click="Cancel_Click"/>
             </DockPanel>
         </DockPanel>
     </Grid>

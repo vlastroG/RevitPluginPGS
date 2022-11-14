@@ -62,7 +62,7 @@ namespace MS
             Uri btnElementInViewsImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
             BitmapImage btnElementInViewsImage = new BitmapImage(btnElementInViewsImagePath);
             btnElementInViews.LargeImage = btnElementInViewsImage;
-            btnElementInViews.ToolTip = "Все виды, на которых виден элемент";
+            btnElementInViews.ToolTip = "Перейти на вид (лист), на котором виден выбранный элемент";
 
             // ClashReport command
             PushButtonData btnClashReport = new PushButtonData("ClashReport", "Clashes\nimport", path, "MS.Commands.BIM.ClashReportImport");

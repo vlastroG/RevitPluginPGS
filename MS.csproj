@@ -122,6 +122,7 @@
     <Compile Include="Commands\General\ElementInViewsCmd.cs" />
     <Compile Include="Commands\General\Info.cs" />
     <Compile Include="Commands\General\LevelName.cs" />
+    <Compile Include="Commands\General\Models\ViewWrapper.cs" />
     <Compile Include="Commands\General\PolyLineLength.cs" />
     <Compile Include="Commands\General\Selector.cs" />
     <Compile Include="Commands\General\SelectorSettingsCmd.cs" />

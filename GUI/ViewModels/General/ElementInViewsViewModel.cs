@@ -1,4 +1,5 @@
 ﻿using Autodesk.Revit.DB;
+using MS.Commands.General.Models;
 using MS.GUI.ViewModels.Base;
 using System;
 using System.Collections.Generic;
@@ -14,17 +15,25 @@ namespace MS.GUI.ViewModels.General
         /// <summary>
         /// Список видов, на которых виден элемент
         /// </summary>
-        public ReadOnlyObservableCollection<View> Views { get; private set; }
+        public ReadOnlyObservableCollection<ViewWrapper> Views { get; private set; }
+
+        private bool _goToSheet = false;
+
+        public bool GoToSheet
+        {
+            get => _goToSheet;
+            set => Set(ref _goToSheet, value);
+        }
 
         /// <summary>
         /// Выбранный вид из списка
         /// </summary>
-        private View _selectedView;
+        private ViewWrapper _selectedView;
 
         /// <summary>
         /// Выбранный вид из списка
         /// </summary>
-        public View SelectedView
+        public ViewWrapper SelectedView
         {
             get => _selectedView;
             set => Set(ref _selectedView, value);
@@ -33,8 +42,9 @@ namespace MS.GUI.ViewModels.General
 
         public ElementInViewsViewModel(IEnumerable<View> views)
         {
-            var collection = new ObservableCollection<View>(views);
-            Views = new ReadOnlyObservableCollection<View>(collection);
+            var viewWrappers = views.Select(v => new ViewWrapper(v));
+            var collection = new ObservableCollection<ViewWrapper>(viewWrappers);
+            Views = new ReadOnlyObservableCollection<ViewWrapper>(collection);
         }
     }
 }

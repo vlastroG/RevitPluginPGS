@@ -36,5 +36,11 @@ namespace MS.GUI.General
         {
             DialogResult = false;
         }
+
+        private void ToList_Click(object sender, RoutedEventArgs e)
+        {
+            (DataContext as ElementInViewsViewModel).GoToSheet = true;
+            DialogResult = true;
+        }
     }
 }
