@@ -3,6 +3,7 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Mechanical;
 using Autodesk.Revit.UI;
 using MS.Shared;
+using MS.Utilites.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,13 +37,22 @@ namespace MS.Commands.MEP
             var ducts = GetDucts();
             int count = 0;
 
+            List<int> errors = new List<int>();
             using (Transaction setThickness = new Transaction(_doc))
             {
                 setThickness.Start("Толщины воздуховодов");
 
                 foreach (var duct in ducts)
                 {
-                    (bool isCircle, double maxDimension) = GetOpeningDimensions(duct);
+                    (bool isCircle, double maxDimension) = (false, 0);
+                    try
+                    {
+                        (isCircle, maxDimension) = GetOpeningDimensions(duct);
+                    }
+                    catch (ArgumentException)
+                    {
+                        errors.Add(duct.Id.IntegerValue);
+                    }
                     if (IsSmoke(duct))
                     {
                         if (isCircle)
@@ -116,7 +126,19 @@ namespace MS.Commands.MEP
                 }
                 setThickness.Commit();
             }
-            MessageBox.Show($"Значение параметра 'ADSK_Толщина стенки' обновлено у {count} воздуховодов.", "Толщины воздуховодов");
+            if (errors.Count > 0)
+            {
+                MessageBox.Show(
+                    $"Значение параметра 'ADSK_Толщина стенки' обновлено у {count} воздуховодов." +
+                    $"\nВоздуховоды не обработаны: {string.Join(", ", errors)}.",
+                    "Выполнено с ошибками");
+            }
+            else
+            {
+                MessageBox.Show(
+                    $"Значение параметра 'ADSK_Толщина стенки' обновлено у {count} воздуховодов.",
+                    "Толщины воздуховодов");
+            }
 
             return Result.Succeeded;
         }
@@ -152,22 +174,23 @@ namespace MS.Commands.MEP
             bool isIntakeSmoke = systemName.Contains("дп");
             if (isIntakeSmoke) return true;
 
-            try
-            {
-                return _doc.GetElement(_doc.GetElement(duct
-                   .GetDependentElements(new ElementClassFilter(typeof(DuctInsulation)))?
-                   .First())?
-                   .GetTypeId())?
-                   .get_Parameter(BuiltInParameter.WINDOW_TYPE_ID)
-                   .AsValueString()?
-                   .ToLower()
-                   .Contains("огнезащита") ?? false;
 
-            }
-            catch (System.InvalidOperationException)
+            var dependentEls = duct
+               .GetDependentElements(new ElementClassFilter(typeof(DuctInsulation)));
+
+            if (dependentEls != null && dependentEls.Count > 0)
             {
-                return false;
+                return _doc.GetElement(
+                    _doc.GetElement(
+                         dependentEls
+                            .First())
+                            .GetTypeId())
+                            .get_Parameter(BuiltInParameter.WINDOW_TYPE_ID)
+                            .AsValueString()?
+                            .ToLower()
+                            .Contains("огнезащита") ?? false;
             }
+            return false;
         }
 
 
@@ -180,25 +203,33 @@ namespace MS.Commands.MEP
         {
             bool isCircle = false;
             double maxDim = 0;
-            try
+            ConnectorProfileType shape = duct.ConnectorManager.Connectors.GetFirst().Shape;
+            switch (shape)
             {
-                // Если воздуховод прямоугольный или овальный
-                double dimH = Math.Round(duct
-                    .get_Parameter(BuiltInParameter.RBS_CURVE_HEIGHT_PARAM)
-                    .AsDouble() * SharedValues.FootToMillimeters);
-                double dimW = Math.Round(duct
-                    .get_Parameter(BuiltInParameter.RBS_CURVE_WIDTH_PARAM)
-                    .AsDouble() * SharedValues.FootToMillimeters);
+                case ConnectorProfileType.Invalid:
+                    throw new ArgumentException();
+                case ConnectorProfileType.Round:
+                    {
+                        // Воздуховод круглого сечения
+                        isCircle = true;
+                        maxDim = Math.Round(duct
+                            .get_Parameter(BuiltInParameter.RBS_CURVE_DIAMETER_PARAM)
+                            .AsDouble() * SharedValues.FootToMillimeters);
+                    }
+                    break;
+                default:
+                    {
+                        // Если воздуховод прямоугольный или овальный
+                        double dimH = Math.Round(duct
+                            .get_Parameter(BuiltInParameter.RBS_CURVE_HEIGHT_PARAM)
+                            .AsDouble() * SharedValues.FootToMillimeters);
+                        double dimW = Math.Round(duct
+                            .get_Parameter(BuiltInParameter.RBS_CURVE_WIDTH_PARAM)
+                            .AsDouble() * SharedValues.FootToMillimeters);
 
-                maxDim = dimH >= dimW ? dimH : dimW;
-            }
-            catch (System.NullReferenceException)
-            {
-                // Воздуховод круглого сечения
-                isCircle = true;
-                maxDim = Math.Round(duct
-                    .get_Parameter(BuiltInParameter.RBS_CURVE_DIAMETER_PARAM)
-                    .AsDouble() * SharedValues.FootToMillimeters);
+                        maxDim = dimH >= dimW ? dimH : dimW;
+                        break;
+                    }
             }
 
             return (isCircle, maxDim);
