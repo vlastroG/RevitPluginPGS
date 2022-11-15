@@ -135,6 +135,7 @@
     <Compile Include="Commands\KR\Services\SelectionFilters\SelectionFilterStairAnglePlane.cs" />
     <Compile Include="Commands\KR\Services\SelectionFilters\SelectionFilterStairStepEdges.cs" />
     <Compile Include="Commands\KR\StairReinforcement.cs" />
+    <Compile Include="Commands\MEP\DuctsThicknessCmd.cs" />
     <Compile Include="GUI\General\ElementInViews.xaml.cs">
       <DependentUpon>ElementInViews.xaml</DependentUpon>
     </Compile>
@@ -183,6 +184,7 @@
     <Compile Include="Utilites\Comparers\LintelsEqualityComparer.cs" />
     <Compile Include="Utilites\DataParsers\Excel.cs" />
     <Compile Include="Utilites\Extensions\CeilingExtension.cs" />
+    <Compile Include="Utilites\Extensions\ConnectorSetExtension.cs" />
     <Compile Include="Utilites\Extensions\CurveLoopExtension.cs" />
     <Compile Include="Utilites\Extensions\ElementSetExtension.cs" />
     <Compile Include="Utilites\Extensions\CurveExtension.cs" />
@@ -291,6 +293,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Diagrams\TextFile1.txt" />
+    <EmbeddedResource Include="Images\Icons\MEP\Thickness.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="Images\Icons\MEP\Find.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
