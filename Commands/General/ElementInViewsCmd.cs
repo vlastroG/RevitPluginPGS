@@ -24,16 +24,29 @@ namespace MS.Commands.General
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
             var el = GetElement(commandData);
 
-            var views = new FilteredElementCollector(doc)
-                .OfClass(typeof(View))
-                .WhereElementIsNotElementType()
-                .Cast<View>()
-                .Where(v => (v is ViewPlan) || (v is ViewSection))
-                .Where(
-                v => (v.ViewType == ViewType.Section)
-                || (v.ViewType == ViewType.EngineeringPlan))
-                .Where(v => FilteredElementCollector.IsViewValidForElementIteration(doc, v.Id))
-                .Where(v => IsElementVisibleInView(v, el));
+            IList<ElementId> dimensions = new List<ElementId>();
+            try
+            {
+                dimensions = el.GetDependentElements(new ElementClassFilter(typeof(Dimension)));
+            }
+            catch (NullReferenceException)
+            {
+                return Result.Cancelled;
+            }
+
+            if (dimensions.Count < 1)
+            {
+                MessageBox.Show("Не найдено видов с размерами по выбранному элементу.");
+                return Result.Cancelled;
+            }
+
+            var views = dimensions
+                .Select(id => doc.GetElement(id))
+                .Cast<Dimension>()
+                .Select(d => d.OwnerViewId)
+                .Where(vId => vId.IntegerValue != -1)
+                .Distinct()
+                .Select(id => doc.GetElement(id) as View);
 
 
             ElementInViewsViewModel vm = new ElementInViewsViewModel(views);
