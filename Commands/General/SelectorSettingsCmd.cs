@@ -2,6 +2,7 @@
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using MS.GUI.General;
+using MS.GUI.ViewModels.General;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,17 +13,9 @@ namespace MS.Commands.General
 {
     [Transaction(TransactionMode.Manual)]
     [Regeneration(RegenerationOption.Manual)]
-    internal class SelectorSettingsCmd : IExternalCommand
+    public class SelectorSettingsCmd : IExternalCommand
     {
-        /// <summary>
-        /// Название категории по умолчанию
-        /// </summary>
-        private static string _category = "Помещения";
-
-        /// <summary>
-        /// Категория, заданная при выборе пользователем
-        /// </summary>
-        public static Category Category { get; private set; }
+        private static SelectorViewModel _settings = new SelectorViewModel();
 
         /// <summary>
         /// Вывести окно для выбора категории пользователем
@@ -35,6 +28,7 @@ namespace MS.Commands.General
         {
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
             Document doc = uidoc.Document;
+            string docPath = doc.PathName;
 
             var categories = doc.Settings.Categories;
             List<Category> categoriesList = new List<Category>();
@@ -44,15 +38,12 @@ namespace MS.Commands.General
             }
             categoriesList.Sort((x, y) => x.Name.CompareTo(y.Name));
 
-            var form = new CategoryInput(categoriesList, _category);
+            _settings = new SelectorViewModel(categoriesList, docPath);
+
+
+            var form = new CategoryInput();
             form.ShowDialog();
-            if (form.DialogResult != true)
-            {
-                return Result.Cancelled;
-            }
-            _category = form.Category.Name;
-            Category = form.Category;
-            if (Category == null)
+            if (form.DialogResult != true || _settings.SelectedCategory is null)
             {
                 return Result.Cancelled;
             }

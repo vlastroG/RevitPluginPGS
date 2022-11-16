@@ -144,6 +144,7 @@
     </Compile>
     <Compile Include="GUI\ViewModels\BIM\SchedulesToCSVExportViewModel.cs" />
     <Compile Include="GUI\ViewModels\General\ElementInViewsViewModel.cs" />
+    <Compile Include="GUI\ViewModels\General\SelectorViewModel.cs" />
     <Compile Include="GUI\ViewModels\KR\SettingsViewModelKR.cs" />
     <Compile Include="Commands\MEP\EquipmentInSystemCmd.cs" />
     <Compile Include="Commands\MEP\FullSystemNamesCmd.cs" />

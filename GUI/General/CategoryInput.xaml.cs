@@ -1,4 +1,5 @@
 ﻿using Autodesk.Revit.DB;
+using MS.GUI.ViewModels.General;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,36 +22,12 @@ namespace MS.GUI.General
     /// </summary>
     public partial class CategoryInput : Window
     {
-        private readonly List<Category> _categories;
-        private string _categoryName;
-        public Category Category
-        {
-            get
-            {
-                try
-                {
-                    return _categories[Input.SelectedIndex];
-                }
-                catch (ArgumentOutOfRangeException)
-                {
-                    return null;
-                }
-            }
-        }
-
         /// <summary>
         /// Конструктор WPF формы для выбора категории
         /// </summary>
-        /// <param name="Categories">Список всех категорий в проекте</param>
-        /// <param name="CategoryName">Категория по умолчинию</param>
-        public CategoryInput(List<Category> Categories, string CategoryName)
+        public CategoryInput()
         {
-            _categories = Categories;
             InitializeComponent();
-            Input.ItemsSource = _categories;
-            Input.DisplayMemberPath = "Name";
-            _categoryName = CategoryName;
-            Input.SelectedIndex = _categories.FindIndex(c => c.Name == _categoryName);
         }
 
         private void SubmitButton_Click(object sender, RoutedEventArgs e)
