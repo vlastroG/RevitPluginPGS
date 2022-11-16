@@ -214,7 +214,8 @@ namespace MS.GUI.ViewModels.KR
         /// <summary>
         /// Конструктор формы для настроек армирования лестницы
         /// </summary>
-        /// <param name="doc">Документ, в котором будет армироваться лестница</param>
+        /// <param name="rebarTypesNames">Типы арматурных стержней</param>
+        /// <param name="docPath">Путь к документу в котором создается армирование</param>
         public StairReinforcementViewModel(in IEnumerable<RebarBarType> rebarTypesNames, string docPath)
         {
             RebarTypesSteps = new ObservableCollection<RebarBarType>(rebarTypesNames);
