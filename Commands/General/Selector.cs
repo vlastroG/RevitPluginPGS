@@ -16,8 +16,18 @@ namespace MS
     [Regeneration(RegenerationOption.Manual)]
     public class Selector : IExternalCommand
     {
+        /// <summary>
+        /// Настройки категории выбираемых элементов
+        /// </summary>
         private static SelectorViewModel _settings = new SelectorViewModel();
 
+        /// <summary>
+        /// Получить категорию для выбора элементов в текущем документу по настройкам
+        /// </summary>
+        /// <param name="commandData"></param>
+        /// <param name="message"></param>
+        /// <param name="elements"></param>
+        /// <returns></returns>
         private Category GetCategory(
             ExternalCommandData commandData,
             ref string message,
@@ -32,16 +42,30 @@ namespace MS
                     return null;
                 }
             }
-            var categories = commandData.Application.ActiveUIDocument.Document.Settings.Categories;
             try
             {
                 var test = _settings.SelectedCategory.Name;
             }
+            catch (NullReferenceException)
+            {
+                var settingsCmd = new SelectorSettingsCmd();
+                var result = settingsCmd.Execute(commandData, ref message, elements);
+                if (result != Result.Succeeded)
+                {
+                    return null;
+                }
+            }
             catch (AccessViolationException)
             {
-                _settings.SelectedCategory = SelectorViewModel.Categories.FirstOrDefault(c => c.Name.Equals("Помещения"));
+                var settingsCmd = new SelectorSettingsCmd();
+                var result = settingsCmd.Execute(commandData, ref message, elements);
+                if (result != Result.Succeeded)
+                {
+                    return null;
+                }
             }
             Category category = null;
+            var categories = commandData.Application.ActiveUIDocument.Document.Settings.Categories;
             foreach (Category categoryInDoc in categories)
             {
                 if (categoryInDoc.Name.Equals(_settings.SelectedCategory.Name))

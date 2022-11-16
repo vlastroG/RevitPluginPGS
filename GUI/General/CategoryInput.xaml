@@ -12,7 +12,7 @@
              MinWidth="300" 
              Width="300" 
              MaxWidth="300"
-             Title="PGS-BIM - Выбор элементов по категории">
+             Title="PGS-BIM - элементы по категории">
     <Window.DataContext>
         <vm:SelectorViewModel/>
     </Window.DataContext>
