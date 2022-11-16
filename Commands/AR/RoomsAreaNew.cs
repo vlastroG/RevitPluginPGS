@@ -3,6 +3,7 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using MS.Commands.AR.Models;
 using MS.GUI.AR;
+using MS.GUI.ViewModels.AR;
 using MS.Shared;
 using System;
 using System.Collections.Generic;
@@ -148,24 +149,26 @@ namespace MS.Commands.AR
 
             List<Apartment> _apartments = new List<Apartment>();
 
+
+            var settings = new RoomsAreaViewModel();
             //Вывод окна входных данных
-            InputRoomsArea inputForm = new InputRoomsArea();
-            inputForm.ShowDialog();
-            if (inputForm.DialogResult == false)
+            InputRoomsArea ui = new InputRoomsArea();
+            ui.ShowDialog();
+            if (ui.DialogResult != true)
             {
                 return Result.Cancelled;
             }
 
             // Выбор диапазона подсчета площадей.
             // Подсчет площадей помещений во всем проекте, если true, и только видимые на виде, если false
-            var all_project_rooms = inputForm.AllProjCalc;
+            var calculateAllRoomsInProject = !settings.RoomsOnlyInView;
 
             //Назначение числа знаков после запятой для округления значения площадей помещений
-            var round_decimals = inputForm.AreaRound;
+            var round_decimals = settings.TwoDecimals ? 2 : 3;
 
             // Создание фильтра в соответствии с заданным диапазоном - весь проект/активный вид
             FilteredElementCollector newActiveViewFilterElements;
-            if (all_project_rooms)
+            if (calculateAllRoomsInProject)
             {
                 newActiveViewFilterElements = new FilteredElementCollector(doc);
             }

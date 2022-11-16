@@ -136,12 +136,14 @@
     <Compile Include="Commands\KR\Services\SelectionFilters\SelectionFilterStairStepEdges.cs" />
     <Compile Include="Commands\KR\StairReinforcement.cs" />
     <Compile Include="Commands\MEP\DuctsThicknessCmd.cs" />
+    <Compile Include="GUI\Converters\InverseBooleanConverter.cs" />
     <Compile Include="GUI\General\ElementInViews.xaml.cs">
       <DependentUpon>ElementInViews.xaml</DependentUpon>
     </Compile>
     <Compile Include="GUI\KR\StairReinforcementView.xaml.cs">
       <DependentUpon>StairReinforcementView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="GUI\ViewModels\AR\RoomsAreaViewModel.cs" />
     <Compile Include="GUI\ViewModels\BIM\SchedulesToCSVExportViewModel.cs" />
     <Compile Include="GUI\ViewModels\General\ElementInViewsViewModel.cs" />
     <Compile Include="GUI\ViewModels\General\SelectorViewModel.cs" />
