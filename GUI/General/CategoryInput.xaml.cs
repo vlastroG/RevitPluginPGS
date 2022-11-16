@@ -40,29 +40,4 @@ namespace MS.GUI.General
             DialogResult = false;
         }
     }
-
-    public static class MyCommands
-    {
-        public static readonly RoutedUICommand Submit = new RoutedUICommand
-            (
-                "Submit",
-                "Submit",
-                typeof(MyCommands),
-                new InputGestureCollection()
-                {
-                    new KeyGesture(Key.Enter)
-                }
-            );
-
-        public static readonly RoutedUICommand Cancel = new RoutedUICommand
-            (
-                "Cancel",
-                "Cancel",
-                typeof(MyCommands),
-                new InputGestureCollection()
-                {
-                    new KeyGesture (Key.Escape)
-                }
-            );
-    }
 }

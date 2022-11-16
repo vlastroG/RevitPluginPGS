@@ -26,7 +26,7 @@
                   SelectedItem="{Binding SelectedCategory}"
                   DisplayMemberPath="Name"/>
         <TextBlock HorizontalAlignment="Left" Margin="10,29,0,0" TextWrapping="Wrap" VerticalAlignment="Top"><Run Language="ru-ru" Text="Выбранная категория"/></TextBlock>
-        <Button x:Name="Submit" Content="Готово" RenderTransformOrigin="0.69,0.303" Click="SubmitButton_Click" Margin="70,67,0,0" Height="20" VerticalAlignment="Top" HorizontalAlignment="Left" Width="60"/>
+        <Button x:Name="Submit" Content="Готово" Click="SubmitButton_Click" Margin="70,67,0,0" Height="20" VerticalAlignment="Top" HorizontalAlignment="Left" Width="60"/>
         <Button x:Name="Cancel" Content="Отмена" Margin="153,67,0,0" Click="CancelButton_Click" HorizontalAlignment="Left" Width="60" Height="20" VerticalAlignment="Top"/>
     </Grid>
 </Window>
