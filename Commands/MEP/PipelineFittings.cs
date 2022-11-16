@@ -4,6 +4,7 @@ using Autodesk.Revit.DB.Architecture;
 using Autodesk.Revit.DB.Mechanical;
 using Autodesk.Revit.UI;
 using MS.GUI.MEP;
+using MS.GUI.ViewModels.MEP;
 using MS.Shared;
 using System;
 using System.Collections.Generic;
@@ -100,7 +101,7 @@ namespace MS.Commands.MEP
             in SpatialElementGeometryCalculator calculator,
             in Document doc,
             in Element SpatialEl,
-            in List<BuiltInCategory> categories,
+            in ICollection<BuiltInCategory> categories,
             in RevitLinkInstance link = null)
         {
             Solid solid;
@@ -160,19 +161,21 @@ namespace MS.Commands.MEP
                 return Result.Cancelled;
             }
 
+            var settings = new MEPinSpatialsViewModel();
+
             var ui = new MEPinSpatials();
             ui.ShowDialog();
             if (ui.DialogResult != true)
             {
                 return Result.Cancelled;
             }
-            var categories = ui.Categories.ToList();
+            var categories = settings.GetCategories();
             if (categories.Count == 0)
             {
                 MessageBox.Show("Не выбрано ни одной категории!", "Операция отменена");
                 return Result.Succeeded;
             }
-            var spatialsFromLinks = ui.SpatialsFromLinks;
+            var spatialsFromLinks = !settings.SpatialsFromMEP;
             string transDesc = "MEP элементы в пространствах";
             List<(RevitLinkInstance, Document)> linksDocs = new List<(RevitLinkInstance, Document)> { (null, doc) };
             if (spatialsFromLinks)

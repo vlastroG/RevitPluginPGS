@@ -69,7 +69,7 @@ namespace MS
             Uri btnClashReportImagePath = new Uri(assembly_dir + @"\Images\Icons\BIM\Clashes.png");
             BitmapImage btnClashReportImage = new BitmapImage(btnClashReportImagePath);
             btnClashReport.LargeImage = btnClashReportImage;
-            btnClashReport.ToolTip = "Расстановка семейств по координатом пересечений из отчета Navisworks.";
+            btnClashReport.ToolTip = "Расстановка семейств по координатам пересечений из отчета Navisworks.";
             btnClashReport.LongDescription = $"\n\nНазвание проверки записано в ADSK_Группирование" +
                 $"\nОтветственный записывается в 'Комментарии'" +
                 $"\nid1 записывается в 'ADSK_Код изделия'" +
