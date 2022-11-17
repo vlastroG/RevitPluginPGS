@@ -137,10 +137,10 @@
     <Compile Include="Commands\KR\StairReinforcement.cs" />
     <Compile Include="Commands\MEP\DuctsThicknessCmd.cs" />
     <Compile Include="GUI\Converters\InverseBooleanConverter.cs" />
-    <Compile Include="GUI\General\ElementInViews.xaml.cs">
+    <Compile Include="GUI\Windows\General\ElementInViews.xaml.cs">
       <DependentUpon>ElementInViews.xaml</DependentUpon>
     </Compile>
-    <Compile Include="GUI\KR\StairReinforcementView.xaml.cs">
+    <Compile Include="GUI\Windows\KR\StairReinforcementView.xaml.cs">
       <DependentUpon>StairReinforcementView.xaml</DependentUpon>
     </Compile>
     <Compile Include="GUI\ViewModels\AR\RoomsAreaViewModel.cs" />
@@ -154,28 +154,28 @@
     <Compile Include="Commands\MEP\SystemNameCorrectCmd.cs" />
     <Compile Include="Commands\MEP\SystemsInSpace.cs" />
     <Compile Include="Commands\SS\Numerator.cs" />
-    <Compile Include="GUI\AR\FinishingCreation.xaml.cs">
+    <Compile Include="GUI\Windows\AR\FinishingCreation.xaml.cs">
       <DependentUpon>FinishingCreation.xaml</DependentUpon>
     </Compile>
-    <Compile Include="GUI\AR\OpeningsLintelsMark.xaml.cs">
+    <Compile Include="GUI\Windows\AR\OpeningsLintelsMark.xaml.cs">
       <DependentUpon>OpeningsLintelsMark.xaml</DependentUpon>
     </Compile>
-    <Compile Include="GUI\AR\RoomsForCalculation.xaml.cs">
+    <Compile Include="GUI\Windows\AR\RoomsForCalculation.xaml.cs">
       <DependentUpon>RoomsForCalculation.xaml</DependentUpon>
     </Compile>
-    <Compile Include="GUI\AR\InputRoomsArea.xaml.cs">
+    <Compile Include="GUI\Windows\AR\InputRoomsArea.xaml.cs">
       <DependentUpon>InputRoomsArea.xaml</DependentUpon>
     </Compile>
-    <Compile Include="GUI\General\AltSymbols.xaml.cs">
+    <Compile Include="GUI\Windows\General\AltSymbols.xaml.cs">
       <DependentUpon>AltSymbols.xaml</DependentUpon>
     </Compile>
-    <Compile Include="GUI\General\CategoryInput.xaml.cs">
+    <Compile Include="GUI\Windows\General\CategoryInput.xaml.cs">
       <DependentUpon>CategoryInput.xaml</DependentUpon>
     </Compile>
-    <Compile Include="GUI\KR\SettingsKRview.xaml.cs">
+    <Compile Include="GUI\Windows\KR\SettingsKRview.xaml.cs">
       <DependentUpon>SettingsKRview.xaml</DependentUpon>
     </Compile>
-    <Compile Include="GUI\MEP\MEPinSpatials.xaml.cs">
+    <Compile Include="GUI\Windows\MEP\MEPinSpatials.xaml.cs">
       <DependentUpon>MEPinSpatials.xaml</DependentUpon>
     </Compile>
     <Compile Include="GUI\ViewModels\Base\ViewModelBase.cs" />
@@ -254,43 +254,43 @@
     <Folder Include="Images\Content\" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="GUI\AR\FinishingCreation.xaml">
+    <Page Include="GUI\Windows\AR\FinishingCreation.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="GUI\AR\OpeningsLintelsMark.xaml">
+    <Page Include="GUI\Windows\AR\OpeningsLintelsMark.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="GUI\AR\RoomsForCalculation.xaml">
+    <Page Include="GUI\Windows\AR\RoomsForCalculation.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="GUI\AR\InputRoomsArea.xaml">
+    <Page Include="GUI\Windows\AR\InputRoomsArea.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="GUI\General\AltSymbols.xaml">
+    <Page Include="GUI\Windows\General\AltSymbols.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="GUI\General\CategoryInput.xaml">
+    <Page Include="GUI\Windows\General\CategoryInput.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="GUI\General\ElementInViews.xaml">
+    <Page Include="GUI\Windows\General\ElementInViews.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="GUI\KR\SettingsKRview.xaml">
+    <Page Include="GUI\Windows\KR\SettingsKRview.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="GUI\KR\StairReinforcementView.xaml">
+    <Page Include="GUI\Windows\KR\StairReinforcementView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="GUI\MEP\MEPinSpatials.xaml">
+    <Page Include="GUI\Windows\MEP\MEPinSpatials.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -360,7 +360,7 @@
     <EmbeddedResource Include="Images\Icons\AR\BalconyDoor.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <Resource Include="GUI\General\Alt_symbols.png">
+    <Resource Include="GUI\Windows\General\Alt_symbols.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
     <EmbeddedResource Include="Images\Icons\AR\MaterialColors.png">
