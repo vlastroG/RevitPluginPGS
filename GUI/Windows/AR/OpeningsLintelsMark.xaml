@@ -33,16 +33,13 @@
 
     <Grid Background="#FFFFFEFE" Margin="0,0,0,0">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="77*"/>
-            <ColumnDefinition Width="523*"/>
         </Grid.ColumnDefinitions>
-        <TextBlock HorizontalAlignment="Left" 
-                   Margin="45,1,0,0"
+        <TextBlock Margin="98,1,60,0"
                    TextWrapping="Wrap"
                    VerticalAlignment="Top"
                    RenderTransformOrigin="-3.064,-6.579" 
-                   Width="291" 
-                   TextAlignment="Center" Grid.Column="1">
+                   Width="292" 
+                   TextAlignment="Center">
             <Run Language="ru-ru" Text="Назначение марок перемычек окнам и дверям"/></TextBlock>
         <Grid Grid.ColumnSpan="2">
             <DataGrid x:Name="OpeningDtosList"
@@ -52,7 +49,12 @@
                       SelectionUnit="FullRow"
                       MinRowHeight="20"
                       CanUserDeleteRows="False"
-                      CanUserAddRows="False">
+                      CanUserAddRows="False"
+                      EnableRowVirtualization="True"
+                      VirtualizingPanel.IsVirtualizingWhenGrouping="True"
+                      VirtualizingPanel.VirtualizationMode="Standard"
+                      VirtualizingPanel.IsVirtualizing="True"
+                      ScrollViewer.CanContentScroll="True">
                 <DataGrid.GroupStyle>
                     <GroupStyle ContainerStyle="{StaticResource GroupHeaderStyle}">
                         <GroupStyle.Panel>
