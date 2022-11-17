@@ -40,7 +40,9 @@ namespace MS.Commands.AR
 
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
-            _doc = commandData.Application.ActiveUIDocument.Document;
+            _uidoc = commandData.Application.ActiveUIDocument;
+            _doc = _uidoc.Document;
+
             (Element duct, Line ductLine) = GetDuct();
             Wall wall = GetWall();
             if ((duct is null) || (wall is null))
@@ -54,8 +56,8 @@ namespace MS.Commands.AR
                 MessageBox.Show("Не найдена точка пересечения оси воздуховода и стены", "Ошибка");
                 return Result.Cancelled;
             }
-            double ductH = 0;
-            double ductW = 0;
+            double ductH;
+            double ductW;
             double openingH;
             double openingW;
             try
@@ -169,8 +171,8 @@ namespace MS.Commands.AR
         {
             UV uv1, uv2 = new UV();
 
-            plane.Project(line.Origin, out uv1, out double d);
-            plane.Project(line.Origin + line.Direction, out uv2, out double b);
+            plane.Project(line.Origin, out uv1, out _);
+            plane.Project(line.Origin + line.Direction, out uv2, out _);
 
             XYZ xyz1 = plane.Origin + (uv1.U * plane.XVec) + (uv1.V * plane.YVec);
             XYZ xyz2 = plane.Origin + (uv2.U * plane.XVec) + (uv2.V * plane.YVec);
@@ -310,7 +312,7 @@ namespace MS.Commands.AR
             ElementInLinkSelectionFilter<Duct> filter
                 = new ElementInLinkSelectionFilter<Duct>(
                   _doc);
-            Element duct = null;
+            Element duct;
             try
             {
                 Reference ductRef = _uidoc.Selection.PickObject(

@@ -102,6 +102,7 @@
     <Compile Include="Commands\AR\DTO\RoomFinishingDto.cs" />
     <Compile Include="Commands\AR\DTO\ScheduleFinishWallsCeilingsRowDto.cs" />
     <Compile Include="Commands\AR\DTO\WallTypeFinishingDto.cs" />
+    <Compile Include="Commands\AR\Enums\FinWallsHeight.cs" />
     <Compile Include="Commands\AR\MasonryMesh.cs" />
     <Compile Include="Commands\AR\MaterialColors.cs" />
     <Compile Include="Commands\AR\Models\Apartment.cs" />
@@ -137,6 +138,7 @@
     <Compile Include="Commands\KR\StairReinforcement.cs" />
     <Compile Include="Commands\MEP\DuctsThicknessCmd.cs" />
     <Compile Include="GUI\Converters\InverseBooleanConverter.cs" />
+    <Compile Include="GUI\ViewModels\AR\FinishingCreationViewModel.cs" />
     <Compile Include="GUI\Windows\General\ElementInViews.xaml.cs">
       <DependentUpon>ElementInViews.xaml</DependentUpon>
     </Compile>

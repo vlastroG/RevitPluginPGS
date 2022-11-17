@@ -6,7 +6,9 @@ using Autodesk.Revit.UI.Selection;
 using Microsoft.Office.Interop.Excel;
 using MS.Commands.AR.DTO;
 using MS.Commands.AR.DTO.FinishingCreationCmd;
+using MS.Commands.AR.Enums;
 using MS.GUI.AR;
+using MS.GUI.ViewModels.AR;
 using MS.Shared;
 using MS.Utilites;
 using MS.Utilites.Extensions;
@@ -18,25 +20,6 @@ using System.Windows;
 
 namespace MS.Commands.AR
 {
-    /// <summary>
-    /// Перечисление для определения способа построения отделочных стен
-    /// </summary>
-    public enum FinWallsHeight
-    {
-        /// <summary>
-        /// Заданная высота отделочной стены
-        /// </summary>
-        ByInput,
-        /// <summary>
-        /// Высота отделочной стены по высоте помещения
-        /// </summary>
-        ByRoom,
-        /// <summary>
-        /// Высота отделочной стены по элементу
-        /// </summary>
-        ByElement
-    }
-
     [Transaction(TransactionMode.Manual)]
     [Regeneration(RegenerationOption.Manual)]
     public class RoomsFinishingCreation : IExternalCommand
@@ -66,21 +49,22 @@ namespace MS.Commands.AR
 
             (List<WallType> wallTypes, List<CeilingType> ceilingTypes) = GetWallsAndCeilingsTypes(doc);
 
-            var ui = new FinishingCreation(descriptions, wallTypes, ceilingTypes);
+            var settings = new FinishingCreationViewModel(wallTypes, ceilingTypes, descriptions);
+            var ui = new FinishingCreation(settings);
             ui.ShowDialog();
-            if (ui.DialogResult != true)
+            if (ui.DialogResult != true || (!settings.CreateWalls && !settings.CreateCeiling))
             {
                 return Result.Cancelled;
             }
-            bool createWalls = ui.CreateWalls;
-            bool createCeilings = ui.CreateCeilings;
+            bool createWalls = settings.CreateWalls;
+            bool createCeilings = settings.CreateCeiling;
             if (createWalls)
             {
-                CreateWalls(doc, wallDtos, ui, view3d);
+                CreateWalls(doc, wallDtos, settings, view3d);
             }
-            if (createCeilings)
+            if (createCeilings && !(settings.SelectedCeilingType is null))
             {
-                var errorRoomsForCeiling = CreateCeilings(doc, rooms, ui, spatialElementBoundaryOptions);
+                var errorRoomsForCeiling = CreateCeilings(doc, rooms, settings, spatialElementBoundaryOptions);
                 if (errorRoomsForCeiling.Count > 0)
                 {
                     string ids = String.Join(", ", errorRoomsForCeiling.Select(e => e.ToString()));
@@ -235,12 +219,15 @@ namespace MS.Commands.AR
         private void CreateWalls(
             in Document doc,
             in List<WallDto> wallDtos,
-            in FinishingCreation ui,
+            in FinishingCreationViewModel settings,
             in View3D view3d)
         {
             WallType wtDefault = null;
             List<(ElementId, ElementId)> pairsToJoin = new List<(ElementId, ElementId)>();
-            IReadOnlyDictionary<string, WallType> dictWT = ui.DictWallTypeByFinName;
+            IReadOnlyDictionary<string, WallType> dictWT =
+                settings
+                .DTOs
+                .ToDictionary(dto => dto.FinishingName, dto => dto.WallType);
 
             using (Transaction trans = new Transaction(doc))
             {
@@ -262,7 +249,7 @@ namespace MS.Commands.AR
                         Curve wallGrid = wallDtos[i].Curve.CreateOffset(-wallGridOffset, XYZ.BasisZ);
                         double height = 0;
                         double bottomOffset = 0;
-                        switch (ui.FinWallsHeightType)
+                        switch (settings.WallsHeightType)
                         {
                             case FinWallsHeight.ByRoom:
                                 height = wallDtos[i].HRoom;
@@ -273,7 +260,7 @@ namespace MS.Commands.AR
                                 bottomOffset = wallDtos[i].ElementBottomOffset - wallDtos[i].RoomBottomOffset;
                                 break;
                             case FinWallsHeight.ByInput:
-                                height = ui.InputWallsHeight / SharedValues.FootToMillimeters;
+                                height = settings.WallsHeight / SharedValues.FootToMillimeters;
                                 bottomOffset = wallDtos[i].RoomBottomOffset;
                                 break;
                         }
@@ -617,7 +604,7 @@ namespace MS.Commands.AR
         private List<ElementId> CreateCeilings(
             in Document doc,
             in List<Room> rooms,
-            in FinishingCreation ui,
+            in FinishingCreationViewModel settings,
             in SpatialElementBoundaryOptions opts)
         {
             List<ElementId> errorRoomsForCeilings = new List<ElementId>();
@@ -630,15 +617,15 @@ namespace MS.Commands.AR
                     {
                         IList<CurveLoop> curveLoops = room.GetCurveLoops(opts).Select(loop => loop.Simplify()).ToList();
                         double height = 0;
-                        if (ui.CeilingHeightByRoom)
+                        if (settings.CeilingHeightByRoom)
                         {
                             height = room.get_Parameter(BuiltInParameter.ROOM_HEIGHT).AsDouble();
                         }
                         else
                         {
-                            height = ui.InputCeilingsHeight / SharedValues.FootToMillimeters;
+                            height = settings.CeilingHeight / SharedValues.FootToMillimeters;
                         }
-                        ElementId ceilingTypeId = ui.Ceiling.Id;
+                        ElementId ceilingTypeId = settings.SelectedCeilingType.Id;
                         ElementId levelId = room.LevelId;
                         string roomNumber = room.get_Parameter(BuiltInParameter.ROOM_NUMBER).AsValueString();
                         string roomFinTypeWalls = room.get_Parameter(SharedParams.PGS_FinishingTypeOfWalls).AsValueString();
