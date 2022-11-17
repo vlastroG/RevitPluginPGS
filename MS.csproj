@@ -299,7 +299,6 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Diagrams\TextFile1.txt" />
     <EmbeddedResource Include="Images\Icons\MEP\Thickness.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
