@@ -105,7 +105,7 @@ namespace MS.Commands.General
             var doc = uidoc.Document;
 
             SelectionFilterElementsOfCategoryType filter = new SelectionFilterElementsOfCategoryType(CategoryType.Model);
-            Element element = null;
+            Element element;
             try
             {
                 Reference elementRef = uidoc.Selection.PickObject(

@@ -12,7 +12,7 @@ namespace MS.Commands.AR.DTO.FinishingCreationCmd
     /// </summary>
     public class WallDto
     {
-        private List<ElementId> _elementsToJoin = new List<ElementId>();
+        private readonly List<ElementId> _elementsToJoin;
 
         /// <summary>
         /// Линия границы помещения
@@ -94,7 +94,7 @@ namespace MS.Commands.AR.DTO.FinishingCreationCmd
             this.HElem = HElem;
             this.RoomBottomOffset = RoomBottomOffset;
             this.ElementBottomOffset = ElemBottomOffset;
-            _elementsToJoin.AddRange(elementsToJoin);
+            _elementsToJoin = new List<ElementId>(elementsToJoin);
             this.RoomNumber = RoomNumber;
             this.RoomFinTypeWalls = RoomFinTypeWalls;
         }

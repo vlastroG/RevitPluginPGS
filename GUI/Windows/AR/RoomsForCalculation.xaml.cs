@@ -1,4 +1,5 @@
 ﻿using MS.Commands.AR.DTO;
+using MS.GUI.ViewModels.AR;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
@@ -6,29 +7,14 @@ using System.Windows.Controls;
 namespace MS.GUI.AR
 {
     /// <summary>
-    /// Interaction logic for RoomsForCalculation.xaml
+    /// Окно для выбора помещений для расчета площадей проемов
     /// </summary>
     public partial class RoomsForCalculation : Window
     {
-        private List<RoomDto> _rooms;
-
-        public IReadOnlyCollection<RoomDto> Rooms
+        public RoomsForCalculation(OpeningsAreaViewModel viewModel)
         {
-            get { return _rooms; }
-        }
-
-
-        public RoomsForCalculation(List<RoomDto> rooms)
-        {
-            _rooms = rooms;
+            DataContext = viewModel;
             InitializeComponent();
-
-            RoomDtosList.ItemsSource = _rooms;
-        }
-
-        private void RoomDtosList_AutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e)
-        {
-
         }
 
         private void SubmitButton_Click(object sender, RoutedEventArgs e)
