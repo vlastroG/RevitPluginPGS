@@ -72,7 +72,7 @@ namespace MS.Commands.MEP
                         }
                         else
                         {
-                            if (maxDimension <= 250)
+                            if (maxDimension <= 1000)
                             {
                                 SetSideThickness(duct, 0.8, ref count);
                             }

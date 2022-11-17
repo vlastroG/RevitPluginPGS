@@ -405,6 +405,28 @@ namespace MS
             BitmapImage btnDuctsThicknessCmdImage = new BitmapImage(btnDuctsThicknessCmdImagePath);
             btnDuctsThicknessCmd.LargeImage = btnDuctsThicknessCmdImage;
             btnDuctsThicknessCmd.ToolTip = "Назначение 'ADSK_Толщина стенки' воздуховодам";
+            btnDuctsThicknessCmd.LongDescription =
+                "Если параметр 'Имя системы' начинается с ДВ или ДП," +
+                "\nили в типе изоляции воздуховода параметр" +
+                "\n'Маркировка типоразмера' содержит 'Огнезащита':" +
+                "\n\n\tЕсли круглый воздуховод диаметром:" +
+                "\n\t\tдо 800]\t\t-\t0.8" +
+                "\n\t\t(800-1250]\t-\t1.0" +
+                "\n\t\t(1250+)\t\t-\t1.4" +
+                "\n\n\tЕсли большая сторона прямоугольного:" +
+                "\n\t\tдо 1000]\t\t-\t0.8" +
+                "\n\t\t(1000+)\t\t-\t0.9" +
+                "\n\nЕсли условия выше не выполняются, то:" +
+                "\n\n\tЕсли круглый воздуховод диаметром:" +
+                "\n\t\tдо 200]\t\t-\t0.5" +
+                "\n\t\t(200-450]\t-\t0.6" +
+                "\n\t\t(450-800]\t-\t0.7" +
+                "\n\t\t(800-1250]\t-\t1.0" +
+                "\n\t\t(1250+)\t\t-\t1.4" +
+                "\n\n\tЕсли большая сторона прямоугольного:" +
+                "\n\t\tдо 250]\t\t-\t0.5" +
+                "\n\t\t(250-1000]\t-\t0.7" +
+                "\n\t\t(1000+)\t\t-\t0.9";
 
             // ОВиК корректировка имени системы command
             PushButtonData btnSystemNameCorrectCmd = new PushButtonData("SystemNameCorrectCmd", "Формирование\nспецификации", path, "MS.Commands.MEP.SystemNameCorrectCmd");
