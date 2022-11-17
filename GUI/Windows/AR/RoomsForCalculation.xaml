@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:MS.GUI.AR"
+             xmlns:vm="clr-namespace:MS.GUI.ViewModels.AR"
              mc:Ignorable="d" 
              d:DesignHeight="450" 
         MaxWidth="950" 
@@ -11,12 +12,8 @@
         MaxHeight="1000" 
         MinHeight="450" 
         Width="600" 
-        Height="449" >
+        Height="449">
     <Grid Background="#FFFFFEFE" Margin="0,0,0,0">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="77*"/>
-            <ColumnDefinition Width="523*"/>
-        </Grid.ColumnDefinitions>
         <TextBlock HorizontalAlignment="Left" 
                    Margin="-90,1,0,0"
                    TextWrapping="Wrap"
@@ -34,38 +31,55 @@
                       SelectionUnit="FullRow"
                       MinRowHeight="20"
                       CanUserAddRows="False"
-                      CanUserDeleteRows="False">
+                      CanUserDeleteRows="False"
+                      ItemsSource="{Binding RoomDtos}"
+                      EnableRowVirtualization="True"
+                      VirtualizingPanel.IsVirtualizingWhenGrouping="True"
+                      VirtualizingPanel.VirtualizationMode="Standard"
+                      VirtualizingPanel.IsVirtualizing="True"
+                      ScrollViewer.CanContentScroll="True">
                 <DataGrid.Columns>
-                    <DataGridCheckBoxColumn Binding="{Binding Path = DoOpeningsAreaCalculation}" 
+                    <DataGridCheckBoxColumn Binding="{Binding DoOpeningsAreaCalculation}" 
                                             IsReadOnly="False" 
                                             Header="Считать" 
                                             MinWidth="60" 
                                             MaxWidth="60"
                                             Selector.IsSelected="True"/>
-                    <DataGridTextColumn Binding="{Binding Path = Number}"
+                    <DataGridTextColumn Binding="{Binding Number}"
                                         IsReadOnly="True" 
                                         Header="Номер" 
                                         MinWidth="60" 
                                         MaxWidth="60"/>
-                    <DataGridTextColumn Binding="{Binding Path = Name}"
+                    <DataGridTextColumn Binding="{Binding Name}"
                                         IsReadOnly="True" 
                                         Header="Имя" 
                                         MinWidth="100"
                                         Width="4*"/>
-                    <DataGridTextColumn Binding="{Binding Path = Level}" 
+                    <DataGridTextColumn Binding="{Binding Level}" 
                                         IsReadOnly="True" 
                                         Header="Уровень"
                                         MinWidth="100"
                                         MaxWidth="150"/>
-                    <DataGridTextColumn Binding="{Binding Path = Comment}"
+                    <DataGridTextColumn Binding="{Binding Comment}"
                                         IsReadOnly="True"
                                         Header="Комментарии"
                                         MinWidth="100"
                                         Width="3*"/>
                 </DataGrid.Columns>
             </DataGrid>
-            <Button x:Name="Submit" Content="Готово" HorizontalAlignment="Left" VerticalAlignment="Top" RenderTransformOrigin="0.69,0.303" Width="60" Click="SubmitButton_Click"/>
-            <Button x:Name="Cancel" Content="Отмена" HorizontalAlignment="Left" Margin="60,0,0,0" VerticalAlignment="Top" Width="60" Click="CancelButton_Click"/>
+            <Button x:Name="Submit"
+                    Content="Готово" 
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top" 
+                    Width="60"
+                    Click="SubmitButton_Click"/>
+            <Button x:Name="Cancel" 
+                    Content="Отмена"
+                    HorizontalAlignment="Left"
+                    Margin="60,0,0,0" 
+                    VerticalAlignment="Top"
+                    Width="60" 
+                    Click="CancelButton_Click"/>
         </Grid>
     </Grid>
 </Window>

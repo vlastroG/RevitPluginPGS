@@ -4,6 +4,7 @@ using Autodesk.Revit.DB.Architecture;
 using Autodesk.Revit.UI;
 using MS.Commands.AR.DTO;
 using MS.GUI.AR;
+using MS.GUI.ViewModels.AR;
 using MS.Shared;
 using MS.Utilites;
 using System;
@@ -100,21 +101,23 @@ namespace MS.Commands.AR
                 if (NotCalculatedRooms.Contains(roomDto))
                     roomDto.DoOpeningsAreaCalculation = false;
             }
+
+            var settings = new OpeningsAreaViewModel(roomsDto);
             //Вывод окна входных данных
-            RoomsForCalculation inputForm = new RoomsForCalculation(roomsDto);
+            RoomsForCalculation inputForm = new RoomsForCalculation(settings);
             inputForm.ShowDialog();
 
-            if (inputForm.DialogResult == false)
+            if (inputForm.DialogResult != true)
             {
                 return Result.Cancelled;
             }
 
-            Element[] rooms = inputForm.Rooms
+            Element[] rooms = settings.RoomDtos
                 .Where(rDto => rDto.DoOpeningsAreaCalculation == true)
                 .Select(rDto => rDto.RoomRevit as Element)
                 .ToArray();
 
-            NotCalculatedRooms = inputForm.Rooms
+            NotCalculatedRooms = settings.RoomDtos
                 .Where(rDto => rDto.DoOpeningsAreaCalculation == false)
                 .ToList();
 
