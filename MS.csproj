@@ -119,6 +119,7 @@
     <Compile Include="Commands\AR\RoomsFinishingMultiMark.cs" />
     <Compile Include="Commands\BIM\ClashReportImport.cs" />
     <Compile Include="Commands\BIM\DTO\ScheduleToCSVExportDto.cs" />
+    <Compile Include="Commands\BIM\DuctEquipmentConstructorCmd.cs" />
     <Compile Include="Commands\BIM\XmlData\ClashReportXml.cs" />
     <Compile Include="Commands\General\ElementInViewsCmd.cs" />
     <Compile Include="Commands\General\Info.cs" />
