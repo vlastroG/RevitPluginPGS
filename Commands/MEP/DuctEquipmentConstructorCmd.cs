@@ -80,14 +80,33 @@ namespace MS.Commands.MEP
             XYZ rightPoint4 = CreateFamilyInstance(doc, level, famInstSymb, rightPoint3, length3);
             _ = CreateFamilyInstance(doc, level, famInstSymb, rightPoint4, length4);
 
-
             doc.Save();
             return Result.Succeeded;
         }
 
+        /// <summary>
+        /// Назначает значения параметрам семейства из входного кортежа
+        /// </summary>
+        /// <param name="doc">Документ семейства, параметры которого обрабатываются</param>
+        /// <param name="tuples">Входной кортеж пар значение названия параметра и его значения</param>
+        private void SetFamilyParameters(in Document doc, in ICollection<(string parName, string parValue)> tuples)
+        {
+            using (Transaction familyParameterTrans = new Transaction(doc))
+            {
+                familyParameterTrans.Start("Назначения параметра семейства");
+
+                foreach (var tuple in tuples)
+                {
+                    var famParameter = doc.FamilyManager.get_Parameter(tuple.parName);
+                    doc.FamilyManager.Set(famParameter, tuple.parValue);
+                }
+
+                familyParameterTrans.Commit();
+            }
+        }
+
         private FamilySymbol GetFamilySymbol(in Document doc, string familyName, string typeName)
         {
-
             return new FilteredElementCollector(doc)
                 .OfClass(typeof(FamilySymbol))
                 .WhereElementIsElementType()
@@ -106,7 +125,7 @@ namespace MS.Commands.MEP
             string destPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + $@"\{newName}.rfa";
             try
             {
-                File.Copy(sourcePath, destPath);
+                File.Copy(sourcePath, destPath, true);
             }
             catch (FileNotFoundException)
             {
