@@ -184,6 +184,9 @@
     <Compile Include="GUI\Windows\KR\SettingsKRview.xaml.cs">
       <DependentUpon>SettingsKRview.xaml</DependentUpon>
     </Compile>
+    <Compile Include="GUI\Windows\MEP\DuctInstallationView.xaml.cs">
+      <DependentUpon>DuctInstallationView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="GUI\Windows\MEP\MEPinSpatials.xaml.cs">
       <DependentUpon>MEPinSpatials.xaml</DependentUpon>
     </Compile>
@@ -297,6 +300,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="GUI\Windows\KR\StairReinforcementView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GUI\Windows\MEP\DuctInstallationView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
