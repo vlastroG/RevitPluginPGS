@@ -119,7 +119,7 @@
     <Compile Include="Commands\AR\RoomsFinishingMultiMark.cs" />
     <Compile Include="Commands\BIM\ClashReportImport.cs" />
     <Compile Include="Commands\BIM\DTO\ScheduleToCSVExportDto.cs" />
-    <Compile Include="Commands\BIM\DuctEquipmentConstructorCmd.cs" />
+    <Compile Include="Commands\MEP\DuctEquipmentConstructorCmd.cs" />
     <Compile Include="Commands\BIM\XmlData\ClashReportXml.cs" />
     <Compile Include="Commands\General\ElementInViewsCmd.cs" />
     <Compile Include="Commands\General\Info.cs" />
@@ -227,6 +227,9 @@
     <None Include="Diagrams\Copy of Algorhytm check lintels.drawio" />
     <None Include="Diagrams\RoomsAreaAlgorithm.drawio" />
     <EmbeddedResource Include="EmbeddedFamilies\ABG_GEN_ClashSphere_R22.rfa">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EmbeddedFamilies\Шаблон установки.rfa">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <None Include="packages.config" />

@@ -118,6 +118,11 @@ namespace MS.Shared
         public static Guid ADSK_DimensionDiameter => Guid.Parse("9b679ab7-ea2e-49ce-90ab-0549d5aa36ff");
 
         /// <summary>
+        /// Guid параметра ADSK_Размер_Длина = 748a2515-4cc9-4b74-9a69-339a8d65a212 (double)
+        /// </summary>
+        public static Guid ADSK_DimensionLength => Guid.Parse("748a2515-4cc9-4b74-9a69-339a8d65a212");
+
+        /// <summary>
         /// Guid параметра PGS_ИтогАрмСетки = 40f2c9af-2986-4330-a6d9-4c9ae9419342 (double)
         /// </summary>
         public static Guid PGS_TotalMasonryMesh => Guid.Parse("40f2c9af-2986-4330-a6d9-4c9ae9419342");

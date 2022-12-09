@@ -91,14 +91,6 @@ namespace MS
                 "разных категорий, то линии из них отфильтруются автоматически.";
 
 
-            // LevelName command
-            //PushButtonData btnLevelName = new PushButtonData("LevelName", "Отметки\nуровней", path, "MS.Commands.General.LevelName");
-            //Uri btnLevelNameImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
-            //BitmapImage btnLevelNameImage = new BitmapImage(btnLevelNameImagePath);
-            //btnLevelName.LargeImage = btnLevelNameImage;
-            //btnLevelName.ToolTip = "Проверка отметок уровней в их названии";
-
-
             // Selection command
             PushButtonData btnSelection = new PushButtonData("Selection", "Выбор\nэлементов", path, "MS.Selector");
             Uri btnSelectionImagePath = new Uri(assembly_dir + @"\Images\Icons\General\SelectionElements.png");
@@ -363,12 +355,6 @@ namespace MS
             btnChangeSettingsKRCmd.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, @"https://google.com"));
 
 
-            // SS Numerator command
-            //PushButtonData btnNumerator = new PushButtonData("Numerator", "Маркировка", path, "MS.Numerator");
-            //Uri btnNumeratorImagePath = new Uri(assembly_dir + @"\Images\Icons\SS\СС.png");
-            //BitmapImage btnNumeratorImage = new BitmapImage(btnNumeratorImagePath);
-            //btnNumerator.LargeImage = btnNumeratorImage;
-
             // ОВиК арматура трубопроводов и оборудование в помещениях command
             PushButtonData btnPipelineFittings = new PushButtonData("PipelineFittings", "Инженерные элементы\nв пространствах", path, "MS.Commands.MEP.PipelineFittings");
             Uri btnPipelineFittingsImagePath = new Uri(assembly_dir + @"\Images\Icons\MEP\WaterPump.png");
@@ -398,6 +384,17 @@ namespace MS
                 "Для самостоятельного заполнения пункта в параметр пространства \"Комментарии\" " +
                 "написать \"не обрабатывать\" (регистр не важен)";
             btnSystemsInSpace.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, @"https://google.com"));
+
+            // ОВиК конструктор установок
+            PushButtonData btnDuctEquipmentCtorCmd = new PushButtonData("DuctEquipmentConstructor", "Конструктор\nустановок", path, "MS.Commands.MEP.DuctEquipmentConstructorCmd");
+            Uri btnDuctEquipmentCtorCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            BitmapImage btnDuctEquipmentCtorCmdImage = new BitmapImage(btnDuctEquipmentCtorCmdImagePath);
+            btnDuctEquipmentCtorCmd.LargeImage = btnDuctEquipmentCtorCmdImage;
+            btnDuctEquipmentCtorCmd.ToolTip = "Конструктор семейств вентиляционных установок";
+            btnDuctEquipmentCtorCmd.LongDescription =
+                "По настройкам создается родительское семейство установки категории 'Оборудование', " +
+                "в котором находятся вложенные семейства-'болванки' для формирования дополнительных строчек в спецификациях.";
+
 
             // ОВиК толщины воздуховодов command
             PushButtonData btnDuctsThicknessCmd = new PushButtonData("DuctsThicknessCmd", "Толщины\nвоздуховодов", path, "MS.Commands.MEP.DuctsThicknessCmd");
@@ -517,9 +514,6 @@ namespace MS
             panelGeneral.AddSlideOut();
             panelGeneral.AddItem(btnSelectionSettings);
 
-
-            //panelGeneral.AddItem(btnLevelName);
-
             // AR panel
             panelAR.AddItem(btnRmArea);
             panelAR.AddItem(btnOpeningsByDuctCmd);
@@ -543,14 +537,12 @@ namespace MS
             panelKR.AddItem(btnPilesMarkRangeCmd);
             panelKR.AddItem(btnChangeSettingsKRCmd);
 
-            // SS panel
-            // panelSS.AddItem(btnNumerator);
-
             // ОВ panel
             panelOV.AddItem(btnPipelineFittings);
             panelOV.AddItem(btnSystemsInSpace);
             panelOV.AddItem(btnEquipmentInSystemCmd);
             panelOV.AddItem(btnDuctsThicknessCmd);
+            panelOV.AddItem(btnDuctEquipmentCtorCmd);
 
             // ВК panel
             panelVK.AddItem(btnSystemNameCorrectCmd);
