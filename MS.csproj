@@ -138,9 +138,14 @@
     <Compile Include="Commands\KR\Services\SelectionFilters\SelectionFilterStairStepEdges.cs" />
     <Compile Include="Commands\KR\StairReinforcement.cs" />
     <Compile Include="Commands\MEP\DuctsThicknessCmd.cs" />
+    <Compile Include="Commands\MEP\Enums\EquipmentType.cs" />
+    <Compile Include="GUI\CommandsBase\Base\Command.cs" />
+    <Compile Include="GUI\CommandsBase\LambdaCommand.cs" />
     <Compile Include="GUI\Converters\InverseBooleanConverter.cs" />
     <Compile Include="GUI\ViewModels\AR\FinishingCreationViewModel.cs" />
     <Compile Include="GUI\ViewModels\AR\OpeningsAreaViewModel.cs" />
+    <Compile Include="GUI\ViewModels\MEP\DuctInstallation\DuctEquipmentConstructorViewModel.cs" />
+    <Compile Include="GUI\ViewModels\MEP\DuctInstallation\EquipmentViewModel.cs" />
     <Compile Include="GUI\Windows\General\ElementInViews.xaml.cs">
       <DependentUpon>ElementInViews.xaml</DependentUpon>
     </Compile>
@@ -224,12 +229,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
-    <None Include="Diagrams\Copy of Algorhytm check lintels.drawio" />
-    <None Include="Diagrams\RoomsAreaAlgorithm.drawio" />
     <EmbeddedResource Include="EmbeddedFamilies\ABG_GEN_ClashSphere_R22.rfa">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="EmbeddedFamilies\Шаблон установки.rfa">
+    <EmbeddedResource Include="EmbeddedFamilies\ОВ_установка_default.rfa">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <None Include="packages.config" />

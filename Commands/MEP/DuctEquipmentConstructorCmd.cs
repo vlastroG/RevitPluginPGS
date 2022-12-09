@@ -54,26 +54,17 @@ namespace MS.Commands.MEP
         {
             UIApplication uiapp = commandData.Application;
 
-            string path = CopyFamily();
+            string path = CopyFamily("В123");
             UIDocument uidoc = uiapp.OpenAndActivateDocument(path);
             Document doc = uidoc.Document;
 
-
-            FamilySymbol famInstSymb = new FilteredElementCollector(doc)
-                .OfClass(typeof(FamilySymbol))
-                .WhereElementIsElementType()
-                .Cast<FamilySymbol>()
-                .FirstOrDefault(ft => ft.FamilyName == _familyName && ft.Name == _typeName);
-
-            Element level = new FilteredElementCollector(doc)
-                .OfClass(typeof(Level))
-                .FirstOrDefault();
-
+            // Получить начальные значения оборудования установки
+            FamilySymbol famInstSymb = GetFamilySymbol(doc, _familyName, _typeName);
+            Element level = new FilteredElementCollector(doc).OfClass(typeof(Level)).FirstOrDefault();
             ReferencePlane startPlane = new FilteredElementCollector(doc)
                 .OfClass(typeof(ReferencePlane))
                 .FirstOrDefault(r => r.Name.Equals(_startPlane)) as ReferencePlane;
             Reference startPlaneRef = new Reference(startPlane);
-
             XYZ startPoint = new XYZ(startPlane.GetPlane().Origin.X, 0, 0);
 
             double length = 1;
@@ -82,20 +73,45 @@ namespace MS.Commands.MEP
             double length3 = 2;
             double length4 = 1274 / 304.8;
 
+            // Создать тестовые элементы установки
             XYZ rightPoint1 = CreateFamilyInstance(doc, level, famInstSymb, startPoint, length);
             XYZ rightPoint2 = CreateFamilyInstance(doc, level, famInstSymb, rightPoint1, length1);
             XYZ rightPoint3 = CreateFamilyInstance(doc, level, famInstSymb, rightPoint2, length2);
             XYZ rightPoint4 = CreateFamilyInstance(doc, level, famInstSymb, rightPoint3, length3);
             _ = CreateFamilyInstance(doc, level, famInstSymb, rightPoint4, length4);
 
+
+            doc.Save();
             return Result.Succeeded;
         }
 
-        private string CopyFamily()
+        private FamilySymbol GetFamilySymbol(in Document doc, string familyName, string typeName)
         {
-            string sourcePath = WorkWithPath.AssemblyDirectory + @"\EmbeddedFamilies\Шаблон установки.rfa";
-            string destPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\Шаблон установки.rfa";
-            File.Copy(sourcePath, destPath);
+
+            return new FilteredElementCollector(doc)
+                .OfClass(typeof(FamilySymbol))
+                .WhereElementIsElementType()
+                .Cast<FamilySymbol>()
+                .FirstOrDefault(ft => ft.FamilyName == familyName && ft.Name == typeName);
+        }
+
+        /// <summary>
+        /// Копирует семейство из ресурсов плагина в папку 'Документы' пользователя
+        /// </summary>
+        /// <param name="newName">Название нового семейства</param>
+        /// <returns>Полный путь к скопированному файлу, или пустая строка, если не удалось скопировать файл семейства</returns>
+        private string CopyFamily(string newName)
+        {
+            string sourcePath = WorkWithPath.AssemblyDirectory + @"\EmbeddedFamilies\ОВ_установка_default.rfa";
+            string destPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + $@"\{newName}.rfa";
+            try
+            {
+                File.Copy(sourcePath, destPath);
+            }
+            catch (FileNotFoundException)
+            {
+                return string.Empty;
+            }
             return destPath;
         }
 
