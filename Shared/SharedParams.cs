@@ -1,4 +1,6 @@
 ﻿using Autodesk.Revit.DB;
+using Autodesk.Revit.UI;
+using MS.Utilites;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -358,6 +360,11 @@ namespace MS.Shared
         /// </summary>
         public static Guid ADSK_SideThickness => Guid.Parse("381b467b-3518-42bb-b183-35169c9bdfb3");
 
+        /// <summary>
+        /// Полный путь к ФОП
+        /// </summary>
+        public static readonly string FilePath
+            = WorkWithPath.AssemblyDirectory + @"\EmbeddedFiles\ФОП2021_PGS_ОВ и ВК(07.06.22).txt";
 
         /// <summary>
         /// Валидация текущего проекта Revit на наличие общих параметров у заданной категории.
@@ -400,6 +407,89 @@ namespace MS.Shared
                 message = "отсутствуют";
             }
             return message;
+        }
+
+        /// <summary>
+        /// Добавляет общий параметр в семейство и устанавливает его значение
+        /// </summary>
+        /// <typeparam name="T">Тип значания параметра</typeparam>
+        /// <param name="uidoc">Документ семейства, в которое добавляется параметр</param>
+        /// <param name="groupName">Название группы, в которой расположен параметр</param>
+        /// <param name="parName">Название параметра</param>
+        /// <param name="isInstance">Если True => экземпляр, False => тип</param>
+        /// <param name="value">Значение параметра</param>
+        /// <returns>True, если параметр успешно добавлен и его значение установлено, иначе False.</returns>
+        public static bool AddParameterWithValue<T>(in UIDocument uidoc, string groupName, string parName, bool isInstance, T value)
+        {
+            try
+            {
+                using (Transaction addParameter = new Transaction(uidoc.Document))
+                {
+                    addParameter.Start($"Добавить {parName}");
+                    AddSharedParameter(uidoc, groupName, parName, isInstance);
+                    SetSharedParameterValue(uidoc.Document, parName, value);
+                    addParameter.Commit();
+                }
+            }
+            catch (ArgumentNullException)
+            {
+                return false;
+            }
+            catch (NullReferenceException)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Добавляет общий параметр в файл семейства
+        /// </summary>
+        /// <param name="uidoc">UI файла семейства</param>
+        /// <param name="groupName">Название группы параметров</param>
+        /// <param name="parName">Название параметра</param>
+        private static void AddSharedParameter(in UIDocument uidoc, string groupName, string parName, bool isInstance)
+        {
+            FamilyManager familyManager = uidoc.Document.FamilyManager;
+            uidoc.Application.Application.SharedParametersFilename = SharedParams.FilePath;
+            DefinitionFile defFile = uidoc.Application.Application.OpenSharedParameterFile();
+            DefinitionGroups groups = defFile.Groups;
+            DefinitionGroup group = groups.get_Item(groupName);
+
+            Definitions definitions = group.Definitions;
+            ExternalDefinition eDef = definitions.FirstOrDefault(d => d.Name.Equals(parName)) as ExternalDefinition;
+
+            familyManager.AddParameter(eDef, BuiltInParameterGroup.PG_MECHANICAL, isInstance);
+        }
+
+        /// <summary>
+        /// Назначает значения параметру семейства
+        /// </summary>
+        /// <param name="doc">Документ семейства, параметры которого обрабатываются</param>
+        private static void SetSharedParameterValue<T>(in Document doc, string parName, T parValue)
+        {
+            if (parValue == null)
+            {
+                throw new NullReferenceException(nameof(parValue));
+            }
+            var famParameter = doc.FamilyManager.get_Parameter(parName);
+            switch (parValue)
+            {
+                case int intValue:
+                    doc.FamilyManager.Set(famParameter, intValue);
+                    break;
+                case double doubleValue:
+                    doc.FamilyManager.Set(famParameter, doubleValue);
+                    break;
+                case string stringValue:
+                    doc.FamilyManager.Set(famParameter, stringValue);
+                    break;
+                case ElementId elementIdValue:
+                    doc.FamilyManager.Set(famParameter, elementIdValue);
+                    break;
+                default:
+                    throw new ArgumentException(Type.GetTypeCode(typeof(T)).ToString());
+            }
         }
     }
 }
