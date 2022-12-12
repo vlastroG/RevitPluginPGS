@@ -69,6 +69,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -139,6 +140,12 @@
     <Compile Include="Commands\KR\StairReinforcement.cs" />
     <Compile Include="Commands\MEP\DuctsThicknessCmd.cs" />
     <Compile Include="Commands\MEP\Enums\EquipmentType.cs" />
+    <Compile Include="Commands\MEP\Models\Mechanic\Impl\Cooler.cs" />
+    <Compile Include="Commands\MEP\Models\Mechanic\Impl\Fan.cs" />
+    <Compile Include="Commands\MEP\Models\Mechanic\IMechanic.cs" />
+    <Compile Include="Commands\MEP\Models\Mechanic\Impl\Filter.cs" />
+    <Compile Include="Commands\MEP\Models\Mechanic\Impl\Heater.cs" />
+    <Compile Include="Commands\MEP\Models\Mechanic\Mechanic.cs" />
     <Compile Include="GUI\CommandsBase\Base\Command.cs" />
     <Compile Include="GUI\CommandsBase\LambdaCommand.cs" />
     <Compile Include="GUI\Converters\InverseBooleanConverter.cs" />
@@ -383,6 +390,11 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="Images\Icons\KR\StairRnfrcmt.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="EmbeddedFiles\ФОП2021_PGS_ОВ и ВК%2807.06.22%29.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>
