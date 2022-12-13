@@ -53,6 +53,34 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         }
 
         /// <summary>
+        /// Тестовый nullable int
+        /// </summary>
+        private static int? _testIntNull;
+
+        /// <summary>
+        /// Тестовый nullable int
+        /// </summary>
+        public int? TestIntNull
+        {
+            get => _testIntNull;
+            set => Set(ref _testIntNull, value);
+        }
+
+        /// <summary>
+        /// Тестовый nullable double
+        /// </summary>
+        private static double? _testDoubleNull;
+
+        /// <summary>
+        /// Тестовый nullable double
+        /// </summary>
+        public double? TestDoubleNull
+        {
+            get => _testDoubleNull;
+            set => Set(ref _testDoubleNull, value);
+        }
+
+        /// <summary>
         /// Коллекция элементов оборудования в установке
         /// </summary>
         public ObservableCollection<EquipmentViewModel> Equipment { get; } = new ObservableCollection<EquipmentViewModel>();

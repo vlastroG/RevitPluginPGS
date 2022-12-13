@@ -100,6 +100,11 @@ namespace MS.Shared
         public static Guid ADSK_Mark => Guid.Parse("2204049c-d557-4dfc-8d70-13f19715e46d");
 
         /// <summary>
+        /// Guid параметра ADSK_Количество = "8d057bb3-6ccd-4655-9165-55526691fe3a"
+        /// </summary>
+        public static Guid ADSK_Count => Guid.Parse("8d057bb3-6ccd-4655-9165-55526691fe3a");
+
+        /// <summary>
         /// Guid параметра PGS_АрмКолвоАрмРядов = 9d149e47-87a0-45f7-9237-d47436065c80 (double)
         /// </summary>
         public static Guid PGS_ArmCountRows => Guid.Parse("9d149e47-87a0-45f7-9237-d47436065c80");

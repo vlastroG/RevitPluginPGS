@@ -3,10 +3,19 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:vm="clr-namespace:MS.GUI.ViewModels.MEP.DuctInstallation"
              xmlns:local="clr-namespace:MS.GUI.Windows.MEP"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="450" d:DesignWidth="800"
+        Title="Конструктор установок">
+    <Window.DataContext>
+        <vm:DuctEquipmentConstructorViewModel/>
+    </Window.DataContext>
     <Grid>
-        <ItemsControl></ItemsControl>
+        <TextBlock Width="100" Height="20" Text="TestIntNull" Margin="245,207,455,207"></TextBlock>
+        <TextBlock Width="100" Height="20" Text="TestDoubleNull" Margin="245,260,455,154"></TextBlock>
+        <TextBox Width="100" Height="20" Text="{Binding TestIntNull}"/>
+        <TextBox Width="100" Height="20" Margin="350,260,350,154" Text="{Binding TestDoubleNull}"/>
+        <Button Margin="0,355,631,0" Content="Ok" Click="Button_Click"></Button>
     </Grid>
 </Window>
