@@ -32,7 +32,7 @@ namespace MS.Commands.MEP.Mechanic.Impl
         /// <summary>
         /// PGS_ВоздухонагревательКоличество
         /// </summary>
-        public int Count { get; set; }
+        public double Count { get; set; }
 
         /// <summary>
         /// ADSK_Температура воздуха на входе в нагреватель

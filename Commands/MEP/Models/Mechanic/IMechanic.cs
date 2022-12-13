@@ -21,10 +21,5 @@ namespace MS.Commands.MEP.Mechanic
         /// Тип оборудования
         /// </summary>
         EquipmentType EquipmentType { get; }
-
-        /// <summary>
-        /// ADSK_Группирование
-        /// </summary>
-        string Grouping { get; set; }
     }
 }

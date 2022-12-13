@@ -31,7 +31,7 @@ namespace MS.Commands.MEP.Mechanic.Impl
         /// <summary>
         /// PGS_ВоздухоохладительКоличество
         /// </summary>
-        public int Count { get; set; }
+        public double Count { get; set; }
 
         /// <summary>
         /// ADSK_Температура воздуха на входе в охладитель
@@ -52,5 +52,7 @@ namespace MS.Commands.MEP.Mechanic.Impl
         /// ADSK_Потеря давления воздуха в охладителе
         /// </summary>
         public double AirPressureLoss { get; set; }
+
+
     }
 }
