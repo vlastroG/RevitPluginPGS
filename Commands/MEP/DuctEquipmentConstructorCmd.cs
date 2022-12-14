@@ -100,6 +100,8 @@ namespace MS.Commands.MEP
 
             FillInstallationParentGeneralParams(doc, installation);
 
+            FillInstallationMechanicParams(uidoc, installation);
+
             XYZ startBlankPoint = new XYZ();
 
 
@@ -119,7 +121,6 @@ namespace MS.Commands.MEP
 
 
             // Добавление общих параметров
-            SharedParams.AddParameterWithValue(uidoc, "PGS_ОВ_ХОВС", "PGS_ТипоразмерВентилятора", true, "ТестТипоразмера_007");
             doc.Save();
 
             return Result.Succeeded;
@@ -171,11 +172,44 @@ namespace MS.Commands.MEP
             }
         }
 
-        private void FillInstallationMechanicParams(in Document doc, in Installation installation)
+        private void FillInstallationMechanicParams(in UIDocument uidoc, in Installation installation)
         {
-            var mechanics = installation.GetMechanics().First();
-            foreach (var mechanic in mechanics)
+
+            var mechanic2 = new Mechanic.Impl.Fan(300)
             {
+                Mark = "V1.0.P63.R-5,5x15",
+                AirFlow = 8225,
+                AirPressureLoss = 500,
+                FanSpeed = 1514,
+                ExplosionProofType = "АИР112M4",
+                RatedPower = 5500,
+                EngineSpeed = 1432
+            };
+
+            var mechanic1 = new Mechanic.Impl.Fan(300)
+            {
+                Mark = "V1.0.P63.R-5,5x15",
+                ExplosionProofType = "АИР112M4",
+                RatedPower = 5500,
+                EngineSpeed = 1432
+            };
+
+            var parameters = mechanic1.GetNotEmptyParameters();
+            using (Transaction addMechanic = new Transaction(uidoc.Document))
+            {
+                addMechanic.Start("Добавление механики");
+
+                foreach (var parameter in parameters)
+                {
+                    SharedParams.AddParameterWithValue(
+                        uidoc,
+                        BuiltInParameterGroup.PG_MECHANICAL,
+                        parameter.Key,
+                        true,
+                        (object)parameter.Value);
+                }
+
+                addMechanic.Commit();
             }
         }
 
@@ -186,6 +220,8 @@ namespace MS.Commands.MEP
         private Installation CreateTestInstallation()
         {
             Installation installationTest = new Installation(1100, 1100, 7400);
+
+            installationTest.System = "П4";
 
             List<Mechanic.Mechanic> mechanics = new List<Mechanic.Mechanic>()
             {

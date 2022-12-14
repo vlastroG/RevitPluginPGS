@@ -137,7 +137,8 @@ namespace MS.Commands.MEP.Models.Installation
         public void AddMechanic(Mechanic.Mechanic mechanic)
         {
             var mechanicType = mechanic.GetType();
-            for (int i = 0; i < _levelsCapacity; i++)
+            bool isAdded = false;
+            for (int i = 0; !isAdded; i++)
             {
                 if (!(_mechanics[i].FirstOrDefault(m => m.GetType().Equals(mechanicType)) is null))
                 {
@@ -149,7 +150,7 @@ namespace MS.Commands.MEP.Models.Installation
                 else
                 {
                     _mechanics[i].Add(mechanic);
-                    return;
+                    isAdded = true;
                 }
             }
         }

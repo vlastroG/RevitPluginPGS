@@ -54,7 +54,7 @@ namespace MS.Commands.MEP.Mechanic.Impl
         /// </summary>
         public double? AirPressureLoss { get; set; }
 
-        public override Dictionary<string, string> GetNotEmptyParameters()
+        public override Dictionary<string, dynamic> GetNotEmptyParameters()
         {
             throw new NotImplementedException();
         }

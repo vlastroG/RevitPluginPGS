@@ -52,6 +52,6 @@ namespace MS.Commands.MEP.Mechanic
         /// Возвращает словарь названий параметров оборудования и их значений (значения заполненных свойств оборудования)
         /// </summary>
         /// <returns>Словарь заполненных параметров и их значений</returns>
-        public abstract Dictionary<string, string> GetNotEmptyParameters();
+        public abstract Dictionary<string, dynamic> GetNotEmptyParameters();
     }
 }

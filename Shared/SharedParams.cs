@@ -414,27 +414,28 @@ namespace MS.Shared
             return message;
         }
 
+
         /// <summary>
         /// Добавляет общий параметр в семейство и устанавливает его значение
         /// </summary>
         /// <typeparam name="T">Тип значания параметра</typeparam>
         /// <param name="uidoc">Документ семейства, в которое добавляется параметр</param>
-        /// <param name="groupName">Название группы, в которой расположен параметр</param>
+        /// <param name="parameterGroup">Группа параметров в семействе</param>
         /// <param name="parName">Название параметра</param>
         /// <param name="isInstance">Если True => экземпляр, False => тип</param>
         /// <param name="value">Значение параметра</param>
         /// <returns>True, если параметр успешно добавлен и его значение установлено, иначе False.</returns>
-        public static bool AddParameterWithValue<T>(in UIDocument uidoc, string groupName, string parName, bool isInstance, T value)
+        public static bool AddParameterWithValue(
+            in UIDocument uidoc,
+            BuiltInParameterGroup parameterGroup, 
+            string parName, 
+            bool isInstance,
+            dynamic value)
         {
             try
             {
-                using (Transaction addParameter = new Transaction(uidoc.Document))
-                {
-                    addParameter.Start($"Добавить {parName}");
-                    AddSharedParameter(uidoc, groupName, parName, isInstance);
-                    SetSharedParameterValue(uidoc.Document, parName, value);
-                    addParameter.Commit();
-                }
+                AddSharedParameter(uidoc, parameterGroup, parName, isInstance);
+                SetFamilyParameterValue(uidoc.Document, parName, (object)value);
             }
             catch (ArgumentNullException)
             {
@@ -448,52 +449,69 @@ namespace MS.Shared
         }
 
         /// <summary>
-        /// Добавляет общий параметр в файл семейства
+        /// Добавляет общий параметр в файл семейства по имени параметра
         /// </summary>
         /// <param name="uidoc">UI файла семейства</param>
-        /// <param name="groupName">Название группы параметров</param>
+        /// <param name="parameterGroup">Группа параметров в семействе</param>
         /// <param name="parName">Название параметра</param>
-        private static void AddSharedParameter(in UIDocument uidoc, string groupName, string parName, bool isInstance)
+        /// <param name="isInstance">True => параметр экземпляра, False => параметр типа</param>
+        private static void AddSharedParameter(
+            in UIDocument uidoc, 
+            BuiltInParameterGroup parameterGroup,
+            string parName,
+            bool isInstance)
         {
             FamilyManager familyManager = uidoc.Document.FamilyManager;
             uidoc.Application.Application.SharedParametersFilename = SharedParams.FilePath;
             DefinitionFile defFile = uidoc.Application.Application.OpenSharedParameterFile();
             DefinitionGroups groups = defFile.Groups;
-            DefinitionGroup group = groups.get_Item(groupName);
-
-            Definitions definitions = group.Definitions;
-            ExternalDefinition eDef = definitions.FirstOrDefault(d => d.Name.Equals(parName)) as ExternalDefinition;
-
-            familyManager.AddParameter(eDef, BuiltInParameterGroup.PG_MECHANICAL, isInstance);
+            ExternalDefinition eDef = null;
+            foreach (var group in groups)
+            {
+                eDef = group.Definitions.FirstOrDefault(d => d.Name.Equals(parName)) as ExternalDefinition;
+                if (eDef != null)
+                    break;
+            }
+            try
+            {
+                familyManager.AddParameter(eDef, parameterGroup, isInstance);
+            }
+            catch (Autodesk.Revit.Exceptions.ArgumentException)
+            {
+            }
         }
 
         /// <summary>
-        /// Назначает значения параметру семейства
+        /// Назначает значению парамтера семейства по его имени
         /// </summary>
-        /// <param name="doc">Документ семейства, параметры которого обрабатываются</param>
-        private static void SetSharedParameterValue<T>(in Document doc, string parName, T parValue)
+        /// <param name="doc">Документ семейства</param>
+        /// <param name="parName">Название параметра</param>
+        /// <param name="parValue">Значение параметра</param>
+        /// <exception cref="NullReferenceException">Значение параметра null</exception>
+        private static void SetFamilyParameterValue(in Document doc, string parName, dynamic parValue)
         {
-            if (parValue == null)
+            if (parValue is null)
             {
                 throw new NullReferenceException(nameof(parValue));
             }
             var famParameter = doc.FamilyManager.get_Parameter(parName);
-            switch (parValue)
+            var value = parValue;
+            try
             {
-                case int intValue:
-                    doc.FamilyManager.Set(famParameter, intValue);
-                    break;
-                case double doubleValue:
-                    doc.FamilyManager.Set(famParameter, doubleValue);
-                    break;
-                case string stringValue:
-                    doc.FamilyManager.Set(famParameter, stringValue);
-                    break;
-                case ElementId elementIdValue:
-                    doc.FamilyManager.Set(famParameter, elementIdValue);
-                    break;
-                default:
-                    throw new ArgumentException(Type.GetTypeCode(typeof(T)).ToString());
+                var paramType = famParameter.GetUnitTypeId();
+                value = UnitUtils.ConvertToInternalUnits(parValue, paramType);
+            }
+            catch (Autodesk.Revit.Exceptions.InvalidOperationException)
+            {
+                value = parValue;
+            }
+            try
+            {
+                doc.FamilyManager.Set(famParameter, value);
+            }
+            catch (Autodesk.Revit.Exceptions.ArgumentException)
+            {
+                return;
             }
         }
     }
