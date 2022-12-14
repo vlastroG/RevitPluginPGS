@@ -76,8 +76,9 @@ namespace MS.Commands.MEP
             DuctEquipmentConstructorViewModel viewModel = ui.DataContext as DuctEquipmentConstructorViewModel;
             var testInt = viewModel.TestIntNull;
             var testDouble = viewModel.TestDoubleNull;
+            var testNameShort = viewModel.NameShort;
 
-            return Result.Succeeded;
+            //return Result.Succeeded;
             UIApplication uiapp = commandData.Application;
 
             string path = CopyFamily("П4_Тест");

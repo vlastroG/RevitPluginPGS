@@ -27,16 +27,21 @@ namespace MS.Commands.MEP.Mechanic.Impl
         /// <summary>
         /// PGS_ФильтрКоличество
         /// </summary>
-        public int Count { get; set; }
+        public int? Count { get; set; }
 
         /// <summary>
         /// ADSK_Сопротивление воздушного фильтра
         /// </summary>
-        public double Windage { get; set; }
+        public double? Windage { get; set; }
 
         /// <summary>
         /// ADSK_Примечание
         /// </summary>
         public string Note { get; set; }
+
+        public override Dictionary<string, string> GetNotEmptyParameters()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

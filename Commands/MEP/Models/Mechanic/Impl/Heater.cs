@@ -27,31 +27,36 @@ namespace MS.Commands.MEP.Mechanic.Impl
         /// <summary>
         /// PGS_ВоздухонагревательМощность
         /// </summary>
-        public double Power { get; set; }
+        public double? Power { get; set; }
 
         /// <summary>
         /// PGS_ВоздухонагревательКоличество
         /// </summary>
-        public double Count { get; set; }
+        public double? Count { get; set; }
 
         /// <summary>
         /// ADSK_Температура воздуха на входе в нагреватель
         /// </summary>
-        public double TemperatureIn { get; set; }
+        public double? TemperatureIn { get; set; }
 
         /// <summary>
         /// ADSK_Температура воздуха на выходе из нагревателя
         /// </summary>
-        public double TemperatureOut { get; set; }
+        public double? TemperatureOut { get; set; }
 
         /// <summary>
         /// ADSK_Тепловая мощность 
         /// </summary>
-        public double PowerHeat { get; set; }
+        public double? PowerHeat { get; set; }
 
         /// <summary>
         /// ADSK_Потеря давления воздуха в нагревателе
         /// </summary>
-        public double AirPressureLoss { get; set; }
+        public double? AirPressureLoss { get; set; }
+
+        public override Dictionary<string, string> GetNotEmptyParameters()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

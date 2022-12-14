@@ -13,7 +13,9 @@ namespace MS.Commands.MEP.Models.Installation
         /// Список болванок семейств оборудования внутри родительского семейства вентиляционной установки.
         /// Болванки представлены списками оборудования
         /// </summary>
-        private readonly List<List<Mechanic.Mechanic>> _mechanics = new List<List<Mechanic.Mechanic>>();
+        private readonly List<List<Mechanic.Mechanic>> _mechanics = new List<List<Mechanic.Mechanic>>() {
+            new List<Mechanic.Mechanic>()
+        };
 
         /// <summary>
         /// Список болванок семейств наполнения внутри родительского семейства вентиляционной установки.
@@ -147,6 +149,7 @@ namespace MS.Commands.MEP.Models.Installation
                 else
                 {
                     _mechanics[i].Add(mechanic);
+                    return;
                 }
             }
         }

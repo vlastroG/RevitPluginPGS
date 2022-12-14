@@ -26,33 +26,36 @@ namespace MS.Commands.MEP.Mechanic.Impl
         /// <summary>
         /// PGS_ВоздухоохладительМощность
         /// </summary>
-        public double Power { get; set; }
+        public double? Power { get; set; }
 
         /// <summary>
         /// PGS_ВоздухоохладительКоличество
         /// </summary>
-        public double Count { get; set; }
+        public double? Count { get; set; }
 
         /// <summary>
         /// ADSK_Температура воздуха на входе в охладитель
         /// </summary>
-        public double TemperatureIn { get; set; }
+        public double? TemperatureIn { get; set; }
 
         /// <summary>
         /// ADSK_Температура воздуха на выходе из охладителя
         /// </summary>
-        public double TemperatureOut { get; set; }
+        public double? TemperatureOut { get; set; }
 
         /// <summary>
         /// ADSK_Холодильная мощность 
         /// </summary>
-        public double PowerCool { get; set; }
+        public double? PowerCool { get; set; }
 
         /// <summary>
         /// ADSK_Потеря давления воздуха в охладителе
         /// </summary>
-        public double AirPressureLoss { get; set; }
+        public double? AirPressureLoss { get; set; }
 
-
+        public override Dictionary<string, string> GetNotEmptyParameters()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

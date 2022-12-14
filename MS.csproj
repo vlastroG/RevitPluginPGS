@@ -151,6 +151,7 @@
     <Compile Include="GUI\CommandsBase\Base\Command.cs" />
     <Compile Include="GUI\CommandsBase\LambdaCommand.cs" />
     <Compile Include="GUI\Converters\InverseBooleanConverter.cs" />
+    <Compile Include="GUI\Converters\NullableValueConverter.cs" />
     <Compile Include="GUI\ViewModels\AR\FinishingCreationViewModel.cs" />
     <Compile Include="GUI\ViewModels\AR\OpeningsAreaViewModel.cs" />
     <Compile Include="GUI\ViewModels\MEP\DuctInstallation\DuctEquipmentConstructorViewModel.cs" />
@@ -223,6 +224,7 @@
     <Compile Include="Utilites\Extensions\WallExtension.cs" />
     <Compile Include="Utilites\Extensions\IEnumerableExtension.cs" />
     <Compile Include="Utilites\GetBoundarySegmentElement.cs" />
+    <Compile Include="Utilites\Reflection\AttributesHandler.cs" />
     <Compile Include="Utilites\SelectionFilters\MulticategoryInLinkSelectionFilter.cs" />
     <Compile Include="Utilites\SelectionFilters\ElementInLinkSelectionFilter.cs" />
     <Compile Include="Utilites\SelectionFilters\SelectionFilterEdges.cs" />
