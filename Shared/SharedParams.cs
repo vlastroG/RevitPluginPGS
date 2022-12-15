@@ -368,8 +368,19 @@ namespace MS.Shared
         /// <summary>
         /// Полный путь к ФОП
         /// </summary>
-        public static readonly string FilePath
+        private static readonly string _filePathADSK
             = WorkWithPath.AssemblyDirectory + @"\EmbeddedFiles\ФОП2021_PGS_ОВ и ВК(07.06.22).txt";
+
+        /// <summary>
+        /// Возвращает ФОП ADSK в виде объекта
+        /// </summary>
+        /// <param name="uidoc">UI Revit</param>
+        /// <returns>ФОП ADSK объект</returns>
+        public static DefinitionFile GetSharedParameterFileADSK(in UIDocument uidoc)
+        {
+            uidoc.Application.Application.SharedParametersFilename = _filePathADSK;
+            return uidoc.Application.Application.OpenSharedParameterFile();
+        }
 
         /// <summary>
         /// Валидация текущего проекта Revit на наличие общих параметров у заданной категории.
@@ -426,16 +437,17 @@ namespace MS.Shared
         /// <param name="value">Значение параметра</param>
         /// <returns>True, если параметр успешно добавлен и его значение установлено, иначе False.</returns>
         public static bool AddParameterWithValue(
-            in UIDocument uidoc,
-            ForgeTypeId parameterGroup, 
-            string parName, 
+            in DefinitionFile defFile,
+            in Document doc,
+            ForgeTypeId parameterGroup,
+            string parName,
             bool isInstance,
             dynamic value)
         {
             try
             {
-                AddSharedParameter(uidoc, parameterGroup, parName, isInstance);
-                SetFamilyParameterValue(uidoc.Document, parName, (object)value);
+                AddSharedParameter(defFile, doc, parameterGroup, parName, isInstance);
+                SetFamilyParameterValue(doc, parName, (object)value);
             }
             catch (ArgumentNullException)
             {
@@ -456,14 +468,13 @@ namespace MS.Shared
         /// <param name="parName">Название параметра</param>
         /// <param name="isInstance">True => параметр экземпляра, False => параметр типа</param>
         private static void AddSharedParameter(
-            in UIDocument uidoc, 
+            in DefinitionFile defFile,
+            in Document doc,
             ForgeTypeId parameterGroup,
             string parName,
             bool isInstance)
         {
-            FamilyManager familyManager = uidoc.Document.FamilyManager;
-            uidoc.Application.Application.SharedParametersFilename = SharedParams.FilePath;
-            DefinitionFile defFile = uidoc.Application.Application.OpenSharedParameterFile();
+            FamilyManager familyManager = doc.FamilyManager;
             DefinitionGroups groups = defFile.Groups;
             ExternalDefinition eDef = null;
             foreach (var group in groups)

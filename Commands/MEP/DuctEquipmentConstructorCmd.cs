@@ -78,8 +78,8 @@ namespace MS.Commands.MEP
             Document doc = uidoc.Document;
 
             Installation installation = GetInstallationFromUser();
-
-            FillInstallationParentFamilyParams(uidoc, installation);
+            DefinitionFile defFile = SharedParams.GetSharedParameterFileADSK(uidoc);
+            FillInstallationParentFamilyParams(doc, defFile, installation);
             PlaceNestedFamilies(uidoc);
 
             doc.Save();
@@ -102,6 +102,10 @@ namespace MS.Commands.MEP
             return CreateTestInstallation();
         }
 
+        /// <summary>
+        /// Размещиет вложенные семейства в документе родительского семейства
+        /// </summary>
+        /// <param name="uidoc">Документ родительского семейства</param>
         private void PlaceNestedFamilies(in UIDocument uidoc)
         {
             Document doc = uidoc.Document;
@@ -123,28 +127,39 @@ namespace MS.Commands.MEP
             double length4 = 1274 / 304.8;
 
             // Создать тестовые элементы установки
-            XYZ rightPoint1 = CreateSymbolicFamilyInstance(doc, level, famInstSymb, startPoint, length);
-            XYZ rightPoint2 = CreateSymbolicFamilyInstance(doc, level, famInstSymb, rightPoint1, length1);
-            XYZ rightPoint3 = CreateSymbolicFamilyInstance(doc, level, famInstSymb, rightPoint2, length2);
-            XYZ rightPoint4 = CreateSymbolicFamilyInstance(doc, level, famInstSymb, rightPoint3, length3);
-            _ = CreateSymbolicFamilyInstance(doc, level, famInstSymb, rightPoint4, length4);
+            XYZ rightPoint1 = PlaceSymbolicFamilyInstance(doc, level, famInstSymb, startPoint, length);
+            XYZ rightPoint2 = PlaceSymbolicFamilyInstance(doc, level, famInstSymb, rightPoint1, length1);
+            XYZ rightPoint3 = PlaceSymbolicFamilyInstance(doc, level, famInstSymb, rightPoint2, length2);
+            XYZ rightPoint4 = PlaceSymbolicFamilyInstance(doc, level, famInstSymb, rightPoint3, length3);
+            _ = PlaceSymbolicFamilyInstance(doc, level, famInstSymb, rightPoint4, length4);
 
             FamilySymbol famInstSymbBlank = GetFamilySymbol(doc, _familyBlankFillingName, _familyBlankFillingName);
 
-            XYZ startPoinBlank = CreateBlankFamilyInstance(doc, level, famInstSymbBlank, new XYZ());
-            XYZ startPoinBlank1 = CreateBlankFamilyInstance(doc, level, famInstSymbBlank, startPoinBlank);
-            _ = CreateBlankFamilyInstance(doc, level, famInstSymbBlank, startPoinBlank1);
+            XYZ startPoinBlank = PlaceBlankFamilyInstance(doc, level, famInstSymbBlank, new XYZ());
+            XYZ startPoinBlank1 = PlaceBlankFamilyInstance(doc, level, famInstSymbBlank, startPoinBlank);
+            _ = PlaceBlankFamilyInstance(doc, level, famInstSymbBlank, startPoinBlank1);
         }
+
+        private void CreateBlankMechanicFamily(in UIDocument uidoc, string newTypeName)
+        {
+            FamilySymbol fType = GetFamilySymbol(
+                uidoc.Document,
+                _familyBlankFillingName,
+                _familyBlankFillingName)
+                .Duplicate(newTypeName) as FamilySymbol;
+
+        }
+
 
         /// <summary>
         /// Создает и заполняет все параметры в родительском семействе установки
         /// </summary>
         /// <param name="uidoc">Документ родительского семейства установки</param>
         /// <param name="installation">Установка, заданная пользователем</param>
-        private void FillInstallationParentFamilyParams(in UIDocument uidoc, in Installation installation)
+        private void FillInstallationParentFamilyParams(in Document doc, in DefinitionFile defFile, in Installation installation)
         {
-            FillInstallationParentGeneralParams(uidoc.Document, installation);
-            FillInstallationMechanicParams(uidoc, installation);
+            FillInstallationParentGeneralParams(doc, installation);
+            AddAndFillMechanicParamsInDocument(defFile, doc, installation.GetMechanics().First().ToList());
         }
 
         /// <summary>
@@ -194,17 +209,16 @@ namespace MS.Commands.MEP
         }
 
         /// <summary>
-        /// Добавляет параметры оборудования и их значения в родительское семейство установки
+        /// Добавляет параметры оборудования и их значения в семейство
         /// </summary>
-        /// <param name="uidoc">Документ родительского семейства установки</param>
-        /// <param name="installation">Установка, заданная пользователем</param>
-        private void FillInstallationMechanicParams(in UIDocument uidoc, in Installation installation)
+        /// <param name="uidoc">Документ семейства, в которое добавляются параметры оборудования</param>
+        /// <param name="mechanics">Коллекция оборудования, параметры которого нужно добавить в семейство</param>
+        private void AddAndFillMechanicParamsInDocument(in DefinitionFile defFile, in Document doc, in ICollection<Mechanic.Mechanic> mechanics)
         {
-            var mechanics = installation.GetMechanics().First();
-            var fManager = uidoc.Document.FamilyManager;
+            var fManager = doc.FamilyManager;
 
             List<string> addedParametersNames = new List<string>();
-            using (Transaction addMechanic = new Transaction(uidoc.Document))
+            using (Transaction addMechanic = new Transaction(doc))
             {
                 addMechanic.Start("Параметры оборудования в родительском");
                 foreach (var mechanic in mechanics)
@@ -213,7 +227,8 @@ namespace MS.Commands.MEP
                     foreach (var parameter in parameters)
                     {
                         SharedParams.AddParameterWithValue(
-                            uidoc,
+                            defFile,
+                            doc,
                             GroupTypeId.Mechanical,
                             parameter.Key,
                             true,
@@ -221,11 +236,12 @@ namespace MS.Commands.MEP
                         addedParametersNames.Add(parameter.Key);
                     }
                     string title = $"-----{EquipmentTypeExtension.GetName(mechanic.EquipmentType)}-----";
-                    uidoc.Document.FamilyManager.AddParameter(
+                    var titlePar = doc.FamilyManager.AddParameter(
                         title,
                         GroupTypeId.Mechanical,
                         SpecTypeId.String.Text,
                         false);
+                    doc.FamilyManager.SetFormula(titlePar, $"\"{title}\"");
                     addedParametersNames.Add(title);
                 }
                 addMechanic.Commit();
@@ -239,7 +255,7 @@ namespace MS.Commands.MEP
                     reorderedParametersNames.Add(fParameterName);
                 }
             }
-            using (Transaction sortParameters = new Transaction(uidoc.Document))
+            using (Transaction sortParameters = new Transaction(doc))
             {
                 sortParameters.Start("Сортировка параметров");
 
@@ -337,7 +353,6 @@ namespace MS.Commands.MEP
             return installationTest;
         }
 
-
         /// <summary>
         /// Возвращает заданный типоразмер семейства
         /// </summary>
@@ -384,7 +399,7 @@ namespace MS.Commands.MEP
         /// <param name="length">Длина оборудования</param>
         /// <returns>Правая крайняя точка размещенного семейства</returns>
         /// <exception cref="ArgumentException"></exception>
-        private XYZ CreateSymbolicFamilyInstance(
+        private XYZ PlaceSymbolicFamilyInstance(
             in Document doc,
             in Element level,
             in FamilySymbol familySymbol,
@@ -457,7 +472,7 @@ namespace MS.Commands.MEP
         /// <param name="familySymbol">Типоразмер семейства болванки</param>
         /// <param name="leftTopPoint">Левая верхняя точка (на плане) для размещения семейства болванки</param>
         /// <returns>Координата правой верхней точки размещенного семейства болванки  </returns>
-        private XYZ CreateBlankFamilyInstance(
+        private XYZ PlaceBlankFamilyInstance(
             in Document doc,
             in Element level,
             in FamilySymbol familySymbol,
