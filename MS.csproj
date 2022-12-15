@@ -140,6 +140,7 @@
     <Compile Include="Commands\KR\StairReinforcement.cs" />
     <Compile Include="Commands\MEP\DuctsThicknessCmd.cs" />
     <Compile Include="Commands\MEP\Enums\EquipmentType.cs" />
+    <Compile Include="Commands\MEP\Enums\EquipmentTypeExtension.cs" />
     <Compile Include="Commands\MEP\Models\Filling.cs" />
     <Compile Include="Commands\MEP\Models\Installation\Installation.cs" />
     <Compile Include="Commands\MEP\Models\Mechanic\Impl\Cooler.cs" />

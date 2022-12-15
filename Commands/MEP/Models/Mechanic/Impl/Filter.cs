@@ -1,6 +1,7 @@
 ﻿using MS.Commands.MEP.Enums;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,26 +23,25 @@ namespace MS.Commands.MEP.Mechanic.Impl
         /// <summary>
         /// PGS_ФильтрТип
         /// </summary>
+        [Description("PGS_ФильтрТип")]
         public string Type { get; set; }
 
         /// <summary>
         /// PGS_ФильтрКоличество
         /// </summary>
+        [Description("PGS_ФильтрКоличество")]
         public int? Count { get; set; }
 
         /// <summary>
         /// ADSK_Сопротивление воздушного фильтра
         /// </summary>
+        [Description("ADSK_Сопротивление воздушного фильтра")]
         public double? Windage { get; set; }
 
         /// <summary>
         /// ADSK_Примечание
         /// </summary>
+        [Description("ADSK_Примечание")]
         public string Note { get; set; }
-
-        public override Dictionary<string, dynamic> GetNotEmptyParameters()
-        {
-            throw new NotImplementedException();
-        }
     }
 }

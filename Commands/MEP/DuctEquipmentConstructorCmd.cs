@@ -3,6 +3,7 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Structure;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Events;
+using MS.Commands.MEP.Enums;
 using MS.Commands.MEP.Models;
 using MS.Commands.MEP.Models.Installation;
 using MS.GUI.ViewModels.MEP.DuctInstallation;
@@ -71,18 +72,38 @@ namespace MS.Commands.MEP
 
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
+            UIApplication uiapp = commandData.Application;
+            string path = CopyDefaultFamily("П4_Тест");
+            UIDocument uidoc = uiapp.OpenAndActivateDocument(path);
+            Document doc = uidoc.Document;
+
+            Installation installation = GetInstallationFromUser();
+
+            FillInstallationParentFamilyParams(uidoc, installation);
+            PlaceNestedFamilies(uidoc);
+
+            doc.Save();
+
+            return Result.Succeeded;
+        }
+
+        /// <summary>
+        /// Вывести окно для ввода данных и получить вентиляционную установку от пользователя
+        /// </summary>
+        /// <returns>Установка, заданная пользователем</returns>
+        private Installation GetInstallationFromUser()
+        {
             var ui = new DuctInstallationView();
             ui.ShowDialog();
             DuctEquipmentConstructorViewModel viewModel = ui.DataContext as DuctEquipmentConstructorViewModel;
             var testInt = viewModel.TestIntNull;
             var testDouble = viewModel.TestDoubleNull;
             var testNameShort = viewModel.NameShort;
+            return CreateTestInstallation();
+        }
 
-            //return Result.Succeeded;
-            UIApplication uiapp = commandData.Application;
-
-            string path = CopyFamily("П4_Тест");
-            UIDocument uidoc = uiapp.OpenAndActivateDocument(path);
+        private void PlaceNestedFamilies(in UIDocument uidoc)
+        {
             Document doc = uidoc.Document;
 
             // Получить начальные значения оборудования установки
@@ -93,17 +114,6 @@ namespace MS.Commands.MEP
                 .FirstOrDefault(r => r.Name.Equals(_startPlane)) as ReferencePlane;
             Reference startPlaneRef = new Reference(startPlane);
             XYZ startPoint = new XYZ(startPlane.GetPlane().Origin.X, 0, 0);
-
-            Installation installation = CreateTestInstallation();
-            var mechanics = installation.GetMechanics();
-            var fillings = installation.GetFillings();
-
-            FillInstallationParentGeneralParams(doc, installation);
-
-            FillInstallationMechanicParams(uidoc, installation);
-
-            XYZ startBlankPoint = new XYZ();
-
 
 
             double length = 1;
@@ -119,19 +129,30 @@ namespace MS.Commands.MEP
             XYZ rightPoint4 = CreateSymbolicFamilyInstance(doc, level, famInstSymb, rightPoint3, length3);
             _ = CreateSymbolicFamilyInstance(doc, level, famInstSymb, rightPoint4, length4);
 
+            FamilySymbol famInstSymbBlank = GetFamilySymbol(doc, _familyBlankFillingName, _familyBlankFillingName);
 
-            // Добавление общих параметров
-            doc.Save();
-
-            return Result.Succeeded;
+            XYZ startPoinBlank = CreateBlankFamilyInstance(doc, level, famInstSymbBlank, new XYZ());
+            XYZ startPoinBlank1 = CreateBlankFamilyInstance(doc, level, famInstSymbBlank, startPoinBlank);
+            _ = CreateBlankFamilyInstance(doc, level, famInstSymbBlank, startPoinBlank1);
         }
 
         /// <summary>
-        /// Заполнение геометрических и общих параметров родительского семейства установки
-        /// (без добавления параметров для оборудования)
+        /// Создает и заполняет все параметры в родительском семействе установки
+        /// </summary>
+        /// <param name="uidoc">Документ родительского семейства установки</param>
+        /// <param name="installation">Установка, заданная пользователем</param>
+        private void FillInstallationParentFamilyParams(in UIDocument uidoc, in Installation installation)
+        {
+            FillInstallationParentGeneralParams(uidoc.Document, installation);
+            FillInstallationMechanicParams(uidoc, installation);
+        }
+
+        /// <summary>
+        /// Заполнение геометрических и общих параметров самого родительского семейства установки
+        /// без добавления параметров для оборудования
         /// </summary>
         /// <param name="doc">Документ родительского семейства установки</param>
-        /// <param name="installation">Вентиляционная установка</param>
+        /// <param name="installation">Вентиляционная установка, заданная пользователем</param>
         private void FillInstallationParentGeneralParams(in Document doc, in Installation installation)
         {
             using (Transaction fillParentParams = new Transaction(doc))
@@ -172,44 +193,59 @@ namespace MS.Commands.MEP
             }
         }
 
+        /// <summary>
+        /// Добавляет параметры оборудования и их значения в родительское семейство установки
+        /// </summary>
+        /// <param name="uidoc">Документ родительского семейства установки</param>
+        /// <param name="installation">Установка, заданная пользователем</param>
         private void FillInstallationMechanicParams(in UIDocument uidoc, in Installation installation)
         {
+            var mechanics = installation.GetMechanics().First();
+            var fManager = uidoc.Document.FamilyManager;
 
-            var mechanic2 = new Mechanic.Impl.Fan(300)
-            {
-                Mark = "V1.0.P63.R-5,5x15",
-                AirFlow = 8225,
-                AirPressureLoss = 500,
-                FanSpeed = 1514,
-                ExplosionProofType = "АИР112M4",
-                RatedPower = 5500,
-                EngineSpeed = 1432
-            };
-
-            var mechanic1 = new Mechanic.Impl.Fan(300)
-            {
-                Mark = "V1.0.P63.R-5,5x15",
-                ExplosionProofType = "АИР112M4",
-                RatedPower = 5500,
-                EngineSpeed = 1432
-            };
-
-            var parameters = mechanic1.GetNotEmptyParameters();
+            List<string> addedParametersNames = new List<string>();
             using (Transaction addMechanic = new Transaction(uidoc.Document))
             {
-                addMechanic.Start("Добавление механики");
-
-                foreach (var parameter in parameters)
+                addMechanic.Start("Параметры оборудования в родительском");
+                foreach (var mechanic in mechanics)
                 {
-                    SharedParams.AddParameterWithValue(
-                        uidoc,
-                        BuiltInParameterGroup.PG_MECHANICAL,
-                        parameter.Key,
-                        true,
-                        (object)parameter.Value);
+                    var parameters = mechanic.GetNotEmptyParameters();
+                    foreach (var parameter in parameters)
+                    {
+                        SharedParams.AddParameterWithValue(
+                            uidoc,
+                            GroupTypeId.Mechanical,
+                            parameter.Key,
+                            true,
+                            (object)parameter.Value);
+                        addedParametersNames.Add(parameter.Key);
+                    }
+                    string title = $"-----{EquipmentTypeExtension.GetName(mechanic.EquipmentType)}-----";
+                    uidoc.Document.FamilyManager.AddParameter(
+                        title,
+                        GroupTypeId.Mechanical,
+                        SpecTypeId.String.Text,
+                        false);
+                    addedParametersNames.Add(title);
                 }
-
                 addMechanic.Commit();
+            }
+            var fParametersNames = fManager.GetParameters().Select(p => p.Definition.Name);
+            List<string> reorderedParametersNames = new List<string>(addedParametersNames.Reverse<string>());
+            foreach (var fParameterName in fParametersNames)
+            {
+                if (!reorderedParametersNames.Contains(fParameterName))
+                {
+                    reorderedParametersNames.Add(fParameterName);
+                }
+            }
+            using (Transaction sortParameters = new Transaction(uidoc.Document))
+            {
+                sortParameters.Start("Сортировка параметров");
+
+                fManager.ReorderParameters(reorderedParametersNames.Select(n => fManager.get_Parameter(n)).ToList());
+
+                sortParameters.Commit();
             }
         }
 
@@ -323,7 +359,7 @@ namespace MS.Commands.MEP
         /// </summary>
         /// <param name="newName">Название нового семейства</param>
         /// <returns>Полный путь к скопированному файлу, или пустая строка, если не удалось скопировать файл семейства</returns>
-        private string CopyFamily(string newName)
+        private string CopyDefaultFamily(string newName)
         {
             string sourcePath = WorkWithPath.AssemblyDirectory + @"\EmbeddedFamilies\ОВ_установка_default.rfa";
             string destPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + $@"\{newName}.rfa";
@@ -441,7 +477,7 @@ namespace MS.Commands.MEP
 
                 addBoldFamily.Commit();
             }
-            return new XYZ(1 / 304.8, leftTopPoint.Y, leftTopPoint.Z);
+            return new XYZ(leftTopPoint.X + 1 / 304.8, leftTopPoint.Y, leftTopPoint.Z);
         }
     }
 }

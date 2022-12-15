@@ -31,5 +31,5 @@ namespace MS.Commands.MEP.Enums
         /// Фильтр
         /// </summary>
         Filter
-    }
+    } 
 }

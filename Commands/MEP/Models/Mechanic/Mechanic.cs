@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
+using System.Reflection;
+using System.ComponentModel;
 
 namespace MS.Commands.MEP.Mechanic
 {
@@ -52,6 +54,26 @@ namespace MS.Commands.MEP.Mechanic
         /// Возвращает словарь названий параметров оборудования и их значений (значения заполненных свойств оборудования)
         /// </summary>
         /// <returns>Словарь заполненных параметров и их значений</returns>
-        public abstract Dictionary<string, dynamic> GetNotEmptyParameters();
+        public virtual Dictionary<string, dynamic> GetNotEmptyParameters()
+        {
+            Dictionary<string, dynamic> parameters = new Dictionary<string, dynamic>();
+
+            PropertyInfo[] properties = GetType().GetProperties();
+            foreach (PropertyInfo property in properties)
+            {
+                var value = property.GetValue(this);
+                if (!(value is null))
+                {
+                    var description = ((DescriptionAttribute)property
+                        .GetCustomAttribute(typeof(DescriptionAttribute)))?.Description;
+                    if (!(description is null))
+                    {
+                        parameters.Add(description, value);
+                    }
+                }
+            }
+
+            return parameters;
+        }
     }
 }

@@ -69,27 +69,5 @@ namespace MS.Commands.MEP.Mechanic.Impl
         /// </summary>
         [Description("ADSK_Частота вращения двигателя")]
         public int? EngineSpeed { get; set; }
-
-        public override Dictionary<string, dynamic> GetNotEmptyParameters()
-        {
-            Dictionary<string, dynamic> parameters = new Dictionary<string, dynamic>();
-
-            PropertyInfo[] properties = GetType().GetProperties();
-            foreach (PropertyInfo property in properties)
-            {
-                var value = property.GetValue(this);
-                if (!(value is null))
-                {
-                    var description = ((DescriptionAttribute)property
-                        .GetCustomAttribute(typeof(DescriptionAttribute)))?.Description;
-                    if (!(description is null))
-                    {
-                        parameters.Add(description, value);
-                    }
-                }
-            }
-
-            return parameters;
-        }
     }
 }

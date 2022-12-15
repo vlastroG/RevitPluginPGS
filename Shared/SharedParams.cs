@@ -416,9 +416,9 @@ namespace MS.Shared
 
 
         /// <summary>
-        /// Добавляет общий параметр в семейство и устанавливает его значение
+        /// Добавляет общий параметр в семейство и устанавливает его значение,
+        /// которое автоматически конвертируется из мертических единиц в имперские.
         /// </summary>
-        /// <typeparam name="T">Тип значания параметра</typeparam>
         /// <param name="uidoc">Документ семейства, в которое добавляется параметр</param>
         /// <param name="parameterGroup">Группа параметров в семействе</param>
         /// <param name="parName">Название параметра</param>
@@ -427,7 +427,7 @@ namespace MS.Shared
         /// <returns>True, если параметр успешно добавлен и его значение установлено, иначе False.</returns>
         public static bool AddParameterWithValue(
             in UIDocument uidoc,
-            BuiltInParameterGroup parameterGroup, 
+            ForgeTypeId parameterGroup, 
             string parName, 
             bool isInstance,
             dynamic value)
@@ -457,7 +457,7 @@ namespace MS.Shared
         /// <param name="isInstance">True => параметр экземпляра, False => параметр типа</param>
         private static void AddSharedParameter(
             in UIDocument uidoc, 
-            BuiltInParameterGroup parameterGroup,
+            ForgeTypeId parameterGroup,
             string parName,
             bool isInstance)
         {
@@ -482,7 +482,8 @@ namespace MS.Shared
         }
 
         /// <summary>
-        /// Назначает значению парамтера семейства по его имени
+        /// Назначает значению парамтера семейства по его имени.
+        /// Значение автоматически конвертируется из метрических единиц в имперские.
         /// </summary>
         /// <param name="doc">Документ семейства</param>
         /// <param name="parName">Название параметра</param>
