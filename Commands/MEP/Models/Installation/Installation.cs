@@ -171,9 +171,9 @@ namespace MS.Commands.MEP.Models.Installation
         /// Возвращает компоновку наполнений вентиляционной установки
         /// </summary>
         /// <returns>Коллекция наполнений установки. В каждом уровне не более 1 типа оборудования различных видов</returns>
-        public IReadOnlyCollection<IReadOnlyCollection<Mechanic.Mechanic>> GetMechanics()
+        public List<List<Mechanic.Mechanic>> GetMechanics()
         {
-            return _mechanics;
+            return new List<List<Mechanic.Mechanic>>(_mechanics);
         }
 
         /// <summary>

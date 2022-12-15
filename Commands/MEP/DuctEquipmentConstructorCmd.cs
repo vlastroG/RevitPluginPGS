@@ -72,14 +72,30 @@ namespace MS.Commands.MEP
 
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
+            (Installation installation, string system) = GetDataFromUser();
+
             UIApplication uiapp = commandData.Application;
-            string path = CopyDefaultFamily("П4_Тест");
+            string path = CopyDefaultFamily(system);
             UIDocument uidoc = uiapp.OpenAndActivateDocument(path);
             Document doc = uidoc.Document;
 
-            Installation installation = GetInstallationFromUser();
             DefinitionFile defFile = SharedParams.GetSharedParameterFileADSK(uidoc);
             FillInstallationParentFamilyParams(doc, defFile, installation);
+
+            List<Family> loadedMechanics = new List<Family>();
+            for (int i = 1; i < installation.GetMechanics().Count; i++)
+            {
+                var family = CreateAndLoadMechanicFamily(
+                    uidoc,
+                    defFile,
+                    installation.GetMechanics()[1],
+                    system + $"-2-вложенное-{i}");
+                if (family != null)
+                {
+                    loadedMechanics.Add(family);
+                }
+            }
+
             PlaceNestedFamilies(uidoc);
 
             doc.Save();
@@ -91,7 +107,7 @@ namespace MS.Commands.MEP
         /// Вывести окно для ввода данных и получить вентиляционную установку от пользователя
         /// </summary>
         /// <returns>Установка, заданная пользователем</returns>
-        private Installation GetInstallationFromUser()
+        private (Installation installation, string name) GetDataFromUser()
         {
             var ui = new DuctInstallationView();
             ui.ShowDialog();
@@ -99,7 +115,7 @@ namespace MS.Commands.MEP
             var testInt = viewModel.TestIntNull;
             var testDouble = viewModel.TestDoubleNull;
             var testNameShort = viewModel.NameShort;
-            return CreateTestInstallation();
+            return (CreateTestInstallation(), "П4_Тест");
         }
 
         /// <summary>
@@ -140,14 +156,29 @@ namespace MS.Commands.MEP
             _ = PlaceBlankFamilyInstance(doc, level, famInstSymbBlank, startPoinBlank1);
         }
 
-        private void CreateBlankMechanicFamily(in UIDocument uidoc, string newTypeName)
+        private Family CreateAndLoadMechanicFamily(in UIDocument uidoc, in DefinitionFile defFile, in ICollection<Mechanic.Mechanic> mechanics, string newName)
         {
-            FamilySymbol fType = GetFamilySymbol(
-                uidoc.Document,
-                _familyBlankFillingName,
-                _familyBlankFillingName)
-                .Duplicate(newTypeName) as FamilySymbol;
-
+            Family loadedFamily = null;
+            try
+            {
+                string tempDir = Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + $@"\{SharedValues.TempDirName}").FullName;
+                string path = $@"{tempDir}\{newName}.rfa";
+                Family familyBlank = new FilteredElementCollector(uidoc.Document)
+                    .OfClass(typeof(Family))
+                    .FirstOrDefault(f => f.Name.Equals(_familyBlankFillingName)) as Family;
+                Document familyDocument = uidoc.Document.EditFamily(familyBlank);
+                familyDocument.SaveAs(path);
+                AddAndFillMechanicParamsInDocument(defFile, familyDocument, mechanics, false);
+                loadedFamily = familyDocument.LoadFamily(uidoc.Document);
+                familyDocument.Close();
+                familyDocument.Dispose();
+                Directory.Delete(tempDir, true);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+            return loadedFamily;
         }
 
 
@@ -159,7 +190,7 @@ namespace MS.Commands.MEP
         private void FillInstallationParentFamilyParams(in Document doc, in DefinitionFile defFile, in Installation installation)
         {
             FillInstallationParentGeneralParams(doc, installation);
-            AddAndFillMechanicParamsInDocument(defFile, doc, installation.GetMechanics().First().ToList());
+            AddAndFillMechanicParamsInDocument(defFile, doc, installation.GetMechanics()[0], true); ;
         }
 
         /// <summary>
@@ -209,11 +240,24 @@ namespace MS.Commands.MEP
         }
 
         /// <summary>
-        /// Добавляет параметры оборудования и их значения в семейство
+        /// 
         /// </summary>
         /// <param name="uidoc">Документ семейства, в которое добавляются параметры оборудования</param>
         /// <param name="mechanics">Коллекция оборудования, параметры которого нужно добавить в семейство</param>
-        private void AddAndFillMechanicParamsInDocument(in DefinitionFile defFile, in Document doc, in ICollection<Mechanic.Mechanic> mechanics)
+
+
+        /// <summary>
+        /// Добавляет параметры оборудования и их значения в семейство
+        /// </summary>
+        /// <param name="defFile">Объект файла общиъ параметров</param>
+        /// <param name="doc">Документ семейства, в которое добавляются параметры оборудования</param>
+        /// <param name="mechanics">Список оборудования, параметры которого нужно добавить в семейство</param>
+        /// <param name="isInstance">True => все параметры добавлять в экземпляр, False => в тип</param>
+        private void AddAndFillMechanicParamsInDocument(
+            in DefinitionFile defFile,
+            in Document doc,
+            in ICollection<Mechanic.Mechanic> mechanics,
+            bool isInstance)
         {
             var fManager = doc.FamilyManager;
 
@@ -231,7 +275,7 @@ namespace MS.Commands.MEP
                             doc,
                             GroupTypeId.Mechanical,
                             parameter.Key,
-                            true,
+                            isInstance,
                             (object)parameter.Value);
                         addedParametersNames.Add(parameter.Key);
                     }
@@ -240,7 +284,7 @@ namespace MS.Commands.MEP
                         title,
                         GroupTypeId.Mechanical,
                         SpecTypeId.String.Text,
-                        false);
+                        isInstance);
                     doc.FamilyManager.SetFormula(titlePar, $"\"{title}\"");
                     addedParametersNames.Add(title);
                 }
