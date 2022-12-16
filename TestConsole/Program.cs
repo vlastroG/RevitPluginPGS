@@ -1,6 +1,6 @@
-﻿double? test1 = null;
-double? test2 = 52.0;
-dynamic test2O = test2;
+﻿using System.Text.RegularExpressions;
 
-Console.WriteLine();
+string fileName = @"123<>:poi+-9dfh\/|?*""adfh";
+
+Console.WriteLine(Regex.Replace(fileName, @"[\\<>:/|?*""]", "_"));
 

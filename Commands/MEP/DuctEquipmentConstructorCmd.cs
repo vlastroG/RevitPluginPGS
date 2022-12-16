@@ -10,6 +10,7 @@ using MS.GUI.ViewModels.MEP.DuctInstallation;
 using MS.GUI.Windows.MEP;
 using MS.Shared;
 using MS.Utilites;
+using MS.Utilites.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -82,19 +83,9 @@ namespace MS.Commands.MEP
             DefinitionFile defFile = SharedParams.GetSharedParameterFileADSK(uidoc);
             FillInstallationParentFamilyParams(doc, defFile, installation);
 
-            List<Family> loadedMechanics = new List<Family>();
-            for (int i = 1; i < installation.GetMechanics().Count; i++)
-            {
-                var family = CreateAndLoadMechanicFamily(
-                    uidoc,
-                    defFile,
-                    installation.GetMechanics()[1],
-                    system + $"-2-вложенное-{i}");
-                if (family != null)
-                {
-                    loadedMechanics.Add(family);
-                }
-            }
+            var mechanics = CreateMechanicFamilies(uidoc, defFile, installation);
+
+            var fillings = CreateFillingFamilies(uidoc, installation.GetFillings(), installation.System);
 
             PlaceNestedFamilies(uidoc);
 
@@ -149,20 +140,62 @@ namespace MS.Commands.MEP
             XYZ rightPoint4 = PlaceSymbolicFamilyInstance(doc, level, famInstSymb, rightPoint3, length3);
             _ = PlaceSymbolicFamilyInstance(doc, level, famInstSymb, rightPoint4, length4);
 
-            FamilySymbol famInstSymbBlank = GetFamilySymbol(doc, _familyBlankFillingName, _familyBlankFillingName);
+            //FamilySymbol famInstSymbBlank = GetFamilySymbol(doc, _familyBlankFillingName, _familyBlankFillingName);
 
-            XYZ startPoinBlank = PlaceBlankFamilyInstance(doc, level, famInstSymbBlank, new XYZ());
-            XYZ startPoinBlank1 = PlaceBlankFamilyInstance(doc, level, famInstSymbBlank, startPoinBlank);
-            _ = PlaceBlankFamilyInstance(doc, level, famInstSymbBlank, startPoinBlank1);
+            //XYZ startPoinBlank = PlaceBlankFamilyInstance(doc, level, famInstSymbBlank, new XYZ());
+            //XYZ startPoinBlank1 = PlaceBlankFamilyInstance(doc, level, famInstSymbBlank, startPoinBlank);
+            //_ = PlaceBlankFamilyInstance(doc, level, famInstSymbBlank, startPoinBlank1);
         }
 
-        private Family CreateAndLoadMechanicFamily(in UIDocument uidoc, in DefinitionFile defFile, in ICollection<Mechanic.Mechanic> mechanics, string newName)
+        private ICollection<Family> CreateMechanicFamilies(
+            in UIDocument uidoc,
+            in DefinitionFile defFile,
+            in Installation installation)
+        {
+            string tempDir = Directory
+                .CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + $@"\{SharedValues.TempDirName}").FullName;
+            List<Family> loadedMechanics = new List<Family>();
+            for (int i = 1; i < installation.GetMechanics().Count; i++)
+            {
+                var family = CreateAndLoadMechanicFamily(
+                    uidoc,
+                    defFile,
+                    installation.GetMechanics()[1],
+                    installation.System + $"-2-вложенное-{i}",
+                    tempDir);
+                if (family != null)
+                {
+                    loadedMechanics.Add(family);
+                }
+            }
+            Directory.Delete(tempDir, true);
+
+            return loadedMechanics;
+        }
+
+        /// <summary>
+        /// Открывает семейство болванки,
+        /// заполняет его необходимыми параметрами для оборудования,
+        /// закрывает и загружает обратно в родительское смейство с новым названием
+        /// </summary>
+        /// <param name="uidoc">Документ Revit</param>
+        /// <param name="defFile">Объект файла общих параметров</param>
+        /// <param name="mechanics">Коллекция оборудования,
+        /// параметры которого нужно добавить в документ вложенного семейства</param>
+        /// <param name="newName">Новое наименование вложенного семейства оборудования</param>
+        /// <param name="tempDir">Путь к временной папке</param>
+        /// <returns>Загруженное семейство в родительском семействе</returns>
+        private Family CreateAndLoadMechanicFamily(
+            in UIDocument uidoc,
+            in DefinitionFile defFile,
+            in ICollection<Mechanic.Mechanic> mechanics,
+            string newName,
+            string tempDir)
         {
             Family loadedFamily = null;
             try
             {
-                string tempDir = Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + $@"\{SharedValues.TempDirName}").FullName;
-                string path = $@"{tempDir}\{newName}.rfa";
+                string path = $@"{tempDir}\{newName.ReplaceForbiddenSymbols()}.rfa";
                 Family familyBlank = new FilteredElementCollector(uidoc.Document)
                     .OfClass(typeof(Family))
                     .FirstOrDefault(f => f.Name.Equals(_familyBlankFillingName)) as Family;
@@ -172,13 +205,52 @@ namespace MS.Commands.MEP
                 loadedFamily = familyDocument.LoadFamily(uidoc.Document);
                 familyDocument.Close();
                 familyDocument.Dispose();
-                Directory.Delete(tempDir, true);
             }
             catch (Exception)
             {
                 return null;
             }
             return loadedFamily;
+        }
+
+        /// <summary>
+        /// Копирует семейство болванки
+        /// </summary>
+        /// <param name="uidoc"></param>
+        /// <param name="fillings">Колеекция наполнения у установке</param>
+        /// <param name="systemName">Название системы установки</param>
+        /// <returns>Коллекция типоразмеров созданных элементов наполнения установки</returns>
+        private ICollection<ElementType> CreateFillingFamilies(
+            in UIDocument uidoc,
+            in ICollection<Filling> fillings,
+            string systemName)
+        {
+            List<ElementType> duplicatedFamilies = new List<ElementType>();
+            try
+            {
+                Family familyBlank = new FilteredElementCollector(uidoc.Document)
+                    .OfClass(typeof(Family))
+                    .FirstOrDefault(f => f.Name.Equals(_familyBlankFillingName)) as Family;
+                using (Transaction createFilling = new Transaction(uidoc.Document))
+                {
+                    createFilling.Start("Типоразмеры наполнения");
+                    familyBlank.Name = _familyBlankFillingName + $"-{systemName}";
+                    FamilySymbol familySymbol = uidoc.Document
+                        .GetElement(familyBlank.GetFamilySymbolIds().First()) as FamilySymbol;
+                    foreach (var filling in fillings)
+                    {
+                        duplicatedFamilies.Add(familySymbol.Duplicate(filling.Name.ReplaceForbiddenSymbols()));
+                        familySymbol.get_Parameter(SharedParams.ADSK_Count).Set(filling.Count);
+                        familySymbol.get_Parameter(SharedParams.ADSK_Name).Set(filling.Name);
+                    }
+                    createFilling.Commit();
+                }
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+            return duplicatedFamilies;
         }
 
 

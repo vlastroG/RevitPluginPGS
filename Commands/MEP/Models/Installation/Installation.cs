@@ -198,9 +198,9 @@ namespace MS.Commands.MEP.Models.Installation
         /// Возвращает коллекцию экземпляров наполнения из установки
         /// </summary>
         /// <returns></returns>
-        public IReadOnlyCollection<Filling> GetFillings()
+        public List<Filling> GetFillings()
         {
-            return _fillings;
+            return new List<Filling>(_fillings);
         }
     }
 }
