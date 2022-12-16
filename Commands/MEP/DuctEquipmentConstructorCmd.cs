@@ -47,11 +47,6 @@ namespace MS.Commands.MEP
         private readonly string _groupingFilling = "Вложенное_наполнение_группирование";
 
         /// <summary>
-        /// Название размещаемого тестового типоразмера семейства - "Фильтр"
-        /// </summary>
-        private readonly string _typeName = "Фильтр";
-
-        /// <summary>
         /// Название опорного уровня в семействе установки - "Опорный уровень"
         /// </summary>
         private readonly string _viewName = "Опорный уровень";
@@ -355,7 +350,7 @@ namespace MS.Commands.MEP
         {
             using (Transaction fillParentParams = new Transaction(doc))
             {
-                fillParentParams.Start("Заполнение родительских парметров");
+                fillParentParams.Start("Заполнение родительских параметров");
                 FamilyManager familyManager = doc.FamilyManager;
                 FamilyParameter famWidthPar = familyManager
                     .GetParameters()
