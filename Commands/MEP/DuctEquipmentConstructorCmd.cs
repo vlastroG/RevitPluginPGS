@@ -261,7 +261,7 @@ namespace MS.Commands.MEP
         {
             var fManager = doc.FamilyManager;
 
-            List<string> addedParametersNames = new List<string>();
+            List<string> addedParametersNames = new List<string>(fManager.GetParameters().Select(p => p.Definition.Name));
             using (Transaction addMechanic = new Transaction(doc))
             {
                 addMechanic.Start("Параметры оборудования в родительском");
@@ -277,7 +277,10 @@ namespace MS.Commands.MEP
                             parameter.Key,
                             isInstance,
                             (object)parameter.Value);
-                        addedParametersNames.Add(parameter.Key);
+                        if (!addedParametersNames.Contains(parameter.Key))
+                        {
+                            addedParametersNames.Add(parameter.Key);
+                        }
                     }
                     string title = $"-----{EquipmentTypeExtension.GetName(mechanic.EquipmentType)}-----";
                     var titlePar = doc.FamilyManager.AddParameter(
@@ -286,24 +289,19 @@ namespace MS.Commands.MEP
                         SpecTypeId.String.Text,
                         isInstance);
                     doc.FamilyManager.SetFormula(titlePar, $"\"{title}\"");
-                    addedParametersNames.Add(title);
+                    if (!addedParametersNames.Contains(title))
+                    {
+                        addedParametersNames.Add(title);
+                    }
                 }
                 addMechanic.Commit();
             }
-            var fParametersNames = fManager.GetParameters().Select(p => p.Definition.Name);
-            List<string> reorderedParametersNames = new List<string>(addedParametersNames.Reverse<string>());
-            foreach (var fParameterName in fParametersNames)
-            {
-                if (!reorderedParametersNames.Contains(fParameterName))
-                {
-                    reorderedParametersNames.Add(fParameterName);
-                }
-            }
+            addedParametersNames.Reverse();
             using (Transaction sortParameters = new Transaction(doc))
             {
                 sortParameters.Start("Сортировка параметров");
 
-                fManager.ReorderParameters(reorderedParametersNames.Select(n => fManager.get_Parameter(n)).ToList());
+                fManager.ReorderParameters(addedParametersNames.Select(n => fManager.get_Parameter(n)).ToList());
 
                 sortParameters.Commit();
             }
