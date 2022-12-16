@@ -13,14 +13,13 @@ namespace MS.Utilites.Extensions
     public static class StringExtension
     {
         /// <summary>
-        /// Возвращает строку, в которой символы <>:"/\|?* заменены на _
+        /// Возвращает строку, в которой символы :;"/\|?*[]{}`~&lt;&gt; заменены на _
         /// </summary>
         /// <param name="fileName">Строка, в которой надо заменить символы</param>
         /// <returns>Новая строка с замененными символами</returns>
         public static string ReplaceForbiddenSymbols(this string fileName)
         {
-            return Regex.Replace(fileName, @"[\\<>:/|?*""]", "_");
+            return Regex.Replace(fileName, @"[\\<>:;/|?*""\[\]{}`~]", "_");
         }
-
     }
 }

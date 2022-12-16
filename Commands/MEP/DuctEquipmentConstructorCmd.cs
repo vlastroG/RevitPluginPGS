@@ -80,14 +80,13 @@ namespace MS.Commands.MEP
             UIDocument uidoc = uiapp.OpenAndActivateDocument(path);
             Document doc = uidoc.Document;
 
-            DefinitionFile defFile = SharedParams.GetSharedParameterFileADSK(uidoc);
-            FillInstallationParentFamilyParams(doc, defFile, installation);
+            FillInstallationParentFamilyParams(uidoc, installation);
 
-            var mechanics = CreateMechanicFamilies(uidoc, defFile, installation);
+            var mechanics = CreateMechanicFamilies(uidoc, installation);
 
             var fillings = CreateFillingFamilies(uidoc, installation.GetFillings(), installation.System);
 
-            PlaceNestedFamilies(uidoc);
+            PlaceNestedFamilies(uidoc, mechanics, fillings);
 
             doc.Save();
 
@@ -113,13 +112,95 @@ namespace MS.Commands.MEP
         /// Размещиет вложенные семейства в документе родительского семейства
         /// </summary>
         /// <param name="uidoc">Документ родительского семейства</param>
-        private void PlaceNestedFamilies(in UIDocument uidoc)
+        private void PlaceNestedFamilies(
+            in UIDocument uidoc,
+            in ICollection<Family> mechanics,
+            in ICollection<ElementType> fillings)
+        {
+            Element level = new FilteredElementCollector(uidoc.Document).OfClass(typeof(Level)).FirstOrDefault();
+
+            PlaceSymbolicFamilies(uidoc, level);
+
+            XYZ startPointMechanic = new XYZ(0, -1 / 304.8, 0);
+            foreach (Family mechanic in mechanics)
+            {
+                var fSymbol = uidoc.Document.GetElement(mechanic.GetFamilySymbolIds().First()) as FamilySymbol;
+                startPointMechanic = PlaceBlankFamilyInstance(uidoc.Document, level, fSymbol, startPointMechanic, true);
+            }
+
+            XYZ startPointFilling = new XYZ();
+            foreach (ElementType filling in fillings)
+            {
+                startPointFilling = PlaceBlankFamilyInstance(uidoc.Document, level, filling as FamilySymbol, startPointFilling, false);
+            }
+        }
+
+        /// <summary>
+        /// Размещает семейство болванки оборудования или наполнения
+        /// </summary>
+        /// <param name="doc">Документ, в котором размещается семейства болванки</param>
+        /// <param name="level">Уровень, на котором размещается семейство болванки</param>
+        /// <param name="familySymbol">Типоразмер семейства болванки для размещения</param>
+        /// <param name="leftPoint">Левая верхнаяя точка для размещения семейства</param>
+        /// <param name="isMechanic">
+        /// Если True => ADSK_Группирование будет связан с
+        /// <see cref="_groupingMechanic">параметром родительского семейства для оборудования</see>
+        /// Если False => c <see cref="_groupingFilling">параметром для наполнения</see>
+        /// </param>
+        /// <returns>Правая верхняя точка размещенного семейства</returns>
+        private XYZ PlaceBlankFamilyInstance(
+            in Document doc,
+            in Element level,
+            in FamilySymbol familySymbol,
+            XYZ leftPoint,
+            bool isMechanic)
+        {
+            using (Transaction placeFams = new Transaction(doc))
+            {
+                placeFams.Start("Размещение элемента установки");
+                if (!familySymbol.IsActive)
+                {
+                    familySymbol.Activate();
+                }
+
+                FamilyInstance famInstEl = doc.FamilyCreate.NewFamilyInstance(
+                    leftPoint,
+                    familySymbol,
+                    level,
+                    StructuralType.NonStructural);
+                doc.Regenerate();
+                try
+                {
+                    Parameter instGroupPar = famInstEl.get_Parameter(SharedParams.ADSK_Grouping);
+                    FamilyParameter famGroupPar = null;
+                    if (isMechanic)
+                    {
+                        famGroupPar = doc.FamilyManager.get_Parameter(_groupingMechanic);
+                    }
+                    else
+                    {
+                        famGroupPar = doc.FamilyManager.get_Parameter(_groupingFilling);
+                    }
+                    doc.FamilyManager.AssociateElementParameterToFamilyParameter(instGroupPar, famGroupPar);
+                }
+                catch (Autodesk.Revit.Exceptions.ArgumentNullException)
+                {
+                }
+                placeFams.Commit();
+
+                XYZ rightTopPoint = new XYZ(leftPoint.X + 1 / 304.8, leftPoint.Y, leftPoint.Z);
+
+                return rightTopPoint;
+            }
+        }
+
+
+        private void PlaceSymbolicFamilies(in UIDocument uidoc, in Element level)
         {
             Document doc = uidoc.Document;
 
             // Получить начальные значения оборудования установки
             FamilySymbol famInstSymb = GetFamilySymbol(doc, _familyName, _typeName);
-            Element level = new FilteredElementCollector(doc).OfClass(typeof(Level)).FirstOrDefault();
             ReferencePlane startPlane = new FilteredElementCollector(doc)
                 .OfClass(typeof(ReferencePlane))
                 .FirstOrDefault(r => r.Name.Equals(_startPlane)) as ReferencePlane;
@@ -139,19 +220,19 @@ namespace MS.Commands.MEP
             XYZ rightPoint3 = PlaceSymbolicFamilyInstance(doc, level, famInstSymb, rightPoint2, length2);
             XYZ rightPoint4 = PlaceSymbolicFamilyInstance(doc, level, famInstSymb, rightPoint3, length3);
             _ = PlaceSymbolicFamilyInstance(doc, level, famInstSymb, rightPoint4, length4);
-
-            //FamilySymbol famInstSymbBlank = GetFamilySymbol(doc, _familyBlankFillingName, _familyBlankFillingName);
-
-            //XYZ startPoinBlank = PlaceBlankFamilyInstance(doc, level, famInstSymbBlank, new XYZ());
-            //XYZ startPoinBlank1 = PlaceBlankFamilyInstance(doc, level, famInstSymbBlank, startPoinBlank);
-            //_ = PlaceBlankFamilyInstance(doc, level, famInstSymbBlank, startPoinBlank1);
         }
 
+        /// <summary>
+        /// Создает вложенные семейства оборудования в родительском семействе
+        /// </summary>
+        /// <param name="uidoc">Документ родительского семейства</param>
+        /// <param name="installation"></param>
+        /// <returns></returns>
         private ICollection<Family> CreateMechanicFamilies(
             in UIDocument uidoc,
-            in DefinitionFile defFile,
             in Installation installation)
         {
+            DefinitionFile defFile = SharedParams.GetSharedParameterFileADSK(uidoc);
             string tempDir = Directory
                 .CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + $@"\{SharedValues.TempDirName}").FullName;
             List<Family> loadedMechanics = new List<Family>();
@@ -239,9 +320,10 @@ namespace MS.Commands.MEP
                         .GetElement(familyBlank.GetFamilySymbolIds().First()) as FamilySymbol;
                     foreach (var filling in fillings)
                     {
-                        duplicatedFamilies.Add(familySymbol.Duplicate(filling.Name.ReplaceForbiddenSymbols()));
-                        familySymbol.get_Parameter(SharedParams.ADSK_Count).Set(filling.Count);
-                        familySymbol.get_Parameter(SharedParams.ADSK_Name).Set(filling.Name);
+                        var duplicatedFamily = familySymbol.Duplicate(filling.Name.ReplaceForbiddenSymbols());
+                        duplicatedFamilies.Add(duplicatedFamily);
+                        duplicatedFamily.get_Parameter(SharedParams.ADSK_Count).Set(filling.Count);
+                        duplicatedFamily.get_Parameter(SharedParams.ADSK_Name).Set(filling.Name);
                     }
                     createFilling.Commit();
                 }
@@ -259,10 +341,11 @@ namespace MS.Commands.MEP
         /// </summary>
         /// <param name="uidoc">Документ родительского семейства установки</param>
         /// <param name="installation">Установка, заданная пользователем</param>
-        private void FillInstallationParentFamilyParams(in Document doc, in DefinitionFile defFile, in Installation installation)
+        private void FillInstallationParentFamilyParams(in UIDocument uidoc, in Installation installation)
         {
-            FillInstallationParentGeneralParams(doc, installation);
-            AddAndFillMechanicParamsInDocument(defFile, doc, installation.GetMechanics()[0], true); ;
+            DefinitionFile defFile = SharedParams.GetSharedParameterFileADSK(uidoc);
+            FillInstallationParentGeneralParams(uidoc.Document, installation);
+            AddAndFillMechanicParamsInDocument(defFile, uidoc.Document, installation.GetMechanics()[0], true); ;
         }
 
         /// <summary>
@@ -310,13 +393,6 @@ namespace MS.Commands.MEP
                 fillParentParams.Commit();
             }
         }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="uidoc">Документ семейства, в которое добавляются параметры оборудования</param>
-        /// <param name="mechanics">Коллекция оборудования, параметры которого нужно добавить в семейство</param>
-
 
         /// <summary>
         /// Добавляет параметры оборудования и их значения в семейство
@@ -575,38 +651,6 @@ namespace MS.Commands.MEP
 
                 return rightPoint;
             }
-        }
-
-        /// <summary>
-        /// Размещает заданный типоразмер семейства болванки (предварительно загрузить скорректированный тип в родительское семейство)
-        /// по заданным координатам
-        /// </summary>
-        /// <param name="doc">Документ родительского семейства установки</param>
-        /// <param name="level">Уровень для размещения</param>
-        /// <param name="familySymbol">Типоразмер семейства болванки</param>
-        /// <param name="leftTopPoint">Левая верхняя точка (на плане) для размещения семейства болванки</param>
-        /// <returns>Координата правой верхней точки размещенного семейства болванки  </returns>
-        private XYZ PlaceBlankFamilyInstance(
-            in Document doc,
-            in Element level,
-            in FamilySymbol familySymbol,
-            XYZ leftTopPoint)
-        {
-            using (Transaction addBoldFamily = new Transaction(doc))
-            {
-                addBoldFamily.Start("Размещение болванки");
-
-                FamilyInstance famInstEl = doc.FamilyCreate.NewFamilyInstance(
-                    leftTopPoint,
-                    familySymbol,
-                    level,
-                    StructuralType.NonStructural);
-
-                doc.Regenerate();
-
-                addBoldFamily.Commit();
-            }
-            return new XYZ(leftTopPoint.X + 1 / 304.8, leftTopPoint.Y, leftTopPoint.Z);
         }
     }
 }
