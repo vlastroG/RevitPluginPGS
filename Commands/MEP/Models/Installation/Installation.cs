@@ -23,9 +23,9 @@ namespace MS.Commands.MEP.Models.Installation
         private readonly List<Filling> _fillings = new List<Filling>();
 
         /// <summary>
-        /// Максимальное количество семкейств-болванок в родительском семействе установки
+        /// Список УГО внутри родительского семейства вентиляционной установки
         /// </summary>
-        private const int _levelsCapacity = 40;
+        private readonly List<Symbolic.Symbolic> _symbolics = new List<Symbolic.Symbolic>();
 
         /// <summary>
         /// Ширина установки в мм
@@ -36,11 +36,6 @@ namespace MS.Commands.MEP.Models.Installation
         /// Высота установки в мм
         /// </summary>
         private double _height;
-
-        /// <summary>
-        /// Длина установки в мм
-        /// </summary>
-        private double _length;
 
         /// <summary>
         /// ADSK_Группирование
@@ -64,11 +59,10 @@ namespace MS.Commands.MEP.Models.Installation
         /// <param name="width">Ширина в мм</param>
         /// <param name="height">Высота в мм</param>
         /// <param name="length">Длина в мм</param>
-        public Installation(double width, double height, double length)
+        public Installation(double width, double height)
         {
             _width = width;
             _height = height;
-            _length = length;
         }
 
 
@@ -89,8 +83,13 @@ namespace MS.Commands.MEP.Models.Installation
         /// <summary>
         /// Длина установки в мм
         /// </summary>
-        [Range(100, 10000)]
-        public double Length { get => _length; set => _length = value; }
+        public double Length
+        {
+            get
+            {
+                return _symbolics.Select(s => s.Length).Sum();
+            }
+        }
 
         /// <summary>
         /// ADSK_Группирование
@@ -201,6 +200,33 @@ namespace MS.Commands.MEP.Models.Installation
         public List<Filling> GetFillings()
         {
             return new List<Filling>(_fillings);
+        }
+
+        /// <summary>
+        /// Добавляет УГО в установку
+        /// </summary>
+        /// <param name="symbolic"></param>
+        public void AddSymbolic(Symbolic.Symbolic symbolic)
+        {
+            _symbolics.Add(symbolic);
+        }
+
+        /// <summary>
+        /// Добавляет коллекцию УГО в установку
+        /// </summary>
+        /// <param name="symbolics"></param>
+        public void AddSymbolic(ICollection<Symbolic.Symbolic> symbolics)
+        {
+            _symbolics.AddRange(symbolics);
+        }
+
+        /// <summary>
+        /// Возвращает список УГО элементов одноуровневой установки слева направо
+        /// </summary>
+        /// <returns></returns>
+        public List<Symbolic.Symbolic> GetSymbolics()
+        {
+            return new List<Symbolic.Symbolic>(_symbolics);
         }
     }
 }

@@ -20,7 +20,7 @@ namespace MS.Commands.MEP.Models
 
 
         /// <summary>
-        /// Конструктор наполнения
+        /// Конструктор наполнения по наименованию и количеству
         /// </summary>
         /// <param name="name">ADSK_Наименование</param>
         /// <param name="count">ADSK_Количество</param>
@@ -29,6 +29,12 @@ namespace MS.Commands.MEP.Models
             _name = name;
             _count = count;
         }
+
+        /// <summary>
+        /// Конструктор наполнения по наименованию
+        /// </summary>
+        /// <param name="name">ADSK_Наименование</param>
+        public Filling(string name) : this(name, 0) { }
 
 
         /// <summary>

@@ -149,6 +149,8 @@
     <Compile Include="Commands\MEP\Models\Mechanic\Impl\Filter.cs" />
     <Compile Include="Commands\MEP\Models\Mechanic\Impl\Heater.cs" />
     <Compile Include="Commands\MEP\Models\Mechanic\Mechanic.cs" />
+    <Compile Include="Commands\MEP\Models\Symbolic\ISymbolic.cs" />
+    <Compile Include="Commands\MEP\Models\Symbolic\Symbolic.cs" />
     <Compile Include="GUI\CommandsBase\Base\Command.cs" />
     <Compile Include="GUI\CommandsBase\LambdaCommand.cs" />
     <Compile Include="GUI\Converters\InverseBooleanConverter.cs" />

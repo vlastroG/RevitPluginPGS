@@ -6,6 +6,7 @@ using Autodesk.Revit.UI.Events;
 using MS.Commands.MEP.Enums;
 using MS.Commands.MEP.Models;
 using MS.Commands.MEP.Models.Installation;
+using MS.Commands.MEP.Models.Symbolic;
 using MS.GUI.ViewModels.MEP.DuctInstallation;
 using MS.GUI.Windows.MEP;
 using MS.Shared;
@@ -73,20 +74,16 @@ namespace MS.Commands.MEP
 
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
-            (Installation installation, string system) = GetDataFromUser();
+            Installation installation = GetDataFromUser();
 
             UIApplication uiapp = commandData.Application;
-            string path = CopyDefaultFamily(system);
+            string path = CopyDefaultFamily(installation.System);
             UIDocument uidoc = uiapp.OpenAndActivateDocument(path);
             Document doc = uidoc.Document;
 
             FillInstallationParentFamilyParams(uidoc, installation);
 
-            var mechanics = CreateMechanicFamilies(uidoc, installation);
-
-            var fillings = CreateFillingFamilies(uidoc, installation.GetFillings(), installation.System);
-
-            PlaceNestedFamilies(uidoc, mechanics, fillings);
+            PlaceNestedFamilies(uidoc, installation);
 
             doc.Save();
 
@@ -97,7 +94,7 @@ namespace MS.Commands.MEP
         /// Вывести окно для ввода данных и получить вентиляционную установку от пользователя
         /// </summary>
         /// <returns>Установка, заданная пользователем</returns>
-        private (Installation installation, string name) GetDataFromUser()
+        private Installation GetDataFromUser()
         {
             var ui = new DuctInstallationView();
             ui.ShowDialog();
@@ -105,7 +102,8 @@ namespace MS.Commands.MEP
             var testInt = viewModel.TestIntNull;
             var testDouble = viewModel.TestDoubleNull;
             var testNameShort = viewModel.NameShort;
-            return (CreateTestInstallation(), "П4_Тест");
+            var testInstallation = CreateTestInstallation();
+            return testInstallation;
         }
 
         /// <summary>
@@ -114,14 +112,13 @@ namespace MS.Commands.MEP
         /// <param name="uidoc">Документ родительского семейства</param>
         private void PlaceNestedFamilies(
             in UIDocument uidoc,
-            in ICollection<Family> mechanics,
-            in ICollection<ElementType> fillings)
+            in Installation installation)
         {
             Element level = new FilteredElementCollector(uidoc.Document).OfClass(typeof(Level)).FirstOrDefault();
+            var mechanics = CreateMechanicFamilies(uidoc, installation);
+            var fillings = CreateFillingFamilies(uidoc, installation);
 
-            PlaceSymbolicFamilies(uidoc, level);
-
-            XYZ startPointMechanic = new XYZ(0, -1 / 304.8, 0);
+            XYZ startPointMechanic = new XYZ(0, -1 / SharedValues.FootToMillimeters, 0);
             foreach (Family mechanic in mechanics)
             {
                 var fSymbol = uidoc.Document.GetElement(mechanic.GetFamilySymbolIds().First()) as FamilySymbol;
@@ -133,6 +130,8 @@ namespace MS.Commands.MEP
             {
                 startPointFilling = PlaceBlankFamilyInstance(uidoc.Document, level, filling as FamilySymbol, startPointFilling, false);
             }
+
+            PlaceSymbolicFamilies(uidoc, installation);
         }
 
         /// <summary>
@@ -188,38 +187,37 @@ namespace MS.Commands.MEP
                 }
                 placeFams.Commit();
 
-                XYZ rightTopPoint = new XYZ(leftPoint.X + 1 / 304.8, leftPoint.Y, leftPoint.Z);
+                XYZ rightTopPoint = new XYZ(leftPoint.X + 1 / SharedValues.FootToMillimeters, leftPoint.Y, leftPoint.Z);
 
                 return rightTopPoint;
             }
         }
 
 
-        private void PlaceSymbolicFamilies(in UIDocument uidoc, in Element level)
+        /// <summary>
+        /// Размещает экземпляры семейств УГО в родительском семействе установки
+        /// </summary>
+        /// <param name="uidoc">Документ родительского семейства установки</param>
+        /// <param name="installation">Установка, заданная пользователем</param>
+        private void PlaceSymbolicFamilies(
+            in UIDocument uidoc,
+            in Installation installation)
         {
             Document doc = uidoc.Document;
-
-            // Получить начальные значения оборудования установки
-            FamilySymbol famInstSymb = GetFamilySymbol(doc, _familyName, _typeName);
             ReferencePlane startPlane = new FilteredElementCollector(doc)
                 .OfClass(typeof(ReferencePlane))
                 .FirstOrDefault(r => r.Name.Equals(_startPlane)) as ReferencePlane;
             Reference startPlaneRef = new Reference(startPlane);
+            Element level = new FilteredElementCollector(uidoc.Document).OfClass(typeof(Level)).FirstOrDefault();
+
+            var symbolics = installation.GetSymbolics();
+
             XYZ startPoint = new XYZ(startPlane.GetPlane().Origin.X, 0, 0);
-
-
-            double length = 1;
-            double length1 = 3;
-            double length2 = 1.5;
-            double length3 = 2;
-            double length4 = 1274 / 304.8;
-
-            // Создать тестовые элементы установки
-            XYZ rightPoint1 = PlaceSymbolicFamilyInstance(doc, level, famInstSymb, startPoint, length);
-            XYZ rightPoint2 = PlaceSymbolicFamilyInstance(doc, level, famInstSymb, rightPoint1, length1);
-            XYZ rightPoint3 = PlaceSymbolicFamilyInstance(doc, level, famInstSymb, rightPoint2, length2);
-            XYZ rightPoint4 = PlaceSymbolicFamilyInstance(doc, level, famInstSymb, rightPoint3, length3);
-            _ = PlaceSymbolicFamilyInstance(doc, level, famInstSymb, rightPoint4, length4);
+            foreach (var symbolic in symbolics)
+            {
+                FamilySymbol famInstSymb = GetFamilySymbol(doc, _familyName, symbolic.Name);
+                startPoint = PlaceSymbolicFamilyInstance(doc, level, famInstSymb, startPoint, symbolic.Length / SharedValues.FootToMillimeters);
+            }
         }
 
         /// <summary>
@@ -303,8 +301,7 @@ namespace MS.Commands.MEP
         /// <returns>Коллекция типоразмеров созданных элементов наполнения установки</returns>
         private ICollection<ElementType> CreateFillingFamilies(
             in UIDocument uidoc,
-            in ICollection<Filling> fillings,
-            string systemName)
+            in Installation installation)
         {
             List<ElementType> duplicatedFamilies = new List<ElementType>();
             try
@@ -315,10 +312,10 @@ namespace MS.Commands.MEP
                 using (Transaction createFilling = new Transaction(uidoc.Document))
                 {
                     createFilling.Start("Типоразмеры наполнения");
-                    familyBlank.Name = _familyBlankFillingName + $"-{systemName}";
+                    familyBlank.Name = _familyBlankFillingName + $"-{installation.System}";
                     FamilySymbol familySymbol = uidoc.Document
                         .GetElement(familyBlank.GetFamilySymbolIds().First()) as FamilySymbol;
-                    foreach (var filling in fillings)
+                    foreach (var filling in installation.GetFillings())
                     {
                         var duplicatedFamily = familySymbol.Duplicate(filling.Name.ReplaceForbiddenSymbols());
                         duplicatedFamilies.Add(duplicatedFamily);
@@ -387,9 +384,9 @@ namespace MS.Commands.MEP
                 familyManager.Set(famLengthPar, installation.Length / SharedValues.FootToMillimeters);
                 familyManager.Set(famWidthPar, installation.Width / SharedValues.FootToMillimeters);
                 familyManager.Set(famHeightPar, installation.Height / SharedValues.FootToMillimeters);
-                familyManager.Set(famGroupParentPar, installation.System + installation.GroupingParent);
-                familyManager.Set(famGroupMechPar, installation.System + installation.GroupingMechanic);
-                familyManager.Set(famGroupFillPar, installation.System + installation.GroupingFilling);
+                familyManager.SetFormula(famGroupParentPar, "\"" + installation.System + installation.GroupingParent + "\"");
+                familyManager.SetFormula(famGroupMechPar, "\"" + installation.System + installation.GroupingMechanic + "\"");
+                familyManager.SetFormula(famGroupFillPar, "\"" + installation.System + installation.GroupingFilling + "\"");
                 fillParentParams.Commit();
             }
         }
@@ -461,7 +458,7 @@ namespace MS.Commands.MEP
         /// <returns>Заданная вентиляционная установка</returns>
         private Installation CreateTestInstallation()
         {
-            Installation installationTest = new Installation(1100, 1100, 7400);
+            Installation installationTest = new Installation(1100, 1100);
 
             installationTest.System = "П4";
 
@@ -537,8 +534,22 @@ namespace MS.Commands.MEP
                 new Filling("Блок Управления: Щит управления силовой ACV-V Е30", 1)
             };
 
+            List<Symbolic> symbolics = new List<Symbolic>()
+            {
+                new Symbolic("Фильтр", 575),
+                new Symbolic("Воздухонагреватель водяной", 575),
+                new Symbolic("Воздухонагреватель электрический", 575),
+                new Symbolic("Воздухоохладитель водяной", 750),
+                new Symbolic("Воздухонагреватель электрический", 575),
+                new Symbolic("Вентилятор", 1100),
+                new Symbolic("Фильтр", 1100),
+                new Symbolic("Фильтр", 1100),
+                new Symbolic("Шумоглушитель", 1100),
+            };
+
             installationTest.AddMechanic(mechanics);
             installationTest.AddFilling(fillings);
+            installationTest.AddSymbolic(symbolics);
 
             return installationTest;
         }

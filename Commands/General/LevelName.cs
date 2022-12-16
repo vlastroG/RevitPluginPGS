@@ -1,6 +1,7 @@
 ﻿using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
+using MS.Shared;
 using MS.Utilites;
 using System;
 using System.Globalization;
@@ -13,8 +14,6 @@ namespace MS.Commands.General
     [Regeneration(RegenerationOption.Manual)]
     public class LevelName : IExternalCommand
     {
-        private readonly double _footToMetersCoeff = 304.8;
-
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             Document doc = commandData.Application.ActiveUIDocument.Document;
@@ -38,7 +37,7 @@ namespace MS.Commands.General
                         .Round(level
                                .get_Parameter(BuiltInParameter.LEVEL_ELEV)
                                .AsDouble()
-                               * _footToMetersCoeff
+                               * SharedValues.FootToMillimeters
                                / 1000,
                                3,
                                MidpointRounding.AwayFromZero);

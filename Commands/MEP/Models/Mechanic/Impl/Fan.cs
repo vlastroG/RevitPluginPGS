@@ -69,5 +69,11 @@ namespace MS.Commands.MEP.Mechanic.Impl
         /// </summary>
         [Description("ADSK_Частота вращения двигателя")]
         public int? EngineSpeed { get; set; }
+
+        /// <summary>
+        /// ADSK_Количество
+        /// </summary>
+        [Description("ADSK_Количество")]
+        public double? Count { get; set; }
     }
 }
