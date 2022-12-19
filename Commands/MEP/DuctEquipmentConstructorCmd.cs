@@ -448,9 +448,22 @@ namespace MS.Commands.MEP
         /// <returns>Заданная вентиляционная установка</returns>
         private Installation CreateTestInstallation()
         {
-            Installation installationTest = new Installation(1100, 1100);
+            Installation installationTest = new Installation(1100, 1100)
+            {
+                Type = "Тип установки 000",
+                System = "П5",
+                NameShort = "Сокращенное наименование",
+                Name = "Полное наименование",
+                InputHeight = 601,
+                InputWidth = 602,
+                InputLength = 103,
+                InputLocationBottom = 1,
+                OutputWidth = 701,
+                OutputHeight = 702,
+                OutputLength = 105,
+                OutputLocationMiddle = 0,
+            };
 
-            installationTest.System = "П4";
 
             List<Mechanic.Mechanic> mechanics = new List<Mechanic.Mechanic>()
             {
