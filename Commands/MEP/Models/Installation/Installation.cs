@@ -100,7 +100,6 @@ namespace MS.Commands.MEP.Models.Installation
         /// </summary>
         /// <param name="width">Ширина в мм</param>
         /// <param name="height">Высота в мм</param>
-        /// <param name="length">Длина в мм</param>
         public Installation(double width, double height)
         {
             _width = width;

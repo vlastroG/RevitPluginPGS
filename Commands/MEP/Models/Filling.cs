@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MS.Commands.Models.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MS.Commands.MEP.Models
 {
-    public class Filling
+    public class Filling : IEntity
     {
         /// <summary>
         /// ADSK_Наименование
@@ -54,5 +55,7 @@ namespace MS.Commands.MEP.Models
             get => _count;
             set => _count = value;
         }
+
+        public int Id { get; set; }
     }
 }

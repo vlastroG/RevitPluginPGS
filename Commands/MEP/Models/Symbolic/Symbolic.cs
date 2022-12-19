@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MS.Commands.Models.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,7 +10,7 @@ namespace MS.Commands.MEP.Models.Symbolic
     /// <summary>
     /// УГО элемента вентиляционной установки
     /// </summary>
-    public class Symbolic : ISymbolic
+    public class Symbolic : ISymbolic, IEntity
     {
         /// <summary>
         /// Название УГО
@@ -42,5 +43,7 @@ namespace MS.Commands.MEP.Models.Symbolic
         public string Name { get => _name; set => _name = value; }
 
         public double Length { get => _length; set => _length = value; }
+
+        public int Id { get; set; }
     }
 }

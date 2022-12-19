@@ -24,10 +24,6 @@ namespace MS.Commands.MEP.Enums
         /// </summary>
         AirHeater,
         /// <summary>
-        /// Шумоглушитель
-        /// </summary>
-        Silencer,
-        /// <summary>
         /// Фильтр
         /// </summary>
         Filter

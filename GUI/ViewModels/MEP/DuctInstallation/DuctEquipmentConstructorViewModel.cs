@@ -1,4 +1,7 @@
-﻿using MS.GUI.ViewModels.Base;
+﻿using MS.Commands.MEP.Mechanic;
+using MS.Commands.MEP.Models;
+using MS.Commands.MEP.Models.Symbolic;
+using MS.GUI.ViewModels.Base;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -24,6 +27,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
             set => Set(ref _nameLong, value);
         }
 
+
         /// <summary>
         /// Сокращенное наименование установки
         /// </summary>
@@ -37,6 +41,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
             get => _nameShort;
             set => Set(ref _nameShort, value);
         }
+
 
         /// <summary>
         /// Наименование системы
@@ -52,38 +57,152 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
             set => Set(ref _systemName, value);
         }
 
-        /// <summary>
-        /// Тестовый nullable int
-        /// </summary>
-        private static int? _testIntNull;
 
         /// <summary>
-        /// Тестовый nullable int
+        /// Тип установки
         /// </summary>
-        public int? TestIntNull
+        private string _type;
+
+        /// <summary>
+        /// Тип установки
+        /// </summary>
+        public string Type
         {
-            get => _testIntNull;
-            set => Set(ref _testIntNull, value);
+            get => _type;
+            set => Set(ref _type, value);
+        }
+
+
+        /// <summary>
+        /// Впуск высота
+        /// </summary>
+        private double? _inputHeight;
+
+        /// <summary>
+        /// Впуск высота
+        /// </summary>
+        public double? InputHeight
+        {
+            get => _inputHeight;
+            set => Set(ref _inputHeight, value);
         }
 
         /// <summary>
-        /// Тестовый nullable double
+        /// Впуск ширина
         /// </summary>
-        private static double? _testDoubleNull;
+        private double? _inputWidth;
 
         /// <summary>
-        /// Тестовый nullable double
+        /// Впуск ширина
         /// </summary>
-        public double? TestDoubleNull
+        public double? InputWidth
         {
-            get => _testDoubleNull;
-            set => Set(ref _testDoubleNull, value);
+            get => _inputWidth;
+            set => Set(ref _inputWidth, value);
         }
+
+        /// <summary>
+        /// Впуск высота
+        /// </summary>
+        private double? _inputLength;
+
+        /// <summary>
+        /// Впуск высота
+        /// </summary>
+        public double? InputLength
+        {
+            get => _inputLength;
+            set => Set(ref _inputLength, value);
+        }
+
+        /// <summary>
+        /// Выпуск высота
+        /// </summary>
+        private double? _outputHeight;
+
+        /// <summary>
+        /// Выпуск высота
+        /// </summary>
+        public double? OutputHeight
+        {
+            get => _outputHeight;
+            set => Set(ref _outputHeight, value);
+        }
+
+        /// <summary>
+        /// Выпуск ширина
+        /// </summary>
+        private double? _outputWidth;
+
+        /// <summary>
+        /// Выпуск ширина
+        /// </summary>
+        public double? OutputWidth
+        {
+            get => _outputWidth;
+            set => Set(ref _outputWidth, value);
+        }
+
+        /// <summary>
+        /// Выпуск длина
+        /// </summary>
+        private double? _outputLength;
+
+        /// <summary>
+        /// Выпуск длина
+        /// </summary>
+        public double? OutputLength
+        {
+            get => _outputLength;
+            set => Set(ref _outputLength, value);
+        }
+
+
+        /// <summary>
+        /// Впуск снизу
+        /// </summary>
+        private bool _inputLocationBottom;
+
+        /// <summary>
+        /// Впуск снизу
+        /// </summary>
+        public bool InputLocationBottom
+        {
+            get => _inputLocationBottom;
+            set => Set(ref _inputLocationBottom, value);
+        }
+
+        /// <summary>
+        /// Выпуск снизу
+        /// </summary>
+        private bool _outputLocationBottom;
+
+        /// <summary>
+        /// Выпуск снизу
+        /// </summary>
+        public bool OutputLocationBottom
+        {
+            get => _outputLocationBottom;
+            set => Set(ref _outputLocationBottom, value);
+        }
+
 
         /// <summary>
         /// Коллекция элементов оборудования в установке
         /// </summary>
-        public ObservableCollection<EquipmentViewModel> Equipment { get; } = new ObservableCollection<EquipmentViewModel>();
+        public ObservableCollection<Mechanic> Equipment { get; } = new ObservableCollection<Mechanic>();
+
+
+        /// <summary>
+        /// Коллекция элементов наполнения в установке
+        /// </summary>
+        public ObservableCollection<Filling> Filling { get; } = new ObservableCollection<Filling>();
+
+
+        /// <summary>
+        /// Коллекция элементов УГО в установке
+        /// </summary>
+        public ObservableCollection<Symbolic> Symbolics { get; } = new ObservableCollection<Symbolic>();
 
 
         public DuctEquipmentConstructorViewModel()

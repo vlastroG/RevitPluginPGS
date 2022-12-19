@@ -7,13 +7,14 @@ using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using System.ComponentModel;
+using MS.Commands.Models.Interfaces;
 
 namespace MS.Commands.MEP.Mechanic
 {
     /// <summary>
     /// Оборудование в составе вентиляционной установки
     /// </summary>
-    public abstract class Mechanic : IMechanic
+    public abstract class Mechanic : IMechanic, IEntity
     {
         /// <summary>
         /// Длина оборудования в миллиметрах
@@ -37,6 +38,8 @@ namespace MS.Commands.MEP.Mechanic
         /// Тип оборудования
         /// </summary>
         public EquipmentType EquipmentType => _equipmentType;
+
+        public int Id { get; set; }
 
 
         /// <summary>

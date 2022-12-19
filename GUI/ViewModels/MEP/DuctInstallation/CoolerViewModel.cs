@@ -11,21 +11,13 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
     /// <summary>
     /// Модель представления данных для оборудования внутри вентиляционной установки
     /// </summary>
-    public class EquipmentViewModel : ViewModelBase
+    public class CoolerViewModel : ViewModelBase
     {
         /// <summary>
-        /// Тип оборудования
+        /// Название типа оборудования
         /// </summary>
-        private EquipmentType _type;
+        public string Name { get => "Воздухоохладитель"; }
 
-        /// <summary>
-        /// Тип оборудования
-        /// </summary>
-        public EquipmentType Type
-        {
-            get => _type;
-            set => Set(ref _type, value);
-        }
 
         /// <summary>
         /// Длина оборудования

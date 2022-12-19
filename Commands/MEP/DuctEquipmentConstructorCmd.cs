@@ -94,8 +94,6 @@ namespace MS.Commands.MEP
             var ui = new DuctInstallationView();
             ui.ShowDialog();
             DuctEquipmentConstructorViewModel viewModel = ui.DataContext as DuctEquipmentConstructorViewModel;
-            var testInt = viewModel.TestIntNull;
-            var testDouble = viewModel.TestDoubleNull;
             var testNameShort = viewModel.NameShort;
             var testInstallation = CreateTestInstallation();
             return testInstallation;
@@ -384,7 +382,7 @@ namespace MS.Commands.MEP
         /// <summary>
         /// Добавляет параметры оборудования и их значения в семейство
         /// </summary>
-        /// <param name="defFile">Объект файла общиъ параметров</param>
+        /// <param name="defFile">Объект файла общих параметров</param>
         /// <param name="doc">Документ семейства, в которое добавляются параметры оборудования</param>
         /// <param name="mechanics">Список оборудования, параметры которого нужно добавить в семейство</param>
         /// <param name="isInstance">True => все параметры добавлять в экземпляр, False => в тип</param>
