@@ -132,7 +132,7 @@ namespace MS.Commands.MEP.Models.Installation
         {
             get
             {
-                return _symbolics.Select(s => s.Length).Sum();
+                return _symbolics.Select(s => s.Length).Sum() + InputLength + OutputLength;
             }
         }
 
@@ -140,19 +140,19 @@ namespace MS.Commands.MEP.Models.Installation
         /// ADSK_Группирование
         /// </summary>
         [Description("ADSK_Группирование")]
-        public string GroupingParent { get => "\"" + System + _groupingParent + "\""; }
+        public string GroupingParent { get => System + _groupingParent; }
 
         /// <summary>
         /// Вложенное_оборудование_группирование
         /// </summary>
         [Description("Вложенное_оборудование_группирование")]
-        public string GroupingMechanic { get => "\"" + System + _groupingBoldMechanic + "\""; }
+        public string GroupingMechanic { get => System + _groupingBoldMechanic; }
 
         /// <summary>
         /// Вложенное_наполнение_группирование
         /// </summary>
         [Description("Вложенное_наполнение_группирование")]
-        public string GroupingFilling { get => "\"" + System + _groupingBoldFilling + "\""; }
+        public string GroupingFilling { get => System + _groupingBoldFilling; }
 
         /// <summary>
         /// PGS_ТипУстановки
@@ -200,13 +200,21 @@ namespace MS.Commands.MEP.Models.Installation
         /// Впуск_Снизу
         /// </summary>
         [Description("Впуск_Снизу")]
-        public bool InputLocationBottom { get => _inputLocationBottom; set => _inputLocationBottom = value; }
+        public int InputLocationBottom
+        {
+            get => _inputLocationBottom ? 1 : 0;
+            set => _inputLocationBottom = value == 1 ? true : false;
+        }
 
         /// <summary>
         /// Впуск_Посередине
         /// </summary>
         [Description("Впуск_Посередине")]
-        public bool InputLocationMiddle { get => !_inputLocationBottom; set => _inputLocationBottom = !value; }
+        public int InputLocationMiddle
+        {
+            get => !_inputLocationBottom ? 1 : 0;
+            set => _inputLocationBottom = value == 0 ? true : false;
+        }
 
         /// <summary>
         /// Выпуск_Ширина
@@ -230,13 +238,21 @@ namespace MS.Commands.MEP.Models.Installation
         /// Выпуск_Снизу
         /// </summary>
         [Description("Выпуск_Снизу")]
-        public bool OutputLocationBottom { get => _outputLocationBottom; set => _outputLocationBottom = value; }
+        public int OutputLocationBottom
+        {
+            get => _outputLocationBottom ? 1 : 0;
+            set => _outputLocationBottom = value == 1 ? true : false;
+        }
 
         /// <summary>
         /// Выпуск_Посередине
         /// </summary>
         [Description("Выпуск_Посередине")]
-        public bool OutputLocationMiddle { get => !_outputLocationBottom; set => _outputLocationBottom = !value; }
+        public int OutputLocationMiddle
+        {
+            get => !_outputLocationBottom ? 1 : 0;
+            set => _outputLocationBottom = value == 0 ? true : false;
+        }
 
         /// <summary>
         /// Возвращает словарь названий параметров оборудования и их значений (значения заполненных свойств оборудования)
@@ -249,18 +265,17 @@ namespace MS.Commands.MEP.Models.Installation
             PropertyInfo[] properties = GetType().GetProperties();
             foreach (PropertyInfo property in properties)
             {
-                var value = property.GetValue(this);
-                if (!(value is null))
+                var description = ((DescriptionAttribute)property
+                    .GetCustomAttribute(typeof(DescriptionAttribute)))?.Description;
+                if (!(description is null))
                 {
-                    var description = ((DescriptionAttribute)property
-                        .GetCustomAttribute(typeof(DescriptionAttribute)))?.Description;
-                    if (!(description is null))
+                    var value = property.GetValue(this);
+                    if (!(value is null))
                     {
                         parameters.Add(description, value);
                     }
                 }
             }
-
             return parameters;
         }
 

@@ -352,36 +352,31 @@ namespace MS.Commands.MEP
             {
                 fillParentParams.Start("Заполнение родительских параметров");
                 FamilyManager familyManager = doc.FamilyManager;
-                FamilyParameter famWidthPar = familyManager
-                    .GetParameters()
-                    .Where(p => p.IsShared)
-                    .FirstOrDefault(p => p.GUID.Equals(SharedParams.ADSK_DimensionWidth));
-                FamilyParameter famHeightPar = familyManager
-                    .GetParameters()
-                    .Where(p => p.IsShared)
-                    .FirstOrDefault(p => p.GUID.Equals(SharedParams.ADSK_DimensionHeight));
-                FamilyParameter famLengthPar = familyManager
-                    .GetParameters()
-                    .Where(p => p.IsShared)
-                    .FirstOrDefault(p => p.GUID.Equals(SharedParams.ADSK_DimensionLength));
-                FamilyParameter famGroupParentPar = familyManager
-                    .GetParameters()
-                    .Where(p => p.IsShared)
-                    .FirstOrDefault(p => p.GUID.Equals(SharedParams.ADSK_Grouping));
-                FamilyParameter famGroupMechPar = familyManager
-                    .GetParameters()
-                    .Where(p => !p.IsShared)
-                    .FirstOrDefault(p => p.Definition.Name.Equals(_groupingMechanic));
-                FamilyParameter famGroupFillPar = familyManager
-                    .GetParameters()
-                    .Where(p => !p.IsShared)
-                    .FirstOrDefault(p => p.Definition.Name.Equals(_groupingFilling));
-                familyManager.Set(famLengthPar, installation.Length / SharedValues.FootToMillimeters);
-                familyManager.Set(famWidthPar, installation.Width / SharedValues.FootToMillimeters);
-                familyManager.Set(famHeightPar, installation.Height / SharedValues.FootToMillimeters);
-                familyManager.SetFormula(famGroupParentPar, "\"" + installation.System + installation.GroupingParent + "\"");
-                familyManager.SetFormula(famGroupMechPar, "\"" + installation.System + installation.GroupingMechanic + "\"");
-                familyManager.SetFormula(famGroupFillPar, "\"" + installation.System + installation.GroupingFilling + "\"");
+                var fManager = doc.FamilyManager;
+
+                var parameters = installation.GetParameters();
+                foreach (var parameter in parameters)
+                {
+                    var famParam = fManager.get_Parameter(parameter.Key);
+                    var parValue = parameter.Value;
+                    try
+                    {
+                        var paramType = famParam.GetUnitTypeId();
+                        parValue = UnitUtils.ConvertToInternalUnits(parValue, paramType);
+                    }
+                    catch (Autodesk.Revit.Exceptions.InvalidOperationException)
+                    {
+                        parValue = parameter.Value;
+                    }
+                    if (famParam.Definition.Name.ToLower().Contains("группирование"))
+                    {
+                        fManager.SetFormula(famParam, $"\"{parValue}\"");
+                    }
+                    else
+                    {
+                        fManager.Set(famParam, parValue);
+                    }
+                }
                 fillParentParams.Commit();
             }
         }
@@ -394,10 +389,10 @@ namespace MS.Commands.MEP
         /// <param name="mechanics">Список оборудования, параметры которого нужно добавить в семейство</param>
         /// <param name="isInstance">True => все параметры добавлять в экземпляр, False => в тип</param>
         private void AddAndFillMechanicParamsInDocument(
-            in DefinitionFile defFile,
-            in Document doc,
-            in ICollection<Mechanic.Mechanic> mechanics,
-            bool isInstance)
+                in DefinitionFile defFile,
+                in Document doc,
+                in ICollection<Mechanic.Mechanic> mechanics,
+                bool isInstance)
         {
             var fManager = doc.FamilyManager;
 
