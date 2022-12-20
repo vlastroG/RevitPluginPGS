@@ -210,6 +210,18 @@
     <Compile Include="GUI\Windows\MEP\InstallationConstructor\DuctInstallationView.xaml.cs">
       <DependentUpon>DuctInstallationView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="GUI\Windows\MEP\InstallationConstructor\MechanicViews\CoolerView.xaml.cs">
+      <DependentUpon>CoolerView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Windows\MEP\InstallationConstructor\MechanicViews\FanView.xaml.cs">
+      <DependentUpon>FanView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Windows\MEP\InstallationConstructor\MechanicViews\FilterView.xaml.cs">
+      <DependentUpon>FilterView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Windows\MEP\InstallationConstructor\MechanicViews\HeaterView.xaml.cs">
+      <DependentUpon>HeaterView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="GUI\Windows\MEP\MEPinSpatials.xaml.cs">
       <DependentUpon>MEPinSpatials.xaml</DependentUpon>
     </Compile>
@@ -334,6 +346,22 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="GUI\Windows\MEP\InstallationConstructor\DuctInstallationView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GUI\Windows\MEP\InstallationConstructor\MechanicViews\CoolerView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GUI\Windows\MEP\InstallationConstructor\MechanicViews\FanView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GUI\Windows\MEP\InstallationConstructor\MechanicViews\FilterView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GUI\Windows\MEP\InstallationConstructor\MechanicViews\HeaterView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

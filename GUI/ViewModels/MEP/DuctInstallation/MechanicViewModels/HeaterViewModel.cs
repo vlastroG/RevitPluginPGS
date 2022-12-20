@@ -12,49 +12,49 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
     /// </summary>
     public class HeaterViewModel : ViewModelBase
     {
-        public string _Type;
+        private string _Type;
         /// <summary>
         /// PGS_ВоздухонагревательТип
         /// </summary>
         public string Type { get => _Type; set => Set(ref _Type, value); }
 
 
-        public double? _Power;
+        private double? _Power;
         /// <summary>
         /// PGS_ВоздухонагревательМощность
         /// </summary>
         public double? Power { get => _Power; set => Set(ref _Power, value); }
 
 
-        public double? _Count;
+        private double? _Count;
         /// <summary>
         /// PGS_ВоздухонагревательКоличество
         /// </summary>
         public double? Count { get => _Count; set => Set(ref _Count, value); }
 
 
-        public double? _TemperatureIn;
+        private double? _TemperatureIn;
         /// <summary>
         /// ADSK_Температура воздуха на входе в нагреватель
         /// </summary>
         public double? TemperatureIn { get => _TemperatureIn; set => Set(ref _TemperatureIn, value); }
 
 
-        public double? _TemperatureOut;
+        private double? _TemperatureOut;
         /// <summary>
         /// ADSK_Температура воздуха на выходе из нагревателя
         /// </summary>
         public double? TemperatureOut { get => _TemperatureOut; set => Set(ref _TemperatureOut, value); }
 
 
-        public double? _PowerHeat;
+        private double? _PowerHeat;
         /// <summary>
         /// ADSK_Тепловая мощность
         /// </summary>
         public double? PowerHeat { get => _PowerHeat; set => Set(ref _PowerHeat, value); }
 
 
-        public double? _AirPressureLoss;
+        private double? _AirPressureLoss;
         /// <summary>
         /// ADSK_Потеря давления воздуха в нагревателе
         /// </summary>
