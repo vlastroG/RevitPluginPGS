@@ -5,6 +5,9 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:converters="clr-namespace:MS.GUI.Converters"
              xmlns:vm="clr-namespace:MS.GUI.ViewModels.MEP.DuctInstallation"
+             xmlns:vms="clr-namespce:MS.Commands.MEP.Models.Symbolic"
+             xmlns:vmm="clr-namespce:MS.Commands.MEP.Mechanic"
+             xmlns:vmf="clr-namespce:MS.Commands.MEP.Models"
              xmlns:local="clr-namespace:MS.GUI.Windows.MEP"
              mc:Ignorable="d" 
              d:DesignHeight="500" d:DesignWidth="900" Width="1000" Height="500" MinWidth="600" MinHeight="300"
@@ -176,7 +179,27 @@
                                 CommandParameter="{Binding SelectedFilling}"></Button>
                     </UniformGrid>
                     <ListBox ItemsSource="{Binding Fillings}" SelectedItem="{Binding SelectedFilling}">
-
+                        <ListBox.Resources>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            </Style>
+                        </ListBox.Resources>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate DataType="vmf:Filling">
+                                <DockPanel>
+                                    <TextBox Text="{Binding Name}" MinWidth="180"/>
+                                    <DockPanel HorizontalAlignment="Right">
+                                        <TextBlock Text="Кол.:" Margin="0,0,5,0"/>
+                                        <TextBox Text="{Binding Count}" 
+                                              Width="50"
+                                              Height="20"
+                                              HorizontalContentAlignment="Right"
+                                              TextAlignment="Right"
+                                              HorizontalAlignment="Right"/>
+                                    </DockPanel>
+                                </DockPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
                     </ListBox>
                 </DockPanel>
             </GroupBox>
@@ -200,8 +223,24 @@
                                 Command="{Binding EditMechanicCommand}"
                                 CommandParameter="{Binding SelectedMechanic}"></Button>
                     </UniformGrid>
-                    <ListBox ItemsSource="{Binding Mechanics}" SelectedItem="{Binding SelectedMechanic}">
-
+                    <ListBox ItemsSource="{Binding Mechanics}"
+                             SelectedItem="{Binding SelectedMechanic}">
+                        <ListBox.Resources>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            </Style>
+                        </ListBox.Resources>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate DataType="vmm:Mechanic">
+                                <DockPanel HorizontalAlignment="Stretch">
+                                    <TextBlock Text="{Binding Description}"/>
+                                    <DockPanel HorizontalAlignment="Right">
+                                        <TextBlock Text="Длина:" Margin="0,0,5,0"/>
+                                        <TextBlock Text="{Binding Length}" HorizontalAlignment="Right"/>
+                                    </DockPanel>
+                                </DockPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
                     </ListBox>
                 </DockPanel>
             </GroupBox>
@@ -218,8 +257,32 @@
                         <Button Content="Занести в наполнение и оборудование"
                                 Command="{Binding ConvertToMechanicAndFillingCommand}"></Button>
                     </UniformGrid>
-                    <ListBox ItemsSource="{Binding Symbolics}" SelectedItem="{Binding SelectedSymbolic}">
-
+                    <ListBox ItemsSource="{Binding Symbolics}" 
+                             SelectedItem="{Binding SelectedSymbolic}">
+                        <ListBox.Resources>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            </Style>
+                        </ListBox.Resources>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate DataType="vms:Symbolic">
+                                <DockPanel>
+                                    <ComboBox ItemsSource="{Binding SymbolicTypes}" 
+                                               SelectedItem="{Binding Name}" 
+                                               Width="150"
+                                               Height="20"></ComboBox>
+                                    <DockPanel HorizontalAlignment="Right">
+                                        <TextBlock Text="Длина:" Margin="0,0,5,0"/>
+                                        <TextBox Text="{Binding Length}" 
+                                              Width="50"
+                                              Height="20"
+                                              HorizontalContentAlignment="Right"
+                                              TextAlignment="Right"
+                                              HorizontalAlignment="Right"/>
+                                    </DockPanel>
+                                </DockPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
                     </ListBox>
                 </DockPanel>
             </GroupBox>

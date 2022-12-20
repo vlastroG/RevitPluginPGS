@@ -19,9 +19,31 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
     {
         public DuctEquipmentConstructorViewModel()
         {
+            Mechanics.Add(new Fan(150));
+            Mechanics.Add(new Filter(450));
 
+            Symbolics.Add(new Symbolic());
+            Symbolics.Add(new Symbolic());
+            Symbolics.Add(new Symbolic());
+
+            Fillings.Add(new Filling("Наполнение 1", 2));
+            Fillings.Add(new Filling("Наполнение 2", 1));
+            Fillings.Add(new Filling("Наполнение 3", 3));
         }
 
+        public string[] SymbolicTypes
+        {
+            get => new string[7]
+            {
+                "Вентилятор",
+                "Воздухонагреватель водяной",
+                "Воздухонагреватель электрический",
+                "Воздухоохладитель водяной",
+                "Воздухоохладитель электрический",
+                "Фильтр",
+                "Шумоглушитель"
+            };
+        }
 
         /// <summary>
         /// Полное название установки

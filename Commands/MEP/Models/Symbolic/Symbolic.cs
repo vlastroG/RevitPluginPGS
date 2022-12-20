@@ -39,6 +39,19 @@ namespace MS.Commands.MEP.Models.Symbolic
         /// </summary>
         public Symbolic() : this("Фильтр", 200) { }
 
+        public string[] SymbolicTypes
+        {
+            get => new string[7]
+            {
+                "Вентилятор",
+                "Воздухонагреватель водяной",
+                "Воздухонагреватель электрический",
+                "Воздухоохладитель водяной",
+                "Воздухоохладитель электрический",
+                "Фильтр",
+                "Шумоглушитель"
+            };
+        }
 
         public string Name { get => _name; set => _name = value; }
 

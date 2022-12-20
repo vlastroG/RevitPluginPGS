@@ -78,5 +78,28 @@ namespace MS.Commands.MEP.Mechanic
 
             return parameters;
         }
+
+        /// <summary>
+        /// Описание оборудования
+        /// </summary>
+        public string Description
+        {
+            get
+            {
+                switch (_equipmentType)
+                {
+                    case EquipmentType.AirCooler:
+                        return "Воздухоохладитель";
+                    case EquipmentType.AirHeater:
+                        return "Воздухонагреватель";
+                    case EquipmentType.Filter:
+                        return "Фильтр";
+                    case EquipmentType.Fan:
+                        return "Вентилятор";
+                    default:
+                        return string.Empty;
+                };
+            }
+        }
     }
 }
