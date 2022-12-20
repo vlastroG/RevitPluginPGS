@@ -7,7 +7,7 @@
              xmlns:vm="clr-namespace:MS.GUI.ViewModels.MEP.DuctInstallation"
              xmlns:local="clr-namespace:MS.GUI.Windows.MEP"
              mc:Ignorable="d" 
-             d:DesignHeight="500" d:DesignWidth="900" Width="900" Height="500"
+             d:DesignHeight="500" d:DesignWidth="900" Width="1000" Height="500" MinWidth="600" MinHeight="300"
         Title="Конструктор установок">
     <Window.DataContext>
         <vm:DuctEquipmentConstructorViewModel/>
@@ -22,193 +22,207 @@
             <ColumnDefinition Width="1*"/>
             <ColumnDefinition Width="1*"/>
         </Grid.ColumnDefinitions>
-        <Grid Grid.Column="0" Margin="5">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition/>
-                <RowDefinition/>
-                <RowDefinition/>
-                <RowDefinition/>
-                <RowDefinition/>
-                <RowDefinition/>
-                <RowDefinition/>
-                <RowDefinition/>
-                <RowDefinition/>
-                <RowDefinition/>
-                <RowDefinition/>
-                <RowDefinition/>
-                <RowDefinition/>
-                <RowDefinition/>
-            </Grid.RowDefinitions>
-            <DockPanel Grid.Column="0" Grid.Row="0" 
-                       HorizontalAlignment="Stretch">
-                <TextBox Text="{Binding NameLong}"
-                         Margin="10"/>
+        <Grid.Resources>
+            <Style TargetType="DataGrid">
+                <Setter Property="Margin" Value="1"/>
+            </Style>
+        </Grid.Resources>
+        <GroupBox Grid.Column="0" Header="Параметры установки">
+            <DockPanel>
+                <Grid DockPanel.Dock="Top">
+                    <Grid.Resources>
+                        <Style TargetType="DockPanel">
+                            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                            <Setter Property="Margin" Value="3,0"/>
+                        </Style>
+                        <Style TargetType="TextBox">
+                            <Setter Property="VerticalAlignment" Value="Center"/>
+                            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                        </Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="VerticalAlignment" Value="Center"/>
+                            <Setter Property="Margin" Value="5,0,0,0"/>
+                        </Style>
+                        <Style TargetType="CheckBox">
+                            <Setter Property="VerticalAlignment" Value="Center"/>
+                            <Setter Property="HorizontalAlignment" Value="Right"/>
+                        </Style>
+                        <Style TargetType="RowDefinition">
+                            <Setter Property="Height" Value="25"/>
+                        </Style>
+                    </Grid.Resources>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <DockPanel Grid.Column="0" Grid.Row="0">
+                        <TextBox Text="{Binding NameLong}"/>
+                    </DockPanel>
+                    <DockPanel Grid.Column="1" Grid.Row="0">
+                        <TextBlock Text="Полное наименование"/>
+                    </DockPanel>
+                    <DockPanel Grid.Column="0" Grid.Row="1">
+                        <TextBox Text="{Binding NameShort}"/>
+                    </DockPanel>
+                    <DockPanel Grid.Column="1" Grid.Row="1">
+                        <TextBlock Text="Краткое наименование"/>
+                    </DockPanel>
+                    <DockPanel Grid.Column="0" Grid.Row="2">
+                        <TextBox Text="{Binding SystemName}"/>
+                    </DockPanel>
+                    <DockPanel Grid.Column="1" Grid.Row="2">
+                        <TextBlock Text="Наименование системы"/>
+                    </DockPanel>
+                    <DockPanel Grid.Column="0" Grid.Row="3">
+                        <TextBox Text="{Binding Type}"/>
+                    </DockPanel>
+                    <DockPanel Grid.Column="1" Grid.Row="3">
+                        <TextBlock Text="Тип установки"/>
+                    </DockPanel>
+                    <DockPanel Grid.Column="0" Grid.Row="4">
+                        <TextBox Text="{Binding InputHeight}"/>
+                    </DockPanel>
+                    <DockPanel Grid.Column="1" Grid.Row="4">
+                        <TextBlock Text="Впуск высота"/>
+                    </DockPanel>
+                    <DockPanel Grid.Column="0" Grid.Row="5">
+                        <TextBox Text="{Binding InputWidth}"/>
+                    </DockPanel>
+                    <DockPanel Grid.Column="1" Grid.Row="5">
+                        <TextBlock Text="Впуск ширина"/>
+                    </DockPanel>
+                    <DockPanel Grid.Column="0" Grid.Row="6">
+                        <TextBox Text="{Binding InputLength}"/>
+                    </DockPanel>
+                    <DockPanel Grid.Column="1" Grid.Row="6">
+                        <TextBlock Text="Впуск длина"/>
+                    </DockPanel>
+                    <DockPanel Grid.Column="0" Grid.Row="7">
+                        <CheckBox IsChecked="{Binding InputLocationBottom}"/>
+                    </DockPanel>
+                    <DockPanel Grid.Column="1" Grid.Row="7">
+                        <TextBlock Text="Впуск снизу"/>
+                    </DockPanel>
+                    <DockPanel Grid.Column="0" Grid.Row="8">
+                        <CheckBox IsChecked="{Binding InputLocationBottom, 
+                    Converter={StaticResource InverseBooleanConverter}}"/>
+                    </DockPanel>
+                    <DockPanel Grid.Column="1" Grid.Row="8">
+                        <TextBlock Text="Впуск посередине"/>
+                    </DockPanel>
+                    <DockPanel Grid.Column="0" Grid.Row="9">
+                        <TextBox Text="{Binding OutputHeight}"/>
+                    </DockPanel>
+                    <DockPanel Grid.Column="1" Grid.Row="9">
+                        <TextBlock Text="Выпуск высота"/>
+                    </DockPanel>
+                    <DockPanel Grid.Column="0" Grid.Row="10">
+                        <TextBox Text="{Binding OutputWidth}"/>
+                    </DockPanel>
+                    <DockPanel Grid.Column="1" Grid.Row="10">
+                        <TextBlock Text="Выпуск ширина"/>
+                    </DockPanel>
+                    <DockPanel Grid.Column="0" Grid.Row="11">
+                        <TextBox Text="{Binding OutputLength}"/>
+                    </DockPanel>
+                    <DockPanel Grid.Column="1" Grid.Row="11">
+                        <TextBlock Text="Выпуск длина"/>
+                    </DockPanel>
+                    <DockPanel Grid.Column="0" Grid.Row="12">
+                        <CheckBox IsChecked="{Binding OutputLocationBottom}"/>
+                    </DockPanel>
+                    <DockPanel Grid.Column="1" Grid.Row="12">
+                        <TextBlock Text="Выпуск снизу"/>
+                    </DockPanel>
+                    <DockPanel Grid.Column="0" Grid.Row="13">
+                        <CheckBox IsChecked="{Binding OutputLocationBottom,
+                    Converter={StaticResource InverseBooleanConverter}}"/>
+                    </DockPanel>
+                    <DockPanel Grid.Column="1" Grid.Row="13">
+                        <TextBlock Text="Выпуск посередине"/>
+                    </DockPanel>
+                </Grid>
+                <UniformGrid DockPanel.Dock="Bottom" Rows="1" Height="20" VerticalAlignment="Bottom">
+                    <Button Content="Создать установку" Name="Ok" Click="Ok_Click"></Button>
+                    <Button Content="Отмена" Name="Cancel" Click="Cancel_Click"></Button>
+                </UniformGrid>
             </DockPanel>
-            <DockPanel Grid.Column="1" Grid.Row="0"
-                       Margin="5">
-                <TextBlock Text="Полное наименование"
-                           VerticalAlignment="Center"
-                           HorizontalAlignment="Left"/>
-            </DockPanel>
-            <DockPanel Grid.Column="0" Grid.Row="1" 
-                       HorizontalAlignment="Stretch">
-                <TextBox Text="{Binding NameShort}"
-                         Margin="10"/>
-            </DockPanel>
-            <DockPanel Grid.Column="1" Grid.Row="1"
-                       Margin="5">
-                <TextBlock Text="Краткое наименование"
-                           VerticalAlignment="Center"
-                           HorizontalAlignment="Left"/>
-            </DockPanel>
-            <DockPanel Grid.Column="0" Grid.Row="2" 
-                       HorizontalAlignment="Stretch">
-                <TextBox Text="{Binding SystemName}"
-                         Margin="10"/>
-            </DockPanel>
-            <DockPanel Grid.Column="1" Grid.Row="2"
-                       Margin="5">
-                <TextBlock Text="Наименование системы"
-                           VerticalAlignment="Center"
-                           HorizontalAlignment="Left"/>
-            </DockPanel>
-            <DockPanel Grid.Column="0" Grid.Row="3" 
-                       HorizontalAlignment="Stretch">
-                <TextBox Text="{Binding Type}"
-                         Margin="10"/>
-            </DockPanel>
-            <DockPanel Grid.Column="1" Grid.Row="3"
-                       Margin="5">
-                <TextBlock Text="Тип установки"
-                           VerticalAlignment="Center"
-                           HorizontalAlignment="Left"/>
-            </DockPanel>
-            <DockPanel Grid.Column="0" Grid.Row="4" 
-                       HorizontalAlignment="Stretch">
-                <TextBox Text="{Binding InputHeight}"
-                         Margin="10"/>
-            </DockPanel>
-            <DockPanel Grid.Column="1" Grid.Row="4"
-                       Margin="5">
-                <TextBlock Text="Впуск высота"
-                           VerticalAlignment="Center"
-                           HorizontalAlignment="Left"/>
-            </DockPanel>
-            <DockPanel Grid.Column="0" Grid.Row="5" 
-                       HorizontalAlignment="Stretch">
-                <TextBox Text="{Binding InputWidth}"
-                         Margin="10"/>
-            </DockPanel>
-            <DockPanel Grid.Column="1" Grid.Row="5"
-                       Margin="5">
-                <TextBlock Text="Впуск ширина"
-                           VerticalAlignment="Center"
-                           HorizontalAlignment="Left"/>
-            </DockPanel>
-            <DockPanel Grid.Column="0" Grid.Row="6" 
-                       HorizontalAlignment="Stretch">
-                <TextBox Text="{Binding InputLength}"
-                         Margin="10"/>
-            </DockPanel>
-            <DockPanel Grid.Column="1" Grid.Row="6"
-                       Margin="5">
-                <TextBlock Text="Впуск длина"
-                           VerticalAlignment="Center"
-                           HorizontalAlignment="Left"/>
-            </DockPanel>
-            <DockPanel Grid.Column="0" Grid.Row="7" 
-                       HorizontalAlignment="Right">
-                <CheckBox IsChecked="{Binding InputLocationBottom}"
-                         Margin="10"/>
-            </DockPanel>
-            <DockPanel Grid.Column="1" Grid.Row="7"
-                       Margin="5">
-                <TextBlock Text="Впуск снизу"
-                           VerticalAlignment="Center"
-                           HorizontalAlignment="Left"/>
-            </DockPanel>
-            <DockPanel Grid.Column="0" Grid.Row="8" 
-                       HorizontalAlignment="Right">
-                <CheckBox IsChecked="{Binding InputLocationBottom, 
-                    Converter={StaticResource InverseBooleanConverter}}"
-                         Margin="10"/>
-            </DockPanel>
-            <DockPanel Grid.Column="1" Grid.Row="8"
-                       Margin="5">
-                <TextBlock Text="Впуск посередине"
-                           VerticalAlignment="Center"
-                           HorizontalAlignment="Left"/>
-            </DockPanel>
-            <DockPanel Grid.Column="0" Grid.Row="9" 
-                       HorizontalAlignment="Stretch">
-                <TextBox Text="{Binding OutputHeight}"
-                         Margin="10"/>
-            </DockPanel>
-            <DockPanel Grid.Column="1" Grid.Row="9"
-                       Margin="5">
-                <TextBlock Text="Выпуск высота"
-                           VerticalAlignment="Center"
-                           HorizontalAlignment="Left"/>
-            </DockPanel>
-            <DockPanel Grid.Column="0" Grid.Row="10" 
-                       HorizontalAlignment="Stretch">
-                <TextBox Text="{Binding OutputWidth}"
-                         Margin="10"/>
-            </DockPanel>
-            <DockPanel Grid.Column="1" Grid.Row="10"
-                       Margin="5">
-                <TextBlock Text="Выпуск ширина"
-                           VerticalAlignment="Center"
-                           HorizontalAlignment="Left"/>
-            </DockPanel>
-            <DockPanel Grid.Column="0" Grid.Row="11" 
-                       HorizontalAlignment="Stretch">
-                <TextBox Text="{Binding OutputLength}"
-                         Margin="10"/>
-            </DockPanel>
-            <DockPanel Grid.Column="1" Grid.Row="11"
-                       Margin="5">
-                <TextBlock Text="Выпуск длина"
-                           VerticalAlignment="Center"
-                           HorizontalAlignment="Left"/>
-            </DockPanel>
+        </GroupBox>
+        <Grid Grid.Column="1">
+            <GroupBox Header="Наполнение в спецификации">
+                <DockPanel>
+                    <UniformGrid DockPanel.Dock="Bottom" Rows="1" Height="20">
+                        <Button Content="Добавить"
+                                Command="{Binding CreateNewFillingCommand}"></Button>
+                        <Button Content="Удалить"
+                                Command="{Binding DeleteFillingCommand}"
+                                CommandParameter="{Binding SelectedFilling}"></Button>
+                    </UniformGrid>
+                    <ListBox ItemsSource="{Binding Fillings}" SelectedItem="{Binding SelectedFilling}">
 
-
-
-
-            <DockPanel Grid.Column="0" Grid.Row="12" 
-                       HorizontalAlignment="Right">
-                <CheckBox IsChecked="{Binding OutputLocationBottom}"
-                         Margin="10"/>
-            </DockPanel>
-            <DockPanel Grid.Column="1" Grid.Row="12"
-                       Margin="5">
-                <TextBlock Text="Выпуск снизу"
-                           VerticalAlignment="Center"
-                           HorizontalAlignment="Left"/>
-            </DockPanel>
-            <DockPanel Grid.Column="0" Grid.Row="13" 
-                       HorizontalAlignment="Right">
-                <CheckBox IsChecked="{Binding OutputLocationBottom,
-                    Converter={StaticResource InverseBooleanConverter}}"
-                         Margin="10"/>
-            </DockPanel>
-            <DockPanel Grid.Column="1" Grid.Row="13"
-                       Margin="5">
-                <TextBlock Text="Выпуск посередине"
-                           VerticalAlignment="Center"
-                           HorizontalAlignment="Left"/>
-            </DockPanel>
+                    </ListBox>
+                </DockPanel>
+            </GroupBox>
         </Grid>
         <Grid Grid.Column="2">
             <Grid.RowDefinitions>
-                <RowDefinition Height="1*"/>
-                <RowDefinition Height="2*"/>
+                <RowDefinition Height="4*"/>
+                <RowDefinition Height="5*"/>
             </Grid.RowDefinitions>
+            <GroupBox Grid.Row="0" Grid.Column="0" Header="Оборудование в спецификации">
+                <DockPanel>
+                    <UniformGrid DockPanel.Dock="Bottom" Rows="1" Height="20">
+                        <Button Content="Добавить"
+                                Command="{Binding CreateNewMechanicCommand}"></Button>
+                        <Button Content="Удалить"
+                                Command="{Binding DeleteMechanicCommand}"
+                                CommandParameter="{Binding SelectedMechanic}"></Button>
+                    </UniformGrid>
+                    <UniformGrid DockPanel.Dock="Bottom" Rows="1" Height="20">
+                        <Button Content="Редактировать"
+                                Command="{Binding EditMechanicCommand}"
+                                CommandParameter="{Binding SelectedMechanic}"></Button>
+                    </UniformGrid>
+                    <ListBox ItemsSource="{Binding Mechanics}" SelectedItem="{Binding SelectedMechanic}">
+
+                    </ListBox>
+                </DockPanel>
+            </GroupBox>
+            <GroupBox Grid.Row="1" Grid.Column="0" Header="УГО">
+                <DockPanel>
+                    <UniformGrid DockPanel.Dock="Bottom" Rows="1" Height="20">
+                        <Button Content="Добавить"
+                                Command="{Binding CreateNewSymbolicCommand}"></Button>
+                        <Button Content="Удалить"
+                                Command="{Binding DeleteSymbolicCommand}"
+                                CommandParameter="{Binding SelectedSymbolic}"></Button>
+                    </UniformGrid>
+                    <UniformGrid DockPanel.Dock="Bottom" Rows="1" Height="20">
+                        <Button Content="Занести в наполнение и оборудование"
+                                Command="{Binding ConvertToMechanicAndFillingCommand}"></Button>
+                    </UniformGrid>
+                    <ListBox ItemsSource="{Binding Symbolics}" SelectedItem="{Binding SelectedSymbolic}">
+
+                    </ListBox>
+                </DockPanel>
+            </GroupBox>
         </Grid>
     </Grid>
 </Window>

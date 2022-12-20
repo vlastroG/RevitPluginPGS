@@ -23,8 +23,6 @@ namespace MS.Commands.MEP.Enums
                     return "Воздухонагреватель";
                 case EquipmentType.Filter:
                     return "Фильтр------------";
-                case EquipmentType.Silencer:
-                    return "Шумоглушитель-----";
                 case EquipmentType.Fan:
                     return "Вентилятор--------";
                 default:

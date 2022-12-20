@@ -70,7 +70,7 @@ namespace MS.Commands.MEP
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             Installation installation = GetDataFromUser();
-
+            return Result.Cancelled;
             UIApplication uiapp = commandData.Application;
             string path = CopyDefaultFamily(installation.System);
             UIDocument uidoc = uiapp.OpenAndActivateDocument(path);
@@ -93,6 +93,10 @@ namespace MS.Commands.MEP
         {
             var ui = new DuctInstallationView();
             ui.ShowDialog();
+            if (ui.DialogResult != true)
+            {
+                return null;
+            }
             DuctEquipmentConstructorViewModel viewModel = ui.DataContext as DuctEquipmentConstructorViewModel;
             var testNameShort = viewModel.NameShort;
             var testInstallation = CreateTestInstallation();

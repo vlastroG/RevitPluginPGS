@@ -29,5 +29,15 @@ namespace MS.GUI.Windows.MEP
         {
             DialogResult = true;
         }
+
+        private void Ok_Click(object sender, RoutedEventArgs e)
+        {
+            DialogResult = true;
+        }
+
+        private void Cancel_Click(object sender, RoutedEventArgs e)
+        {
+            DialogResult = false;
+        }
     }
 }
