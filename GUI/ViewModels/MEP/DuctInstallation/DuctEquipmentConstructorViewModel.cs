@@ -4,6 +4,8 @@ using MS.Commands.MEP.Models;
 using MS.Commands.MEP.Models.Symbolic;
 using MS.GUI.CommandsBase;
 using MS.GUI.ViewModels.Base;
+using MS.GUI.Windows.MEP;
+using MS.GUI.Windows.MEP.InstallationConstructor;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -31,19 +33,6 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
             Fillings.Add(new Filling("Наполнение 3", 3));
         }
 
-        public string[] SymbolicTypes
-        {
-            get => new string[7]
-            {
-                "Вентилятор",
-                "Воздухонагреватель водяной",
-                "Воздухонагреватель электрический",
-                "Воздухоохладитель водяной",
-                "Воздухоохладитель электрический",
-                "Фильтр",
-                "Шумоглушитель"
-            };
-        }
 
         /// <summary>
         /// Полное название установки
@@ -311,6 +300,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         #region Commands for Mechanic
 
         #region Create Mechanic command
+
         /// <summary>
         /// Команда добавления оборудования
         /// </summary>
@@ -335,8 +325,28 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// <param name="p"></param>
         private void OnCreateNewMechanicCommandExecuted(object p)
         {
-            //write
-            Mechanics.Add(new Fan(100));
+            var ui = new ChooseMechanicTypeView()
+            {
+                WindowStartupLocation = WindowStartupLocation.CenterOwner
+            };
+            ui.ShowDialog();
+            ChooseMechanicTypeViewModel vm = ui.DataContext as ChooseMechanicTypeViewModel;
+            if (ui.DialogResult == true && !string.IsNullOrEmpty(vm.SelectedMechanicType))
+            {
+                switch (vm.EquipmentType)
+                {
+                    case Commands.MEP.Enums.EquipmentType.Fan:
+                        break;
+                    case Commands.MEP.Enums.EquipmentType.AirCooler:
+                        break;
+                    case Commands.MEP.Enums.EquipmentType.AirHeater:
+                        break;
+                    case Commands.MEP.Enums.EquipmentType.Filter:
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
 
         #endregion

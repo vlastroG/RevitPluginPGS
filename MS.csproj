@@ -161,7 +161,11 @@
     <Compile Include="GUI\ViewModels\AR\FinishingCreationViewModel.cs" />
     <Compile Include="GUI\ViewModels\AR\OpeningsAreaViewModel.cs" />
     <Compile Include="GUI\ViewModels\MEP\DuctInstallation\DuctEquipmentConstructorViewModel.cs" />
-    <Compile Include="GUI\ViewModels\MEP\DuctInstallation\CoolerViewModel.cs" />
+    <Compile Include="GUI\ViewModels\MEP\DuctInstallation\MechanicViewModels\CoolerViewModel.cs" />
+    <Compile Include="GUI\ViewModels\MEP\DuctInstallation\ChooseMechanicTypeViewModel.cs" />
+    <Compile Include="GUI\ViewModels\MEP\DuctInstallation\MechanicViewModels\FanViewModel.cs" />
+    <Compile Include="GUI\ViewModels\MEP\DuctInstallation\MechanicViewModels\FilterViewModel.cs" />
+    <Compile Include="GUI\ViewModels\MEP\DuctInstallation\MechanicViewModels\HeaterViewModel.cs" />
     <Compile Include="GUI\Windows\General\ElementInViews.xaml.cs">
       <DependentUpon>ElementInViews.xaml</DependentUpon>
     </Compile>
@@ -199,6 +203,9 @@
     </Compile>
     <Compile Include="GUI\Windows\KR\SettingsKRview.xaml.cs">
       <DependentUpon>SettingsKRview.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Windows\MEP\InstallationConstructor\ChooseMechanicTypeView.xaml.cs">
+      <DependentUpon>ChooseMechanicTypeView.xaml</DependentUpon>
     </Compile>
     <Compile Include="GUI\Windows\MEP\InstallationConstructor\DuctInstallationView.xaml.cs">
       <DependentUpon>DuctInstallationView.xaml</DependentUpon>
@@ -319,6 +326,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="GUI\Windows\KR\StairReinforcementView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GUI\Windows\MEP\InstallationConstructor\ChooseMechanicTypeView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

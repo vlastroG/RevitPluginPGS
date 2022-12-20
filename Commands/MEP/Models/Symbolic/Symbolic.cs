@@ -39,6 +39,9 @@ namespace MS.Commands.MEP.Models.Symbolic
         /// </summary>
         public Symbolic() : this("Фильтр", 200) { }
 
+        /// <summary>
+        /// Доступные названия типов УГО
+        /// </summary>
         public string[] SymbolicTypes
         {
             get => new string[7]
