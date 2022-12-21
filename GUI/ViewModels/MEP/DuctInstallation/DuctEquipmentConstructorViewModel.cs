@@ -1,6 +1,7 @@
 ﻿using MS.Commands.MEP.Mechanic;
 using MS.Commands.MEP.Mechanic.Impl;
 using MS.Commands.MEP.Models;
+using MS.Commands.MEP.Models.Installation;
 using MS.Commands.MEP.Models.Symbolic;
 using MS.GUI.CommandsBase;
 using MS.GUI.ViewModels.Base;
@@ -23,18 +24,32 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
     {
         public DuctEquipmentConstructorViewModel()
         {
-            Mechanics.Add(new Fan(150));
-            Mechanics.Add(new Filter(450));
-
-            Symbolics.Add(new Symbolic());
-            Symbolics.Add(new Symbolic());
-            Symbolics.Add(new Symbolic());
-
-            Fillings.Add(new Filling("Наполнение 1", 2));
-            Fillings.Add(new Filling("Наполнение 2", 1));
-            Fillings.Add(new Filling("Наполнение 3", 3));
         }
 
+
+        /// <summary>
+        /// Ширина установки
+        /// </summary>
+        private double _width;
+
+        /// <summary>
+        /// Ширина установки
+        /// </summary>
+        public double Width
+        {
+            get => _width;
+            set => Set(ref _width, value);
+        }
+
+        /// <summary>
+        /// Высота установки
+        /// </summary>
+        private double _height;
+
+        /// <summary>
+        /// Высота установки
+        /// </summary>
+        public double Height { get => _height; set => Set(ref _height, value); }
 
         /// <summary>
         /// Полное название установки
@@ -99,12 +114,12 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// <summary>
         /// Впуск высота
         /// </summary>
-        private double? _inputHeight;
+        private double _inputHeight;
 
         /// <summary>
         /// Впуск высота
         /// </summary>
-        public double? InputHeight
+        public double InputHeight
         {
             get => _inputHeight;
             set => Set(ref _inputHeight, value);
@@ -113,12 +128,12 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// <summary>
         /// Впуск ширина
         /// </summary>
-        private double? _inputWidth;
+        private double _inputWidth;
 
         /// <summary>
         /// Впуск ширина
         /// </summary>
-        public double? InputWidth
+        public double InputWidth
         {
             get => _inputWidth;
             set => Set(ref _inputWidth, value);
@@ -127,12 +142,12 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// <summary>
         /// Впуск высота
         /// </summary>
-        private double? _inputLength;
+        private double _inputLength;
 
         /// <summary>
         /// Впуск высота
         /// </summary>
-        public double? InputLength
+        public double InputLength
         {
             get => _inputLength;
             set => Set(ref _inputLength, value);
@@ -141,26 +156,98 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// <summary>
         /// Выпуск высота
         /// </summary>
-        private double? _outputHeight;
+        private double _outputHeight;
 
         /// <summary>
         /// Выпуск высота
         /// </summary>
-        public double? OutputHeight
+        public double OutputHeight
         {
             get => _outputHeight;
             set => Set(ref _outputHeight, value);
         }
 
         /// <summary>
-        /// Выпуск ширина
+        /// Отображает полученную установку
         /// </summary>
-        private double? _outputWidth;
+        /// <param name="installation"></param>
+        public void LoadInstallation(Installation installation)
+        {
+            Width = installation.Width;
+            Height = installation.Height;
+            Type = installation.Type;
+            SystemName = installation.System;
+            NameLong = installation.Name;
+            NameShort = installation.NameShort;
+            InputHeight = installation.InputHeight;
+            InputWidth = installation.InputWidth;
+            InputLength = installation.InputLength;
+            InputLocationBottom = installation.InputLocationBottom == 1;
+            OutputHeight = installation.OutputHeight;
+            OutputLength = installation.OutputLength;
+            OutputWidth = installation.OutputWidth;
+            OutputLocationBottom = installation.OutputLocationBottom == 1;
+
+            Fillings = new ObservableCollection<Filling>();
+            foreach (var filling in installation.GetFillings())
+            {
+                Fillings.Add(filling);
+            }
+
+            Mechanics = new ObservableCollection<Mechanic>();
+            foreach (var mechanicList in installation.GetMechanics())
+            {
+                foreach (var mechanic in mechanicList)
+                {
+                    Mechanics.Add(mechanic);
+                }
+            }
+
+            Symbolics = new ObservableCollection<Symbolic>();
+            foreach (var symbolic in installation.GetSymbolics())
+            {
+                Symbolics.Add(symbolic);
+            }
+        }
+
+        /// <summary>
+        /// Возвращает установку, сконструированную пользователем
+        /// </summary>
+        /// <returns></returns>
+        public Installation GetInstallation()
+        {
+            Installation installation = new Installation(Width, Height)
+            {
+                InputHeight = InputHeight,
+                InputLength = InputLength,
+                InputWidth = InputWidth,
+                InputLocationBottom = InputLocationBottom ? 1 : 0,
+                InputLocationMiddle = InputLocationBottom ? 0 : 1,
+                OutputHeight = OutputHeight,
+                OutputLength = OutputLength,
+                OutputWidth = OutputWidth,
+                OutputLocationBottom = OutputLocationBottom ? 1 : 0,
+                OutputLocationMiddle = OutputLocationBottom ? 0 : 1,
+                Name = NameLong,
+                NameShort = NameShort,
+                System = SystemName,
+                Type = Type
+            };
+            installation.AddFilling(Fillings);
+            installation.AddMechanic(Mechanics);
+            installation.AddSymbolic(Symbolics);
+            return installation;
+        }
 
         /// <summary>
         /// Выпуск ширина
         /// </summary>
-        public double? OutputWidth
+        private double _outputWidth;
+
+        /// <summary>
+        /// Выпуск ширина
+        /// </summary>
+        public double OutputWidth
         {
             get => _outputWidth;
             set => Set(ref _outputWidth, value);
@@ -169,12 +256,12 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// <summary>
         /// Выпуск длина
         /// </summary>
-        private double? _outputLength;
+        private double _outputLength;
 
         /// <summary>
         /// Выпуск длина
         /// </summary>
-        public double? OutputLength
+        public double OutputLength
         {
             get => _outputLength;
             set => Set(ref _outputLength, value);
@@ -213,7 +300,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// <summary>
         /// Коллекция элементов оборудования в установке
         /// </summary>
-        public ObservableCollection<Mechanic> Mechanics { get; } = new ObservableCollection<Mechanic>();
+        public ObservableCollection<Mechanic> Mechanics { get; private set; } = new ObservableCollection<Mechanic>();
 
         /// <summary>
         /// Выбранное оборудование
@@ -243,7 +330,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// <summary>
         /// Коллекция элементов наполнения в установке
         /// </summary>
-        public ObservableCollection<Filling> Fillings { get; } = new ObservableCollection<Filling>();
+        public ObservableCollection<Filling> Fillings { get; private set; } = new ObservableCollection<Filling>();
 
         /// <summary>
         /// Выбранное наполнение
@@ -273,7 +360,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// <summary>
         /// Коллекция элементов УГО в установке
         /// </summary>
-        public ObservableCollection<Symbolic> Symbolics { get; } = new ObservableCollection<Symbolic>();
+        public ObservableCollection<Symbolic> Symbolics { get; private set; } = new ObservableCollection<Symbolic>();
 
         /// <summary>
         /// Выбранное УГО
@@ -298,6 +385,30 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
                 }
             }
         }
+
+
+        #region Commands for Serialization Deserialization
+
+        #region Serialize
+
+        private ICommand _serialize;
+
+        public ICommand Serizlize
+            => _serialize = _serialize ?? new LambdaCommand(OnSerializeCommandExecuted, CanSerializeCommandExecute);
+
+        private bool CanSerializeCommandExecute(object p) => !string.IsNullOrWhiteSpace(SystemName);
+
+        private void OnSerializeCommandExecuted(object p)
+        {
+            //LoadInstallation();
+        }
+        #endregion
+
+        #region Deserialize
+
+        #endregion
+
+        #endregion
 
         #region Commands for Mechanic
 
@@ -338,12 +449,36 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
                 switch (vm.EquipmentType)
                 {
                     case Commands.MEP.Enums.EquipmentType.Fan:
+                        FanView fanView = new FanView() { WindowStartupLocation = WindowStartupLocation.CenterOwner };
+                        fanView.ShowDialog();
+                        if (fanView.DialogResult == true)
+                        {
+                            Mechanics.Add((fanView.DataContext as FanViewModel).GetFan());
+                        }
                         break;
                     case Commands.MEP.Enums.EquipmentType.AirCooler:
+                        CoolerView coolerView = new CoolerView() { WindowStartupLocation = WindowStartupLocation.CenterOwner };
+                        coolerView.ShowDialog();
+                        if (coolerView.DialogResult == true)
+                        {
+                            Mechanics.Add((coolerView.DataContext as CoolerViewModel).GetCooler());
+                        }
                         break;
                     case Commands.MEP.Enums.EquipmentType.AirHeater:
+                        HeaterView heaterView = new HeaterView() { WindowStartupLocation = WindowStartupLocation.CenterOwner };
+                        heaterView.ShowDialog();
+                        if (heaterView.DialogResult == true)
+                        {
+                            Mechanics.Add((heaterView.DataContext as HeaterViewModel).GetHeater());
+                        }
                         break;
                     case Commands.MEP.Enums.EquipmentType.Filter:
+                        FilterView filterView = new FilterView() { WindowStartupLocation = WindowStartupLocation.CenterOwner };
+                        filterView.ShowDialog();
+                        if (filterView.DialogResult == true)
+                        {
+                            Mechanics.Add((filterView.DataContext as FilterViewModel).GetFilter());
+                        }
                         break;
                     default:
                         break;
@@ -370,7 +505,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// </summary>
         /// <param name="p">Объект для редактирования</param>
         /// <returns></returns>
-        private static bool CanEditMechanicCommandExecute(object p) => true;
+        private static bool CanEditMechanicCommandExecute(object p) => p is Mechanic;
 
         /// <summary>
         /// Действие, при редактировании оборудования
@@ -391,8 +526,8 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
                     }
                     break;
                 case Commands.MEP.Enums.EquipmentType.AirCooler:
-                    FanViewModel coolerVM = new FanViewModel((Fan)mechanic);
-                    FanView coolerView = new FanView() { DataContext = coolerVM, WindowStartupLocation = WindowStartupLocation.CenterOwner };
+                    CoolerViewModel coolerVM = new CoolerViewModel((Cooler)mechanic);
+                    CoolerView coolerView = new CoolerView() { DataContext = coolerVM, WindowStartupLocation = WindowStartupLocation.CenterOwner };
                     coolerView.ShowDialog();
                     if (coolerView.DialogResult == true)
                     {
@@ -400,8 +535,22 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
                     }
                     break;
                 case Commands.MEP.Enums.EquipmentType.AirHeater:
+                    HeaterViewModel heaterVM = new HeaterViewModel((Heater)mechanic);
+                    HeaterView heaterView = new HeaterView() { DataContext = heaterVM, WindowStartupLocation = WindowStartupLocation.CenterOwner };
+                    heaterView.ShowDialog();
+                    if (heaterView.DialogResult == true)
+                    {
+                        Mechanics.UpdateEntity((heaterView.DataContext as HeaterViewModel).GetHeater(mechanic.Guid));
+                    }
                     break;
                 case Commands.MEP.Enums.EquipmentType.Filter:
+                    FilterViewModel filterVM = new FilterViewModel((Filter)mechanic);
+                    FilterView filterView = new FilterView() { DataContext = filterVM, WindowStartupLocation = WindowStartupLocation.CenterOwner };
+                    filterView.ShowDialog();
+                    if (filterView.DialogResult == true)
+                    {
+                        Mechanics.UpdateEntity((filterView.DataContext as FilterViewModel).GetFilter(mechanic.Guid));
+                    }
                     break;
                 default:
                     break;
@@ -580,19 +729,137 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
 
         #region Convert to Mechanic and Filling command
 
+        /// <summary>
+        /// Копирование элементов из списка УГО в спискки оборудования и наполнения
+        /// </summary>
         private ICommand _convertToMechanicAndFilling;
 
+        /// <summary>
+        /// Копирование элементов из списка УГО в спискки оборудования и наполнения
+        /// </summary>
         public ICommand ConvertToMechanicAndFillingCommand
             => _convertToMechanicAndFilling = _convertToMechanicAndFilling ?? new LambdaCommand(OnConvertToMechanicAndFillingCommandExecuted, CanConvertToMechanicAndFillingCommandExecute);
 
+        /// <summary>
+        /// Команду можно выполнить, только если списки оборудвоания и наполнения пустые
+        /// </summary>
+        /// <param name="p"></param>
+        /// <returns></returns>
         private bool CanConvertToMechanicAndFillingCommandExecute(object p)
         {
             return (Fillings.Count + Mechanics.Count) == 0;
         }
 
+        /// <summary>
+        /// Копирование заполненных элементов из списка УГО в списки наполнения и оборудования
+        /// </summary>
+        /// <param name="p"></param>
         private void OnConvertToMechanicAndFillingCommandExecuted(object p)
         {
-            //
+            foreach (var item in Symbolics)
+            {
+                switch (item.Name)
+                {
+                    case "Вентилятор":
+                        Mechanics.Add(new Fan(item.Length));
+                        break;
+                    case "Воздухонагреватель водяной":
+                    case "Воздухонагреватель электрический":
+                        Mechanics.Add(new Heater(item.Length));
+                        break;
+                    case "Воздухоохладитель водяной":
+                    case "Воздухоохладитель электрический":
+                        Mechanics.Add(new Cooler(item.Length));
+                        break;
+                    case "Фильтр":
+                        Mechanics.Add(new Filter(item.Length));
+                        break;
+                    case "Шумоглушитель":
+                        Fillings.Add(new Filling(item.Name));
+                        break;
+                    default:
+                        break;
+                }
+            };
+        }
+
+        #endregion
+
+        #region MoveUp command
+
+        /// <summary>
+        /// Передвижение элемента списка на 1 позицию ближе к началу списка
+        /// </summary>
+        private ICommand _moveUp;
+
+        /// <summary>
+        /// Передвижение элемента списка на 1 позицию ближе к началу списка
+        /// </summary>
+        public ICommand MoveUpCommand
+            => _moveUp = _moveUp ?? new LambdaCommand(OnMoveUpCommandExecuted, CanMoveUpCommandExecute);
+
+        /// <summary>
+        /// Команду можно выполнить, только если выбранный элемент не первый
+        /// </summary>
+        /// <param name="p"></param>
+        /// <returns></returns>
+        private bool CanMoveUpCommandExecute(object p)
+        {
+            var symbolic = (Symbolic)p;
+            return !(symbolic is null) && Symbolics.IndexOf(symbolic) > 0;
+        }
+
+        /// <summary>
+        /// Передвижение элемента списка на 1 позицию ближе к началу списка
+        /// </summary>
+        /// <param name="p"></param>
+        private void OnMoveUpCommandExecuted(object p)
+        {
+            var indexFrom = Symbolics.IndexOf((Symbolic)p);
+            var indexTo = indexFrom - 1;
+            var temp = Symbolics[indexTo];
+            Symbolics[indexTo] = Symbolics[indexFrom];
+            Symbolics[indexFrom] = temp;
+            SelectedSymbolic = Symbolics[indexTo];
+        }
+        #endregion
+
+        #region MoveDown Command
+
+        /// <summary>
+        /// Передвинуть элемент на 1 поизцию ближе к концу списка
+        /// </summary>
+        private ICommand _moveDown;
+
+        /// <summary>
+        /// Передвинуть элемент на 1 поизцию ближе к концу списка
+        /// </summary>
+        public ICommand MoveDownCommand
+            => _moveDown = _moveDown ?? new LambdaCommand(OnMoveDownCommandExecuted, CanMoveDownCommandExecute);
+
+        /// <summary>
+        /// Команду можно выполнить, только если выбранный элемент не последний
+        /// </summary>
+        /// <param name="p"></param>
+        /// <returns></returns>
+        private bool CanMoveDownCommandExecute(object p)
+        {
+            var symbolic = (Symbolic)p;
+            return !(symbolic is null) && Symbolics.IndexOf(symbolic) < Symbolics.Count - 1;
+        }
+
+        /// <summary>
+        /// Передвижение элемента на 1 позицию ближе к концу списка
+        /// </summary>
+        /// <param name="p"></param>
+        private void OnMoveDownCommandExecuted(object p)
+        {
+            var indexFrom = Symbolics.IndexOf((Symbolic)p);
+            var indexTo = indexFrom + 1;
+            var temp = Symbolics[indexTo];
+            Symbolics[indexTo] = Symbolics[indexFrom];
+            Symbolics[indexFrom] = temp;
+            SelectedSymbolic = Symbolics[indexTo];
         }
 
         #endregion

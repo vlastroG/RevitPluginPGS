@@ -8,13 +8,14 @@ using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using System.ComponentModel;
 using MS.Commands.Models.Interfaces;
+using Newtonsoft.Json;
 
 namespace MS.Commands.MEP.Mechanic
 {
     /// <summary>
     /// Оборудование в составе вентиляционной установки
     /// </summary>
-    public abstract class Mechanic : IMechanic, IIdentifiable
+    public class Mechanic : IMechanic, IIdentifiable
     {
         /// <summary>
         /// Длина оборудования в миллиметрах
@@ -32,6 +33,7 @@ namespace MS.Commands.MEP.Mechanic
         /// <summary>
         /// Тип оборудования
         /// </summary>
+        [JsonProperty]
         private protected readonly EquipmentType _equipmentType;
 
         /// <summary>
@@ -47,6 +49,7 @@ namespace MS.Commands.MEP.Mechanic
 
         public Guid Guid => _guid;
 
+
         /// <summary>
         /// Конструктор оборудования вентиляционной установки
         /// </summary>
@@ -60,6 +63,7 @@ namespace MS.Commands.MEP.Mechanic
         /// <param name="equipmentType">Тип оборудования</param>
         /// <param name="length">Длина оборудования в мм</param>
         /// <param name="guid">Идентификатор</param>
+        [JsonConstructor]
         public Mechanic(EquipmentType equipmentType, double length, Guid guid)
         {
             _equipmentType = equipmentType;

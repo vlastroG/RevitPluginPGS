@@ -74,6 +74,7 @@
                         <RowDefinition/>
                         <RowDefinition/>
                         <RowDefinition/>
+                        <RowDefinition/>
                     </Grid.RowDefinitions>
                     <DockPanel Grid.Column="0" Grid.Row="0">
                         <TextBox Text="{Binding NameLong}"/>
@@ -161,6 +162,18 @@
                     <DockPanel Grid.Column="1" Grid.Row="13">
                         <TextBlock Text="Выпуск посередине"/>
                     </DockPanel>
+                    <DockPanel Grid.Column="0" Grid.Row="14">
+                        <TextBox Text="{Binding Width}"/>
+                    </DockPanel>
+                    <DockPanel Grid.Column="1" Grid.Row="14">
+                        <TextBlock Text="Ширина установки"/>
+                    </DockPanel>
+                    <DockPanel Grid.Column="0" Grid.Row="15">
+                        <TextBox Text="{Binding Height}"/>
+                    </DockPanel>
+                    <DockPanel Grid.Column="1" Grid.Row="15">
+                        <TextBlock Text="Высота установки"/>
+                    </DockPanel>
                 </Grid>
                 <UniformGrid DockPanel.Dock="Bottom" Rows="1" Height="20" VerticalAlignment="Bottom">
                     <Button Content="Создать установку" Name="Ok" Click="Ok_Click"></Button>
@@ -246,7 +259,13 @@
             </GroupBox>
             <GroupBox Grid.Row="1" Grid.Column="0" Header="УГО">
                 <DockPanel>
-                    <UniformGrid DockPanel.Dock="Bottom" Rows="1" Height="20">
+                    <UniformGrid DockPanel.Dock="Bottom" Rows="2" Height="40">
+                        <Button Content="Вверх"
+                                Command="{Binding MoveUpCommand}"
+                                CommandParameter="{Binding SelectedSymbolic}"/>
+                        <Button Content="Вниз"
+                                Command="{Binding MoveDownCommand}"
+                                CommandParameter="{Binding SelectedSymbolic}"/>
                         <Button Content="Добавить"
                                 Command="{Binding CreateNewSymbolicCommand}"></Button>
                         <Button Content="Удалить"

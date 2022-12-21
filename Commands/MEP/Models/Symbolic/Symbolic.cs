@@ -1,4 +1,5 @@
 ﻿using MS.Commands.Models.Interfaces;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,6 +29,7 @@ namespace MS.Commands.MEP.Models.Symbolic
         /// </summary>
         /// <param name="name">Наименование типоразмера УГО в родительском семействе установки</param>
         /// <param name="length">Длина УГО</param>
+        [JsonConstructor]
         public Symbolic(string name, double length)
         {
             _name = name;
@@ -43,6 +45,7 @@ namespace MS.Commands.MEP.Models.Symbolic
         /// <summary>
         /// Доступные названия типов УГО
         /// </summary>
+        [JsonIgnore]
         public string[] SymbolicTypes
         {
             get => new string[7]

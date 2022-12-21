@@ -1,4 +1,5 @@
 ﻿using MS.Commands.Models.Interfaces;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,6 +26,7 @@ namespace MS.Commands.MEP.Models
         /// </summary>
         /// <param name="name">ADSK_Наименование</param>
         /// <param name="count">ADSK_Количество</param>
+        [JsonConstructor]
         public Filling(string name, double count)
         {
             _name = name;

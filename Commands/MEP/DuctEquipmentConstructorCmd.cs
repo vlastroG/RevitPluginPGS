@@ -7,6 +7,7 @@ using MS.Commands.MEP.Enums;
 using MS.Commands.MEP.Models;
 using MS.Commands.MEP.Models.Installation;
 using MS.Commands.MEP.Models.Symbolic;
+using MS.Commands.MEP.Services;
 using MS.GUI.ViewModels.MEP.DuctInstallation;
 using MS.GUI.Windows.MEP;
 using MS.Shared;
@@ -69,8 +70,20 @@ namespace MS.Commands.MEP
 
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
-            Installation installation = GetDataFromUser();
-            return Result.Cancelled;
+            Installation installation = CreateTestInstallation();
+
+            string pathSerizlization = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
+            string savedPath = InstallationCreationService.SerializeInstallation(installation, Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
+
+            Installation inst1 = InstallationCreationService.DeserializeInstallation(savedPath);
+
+            return Result.Succeeded;
+            GetDataFromUser();
+            if (installation is null)
+            {
+                return Result.Cancelled;
+            }
             UIApplication uiapp = commandData.Application;
             string path = CopyDefaultFamily(installation.System);
             UIDocument uidoc = uiapp.OpenAndActivateDocument(path);
@@ -98,9 +111,7 @@ namespace MS.Commands.MEP
                 return null;
             }
             DuctEquipmentConstructorViewModel viewModel = ui.DataContext as DuctEquipmentConstructorViewModel;
-            var testNameShort = viewModel.NameShort;
-            var testInstallation = CreateTestInstallation();
-            return testInstallation;
+            return viewModel.GetInstallation();
         }
 
         /// <summary>

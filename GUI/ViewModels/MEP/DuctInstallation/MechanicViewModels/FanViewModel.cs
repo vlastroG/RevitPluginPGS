@@ -33,6 +33,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
             Mark = fan.Mark;
             RatedPower = fan.RatedPower;
             Type = fan.Type;
+            Length = fan.Length;
         }
 
 
