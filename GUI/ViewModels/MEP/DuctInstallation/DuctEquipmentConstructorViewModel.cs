@@ -3,6 +3,7 @@ using MS.Commands.MEP.Mechanic.Impl;
 using MS.Commands.MEP.Models;
 using MS.Commands.MEP.Models.Installation;
 using MS.Commands.MEP.Models.Symbolic;
+using MS.Commands.MEP.Services;
 using MS.GUI.CommandsBase;
 using MS.GUI.ViewModels.Base;
 using MS.GUI.Windows.MEP;
@@ -188,13 +189,13 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
             OutputWidth = installation.OutputWidth;
             OutputLocationBottom = installation.OutputLocationBottom == 1;
 
-            Fillings = new ObservableCollection<Filling>();
+            Fillings.Clear();
             foreach (var filling in installation.GetFillings())
             {
                 Fillings.Add(filling);
             }
 
-            Mechanics = new ObservableCollection<Mechanic>();
+            Mechanics.Clear();
             foreach (var mechanicList in installation.GetMechanics())
             {
                 foreach (var mechanic in mechanicList)
@@ -203,7 +204,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
                 }
             }
 
-            Symbolics = new ObservableCollection<Symbolic>();
+            Symbolics.Clear();
             foreach (var symbolic in installation.GetSymbolics())
             {
                 Symbolics.Add(symbolic);
@@ -396,15 +397,28 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         public ICommand Serizlize
             => _serialize = _serialize ?? new LambdaCommand(OnSerializeCommandExecuted, CanSerializeCommandExecute);
 
-        private bool CanSerializeCommandExecute(object p) => !string.IsNullOrWhiteSpace(SystemName);
+        private bool CanSerializeCommandExecute(object p) => true;
 
         private void OnSerializeCommandExecuted(object p)
         {
-            //LoadInstallation();
+            InstallationCreationService.SerializeInstallation(GetInstallation());
         }
         #endregion
 
         #region Deserialize
+
+        private ICommand _deserialize;
+
+        public ICommand Deserialize
+            => _deserialize = _deserialize ?? new LambdaCommand(OnDeserializationCommandExecuted, CanDeserializeCommandExecute);
+
+        private bool CanDeserializeCommandExecute(object p) => true;
+
+        private void OnDeserializationCommandExecuted(object p)
+        {
+            Installation installation = InstallationCreationService.DeserializeInstallation();
+            LoadInstallation(installation);
+        }
 
         #endregion
 

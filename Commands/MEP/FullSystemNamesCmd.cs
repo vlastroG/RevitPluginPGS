@@ -105,7 +105,7 @@ namespace MS.Commands.MEP
         /// <returns>Кортеж строк. Если произошла отмена или ошибка, то null</returns>
         private List<(string ShortName, string FullName)> GetShortAndFullTuple(int sheetNumber)
         {
-            string excelPath = GetPath(ref _startPath, "Excel Files|*.xlsx", "Выберите файл таблицы Excel", ".xlsx");
+            string excelPath = GetFilePath(ref _startPath, "Excel Files|*.xlsx", "Выберите файл таблицы Excel", ".xlsx");
             if (String.IsNullOrEmpty(excelPath)) return null;
             List<(string ShortName, string FullName)> shortNameAndFullNameTuple = new List<(string ShortName, string FullName)>();
             using (Excel excel = new Excel(excelPath, sheetNumber))

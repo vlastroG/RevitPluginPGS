@@ -10,7 +10,7 @@
              xmlns:vmf="clr-namespce:MS.Commands.MEP.Models"
              xmlns:local="clr-namespace:MS.GUI.Windows.MEP"
              mc:Ignorable="d" 
-             d:DesignHeight="500" d:DesignWidth="900" Width="1000" Height="500" MinWidth="600" MinHeight="300"
+             d:DesignHeight="550" d:DesignWidth="900" Width="1000" Height="550" MinWidth="600" MinHeight="300"
         Title="Конструктор установок">
     <Window.DataContext>
         <vm:DuctEquipmentConstructorViewModel/>
@@ -175,7 +175,9 @@
                         <TextBlock Text="Высота установки"/>
                     </DockPanel>
                 </Grid>
-                <UniformGrid DockPanel.Dock="Bottom" Rows="1" Height="20" VerticalAlignment="Bottom">
+                <UniformGrid DockPanel.Dock="Bottom" Rows="2" Height="40" VerticalAlignment="Bottom">
+                    <Button Content="Загрузить настройки" Command="{Binding Deserialize}"/>
+                    <Button Content="Сохранить настройки" Command="{Binding Serizlize}"/>
                     <Button Content="Создать установку" Name="Ok" Click="Ok_Click"></Button>
                     <Button Content="Отмена" Name="Cancel" Click="Cancel_Click"></Button>
                 </UniformGrid>

@@ -1,4 +1,5 @@
 ﻿using MS.Commands.MEP.Models.Installation;
+using MS.Utilites;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -15,25 +16,42 @@ namespace MS.Commands.MEP.Services
     public static class InstallationCreationService
     {
         /// <summary>
+        /// Стартовая директория для работы с сериализованными установками
+        /// </summary>
+        private static string @_serializationStartPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
+
+        /// <summary>
         /// Сериализует объект установки в JSON в указанную директорию с названием, соответствующим названию системы.
         /// </summary>
         /// <param name="installation">Сериализуемая установка</param>
-        /// <param name="dirPath">Путь к директории</param>
-        public static string SerializeInstallation(Installation installation, string @dirPath)
+        public static string SerializeInstallation(Installation installation)
         {
-            string path = @dirPath + $@"\{installation.System}.json";
+            var filePath = WorkWithPath.GetFilePath(
+                ref @_serializationStartPath,
+                "Json файлы (*.json)|*.json|Текстовые файлы (*.txt)|*.txt",
+                "Перейдите в папку и напишите название файла без расширения",
+                string.Empty);
+
             string jsonString = JsonConvert.SerializeObject(installation);
-            File.WriteAllText(path, jsonString);
-            return path;
+            File.WriteAllText(filePath, jsonString);
+            return filePath;
         }
+
 
         /// <summary>
         /// Десериализует установку из указанного файла
         /// </summary>
         /// <param name="filePath">JSON файл установки</param>
         /// <returns>Десериализованный объект установки</returns>
-        public static Installation DeserializeInstallation(string @filePath)
+        public static Installation DeserializeInstallation()
         {
+            var filePath = $@"{WorkWithPath.GetFilePath(
+                ref @_serializationStartPath,
+                "Json файлы (*.json)|*.json|Текстовые файлы (*.txt)|*.txt",
+                "Выберите Json файл с вентиляционной установкой",
+                string.Empty)}";
+
             string jsonString = File.ReadAllText(@filePath);
             return JsonConvert.DeserializeObject<Installation>(jsonString);
         }

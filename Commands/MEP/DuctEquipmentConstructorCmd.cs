@@ -70,16 +70,8 @@ namespace MS.Commands.MEP
 
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
-            Installation installation = CreateTestInstallation();
+            Installation installation = GetDataFromUser();
 
-            string pathSerizlization = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-
-            string savedPath = InstallationCreationService.SerializeInstallation(installation, Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
-
-            Installation inst1 = InstallationCreationService.DeserializeInstallation(savedPath);
-
-            return Result.Succeeded;
-            GetDataFromUser();
             if (installation is null)
             {
                 return Result.Cancelled;
