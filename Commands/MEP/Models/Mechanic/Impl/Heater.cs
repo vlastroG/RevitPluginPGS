@@ -19,6 +19,7 @@ namespace MS.Commands.MEP.Mechanic.Impl
         /// <param name="length">Длина воздухонагревателя в миллиметрах</param>
         public Heater(double length) : base(EquipmentType.AirHeater, length) { }
 
+        public Heater(Guid guid, double length) : base(EquipmentType.AirHeater, length, guid) { }
 
         /// <summary>
         /// PGS_ВоздухонагревательТип

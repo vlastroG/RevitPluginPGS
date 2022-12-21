@@ -10,7 +10,7 @@ namespace MS.Commands.MEP.Models.Symbolic
     /// <summary>
     /// УГО элемента вентиляционной установки
     /// </summary>
-    public class Symbolic : ISymbolic, IEntity
+    public class Symbolic : ISymbolic
     {
         /// <summary>
         /// Название УГО
@@ -39,6 +39,7 @@ namespace MS.Commands.MEP.Models.Symbolic
         /// </summary>
         public Symbolic() : this("Фильтр", 200) { }
 
+
         /// <summary>
         /// Доступные названия типов УГО
         /// </summary>
@@ -59,7 +60,5 @@ namespace MS.Commands.MEP.Models.Symbolic
         public string Name { get => _name; set => _name = value; }
 
         public double Length { get => _length; set => _length = value; }
-
-        public int Id { get; set; }
     }
 }

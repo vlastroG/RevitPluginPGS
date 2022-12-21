@@ -1,4 +1,5 @@
-﻿using MS.GUI.ViewModels.Base;
+﻿using MS.Commands.MEP.Mechanic.Impl;
+using MS.GUI.ViewModels.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,28 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
     /// </summary>
     public class HeaterViewModel : ViewModelBase
     {
+        public HeaterViewModel()
+        {
+
+        }
+
+        /// <summary>
+        /// Конструктор модели представления воздухонагревателя по заданному воздухонагревателю
+        /// </summary>
+        /// <param name="heater"></param>
+        public HeaterViewModel(Heater heater)
+        {
+            AirPressureLoss = heater.AirPressureLoss;
+            Count = heater.Count;
+            Length = heater.Length;
+            Power = heater.Power;
+            PowerHeat = heater.PowerHeat;
+            TemperatureIn = heater.TemperatureIn;
+            TemperatureOut = heater.TemperatureOut;
+            Type = heater.Type;
+        }
+
+
         private string _Type;
         /// <summary>
         /// PGS_ВоздухонагревательТип
@@ -59,5 +82,36 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// ADSK_Потеря давления воздуха в нагревателе
         /// </summary>
         public double? AirPressureLoss { get => _AirPressureLoss; set => Set(ref _AirPressureLoss, value); }
+
+
+        /// <summary>
+        /// Длина
+        /// </summary>
+        private double _length;
+
+        /// <summary>
+        /// Длина
+        /// </summary>
+        public double Length { get => _length; set => Set(ref _length, value); }
+
+
+        public Heater GetHeater()
+        {
+            return GetHeater(Guid.NewGuid());
+        }
+
+        public Heater GetHeater(Guid guid)
+        {
+            return new Heater(guid, Length)
+            {
+                AirPressureLoss = AirPressureLoss,
+                Count = Count,
+                Power = Power,
+                PowerHeat = PowerHeat,
+                TemperatureIn = TemperatureIn,
+                TemperatureOut = TemperatureOut,
+                Type = Type
+            };
+        }
     }
 }

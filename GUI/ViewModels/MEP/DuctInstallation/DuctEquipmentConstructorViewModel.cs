@@ -6,6 +6,8 @@ using MS.GUI.CommandsBase;
 using MS.GUI.ViewModels.Base;
 using MS.GUI.Windows.MEP;
 using MS.GUI.Windows.MEP.InstallationConstructor;
+using MS.GUI.Windows.MEP.InstallationConstructor.MechanicViews;
+using MS.Utilites.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -368,7 +370,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// </summary>
         /// <param name="p">Объект для редактирования</param>
         /// <returns></returns>
-        private static bool CanEditMechanicCommandExecute(object p) => p is Mechanic;
+        private static bool CanEditMechanicCommandExecute(object p) => true;
 
         /// <summary>
         /// Действие, при редактировании оборудования
@@ -376,8 +378,34 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// <param name="p">Объект для редактирвоания</param>
         private void OnEditMechanicCommandExecuted(object p)
         {
-            //write
-            MessageBox.Show("Оборудование отредактировано", "Заголовок");
+            var mechanic = (Mechanic)p;
+            switch (mechanic.EquipmentType)
+            {
+                case Commands.MEP.Enums.EquipmentType.Fan:
+                    FanViewModel fanVM = new FanViewModel((Fan)mechanic);
+                    FanView fanView = new FanView() { DataContext = fanVM, WindowStartupLocation = WindowStartupLocation.CenterOwner };
+                    fanView.ShowDialog();
+                    if (fanView.DialogResult == true)
+                    {
+                        Mechanics.UpdateEntity((fanView.DataContext as FanViewModel).GetFan(mechanic.Guid));
+                    }
+                    break;
+                case Commands.MEP.Enums.EquipmentType.AirCooler:
+                    FanViewModel coolerVM = new FanViewModel((Fan)mechanic);
+                    FanView coolerView = new FanView() { DataContext = coolerVM, WindowStartupLocation = WindowStartupLocation.CenterOwner };
+                    coolerView.ShowDialog();
+                    if (coolerView.DialogResult == true)
+                    {
+                        Mechanics.UpdateEntity((coolerView.DataContext as CoolerViewModel).GetCooler(mechanic.Guid));
+                    }
+                    break;
+                case Commands.MEP.Enums.EquipmentType.AirHeater:
+                    break;
+                case Commands.MEP.Enums.EquipmentType.Filter:
+                    break;
+                default:
+                    break;
+            }
         }
         #endregion
 

@@ -1,4 +1,5 @@
-﻿using MS.GUI.ViewModels.Base;
+﻿using MS.Commands.MEP.Mechanic.Impl;
+using MS.GUI.ViewModels.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,25 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
     /// </summary>
     public class FilterViewModel : ViewModelBase
     {
+        public FilterViewModel()
+        {
+
+        }
+
+        /// <summary>
+        /// Конструктор модели представления фильтра по заданному фильтру
+        /// </summary>
+        /// <param name="filter"></param>
+        public FilterViewModel(Filter filter)
+        {
+            Count = filter.Count;
+            Length = filter.Length;
+            Note = filter.Note;
+            Type = filter.Type;
+            Windage = filter.Windage;
+        }
+
+
         private string _Type;
 
         /// <summary>
@@ -42,5 +62,33 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// ADSK_Примечание
         /// </summary>
         public string Note { get => _Note; set => Set(ref _Note, value); }
+
+
+        /// <summary>
+        /// Длина
+        /// </summary>
+        private double _length;
+
+        /// <summary>
+        /// Длина
+        /// </summary>
+        public double Length { get => _length; set => Set(ref _length, value); }
+
+
+        public Filter GetFilter()
+        {
+            return GetFilter(Guid.NewGuid());
+        }
+
+        public Filter GetFilter(Guid guid)
+        {
+            return new Filter(guid, Length)
+            {
+                Count = Count,
+                Note = Note,
+                Type = Type,
+                Windage = Windage
+            };
+        }
     }
 }

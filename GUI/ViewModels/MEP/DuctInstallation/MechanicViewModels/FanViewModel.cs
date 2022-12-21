@@ -1,4 +1,5 @@
-﻿using MS.GUI.ViewModels.Base;
+﻿using MS.Commands.MEP.Mechanic.Impl;
+using MS.GUI.ViewModels.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,29 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
     /// </summary>
     public class FanViewModel : ViewModelBase
     {
+        public FanViewModel()
+        {
+
+        }
+
+        /// <summary>
+        /// Конструктор модели представления вентилятора по заданному вентилятору
+        /// </summary>
+        /// <param name="fan"></param>
+        public FanViewModel(Fan fan)
+        {
+            AirFlow = fan.AirFlow;
+            AirPressureLoss = fan.AirPressureLoss;
+            Count = fan.Count;
+            EngineSpeed = fan.EngineSpeed;
+            ExplosionProofType = fan.ExplosionProofType;
+            FanSpeed = fan.FanSpeed;
+            Mark = fan.Mark;
+            RatedPower = fan.RatedPower;
+            Type = fan.Type;
+        }
+
+
         private string _Mark;
 
         /// <summary>
@@ -82,5 +106,38 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// ADSK_Количество
         /// </summary>
         public double? Count { get => _Count; set => Set(ref _Count, value); }
+
+
+        /// <summary>
+        /// Длина
+        /// </summary>
+        private double _length;
+
+        /// <summary>
+        /// Длина
+        /// </summary>
+        public double Length { get => _length; set => Set(ref _length, value); }
+
+
+        public Fan GetFan()
+        {
+            return GetFan(Guid.NewGuid());
+        }
+
+        public Fan GetFan(Guid guid)
+        {
+            return new Fan(guid, Length)
+            {
+                AirFlow = AirFlow,
+                Count = Count,
+                AirPressureLoss = AirPressureLoss,
+                EngineSpeed = EngineSpeed,
+                ExplosionProofType = ExplosionProofType,
+                FanSpeed = FanSpeed,
+                Mark = Mark,
+                RatedPower = RatedPower,
+                Type = Type
+            };
+        }
     }
 }

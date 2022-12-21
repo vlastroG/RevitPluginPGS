@@ -4,9 +4,115 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:MS.GUI.Windows.MEP.InstallationConstructor.MechanicViews"
+             xmlns:vm="clr-namespace:MS.GUI.ViewModels.MEP.DuctInstallation"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="350" d:DesignWidth="400" Width="400" Height="350" MinWidth="300" MinHeight="350">
+    <Window.DataContext>
+        <vm:FanViewModel/>
+    </Window.DataContext>
     <Grid>
-            
+        <GroupBox Header="Параметры вентилятора">
+            <DockPanel>
+                <Grid DockPanel.Dock="Top" Margin="5">
+                    <Grid.Resources>
+                        <Style TargetType="DockPanel">
+                            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                            <Setter Property="Margin" Value="3,0"/>
+                        </Style>
+                        <Style TargetType="TextBox">
+                            <Setter Property="VerticalAlignment" Value="Center"/>
+                            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                        </Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="VerticalAlignment" Value="Center"/>
+                            <Setter Property="Margin" Value="5,0,0,0"/>
+                        </Style>
+                        <Style TargetType="RowDefinition">
+                            <Setter Property="Height" Value="25"/>
+                        </Style>
+                    </Grid.Resources>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <DockPanel Grid.Row="0" Grid.Column="0">
+                        <TextBox Text="{Binding Mark}"/>
+                    </DockPanel>
+                    <DockPanel Grid.Row="0" Grid.Column="1">
+                        <TextBlock Text="Марка"/>
+                    </DockPanel>
+                    <DockPanel Grid.Row="1" Grid.Column="0">
+                        <TextBox Text="{Binding Type}"/>
+                    </DockPanel>
+                    <DockPanel Grid.Row="1" Grid.Column="1">
+                        <TextBlock Text="Типоразмер"/>
+                    </DockPanel>
+                    <DockPanel Grid.Row="2" Grid.Column="0">
+                        <TextBox Text="{Binding AirFlow}"/>
+                    </DockPanel>
+                    <DockPanel Grid.Row="2" Grid.Column="1">
+                        <TextBlock Text="Расход воздуха"/>
+                    </DockPanel>
+                    <DockPanel Grid.Row="3" Grid.Column="0">
+                        <TextBox Text="{Binding AirPressureLoss}"/>
+                    </DockPanel>
+                    <DockPanel Grid.Row="3" Grid.Column="1">
+                        <TextBlock Text="Потери давления"/>
+                    </DockPanel>
+                    <DockPanel Grid.Row="4" Grid.Column="0">
+                        <TextBox Text="{Binding FanSpeed}"/>
+                    </DockPanel>
+                    <DockPanel Grid.Row="4" Grid.Column="1">
+                        <TextBlock Text="Частота вращения вентилятора"/>
+                    </DockPanel>
+                    <DockPanel Grid.Row="5" Grid.Column="0">
+                        <TextBox Text="{Binding ExplosionProofType}"/>
+                    </DockPanel>
+                    <DockPanel Grid.Row="5" Grid.Column="1">
+                        <TextBlock Text="Тип по взрывозащите"/>
+                    </DockPanel>
+                    <DockPanel Grid.Row="6" Grid.Column="0">
+                        <TextBox Text="{Binding RatedPower}"/>
+                    </DockPanel>
+                    <DockPanel Grid.Row="6" Grid.Column="1">
+                        <TextBlock Text="Номинальная мощность"/>
+                    </DockPanel>
+                    <DockPanel Grid.Row="7" Grid.Column="0">
+                        <TextBox Text="{Binding EngineSpeed}"/>
+                    </DockPanel>
+                    <DockPanel Grid.Row="7" Grid.Column="1">
+                        <TextBlock Text="Частота вращения двигателя"/>
+                    </DockPanel>
+                    <DockPanel Grid.Row="8" Grid.Column="0">
+                        <TextBox Text="{Binding Count}"/>
+                    </DockPanel>
+                    <DockPanel Grid.Row="8" Grid.Column="1">
+                        <TextBlock Text="Количество"/>
+                    </DockPanel>
+                    <DockPanel Grid.Row="9" Grid.Column="0">
+                        <TextBox Text="{Binding Length}"/>
+                    </DockPanel>
+                    <DockPanel Grid.Row="9" Grid.Column="1">
+                        <TextBlock Text="Длина"/>
+                    </DockPanel>
+                </Grid>
+                <UniformGrid DockPanel.Dock="Bottom" Height="20" Rows="1" VerticalAlignment="Bottom">
+                    <Button Content="Ок" Name="Ok" Click="Ok_Click"/>
+                    <Button Content="Отмена" Name="Cancel" Click="Cancel_Click"/>
+                </UniformGrid>
+            </DockPanel>
+        </GroupBox>
     </Grid>
 </Window>

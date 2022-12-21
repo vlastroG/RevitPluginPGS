@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MS.Commands.MEP.Models
 {
-    public class Filling : IEntity
+    public class Filling
     {
         /// <summary>
         /// ADSK_Наименование
@@ -55,7 +55,5 @@ namespace MS.Commands.MEP.Models
             get => _count;
             set => _count = value;
         }
-
-        public int Id { get; set; }
     }
 }

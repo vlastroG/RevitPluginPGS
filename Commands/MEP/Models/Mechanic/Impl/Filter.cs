@@ -19,6 +19,7 @@ namespace MS.Commands.MEP.Mechanic.Impl
         /// <param name="length">Длина фильтра</param>
         public Filter(double length) : base(EquipmentType.Filter, length) { }
 
+        public Filter(Guid guid, double length) : base(EquipmentType.Filter, length, guid) { }
 
         /// <summary>
         /// PGS_ФильтрТип

@@ -14,7 +14,7 @@ namespace MS.Commands.MEP.Mechanic
     /// <summary>
     /// Оборудование в составе вентиляционной установки
     /// </summary>
-    public abstract class Mechanic : IMechanic, IEntity
+    public abstract class Mechanic : IMechanic, IIdentifiable
     {
         /// <summary>
         /// Длина оборудования в миллиметрах
@@ -39,18 +39,32 @@ namespace MS.Commands.MEP.Mechanic
         /// </summary>
         public EquipmentType EquipmentType => _equipmentType;
 
-        public int Id { get; set; }
 
+        /// <summary>
+        /// Идентификатор оборудования
+        /// </summary>
+        private readonly Guid _guid;
+
+        public Guid Guid => _guid;
 
         /// <summary>
         /// Конструктор оборудования вентиляционной установки
         /// </summary>
         /// <param name="equipmentType">Тип оборудования</param>
         /// <param name="length">Длина оборудования в мм</param>
-        public Mechanic(EquipmentType equipmentType, double length)
+        public Mechanic(EquipmentType equipmentType, double length) : this(equipmentType, length, Guid.NewGuid()) { }
+
+        /// <summary>
+        /// Конструктор оборудования вентиляционной установки
+        /// </summary>
+        /// <param name="equipmentType">Тип оборудования</param>
+        /// <param name="length">Длина оборудования в мм</param>
+        /// <param name="guid">Идентификатор</param>
+        public Mechanic(EquipmentType equipmentType, double length, Guid guid)
         {
             _equipmentType = equipmentType;
             _length = length;
+            _guid = guid;
         }
 
         /// <summary>

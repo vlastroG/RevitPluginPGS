@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:MS.GUI.Windows.MEP.InstallationConstructor.MechanicViews"
              xmlns:vm="clr-namespace:MS.GUI.ViewModels.MEP.DuctInstallation"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="320" Width="300" Height="300" ResizeMode="NoResize">
+             d:DesignHeight="250" d:DesignWidth="350" Width="350" Height="250" MinWidth="300" MinHeight="300">
     <Window.DataContext>
         <vm:HeaterViewModel/>
     </Window.DataContext>
@@ -36,6 +36,7 @@
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
+                        <RowDefinition/>
                         <RowDefinition/>
                         <RowDefinition/>
                         <RowDefinition/>
@@ -79,10 +80,16 @@
                     <DockPanel Grid.Row="5" Grid.Column="1">
                         <TextBlock Text="Тепловая мощность"/>
                     </DockPanel>
+                    <DockPanel Grid.Row="6" Grid.Column="0">
+                        <TextBox Text="{Binding Length}"/>
+                    </DockPanel>
+                    <DockPanel Grid.Row="6" Grid.Column="1">
+                        <TextBlock Text="Длина"/>
+                    </DockPanel>
                 </Grid>
                 <UniformGrid DockPanel.Dock="Bottom" Height="20" Rows="1" VerticalAlignment="Bottom">
-                    <Button Content="Ок" Name="Ok"/>
-                    <Button Content="Отмена" Name="Cancel"/>
+                    <Button Content="Ок" Name="Ok" Click="Ok_Click"/>
+                    <Button Content="Отмена" Name="Cancel" Click="Cancel_Click"/>
                 </UniformGrid>
             </DockPanel>
         </GroupBox>

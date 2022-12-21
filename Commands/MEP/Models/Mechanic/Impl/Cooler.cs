@@ -19,6 +19,9 @@ namespace MS.Commands.MEP.Mechanic.Impl
         /// <param name="length">Длина воздухоохладителя в мм</param>
         public Cooler(double length) : base(EquipmentType.AirCooler, length) { }
 
+        public Cooler(Guid guid, double length) : base(EquipmentType.AirCooler, length, guid) { }
+
+
         /// <summary>
         /// PGS_ВоздухоохладительТип
         /// </summary>

@@ -21,6 +21,7 @@ namespace MS.Commands.MEP.Mechanic.Impl
         /// <param name="length">Длина вентилятора в мм</param>
         public Fan(double length) : base(EquipmentType.Fan, length) { }
 
+        public Fan(Guid guid, double length) : base(EquipmentType.Fan, length, guid) { }
 
         /// <summary>
         /// ADSK_Марка

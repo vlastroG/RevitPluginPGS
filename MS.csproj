@@ -151,9 +151,8 @@
     <Compile Include="Commands\MEP\Models\Mechanic\Mechanic.cs" />
     <Compile Include="Commands\MEP\Models\Symbolic\ISymbolic.cs" />
     <Compile Include="Commands\MEP\Models\Symbolic\Symbolic.cs" />
-    <Compile Include="Commands\MEP\Services\MechanicRepository.cs" />
     <Compile Include="Commands\Models\Interfaces\IEntity.cs" />
-    <Compile Include="Commands\Services\Base\RepositoryInMemory.cs" />
+    <Compile Include="Commands\Models\Interfaces\IIdentifiable.cs" />
     <Compile Include="GUI\CommandsBase\Base\Command.cs" />
     <Compile Include="GUI\CommandsBase\LambdaCommand.cs" />
     <Compile Include="GUI\Converters\InverseBooleanConverter.cs" />
@@ -230,7 +229,6 @@
     <Compile Include="GUI\ViewModels\MEP\MEPinSpatialsViewModel.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Commands\Services\Interfaces\IRepository.cs" />
     <Compile Include="Shared\SharedParams.cs" />
     <Compile Include="Shared\SharedValues.cs" />
     <Compile Include="Utilites\Comparers\LintelsEqualityComparer.cs" />
@@ -244,6 +242,7 @@
     <Compile Include="Utilites\Extensions\CurveArrayExtension.cs" />
     <Compile Include="Utilites\Extensions\DictionaryExtension.cs" />
     <Compile Include="Utilites\Extensions\FaceArrayExtension.cs" />
+    <Compile Include="Utilites\Extensions\ObservableCollectionExtension.cs" />
     <Compile Include="Utilites\Extensions\PlanarFaceExtension.cs" />
     <Compile Include="Utilites\Extensions\RoomExtension.cs" />
     <Compile Include="Utilites\Extensions\StringDoubleTupleExtension.cs" />
@@ -302,6 +301,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Commands\MEP\Services\" />
     <Folder Include="Images\Content\" />
   </ItemGroup>
   <ItemGroup>

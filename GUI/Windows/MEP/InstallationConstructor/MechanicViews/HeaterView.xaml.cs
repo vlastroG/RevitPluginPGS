@@ -24,5 +24,15 @@ namespace MS.GUI.Windows.MEP.InstallationConstructor.MechanicViews
         {
             InitializeComponent();
         }
+
+        private void Cancel_Click(object sender, RoutedEventArgs e)
+        {
+            DialogResult = false;
+        }
+
+        private void Ok_Click(object sender, RoutedEventArgs e)
+        {
+            DialogResult = true;
+        }
     }
 }

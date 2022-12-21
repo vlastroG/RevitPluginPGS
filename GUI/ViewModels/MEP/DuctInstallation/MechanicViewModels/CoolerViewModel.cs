@@ -1,4 +1,5 @@
 ﻿using MS.Commands.MEP.Enums;
+using MS.Commands.MEP.Mechanic.Impl;
 using MS.GUI.ViewModels.Base;
 using System;
 using System.Collections.Generic;
@@ -13,10 +14,26 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
     /// </summary>
     public class CoolerViewModel : ViewModelBase
     {
+        public CoolerViewModel()
+        {
+
+        }
+
         /// <summary>
-        /// Название типа оборудования
+        /// Конструктор модели представления воздехоохладителя по заданному воздухоохладителю
         /// </summary>
-        public string Name { get => "Воздухоохладитель"; }
+        /// <param name="cooler"></param>
+        public CoolerViewModel(Cooler cooler)
+        {
+            AirPressureLoss = cooler.AirPressureLoss;
+            Count = cooler.Count;
+            Length = cooler.Length;
+            Power = cooler.Power;
+            PowerCool = cooler.PowerCool;
+            TemperatureIn = cooler.TemperatureIn;
+            TemperatureOut = cooler.TemperatureOut;
+            Type = cooler.Type;
+        }
 
 
         private string _type;
@@ -84,5 +101,25 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// Длина
         /// </summary>
         public double Length { get => _length; set => Set(ref _length, value); }
+
+
+        public Cooler GetCooler()
+        {
+            return GetCooler(Guid.NewGuid());
+        }
+
+        public Cooler GetCooler(Guid guid)
+        {
+            return new Cooler(guid, Length)
+            {
+                AirPressureLoss = AirPressureLoss,
+                Count = Count,
+                Power = Power,
+                PowerCool = PowerCool,
+                TemperatureIn = TemperatureIn,
+                TemperatureOut = TemperatureOut,
+                Type = Type
+            };
+        }
     }
 }
