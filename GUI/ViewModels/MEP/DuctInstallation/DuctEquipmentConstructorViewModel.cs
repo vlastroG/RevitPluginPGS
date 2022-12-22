@@ -14,6 +14,8 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -23,7 +25,7 @@ using System.Windows.Input;
 
 namespace MS.GUI.ViewModels.MEP.DuctInstallation
 {
-    public class DuctEquipmentConstructorViewModel : ViewModelBase
+    public class DuctEquipmentConstructorViewModel : ViewModelBase, IDataErrorInfo
     {
         public DuctEquipmentConstructorViewModel()
         {
@@ -44,7 +46,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// <summary>
         /// Ширина установки
         /// </summary>
-        private double _width;
+        private double _width = 1000;
 
         /// <summary>
         /// Ширина установки
@@ -62,7 +64,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// <summary>
         /// Высота установки
         /// </summary>
-        private double _height;
+        private double _height = 1000;
 
         /// <summary>
         /// Высота установки
@@ -129,7 +131,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// <summary>
         /// Наименование системы
         /// </summary>
-        private string _systemName;
+        private string _systemName = "Система 1";
 
         /// <summary>
         /// Наименование системы
@@ -163,7 +165,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// <summary>
         /// Впуск высота
         /// </summary>
-        private double _inputHeight;
+        private double _inputHeight = 500;
 
         /// <summary>
         /// Впуск высота
@@ -181,7 +183,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// <summary>
         /// Впуск ширина
         /// </summary>
-        private double _inputWidth;
+        private double _inputWidth = 500;
 
         /// <summary>
         /// Впуск ширина
@@ -197,12 +199,12 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         }
 
         /// <summary>
-        /// Впуск высота
+        /// Впуск длина
         /// </summary>
-        private double _inputLength;
+        private double _inputLength = 100;
 
         /// <summary>
-        /// Впуск высота
+        /// Впуск длина
         /// </summary>
         public double InputLength
         {
@@ -217,7 +219,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// <summary>
         /// Выпуск высота
         /// </summary>
-        private double _outputHeight;
+        private double _outputHeight = 500;
 
         /// <summary>
         /// Выпуск высота
@@ -229,6 +231,166 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
             {
                 Set(ref _outputHeight, value);
                 OnPropertyChanged("SystemNameIsWritten");
+            }
+        }
+
+
+
+        /// <summary>
+        /// Выпуск ширина
+        /// </summary>
+        private double _outputWidth = 500;
+
+        /// <summary>
+        /// Выпуск ширина
+        /// </summary>
+        public double OutputWidth
+        {
+            get => _outputWidth;
+            set
+            {
+                Set(ref _outputWidth, value);
+                OnPropertyChanged("SystemNameIsWritten");
+            }
+        }
+
+        /// <summary>
+        /// Выпуск длина
+        /// </summary>
+        private double _outputLength = 100;
+
+        /// <summary>
+        /// Выпуск длина
+        /// </summary>
+        public double OutputLength
+        {
+            get => _outputLength;
+            set
+            {
+                Set(ref _outputLength, value);
+                OnPropertyChanged("SystemNameIsWritten");
+            }
+        }
+
+
+        /// <summary>
+        /// Впуск снизу
+        /// </summary>
+        private bool _inputLocationBottom;
+
+        /// <summary>
+        /// Впуск снизу
+        /// </summary>
+        public bool InputLocationBottom
+        {
+            get => _inputLocationBottom;
+            set => Set(ref _inputLocationBottom, value);
+        }
+
+        /// <summary>
+        /// Выпуск снизу
+        /// </summary>
+        private bool _outputLocationBottom;
+
+        /// <summary>
+        /// Выпуск снизу
+        /// </summary>
+        public bool OutputLocationBottom
+        {
+            get => _outputLocationBottom;
+            set => Set(ref _outputLocationBottom, value);
+        }
+
+
+        /// <summary>
+        /// Коллекция элементов оборудования в установке
+        /// </summary>
+        public ObservableCollection<Mechanic> Mechanics { get; } = new ObservableCollection<Mechanic>();
+
+        /// <summary>
+        /// Выбранное оборудование
+        /// </summary>
+        private Mechanic _selectedMechanic;
+
+        /// <summary>
+        /// Выбранное оборудование
+        /// </summary>
+        [JsonIgnore]
+        public Mechanic SelectedMechanic
+        {
+            get => _selectedMechanic;
+            set
+            {
+                if (value is null)
+                {
+                    Set(ref _selectedMechanic, Mechanics.FirstOrDefault());
+                }
+                else
+                {
+                    Set(ref _selectedMechanic, value);
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Коллекция элементов наполнения в установке
+        /// </summary>
+        public ObservableCollection<Filling> Fillings { get; } = new ObservableCollection<Filling>();
+
+        /// <summary>
+        /// Выбранное наполнение
+        /// </summary>
+        private Filling _selectedFilling;
+
+        /// <summary>
+        /// Выбранное наполнение
+        /// </summary>
+        [JsonIgnore]
+        public Filling SelectedFilling
+        {
+            get => _selectedFilling;
+            set
+            {
+                if (value is null)
+                {
+                    Set(ref _selectedFilling, Fillings.FirstOrDefault());
+                }
+                else
+                {
+                    Set(ref _selectedFilling, value);
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Коллекция элементов УГО в установке
+        /// </summary>
+        public ObservableCollection<Symbolic> Symbolics { get; } = new ObservableCollection<Symbolic>();
+
+        /// <summary>
+        /// Выбранное УГО
+        /// </summary>
+        private Symbolic _selectedSymbolic;
+
+        /// <summary>
+        /// Выбранное УГО
+        /// </summary>
+        [JsonIgnore]
+        public Symbolic SelectedSymbolic
+        {
+            get => _selectedSymbolic;
+            set
+            {
+                if (value is null)
+                {
+                    Set(ref _selectedSymbolic, Symbolics.FirstOrDefault());
+                }
+                else
+                {
+                    Set(ref _selectedSymbolic, value);
+                }
             }
         }
 
@@ -302,164 +464,6 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         }
 
         /// <summary>
-        /// Выпуск ширина
-        /// </summary>
-        private double _outputWidth;
-
-        /// <summary>
-        /// Выпуск ширина
-        /// </summary>
-        public double OutputWidth
-        {
-            get => _outputWidth;
-            set
-            {
-                Set(ref _outputWidth, value);
-                OnPropertyChanged("SystemNameIsWritten");
-            }
-        }
-
-        /// <summary>
-        /// Выпуск длина
-        /// </summary>
-        private double _outputLength;
-
-        /// <summary>
-        /// Выпуск длина
-        /// </summary>
-        public double OutputLength
-        {
-            get => _outputLength;
-            set
-            {
-                Set(ref _outputLength, value);
-                OnPropertyChanged("SystemNameIsWritten");
-            }
-        }
-
-
-        /// <summary>
-        /// Впуск снизу
-        /// </summary>
-        private bool _inputLocationBottom;
-
-        /// <summary>
-        /// Впуск снизу
-        /// </summary>
-        public bool InputLocationBottom
-        {
-            get => _inputLocationBottom;
-            set => Set(ref _inputLocationBottom, value);
-        }
-
-        /// <summary>
-        /// Выпуск снизу
-        /// </summary>
-        private bool _outputLocationBottom;
-
-        /// <summary>
-        /// Выпуск снизу
-        /// </summary>
-        public bool OutputLocationBottom
-        {
-            get => _outputLocationBottom;
-            set => Set(ref _outputLocationBottom, value);
-        }
-
-
-        /// <summary>
-        /// Коллекция элементов оборудования в установке
-        /// </summary>
-        public ObservableCollection<Mechanic> Mechanics { get; private set; } = new ObservableCollection<Mechanic>();
-
-        /// <summary>
-        /// Выбранное оборудование
-        /// </summary>
-        private Mechanic _selectedMechanic;
-
-        /// <summary>
-        /// Выбранное оборудование
-        /// </summary>
-        [JsonIgnore]
-        public Mechanic SelectedMechanic
-        {
-            get => _selectedMechanic;
-            set
-            {
-                if (value is null)
-                {
-                    Set(ref _selectedMechanic, Mechanics.FirstOrDefault());
-                }
-                else
-                {
-                    Set(ref _selectedMechanic, value);
-                }
-            }
-        }
-
-
-        /// <summary>
-        /// Коллекция элементов наполнения в установке
-        /// </summary>
-        public ObservableCollection<Filling> Fillings { get; private set; } = new ObservableCollection<Filling>();
-
-        /// <summary>
-        /// Выбранное наполнение
-        /// </summary>
-        private Filling _selectedFilling;
-
-        /// <summary>
-        /// Выбранное наполнение
-        /// </summary>
-        [JsonIgnore]
-        public Filling SelectedFilling
-        {
-            get => _selectedFilling;
-            set
-            {
-                if (value is null)
-                {
-                    Set(ref _selectedFilling, Fillings.FirstOrDefault());
-                }
-                else
-                {
-                    Set(ref _selectedFilling, value);
-                }
-            }
-        }
-
-
-        /// <summary>
-        /// Коллекция элементов УГО в установке
-        /// </summary>
-        public ObservableCollection<Symbolic> Symbolics { get; private set; } = new ObservableCollection<Symbolic>();
-
-        /// <summary>
-        /// Выбранное УГО
-        /// </summary>
-        private Symbolic _selectedSymbolic;
-
-        /// <summary>
-        /// Выбранное УГО
-        /// </summary>
-        [JsonIgnore]
-        public Symbolic SelectedSymbolic
-        {
-            get => _selectedSymbolic;
-            set
-            {
-                if (value is null)
-                {
-                    Set(ref _selectedSymbolic, Symbolics.FirstOrDefault());
-                }
-                else
-                {
-                    Set(ref _selectedSymbolic, value);
-                }
-            }
-        }
-
-        /// <summary>
         /// Сериализует объект установки в JSON в указанную директорию с названием, соответствующим названию системы.
         /// </summary>
         private void SerializeViewModel()
@@ -497,6 +501,83 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
             else
             {
                 return null;
+            }
+        }
+
+        /// <summary>
+        /// Проверяет, у всех ли УГО длина больше 50
+        /// </summary>
+        /// <returns></returns>
+        public bool SymbolicLengthsCorrect()
+        {
+            bool correct = true;
+            foreach (var symbolic in Symbolics)
+            {
+                correct &= symbolic.Length > 50;
+            }
+            return correct;
+        }
+
+        [JsonIgnore]
+        public string Error => "";
+
+        public string this[string columnName]
+        {
+            get
+            {
+                string error = string.Empty;
+                switch (columnName)
+                {
+                    case "Width":
+                        if ((Width < 100) || (Width > 2000))
+                        {
+                            error = "Ширина должна быть от 100 до 2000 мм включительно";
+                        }
+                        break;
+                    case "Height":
+                        if ((Height < 100) || (Height > 2000))
+                        {
+                            error = "Высота должна быть от 100 до 2000 мм включительно";
+                        }
+                        break;
+                    case "InputHeight":
+                        if ((InputHeight < 50) || (InputHeight > 2000))
+                        {
+                            error = "Длина должна быть от 50 до 2000 мм включительно";
+                        }
+                        break;
+                    case "InputWidth":
+                        if ((InputWidth < 50) || (InputWidth > 2000))
+                        {
+                            error = "Ширина должна быть от 50 до 2000 мм включительно";
+                        }
+                        break;
+                    case "InputLength":
+                        if ((InputLength < 50) || (InputLength > 2000))
+                        {
+                            error = "Длина должна быть от 50 до 2000 мм включительно";
+                        }
+                        break;
+                    case "OutputHeight":
+                        if ((OutputHeight < 50) || (OutputHeight > 2000))
+                        {
+                            error = "Длина должна быть от 50 до 2000 мм включительно";
+                        }
+                        break;
+                    case "OutputWidth":
+                        if ((OutputWidth < 50) || (OutputWidth > 2000))
+                        {
+                            error = "Ширина должна быть от 50 до 2000 мм включительно";
+                        }
+                        break;
+                    case "OutputLength":
+                        if ((OutputLength < 50) || (OutputLength > 2000))
+                        {
+                            error = "Длина должна быть от 50 до 2000 мм включительно";
+                        }
+                        break;
+                }
+                return error;
             }
         }
 
@@ -660,9 +741,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
                     }
                     break;
                 case Commands.MEP.Enums.EquipmentType.AirCooler:
-                    Cooler coolerTest = new Cooler(mechanic.Guid, mechanic.Length);
-                    coolerTest = (Cooler)mechanic;
-                    CoolerViewModel coolerVM = new CoolerViewModel(coolerTest);
+                    CoolerViewModel coolerVM = new CoolerViewModel((Cooler)mechanic);
                     CoolerView coolerView = new CoolerView() { DataContext = coolerVM, WindowStartupLocation = WindowStartupLocation.CenterOwner };
                     coolerView.ShowDialog();
                     if (coolerView.DialogResult == true)
@@ -720,7 +799,6 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// <param name="p"></param>
         private void OnDeleteMechanicCommandExecuted(object p)
         {
-            //write
             Mechanic mechanic = (Mechanic)p;
             Mechanics.Remove(mechanic);
         }
@@ -757,7 +835,6 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// <param name="p"></param>
         private void OnCreateNewFillingCommandExecuted(object p)
         {
-            //write
             Fillings.Add(new Filling("new name"));
         }
 
@@ -828,7 +905,6 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// <param name="p"></param>
         private void OnCreateNewSymbolicCommandExecuted(object p)
         {
-            //write
             Symbolics.Add(new Symbolic());
         }
 
@@ -961,9 +1037,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         {
             var indexFrom = Symbolics.IndexOf((Symbolic)p);
             var indexTo = indexFrom - 1;
-            var temp = Symbolics[indexTo];
-            Symbolics[indexTo] = Symbolics[indexFrom];
-            Symbolics[indexFrom] = temp;
+            (Symbolics[indexFrom], Symbolics[indexTo]) = (Symbolics[indexTo], Symbolics[indexFrom]);
             SelectedSymbolic = Symbolics[indexTo];
         }
         #endregion
@@ -1001,9 +1075,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         {
             var indexFrom = Symbolics.IndexOf((Symbolic)p);
             var indexTo = indexFrom + 1;
-            var temp = Symbolics[indexTo];
-            Symbolics[indexTo] = Symbolics[indexFrom];
-            Symbolics[indexFrom] = temp;
+            (Symbolics[indexFrom], Symbolics[indexTo]) = (Symbolics[indexTo], Symbolics[indexFrom]);
             SelectedSymbolic = Symbolics[indexTo];
         }
 

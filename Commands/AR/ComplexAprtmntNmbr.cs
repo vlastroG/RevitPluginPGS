@@ -28,7 +28,6 @@ namespace MS.Commands.AR
         /// <param name="message"></param>
         /// <param name="elements"></param>
         /// <returns></returns>
-        /// <exception cref="NotImplementedException"></exception>
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             Document doc = commandData.Application.ActiveUIDocument.Document;

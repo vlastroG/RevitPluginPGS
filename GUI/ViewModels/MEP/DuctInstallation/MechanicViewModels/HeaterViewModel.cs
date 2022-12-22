@@ -2,6 +2,7 @@
 using MS.GUI.ViewModels.Base;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,7 +12,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
     /// <summary>
     /// Модель представления воздухонагревателя
     /// </summary>
-    public class HeaterViewModel : ViewModelBase
+    public class HeaterViewModel : ViewModelBase, IDataErrorInfo
     {
         public HeaterViewModel()
         {
@@ -94,6 +95,25 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// </summary>
         public double Length { get => _length; set => Set(ref _length, value); }
 
+        public string Error => "";
+
+        public string this[string columnName]
+        {
+            get
+            {
+                string error = string.Empty;
+                switch (columnName)
+                {
+                    case "Count":
+                        if ((Count != null) && (Count < 0))
+                        {
+                            error = "Количество должно быть >= 0";
+                        }
+                        break;
+                }
+                return error;
+            }
+        }
 
         public Heater GetHeater()
         {

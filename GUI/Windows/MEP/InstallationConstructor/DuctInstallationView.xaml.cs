@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MS.GUI.ViewModels.MEP.DuctInstallation;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -34,7 +35,15 @@ namespace MS.GUI.Windows.MEP
         {
             try
             {
-                DialogResult = true;
+                var vm = DataContext as DuctEquipmentConstructorViewModel;
+                if (vm.SymbolicLengthsCorrect())
+                {
+                    DialogResult = true;
+                }
+                else
+                {
+                    MessageBox.Show("Не все УГО имеют корректную длину, исправьте и повторите попытку.", "Ошибка");
+                }
             }
             catch (System.InvalidOperationException)
             {

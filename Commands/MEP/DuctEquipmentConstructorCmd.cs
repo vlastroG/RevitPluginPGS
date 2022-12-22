@@ -594,6 +594,12 @@ namespace MS.Commands.MEP
             {
                 return string.Empty;
             }
+            catch (System.IO.IOException)
+            {
+                destPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + $@"\{newName}{Guid.NewGuid()}.rfa";
+                File.Copy(sourcePath, destPath, true);
+
+            }
             return destPath;
         }
 

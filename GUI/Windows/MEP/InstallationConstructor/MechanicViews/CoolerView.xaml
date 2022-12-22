@@ -5,23 +5,36 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:MS.GUI.Windows.MEP.InstallationConstructor.MechanicViews"
              xmlns:vm="clr-namespace:MS.GUI.ViewModels.MEP.DuctInstallation"
+             xmlns:converters="clr-namespace:MS.GUI.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="330" Width="330" Height="300" MinWidth="330" MinHeight="300">
     <Window.DataContext>
         <vm:CoolerViewModel/>
     </Window.DataContext>
+    <Window.Resources>
+        <converters:NullableValueConverter x:Key="NullableValueConverter"/>
+    </Window.Resources>
     <Grid>
         <GroupBox Header="Параметры воздухоохладителя">
             <DockPanel>
-                <Grid DockPanel.Dock="Top" Margin="5">
-                    <Grid.Resources>
+                <UniformGrid DockPanel.Dock="Top" Margin="5" Rows="8">
+                    <UniformGrid.Resources>
                         <Style TargetType="DockPanel">
                             <Setter Property="HorizontalAlignment" Value="Stretch"/>
                             <Setter Property="Margin" Value="3,0"/>
+                            <Setter Property="Height" Value="25"/>
                         </Style>
                         <Style TargetType="TextBox">
                             <Setter Property="VerticalAlignment" Value="Center"/>
                             <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                            <Style.Triggers>
+                                <Trigger Property="Validation.HasError" Value="True">
+                                    <Setter Property="ToolTip"
+                                            Value="{Binding RelativeSource={RelativeSource Self},
+                                                    Path=(Validation.Errors)[0].ErrorContent}" />
+                                    <Setter Property="Foreground" Value="Red" />
+                                </Trigger>
+                            </Style.Triggers>
                         </Style>
                         <Style TargetType="TextBlock">
                             <Setter Property="VerticalAlignment" Value="Center"/>
@@ -30,70 +43,56 @@
                         <Style TargetType="RowDefinition">
                             <Setter Property="Height" Value="25"/>
                         </Style>
-                    </Grid.Resources>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
+                    </UniformGrid.Resources>
                     <DockPanel Grid.Row="0" Grid.Column="0">
                         <TextBox Text="{Binding Type}"/>
                     </DockPanel>
-                    <DockPanel Grid.Row="0" Grid.Column="1">
+                    <DockPanel>
                         <TextBlock Text="Тип"/>
                     </DockPanel>
-                    <DockPanel Grid.Row="1" Grid.Column="0">
-                        <TextBox Text="{Binding Power}"/>
+                    <DockPanel>
+                        <TextBox Text="{Binding Power, Converter={StaticResource NullableValueConverter}}"/>
                     </DockPanel>
-                    <DockPanel Grid.Row="1" Grid.Column="1">
+                    <DockPanel>
                         <TextBlock Text="Мощность"/>
                     </DockPanel>
-                    <DockPanel Grid.Row="2" Grid.Column="0">
-                        <TextBox Text="{Binding Count}"/>
+                    <DockPanel>
+                        <TextBox Text="{Binding Count, Converter={StaticResource NullableValueConverter}, ValidatesOnDataErrors=True}"/>
                     </DockPanel>
-                    <DockPanel Grid.Row="2" Grid.Column="1">
+                    <DockPanel>
                         <TextBlock Text="Количество"/>
                     </DockPanel>
-                    <DockPanel Grid.Row="3" Grid.Column="0">
-                        <TextBox Text="{Binding TemperatureIn}"/>
+                    <DockPanel>
+                        <TextBox Text="{Binding TemperatureIn, Converter={StaticResource NullableValueConverter}}"/>
                     </DockPanel>
-                    <DockPanel Grid.Row="3" Grid.Column="1">
+                    <DockPanel>
                         <TextBlock Text="Температура на входе"/>
                     </DockPanel>
-                    <DockPanel Grid.Row="4" Grid.Column="0">
-                        <TextBox Text="{Binding TemperatureOut}"/>
+                    <DockPanel>
+                        <TextBox Text="{Binding TemperatureOut, Converter={StaticResource NullableValueConverter}}"/>
                     </DockPanel>
-                    <DockPanel Grid.Row="4" Grid.Column="1">
+                    <DockPanel>
                         <TextBlock Text="Температура на выходе"/>
                     </DockPanel>
-                    <DockPanel Grid.Row="5" Grid.Column="0">
-                        <TextBox Text="{Binding PowerCool}"/>
+                    <DockPanel>
+                        <TextBox Text="{Binding PowerCool, Converter={StaticResource NullableValueConverter}}"/>
                     </DockPanel>
-                    <DockPanel Grid.Row="5" Grid.Column="1">
+                    <DockPanel>
                         <TextBlock Text="Холодильная мощность"/>
                     </DockPanel>
-                    <DockPanel Grid.Row="6" Grid.Column="0">
-                        <TextBox Text="{Binding AirPressureLoss}"/>
+                    <DockPanel>
+                        <TextBox Text="{Binding AirPressureLoss, Converter={StaticResource NullableValueConverter}}"/>
                     </DockPanel>
-                    <DockPanel Grid.Row="6" Grid.Column="1">
+                    <DockPanel>
                         <TextBlock Text="Потери давления"/>
                     </DockPanel>
-                    <DockPanel Grid.Row="7" Grid.Column="0">
+                    <DockPanel>
                         <TextBox Text="{Binding Length}"/>
                     </DockPanel>
-                    <DockPanel Grid.Row="7" Grid.Column="1">
+                    <DockPanel>
                         <TextBlock Text="Длина"/>
                     </DockPanel>
-                </Grid>
+                </UniformGrid>
                 <UniformGrid DockPanel.Dock="Bottom" Height="20" Rows="1" VerticalAlignment="Bottom">
                     <Button Content="Ок" Name="Ok" Click="Ok_Click"/>
                     <Button Content="Отмена" Name="Cancel" Height="20" VerticalAlignment="Bottom" Click="Cancel_Click"/>
