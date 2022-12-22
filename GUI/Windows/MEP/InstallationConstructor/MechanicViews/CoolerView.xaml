@@ -31,8 +31,8 @@
                                 <Trigger Property="Validation.HasError" Value="True">
                                     <Setter Property="ToolTip"
                                             Value="{Binding RelativeSource={RelativeSource Self},
-                                                    Path=(Validation.Errors)[0].ErrorContent}" />
-                                    <Setter Property="Foreground" Value="Red" />
+                                                    Path=(Validation.Errors)[0].ErrorContent}"/>
+                                    <Setter Property="Foreground" Value="Red"/>
                                 </Trigger>
                             </Style.Triggers>
                         </Style>

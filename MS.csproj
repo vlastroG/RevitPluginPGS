@@ -179,7 +179,6 @@
     <Compile Include="Commands\MEP\Models\Mechanic\Mechanic.cs" />
     <Compile Include="Commands\MEP\Models\Symbolic\ISymbolic.cs" />
     <Compile Include="Commands\MEP\Models\Symbolic\Symbolic.cs" />
-    <Compile Include="Commands\Models\Interfaces\IEntity.cs" />
     <Compile Include="Commands\Models\Interfaces\IIdentifiable.cs" />
     <Compile Include="GUI\CommandsBase\Base\Command.cs" />
     <Compile Include="GUI\CommandsBase\LambdaCommand.cs" />
@@ -209,7 +208,6 @@
     <Compile Include="Commands\MEP\PipelineFittings.cs" />
     <Compile Include="Commands\MEP\SystemNameCorrectCmd.cs" />
     <Compile Include="Commands\MEP\SystemsInSpace.cs" />
-    <Compile Include="Commands\SS\Numerator.cs" />
     <Compile Include="GUI\Windows\AR\FinishingCreation.xaml.cs">
       <DependentUpon>FinishingCreation.xaml</DependentUpon>
     </Compile>
@@ -331,6 +329,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Commands\MEP\Services\" />
+    <Folder Include="Commands\SS\" />
     <Folder Include="Images\Content\" />
   </ItemGroup>
   <ItemGroup>

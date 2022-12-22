@@ -42,8 +42,6 @@ namespace MS
             RibbonPanel panelAR = application.CreateRibbonPanel("PGS-BIM", "Раздел АР");
             //Раздел КР
             RibbonPanel panelKR = application.CreateRibbonPanel("PGS-BIM", "Раздел КР");
-            // Раздел СС
-            // RibbonPanel panelSS = application.CreateRibbonPanel("PGS-BIM", "Раздел СС");
             // Раздел ОВиК
             RibbonPanel panelOV = application.CreateRibbonPanel("PGS-BIM", "Раздел ОВ");
             RibbonPanel panelVK = application.CreateRibbonPanel("PGS-BIM", "Раздел ВК");

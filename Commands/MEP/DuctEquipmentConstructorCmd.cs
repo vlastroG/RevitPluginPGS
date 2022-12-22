@@ -294,9 +294,7 @@ namespace MS.Commands.MEP
         /// <summary>
         /// Копирует семейство болванки
         /// </summary>
-        /// <param name="uidoc"></param>
-        /// <param name="fillings">Колеекция наполнения у установке</param>
-        /// <param name="systemName">Название системы установки</param>
+        /// <param name="uidoc">Документ родительского семейства</param>
         /// <returns>Коллекция типоразмеров созданных элементов наполнения установки</returns>
         private ICollection<ElementType> CreateFillingFamilies(
             in UIDocument uidoc,
@@ -446,120 +444,6 @@ namespace MS.Commands.MEP
             }
         }
 
-        /// <summary>
-        /// Создает тестовую установку (симуляция ввода пользователя)
-        /// </summary>
-        /// <returns>Заданная вентиляционная установка</returns>
-        private Installation CreateTestInstallation()
-        {
-            Installation installationTest = new Installation(1100, 1100)
-            {
-                Type = "Тип установки 000",
-                System = "П5",
-                NameShort = "Сокращенное наименование",
-                Name = "Полное наименование",
-                InputHeight = 601,
-                InputWidth = 602,
-                InputLength = 103,
-                InputLocationBottom = 1,
-                OutputWidth = 701,
-                OutputHeight = 702,
-                OutputLength = 105,
-                OutputLocationMiddle = 0,
-            };
-
-
-            List<Mechanic.Mechanic> mechanics = new List<Mechanic.Mechanic>()
-            {
-                new Mechanic.Impl.Fan(300)
-                {
-                    Mark = "V1.0.P63.R-5,5x15",
-                    AirFlow = 8225,
-                    AirPressureLoss = 500,
-                    FanSpeed = 1514,
-                    ExplosionProofType = "АИР112M4",
-                    RatedPower = 5500,
-                    EngineSpeed = 1432
-                },
-                new Mechanic.Impl.Heater(300)
-                {
-                    Type = "N1.2",
-                    Count = 1,
-                    TemperatureIn = -24,
-                    TemperatureOut = 21,
-                    PowerHeat = 124131,
-                    AirPressureLoss = 73.1
-                },
-                new Mechanic.Impl.Cooler(300)
-                {
-                    Type = "C2.4",
-                    Count = 1,
-                    TemperatureIn = 29,
-                    TemperatureOut = 15,
-                    PowerCool = 64500,
-                    AirPressureLoss = 254.3
-                },
-                new Mechanic.Impl.Heater(300)
-                {
-                    Type = "E1.45",
-                    Power = 45000,
-                    Count = 1,
-                    PowerHeat = 44260,
-                    TemperatureIn = 12.5,
-                    TemperatureOut = 29,
-                    AirPressureLoss = 22.1
-                },
-                new Mechanic.Impl.Heater(300)
-                {
-                    Type = "Е1.30",
-                    Power = 30000,
-                    Count = 1,
-                    PowerHeat = 16530,
-                    TemperatureIn = 15,
-                    TemperatureOut = 21,
-                    AirPressureLoss = 22.1
-                }
-            };
-
-            List<Filling> fillings = new List<Filling>()
-            {
-                new Filling("Блок Управления: Блок управления ACE CR4-E0-3R0-1-1H25-S-S/N", 1),
-                new Filling("Датчик влажности/температуры комнатный DPWC111000", 1),
-                new Filling("Датчик перепада давления 500 Pa DVL-500", 3),
-                new Filling("Датчик температуры воды погружной WTP-3", 1),
-                new Filling("Датчик температуры канальный ARK-3",1 ),
-                new Filling("Датчик температуры наружного воздуха ARN-3", 1),
-                new Filling("Привод ELVA 05/24.M", 1),
-                new Filling("Привод PDF 08/230.D", 1),
-                new Filling("Термостат 3 м", 2),
-                new Filling("Термостат 6 м", 1),
-                new Filling("Трехходовой вентиль TBG 25-10", 1),
-                new Filling("Циркуляционный насос VL-32PBG-8-N (230В)", 1),
-                new Filling("Частотный преобразователь 5,5 кВт 380 В", 1),
-                new Filling("Блок Управления: Шкаф автоматики ACW с контроллером FR-11", 1),
-                new Filling("Блок Управления: Щит управления силовой ACV-V E45", 1),
-                new Filling("Блок Управления: Щит управления силовой ACV-V Е30", 1)
-            };
-
-            List<Symbolic> symbolics = new List<Symbolic>()
-            {
-                new Symbolic("Фильтр", 575),
-                new Symbolic("Воздухонагреватель водяной", 575),
-                new Symbolic("Воздухонагреватель электрический", 575),
-                new Symbolic("Воздухоохладитель водяной", 750),
-                new Symbolic("Воздухонагреватель электрический", 575),
-                new Symbolic("Вентилятор", 1100),
-                new Symbolic("Фильтр", 1100),
-                new Symbolic("Фильтр", 1100),
-                new Symbolic("Шумоглушитель", 1100),
-            };
-
-            installationTest.AddMechanic(mechanics);
-            installationTest.AddFilling(fillings);
-            installationTest.AddSymbolic(symbolics);
-
-            return installationTest;
-        }
 
         /// <summary>
         /// Возвращает заданный типоразмер семейства
