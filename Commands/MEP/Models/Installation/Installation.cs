@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -10,14 +9,12 @@ using System.Threading.Tasks;
 
 namespace MS.Commands.MEP.Models.Installation
 {
-    [JsonObject(MemberSerialization.OptIn)]
     public class Installation
     {
         /// <summary>
         /// Список болванок семейств оборудования внутри родительского семейства вентиляционной установки.
         /// Болванки представлены списками оборудования
         /// </summary>
-        [JsonProperty]
         private readonly List<List<Mechanic.Mechanic>> _mechanics = new List<List<Mechanic.Mechanic>>() {
             new List<Mechanic.Mechanic>()
         };
@@ -25,13 +22,11 @@ namespace MS.Commands.MEP.Models.Installation
         /// <summary>
         /// Список болванок семейств наполнения внутри родительского семейства вентиляционной установки.
         /// </summary>
-        [JsonProperty]
         private readonly List<Filling> _fillings = new List<Filling>();
 
         /// <summary>
         /// Список УГО внутри родительского семейства вентиляционной установки
         /// </summary>
-        [JsonProperty]
         private readonly List<Symbolic.Symbolic> _symbolics = new List<Symbolic.Symbolic>();
 
         /// <summary>
@@ -105,7 +100,6 @@ namespace MS.Commands.MEP.Models.Installation
         /// </summary>
         /// <param name="width">Ширина в мм</param>
         /// <param name="height">Высота в мм</param>
-        [JsonConstructor]
         public Installation(double width, double height)
         {
             _width = width;
@@ -116,7 +110,6 @@ namespace MS.Commands.MEP.Models.Installation
         /// <summary>
         /// Ширина установки в мм
         /// </summary>
-        [JsonProperty]
         [Range(100, 2000)]
         [Description("ADSK_Размер_Ширина")]
         public double Width { get => _width; set => _width = value; }
@@ -125,7 +118,6 @@ namespace MS.Commands.MEP.Models.Installation
         /// <summary>
         /// Высота установки в мм
         /// </summary>
-        [JsonProperty]
         [Range(100, 2000)]
         [Description("ADSK_Размер_Высота")]
         public double Height { get => _height; set => _height = value; }
@@ -134,7 +126,6 @@ namespace MS.Commands.MEP.Models.Installation
         /// <summary>
         /// Длина установки в мм
         /// </summary>
-        [JsonProperty]
         [Description("ADSK_Размер_Длина")]
         public double Length
         {
@@ -147,42 +138,36 @@ namespace MS.Commands.MEP.Models.Installation
         /// <summary>
         /// ADSK_Группирование
         /// </summary>
-        [JsonProperty]
         [Description("ADSK_Группирование")]
         public string GroupingParent { get => System + _groupingParent; }
 
         /// <summary>
         /// Вложенное_оборудование_группирование
         /// </summary>
-        [JsonProperty]
         [Description("Вложенное_оборудование_группирование")]
         public string GroupingMechanic { get => System + _groupingBoldMechanic; }
 
         /// <summary>
         /// Вложенное_наполнение_группирование
         /// </summary>
-        [JsonProperty]
         [Description("Вложенное_наполнение_группирование")]
         public string GroupingFilling { get => System + _groupingBoldFilling; }
 
         /// <summary>
         /// PGS_ТипУстановки
         /// </summary>
-        [JsonProperty]
         [Description("PGS_ТипУстановки")]
         public string Type { get; set; }
 
         /// <summary>
         /// ADSK_Наименование краткое
         /// </summary>
-        [JsonProperty]
         [Description("ADSK_Наименование краткое")]
         public string NameShort { get; set; }
 
         /// <summary>
         /// ADSK_Наименование
         /// </summary>
-        [JsonProperty]
         [Description("ADSK_Наименование")]
         public string Name { get; set; }
 
@@ -190,34 +175,29 @@ namespace MS.Commands.MEP.Models.Installation
         /// <summary>
         /// Префикс наименования (сокращенное название системы)
         /// </summary>
-        [JsonProperty]
         public string System { get; set; }
 
         /// <summary>
         /// Впуск_Ширина
         /// </summary>
-        [JsonProperty]
         [Description("Впуск_Ширина")]
         public double InputWidth { get => _inputWidth; set => _inputWidth = value; }
 
         /// <summary>
         /// Впуск_Высота
         /// </summary>
-        [JsonProperty]
         [Description("Впуск_Высота")]
         public double InputHeight { get => _inputHeight; set => _inputHeight = value; }
 
         /// <summary>
         /// Впуск_Длина
         /// </summary>
-        [JsonProperty]
         [Description("Впуск_Длина")]
         public double InputLength { get => _inputLength; set => _inputLength = value; }
 
         /// <summary>
         /// Впуск_Снизу
         /// </summary>
-        [JsonProperty]
         [Description("Впуск_Снизу")]
         public int InputLocationBottom
         {
@@ -228,7 +208,6 @@ namespace MS.Commands.MEP.Models.Installation
         /// <summary>
         /// Впуск_Посередине
         /// </summary>
-        [JsonProperty]
         [Description("Впуск_Посередине")]
         public int InputLocationMiddle
         {
@@ -239,28 +218,24 @@ namespace MS.Commands.MEP.Models.Installation
         /// <summary>
         /// Выпуск_Ширина
         /// </summary>
-        [JsonProperty]
         [Description("Выпуск_Ширина")]
         public double OutputWidth { get => _outputWidth; set => _outputWidth = value; }
 
         /// <summary>
         /// Выпуск_Высота
         /// </summary>
-        [JsonProperty]
         [Description("Выпуск_Высота")]
         public double OutputHeight { get => _outputHeight; set => _outputHeight = value; }
 
         /// <summary>
         /// Выпуск_Длина
         /// </summary>
-        [JsonProperty]
         [Description("Выпуск_Длина")]
         public double OutputLength { get => _outputLength; set => _outputLength = value; }
 
         /// <summary>
         /// Выпуск_Снизу
         /// </summary>
-        [JsonProperty]
         [Description("Выпуск_Снизу")]
         public int OutputLocationBottom
         {
@@ -271,7 +246,6 @@ namespace MS.Commands.MEP.Models.Installation
         /// <summary>
         /// Выпуск_Посередине
         /// </summary>
-        [JsonProperty]
         [Description("Выпуск_Посередине")]
         public int OutputLocationMiddle
         {

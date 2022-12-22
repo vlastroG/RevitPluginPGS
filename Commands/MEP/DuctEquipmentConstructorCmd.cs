@@ -7,7 +7,6 @@ using MS.Commands.MEP.Enums;
 using MS.Commands.MEP.Models;
 using MS.Commands.MEP.Models.Installation;
 using MS.Commands.MEP.Models.Symbolic;
-using MS.Commands.MEP.Services;
 using MS.GUI.ViewModels.MEP.DuctInstallation;
 using MS.GUI.Windows.MEP;
 using MS.Shared;

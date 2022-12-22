@@ -3,16 +3,18 @@ using MS.Commands.MEP.Mechanic.Impl;
 using MS.Commands.MEP.Models;
 using MS.Commands.MEP.Models.Installation;
 using MS.Commands.MEP.Models.Symbolic;
-using MS.Commands.MEP.Services;
 using MS.GUI.CommandsBase;
 using MS.GUI.ViewModels.Base;
 using MS.GUI.Windows.MEP;
 using MS.GUI.Windows.MEP.InstallationConstructor;
 using MS.GUI.Windows.MEP.InstallationConstructor.MechanicViews;
+using MS.Utilites;
 using MS.Utilites.Extensions;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -169,43 +171,40 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         }
 
         /// <summary>
-        /// Отображает полученную установку
+        /// Отображает полученную конфигурацию установки
         /// </summary>
-        /// <param name="installation"></param>
-        public void LoadInstallation(Installation installation)
+        /// <param name="viewModel">Конфигурация установки</param>
+        public void LoadViewModel(DuctEquipmentConstructorViewModel viewModel)
         {
-            Width = installation.Width;
-            Height = installation.Height;
-            Type = installation.Type;
-            SystemName = installation.System;
-            NameLong = installation.Name;
-            NameShort = installation.NameShort;
-            InputHeight = installation.InputHeight;
-            InputWidth = installation.InputWidth;
-            InputLength = installation.InputLength;
-            InputLocationBottom = installation.InputLocationBottom == 1;
-            OutputHeight = installation.OutputHeight;
-            OutputLength = installation.OutputLength;
-            OutputWidth = installation.OutputWidth;
-            OutputLocationBottom = installation.OutputLocationBottom == 1;
+            Width = viewModel.Width;
+            Height = viewModel.Height;
+            Type = viewModel.Type;
+            SystemName = viewModel.SystemName;
+            NameLong = viewModel.NameLong;
+            NameShort = viewModel.NameShort;
+            InputHeight = viewModel.InputHeight;
+            InputWidth = viewModel.InputWidth;
+            InputLength = viewModel.InputLength;
+            InputLocationBottom = viewModel.InputLocationBottom;
+            OutputHeight = viewModel.OutputHeight;
+            OutputLength = viewModel.OutputLength;
+            OutputWidth = viewModel.OutputWidth;
+            OutputLocationBottom = viewModel.OutputLocationBottom;
 
             Fillings.Clear();
-            foreach (var filling in installation.GetFillings())
+            foreach (var filling in viewModel.Fillings)
             {
                 Fillings.Add(filling);
             }
 
             Mechanics.Clear();
-            foreach (var mechanicList in installation.GetMechanics())
+            foreach (var mechanic in viewModel.Mechanics)
             {
-                foreach (var mechanic in mechanicList)
-                {
-                    Mechanics.Add(mechanic);
-                }
+                Mechanics.Add(mechanic);
             }
 
             Symbolics.Clear();
-            foreach (var symbolic in installation.GetSymbolics())
+            foreach (var symbolic in viewModel.Symbolics)
             {
                 Symbolics.Add(symbolic);
             }
@@ -387,6 +386,47 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
             }
         }
 
+        /// <summary>
+        /// Стартовая директория для работы с сериализованными установками
+        /// </summary>
+        private static string @_serializationStartPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
+
+        /// <summary>
+        /// Сериализует объект установки в JSON в указанную директорию с названием, соответствующим названию системы.
+        /// </summary>
+        /// <param name="installation">Сериализуемая установка</param>
+        private string SerializeViewModel()
+        {
+            var filePath = WorkWithPath.GetFilePath(
+                ref @_serializationStartPath,
+                "Json файлы (*.json)|*.json|Текстовые файлы (*.txt)|*.txt",
+                "Перейдите в папку и напишите название файла без расширения",
+                string.Empty);
+
+            string jsonString = JsonConvert.SerializeObject(this);
+            File.WriteAllText(filePath, jsonString);
+            return filePath;
+        }
+
+
+        /// <summary>
+        /// Десериализует установку из указанного файла
+        /// </summary>
+        /// <param name="filePath">JSON файл установки</param>
+        /// <returns>Десериализованный объект установки</returns>
+        private DuctEquipmentConstructorViewModel DeserializeViewModel()
+        {
+            var filePath = $@"{WorkWithPath.GetFilePath(
+                ref @_serializationStartPath,
+                "Json файлы (*.json)|*.json|Текстовые файлы (*.txt)|*.txt",
+                "Выберите Json файл с вентиляционной установкой",
+                string.Empty)}";
+
+            string jsonString = File.ReadAllText(@filePath);
+            return JsonConvert.DeserializeObject<DuctEquipmentConstructorViewModel>(jsonString);
+        }
+
 
         #region Commands for Serialization Deserialization
 
@@ -401,7 +441,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
 
         private void OnSerializeCommandExecuted(object p)
         {
-            InstallationCreationService.SerializeInstallation(GetInstallation());
+            SerializeViewModel();
         }
         #endregion
 
@@ -416,8 +456,8 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
 
         private void OnDeserializationCommandExecuted(object p)
         {
-            Installation installation = InstallationCreationService.DeserializeInstallation();
-            LoadInstallation(installation);
+            DuctEquipmentConstructorViewModel viewModel = DeserializeViewModel();
+            LoadViewModel(viewModel);
         }
 
         #endregion
@@ -540,6 +580,8 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
                     }
                     break;
                 case Commands.MEP.Enums.EquipmentType.AirCooler:
+                    var t = 0;
+                    Cooler test = mechanic as Cooler;
                     CoolerViewModel coolerVM = new CoolerViewModel((Cooler)mechanic);
                     CoolerView coolerView = new CoolerView() { DataContext = coolerVM, WindowStartupLocation = WindowStartupLocation.CenterOwner };
                     coolerView.ShowDialog();

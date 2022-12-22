@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:MS.GUI.Windows.MEP.InstallationConstructor.MechanicViews"
              xmlns:vm="clr-namespace:MS.GUI.ViewModels.MEP.DuctInstallation"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="320" Width="320" Height="300" MinWidth="320" MinHeight="300">
+             d:DesignHeight="300" d:DesignWidth="330" Width="330" Height="300" MinWidth="330" MinHeight="300">
     <Window.DataContext>
         <vm:CoolerViewModel/>
     </Window.DataContext>
