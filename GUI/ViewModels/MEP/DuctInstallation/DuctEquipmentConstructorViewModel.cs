@@ -52,7 +52,11 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         public double Width
         {
             get => _width;
-            set => Set(ref _width, value);
+            set
+            {
+                Set(ref _width, value);
+                OnPropertyChanged("SystemNameIsWritten");
+            }
         }
 
         /// <summary>
@@ -63,7 +67,14 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// <summary>
         /// Высота установки
         /// </summary>
-        public double Height { get => _height; set => Set(ref _height, value); }
+        public double Height
+        {
+            get => _height; set
+            {
+                Set(ref _height, value);
+                OnPropertyChanged("SystemNameIsWritten");
+            }
+        }
 
         /// <summary>
         /// Полное название установки
@@ -97,7 +108,23 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// <summary>
         /// Проверяет, заполнен ли параметр Имя системы
         /// </summary>
-        public bool SystemNameWritten => !string.IsNullOrWhiteSpace(_systemName);
+        [JsonIgnore]
+        public bool SystemNameIsWritten
+        {
+            get
+            {
+                return (!string.IsNullOrWhiteSpace(_systemName))
+                    && (InputHeight > 10)
+                    && (InputWidth > 10)
+                    && (InputLength > 10)
+                    && (OutputLength > 10)
+                    && (OutputWidth > 10)
+                    && (OutputHeight > 10)
+                    && (Width > 50)
+                    && (Height > 50);
+            }
+        }
+
 
         /// <summary>
         /// Наименование системы
@@ -113,7 +140,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
             set
             {
                 Set(ref _systemName, value);
-                OnPropertyChanged("SystemNameWritten");
+                OnPropertyChanged("SystemNameIsWritten");
             }
         }
 
@@ -144,7 +171,11 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         public double InputHeight
         {
             get => _inputHeight;
-            set => Set(ref _inputHeight, value);
+            set
+            {
+                Set(ref _inputHeight, value);
+                OnPropertyChanged("SystemNameIsWritten");
+            }
         }
 
         /// <summary>
@@ -158,7 +189,11 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         public double InputWidth
         {
             get => _inputWidth;
-            set => Set(ref _inputWidth, value);
+            set
+            {
+                Set(ref _inputWidth, value);
+                OnPropertyChanged("SystemNameIsWritten");
+            }
         }
 
         /// <summary>
@@ -172,7 +207,11 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         public double InputLength
         {
             get => _inputLength;
-            set => Set(ref _inputLength, value);
+            set
+            {
+                Set(ref _inputLength, value);
+                OnPropertyChanged("SystemNameIsWritten");
+            }
         }
 
         /// <summary>
@@ -186,7 +225,11 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         public double OutputHeight
         {
             get => _outputHeight;
-            set => Set(ref _outputHeight, value);
+            set
+            {
+                Set(ref _outputHeight, value);
+                OnPropertyChanged("SystemNameIsWritten");
+            }
         }
 
         /// <summary>
@@ -269,7 +312,11 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         public double OutputWidth
         {
             get => _outputWidth;
-            set => Set(ref _outputWidth, value);
+            set
+            {
+                Set(ref _outputWidth, value);
+                OnPropertyChanged("SystemNameIsWritten");
+            }
         }
 
         /// <summary>
@@ -283,7 +330,11 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         public double OutputLength
         {
             get => _outputLength;
-            set => Set(ref _outputLength, value);
+            set
+            {
+                Set(ref _outputLength, value);
+                OnPropertyChanged("SystemNameIsWritten");
+            }
         }
 
 
@@ -661,7 +712,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// </summary>
         /// <param name="p"></param>
         /// <returns></returns>
-        private static bool CanDeleteMechanicCommandExecute(object p) => true;
+        private bool CanDeleteMechanicCommandExecute(object p) => SelectedMechanic != null;
 
         /// <summary>
         /// Действие при удалении оборудования
@@ -731,7 +782,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// </summary>
         /// <param name="p"></param>
         /// <returns></returns>
-        private static bool CanDeleteFillingCommandExecute(object p) => true;
+        private bool CanDeleteFillingCommandExecute(object p) => SelectedFilling != null;
 
         /// <summary>
         /// Действие при удалении наполнения
@@ -802,7 +853,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// </summary>
         /// <param name="p"></param>
         /// <returns></returns>
-        private static bool CanDeleteSymbolicCommandExecute(object p) => true;
+        private bool CanDeleteSymbolicCommandExecute(object p) => SelectedSymbolic != null;
 
         /// <summary>
         /// Действие при удалении УГО
@@ -838,7 +889,8 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// <returns></returns>
         private bool CanConvertToMechanicAndFillingCommandExecute(object p)
         {
-            return (Fillings.Count + Mechanics.Count) == 0;
+            return (Fillings.Count + Mechanics.Count) == 0
+                && Symbolics.Count > 0;
         }
 
         /// <summary>
