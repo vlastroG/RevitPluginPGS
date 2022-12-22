@@ -1,4 +1,5 @@
 ﻿using MS.Commands.MEP.Enums;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -19,6 +20,7 @@ namespace MS.Commands.MEP.Mechanic.Impl
         /// <param name="length">Длина воздухоохладителя в мм</param>
         public Cooler(double length) : base(EquipmentType.AirCooler, length) { }
 
+        [JsonConstructor]
         public Cooler(Guid guid, double length) : base(EquipmentType.AirCooler, length, guid) { }
 
 

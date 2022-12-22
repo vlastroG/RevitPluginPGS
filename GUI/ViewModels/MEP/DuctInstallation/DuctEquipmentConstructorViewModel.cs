@@ -31,6 +31,17 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
 
 
         /// <summary>
+        /// Стартовая директория для работы с сериализованными установками
+        /// </summary>
+        private static string @_serializationStartPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
+        /// <summary>
+        /// Настройки сериализации
+        /// </summary>
+        private static readonly JsonSerializerSettings _settingsSerizlizer = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All };
+
+
+        /// <summary>
         /// Ширина установки
         /// </summary>
         private double _width;
@@ -83,6 +94,10 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
             set => Set(ref _nameShort, value);
         }
 
+        /// <summary>
+        /// Проверяет, заполнен ли параметр Имя системы
+        /// </summary>
+        public bool SystemNameWritten => !string.IsNullOrWhiteSpace(_systemName);
 
         /// <summary>
         /// Наименование системы
@@ -95,7 +110,11 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         public string SystemName
         {
             get => _systemName;
-            set => Set(ref _systemName, value);
+            set
+            {
+                Set(ref _systemName, value);
+                OnPropertyChanged("SystemNameWritten");
+            }
         }
 
 
@@ -310,6 +329,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// <summary>
         /// Выбранное оборудование
         /// </summary>
+        [JsonIgnore]
         public Mechanic SelectedMechanic
         {
             get => _selectedMechanic;
@@ -340,6 +360,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// <summary>
         /// Выбранное наполнение
         /// </summary>
+        [JsonIgnore]
         public Filling SelectedFilling
         {
             get => _selectedFilling;
@@ -370,6 +391,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// <summary>
         /// Выбранное УГО
         /// </summary>
+        [JsonIgnore]
         public Symbolic SelectedSymbolic
         {
             get => _selectedSymbolic;
@@ -387,26 +409,20 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         }
 
         /// <summary>
-        /// Стартовая директория для работы с сериализованными установками
-        /// </summary>
-        private static string @_serializationStartPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-
-
-        /// <summary>
         /// Сериализует объект установки в JSON в указанную директорию с названием, соответствующим названию системы.
         /// </summary>
-        /// <param name="installation">Сериализуемая установка</param>
-        private string SerializeViewModel()
+        private void SerializeViewModel()
         {
             var filePath = WorkWithPath.GetFilePath(
                 ref @_serializationStartPath,
                 "Json файлы (*.json)|*.json|Текстовые файлы (*.txt)|*.txt",
                 "Перейдите в папку и напишите название файла без расширения",
                 string.Empty);
-
-            string jsonString = JsonConvert.SerializeObject(this);
-            File.WriteAllText(filePath, jsonString);
-            return filePath;
+            if (!string.IsNullOrWhiteSpace(filePath))
+            {
+                string jsonString = JsonConvert.SerializeObject(this, _settingsSerizlizer);
+                File.WriteAllText(filePath, jsonString);
+            }
         }
 
 
@@ -422,9 +438,15 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
                 "Json файлы (*.json)|*.json|Текстовые файлы (*.txt)|*.txt",
                 "Выберите Json файл с вентиляционной установкой",
                 string.Empty)}";
-
-            string jsonString = File.ReadAllText(@filePath);
-            return JsonConvert.DeserializeObject<DuctEquipmentConstructorViewModel>(jsonString);
+            if (!string.IsNullOrWhiteSpace(filePath))
+            {
+                string jsonString = File.ReadAllText(@filePath);
+                return JsonConvert.DeserializeObject<DuctEquipmentConstructorViewModel>(jsonString, _settingsSerizlizer);
+            }
+            else
+            {
+                return null;
+            }
         }
 
 
@@ -434,6 +456,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
 
         private ICommand _serialize;
 
+        [JsonIgnore]
         public ICommand Serizlize
             => _serialize = _serialize ?? new LambdaCommand(OnSerializeCommandExecuted, CanSerializeCommandExecute);
 
@@ -449,6 +472,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
 
         private ICommand _deserialize;
 
+        [JsonIgnore]
         public ICommand Deserialize
             => _deserialize = _deserialize ?? new LambdaCommand(OnDeserializationCommandExecuted, CanDeserializeCommandExecute);
 
@@ -457,7 +481,10 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         private void OnDeserializationCommandExecuted(object p)
         {
             DuctEquipmentConstructorViewModel viewModel = DeserializeViewModel();
-            LoadViewModel(viewModel);
+            if (viewModel != null)
+            {
+                LoadViewModel(viewModel);
+            }
         }
 
         #endregion
@@ -476,6 +503,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// <summary>
         /// Команда добавления оборудования
         /// </summary>
+        [JsonIgnore]
         public ICommand CreateNewMechanicCommand
             => _createNewMechanicCommand = _createNewMechanicCommand ?? new LambdaCommand(OnCreateNewMechanicCommandExecuted, CanCreateNewMechanicCommandExecute);
 
@@ -551,6 +579,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// <summary>
         /// Команда редактирования оборудования
         /// </summary>
+        [JsonIgnore]
         public ICommand EditMechanicCommand
             => _editMechanicCommand = _editMechanicCommand ?? new LambdaCommand(OnEditMechanicCommandExecuted, CanEditMechanicCommandExecute);
 
@@ -580,9 +609,9 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
                     }
                     break;
                 case Commands.MEP.Enums.EquipmentType.AirCooler:
-                    var t = 0;
-                    Cooler test = mechanic as Cooler;
-                    CoolerViewModel coolerVM = new CoolerViewModel((Cooler)mechanic);
+                    Cooler coolerTest = new Cooler(mechanic.Guid, mechanic.Length);
+                    coolerTest = (Cooler)mechanic;
+                    CoolerViewModel coolerVM = new CoolerViewModel(coolerTest);
                     CoolerView coolerView = new CoolerView() { DataContext = coolerVM, WindowStartupLocation = WindowStartupLocation.CenterOwner };
                     coolerView.ShowDialog();
                     if (coolerView.DialogResult == true)
@@ -623,6 +652,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// <summary>
         /// Команда удаления оборудования
         /// </summary>
+        [JsonIgnore]
         public ICommand DeleteMechanicCommand
             => _deleteMechanicCommand = _deleteMechanicCommand ?? new LambdaCommand(OnDeleteMechanicCommandExecuted, CanDeleteMechanicCommandExecute);
 
@@ -659,6 +689,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// <summary>
         /// Команда добавления наполнения
         /// </summary>
+        [JsonIgnore]
         public ICommand CreateNewFillingCommand
             => _createNewFillingCommand = _createNewFillingCommand ?? new LambdaCommand(OnCreateNewFillingCommandExecuted, CanCreateNewFillingCommandExecute);
 
@@ -691,6 +722,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// <summary>
         /// Команда удаления наполнения
         /// </summary>
+        [JsonIgnore]
         public ICommand DeleteFillingCommand
             => _deleteFillingCommand = _deleteFillingCommand ?? new LambdaCommand(OnDeleteFillingCommandExecuted, CanDeleteFillingCommandExecute);
 
@@ -728,6 +760,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// <summary>
         /// Команда добавления УГО
         /// </summary>
+        [JsonIgnore]
         public ICommand CreateNewSymbolicCommand
             => _createNewSymbolicCommand = _createNewSymbolicCommand ?? new LambdaCommand(OnCreateNewSymbolicCommandExecuted, CanCreateNewSymbolicCommandExecute);
 
@@ -760,6 +793,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// <summary>
         /// Команда удаления УГО
         /// </summary>
+        [JsonIgnore]
         public ICommand DeleteSymbolicCommand
             => _deleteSymbolicCommand = _deleteSymbolicCommand ?? new LambdaCommand(OnDeleteSymbolicCommandExecuted, CanDeleteSymbolicCommandExecute);
 
@@ -793,6 +827,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// <summary>
         /// Копирование элементов из списка УГО в спискки оборудования и наполнения
         /// </summary>
+        [JsonIgnore]
         public ICommand ConvertToMechanicAndFillingCommand
             => _convertToMechanicAndFilling = _convertToMechanicAndFilling ?? new LambdaCommand(OnConvertToMechanicAndFillingCommandExecuted, CanConvertToMechanicAndFillingCommandExecute);
 
@@ -851,6 +886,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// <summary>
         /// Передвижение элемента списка на 1 позицию ближе к началу списка
         /// </summary>
+        [JsonIgnore]
         public ICommand MoveUpCommand
             => _moveUp = _moveUp ?? new LambdaCommand(OnMoveUpCommandExecuted, CanMoveUpCommandExecute);
 
@@ -890,6 +926,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// <summary>
         /// Передвинуть элемент на 1 поизцию ближе к концу списка
         /// </summary>
+        [JsonIgnore]
         public ICommand MoveDownCommand
             => _moveDown = _moveDown ?? new LambdaCommand(OnMoveDownCommandExecuted, CanMoveDownCommandExecute);
 

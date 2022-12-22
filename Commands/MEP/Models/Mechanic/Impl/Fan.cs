@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using MS.Utilites.Reflection;
 using System.Reflection;
 using System.ComponentModel;
+using Newtonsoft.Json;
 
 namespace MS.Commands.MEP.Mechanic.Impl
 {
@@ -21,6 +22,7 @@ namespace MS.Commands.MEP.Mechanic.Impl
         /// <param name="length">Длина вентилятора в мм</param>
         public Fan(double length) : base(EquipmentType.Fan, length) { }
 
+        [JsonConstructor]
         public Fan(Guid guid, double length) : base(EquipmentType.Fan, length, guid) { }
 
         /// <summary>

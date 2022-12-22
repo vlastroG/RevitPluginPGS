@@ -32,12 +32,36 @@ namespace MS.GUI.Windows.MEP
 
         private void Ok_Click(object sender, RoutedEventArgs e)
         {
-            DialogResult = true;
+            try
+            {
+                DialogResult = true;
+            }
+            catch (System.InvalidOperationException)
+            {
+                MessageBox.Show("Нельзя создать семейство установки после ошибки! " +
+                    "Можете сохранить конфигурацию, закрыть окно конструктора, " +
+                    "запустить конструктор заново и загрузить в него сохраненную конфигурацию, " +
+                    "после чего снова попытайтесь создаьт семейство. " +
+                    "Если ошибка повторится, попробуйте очистить список оборудования.",
+                    "Ошибка!");
+            }
         }
 
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {
-            DialogResult = false;
+            try
+            {
+                DialogResult = false;
+            }
+            catch (System.InvalidOperationException)
+            {
+                MessageBox.Show("Нельзя создать семейство установки после ошибки! " +
+                    "Можете сохранить конфигурацию, закрыть окно конструктора, " +
+                    "запустить конструктор заново и загрузить в него сохраненную конфигурацию, " +
+                    "после чего снова попытайтесь создаьт семейство. " +
+                    "Если ошибка повторится, попробуйте очистить список оборудования.",
+                    "Ошибка!");
+            }
         }
     }
 }

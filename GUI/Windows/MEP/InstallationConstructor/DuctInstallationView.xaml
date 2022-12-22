@@ -178,7 +178,7 @@
                 <UniformGrid DockPanel.Dock="Bottom" Rows="2" Height="40" VerticalAlignment="Bottom">
                     <Button Content="Загрузить настройки" Command="{Binding Deserialize}"/>
                     <Button Content="Сохранить настройки" Command="{Binding Serizlize}"/>
-                    <Button Content="Создать установку" Name="Ok" Click="Ok_Click"></Button>
+                    <Button Content="Создать установку" Name="Ok" Click="Ok_Click" IsEnabled="{Binding SystemNameWritten}"></Button>
                     <Button Content="Отмена" Name="Cancel" Click="Cancel_Click"></Button>
                 </UniformGrid>
             </DockPanel>
@@ -259,7 +259,7 @@
                     </ListBox>
                 </DockPanel>
             </GroupBox>
-            <GroupBox Grid.Row="1" Grid.Column="0" Header="УГО">
+            <GroupBox Grid.Row="1" Grid.Column="0" Header="УГО: сверху - впуск, снизу - выпуск">
                 <DockPanel>
                     <UniformGrid DockPanel.Dock="Bottom" Rows="2" Height="40">
                         <Button Content="Вверх"
