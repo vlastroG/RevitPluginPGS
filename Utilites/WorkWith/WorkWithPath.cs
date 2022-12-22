@@ -40,11 +40,34 @@ namespace MS.Utilites
         /// В случае отмены или выбора пользователем неправильного расширения возвращается пустая строка.
         /// </summary>
         /// <param name="StartPath">Стартовая директория</param>
-        /// <param name="FileFilter">Фильтр для файлов</param>
+        /// <param name="FileFilter">Строка фильтра должна содержать описание фильтра, 
+        /// за которым следует вертикальная черта и шаблон фильтра. 
+        /// Вертикальная черта должна также отделять разные пары описания и шаблона фильтра. 
+        /// Разные расширения в шаблоне фильтра должны разделяться точкой с запятой. 
+        /// Пример: "Файлы рисунков (*.bmp, *.jpg)|*.bmp;*.jpg|Все файлы (*.*)|*.*"'</param>
         /// <param name="Tittle">Заголовок окна</param>
         /// <param name="MustEndsWith">Расширение, которое должно быть у выбранного файла</param>
         /// <returns></returns>
-        public static string GetPath(ref string StartPath, string FileFilter, string Tittle, string MustEndsWith)
+        public static string GetFilePath(ref string StartPath, string FileFilter, string Tittle, string MustEndsWith)
+        {
+            return GetFilePath(ref StartPath, FileFilter, Tittle, MustEndsWith, false);
+        }
+
+        /// <summary>
+        /// Выводит диалоговое окно для выбора файла заданного расширения и получения полного пути к нему.
+        /// В случае отмены или выбора пользователем неправильного расширения возвращается пустая строка.
+        /// </summary>
+        /// <param name="StartPath">Стартовая директория</param>
+        /// <param name="FileFilter">Строка фильтра должна содержать описание фильтра, 
+        /// за которым следует вертикальная черта и шаблон фильтра. 
+        /// Вертикальная черта должна также отделять разные пары описания и шаблона фильтра. 
+        /// Разные расширения в шаблоне фильтра должны разделяться точкой с запятой. 
+        /// Пример: "Файлы рисунков (*.bmp, *.jpg)|*.bmp;*.jpg|Все файлы (*.*)|*.*"'</param>
+        /// <param name="Tittle">Заголовок окна</param>
+        /// <param name="MustEndsWith">Расширение, которое должно быть у выбранного файла</param>
+        /// <param name="checkFileExists">Проверять, существует ли заданный файл, или нет</param>
+        /// <returns></returns>
+        public static string GetFilePath(ref string StartPath, string FileFilter, string Tittle, string MustEndsWith, bool checkFileExists)
         {
             string path = String.Empty;
             OpenFileDialog openFileDialog = new OpenFileDialog()
@@ -53,7 +76,8 @@ namespace MS.Utilites
                 Filter = FileFilter,
                 Multiselect = false,
                 RestoreDirectory = true,
-                Title = Tittle
+                Title = Tittle,
+                CheckFileExists = checkFileExists
             };
             if (openFileDialog.ShowDialog() == true)
             {

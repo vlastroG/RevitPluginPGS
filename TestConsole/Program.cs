@@ -1,5 +1,6 @@
-﻿string test = "к1 18";
-var t = test.Split(',');
-var filepath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), @"Autodesk\Revit\Addins\2022\MS.dll");
-bool exists = File.Exists(filepath);
-var b = 9;
+﻿using System.Text.RegularExpressions;
+
+string fileName = @"123<>:poi+-9dfh\/|?*""adfh";
+
+Console.WriteLine(Regex.Replace(fileName, @"[\\<>:/|?*""]", "_"));
+

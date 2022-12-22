@@ -1,0 +1,112 @@
+﻿<Window x:Class="MS.GUI.Windows.MEP.InstallationConstructor.MechanicViews.FanView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:MS.GUI.Windows.MEP.InstallationConstructor.MechanicViews"
+             xmlns:vm="clr-namespace:MS.GUI.ViewModels.MEP.DuctInstallation"
+             xmlns:converters="clr-namespace:MS.GUI.Converters"
+             mc:Ignorable="d" 
+             d:DesignHeight="350" d:DesignWidth="400" Width="400" Height="350" MinWidth="300" MinHeight="350">
+    <Window.DataContext>
+        <vm:FanViewModel/>
+    </Window.DataContext>
+    <Window.Resources>
+        <converters:NullableValueConverter x:Key="NullableValueConverter"/>
+    </Window.Resources>
+    <Grid>
+        <GroupBox Header="Параметры вентилятора">
+            <DockPanel>
+                <UniformGrid DockPanel.Dock="Top" Margin="5" Rows="10">
+                    <UniformGrid.Resources>
+                        <Style TargetType="DockPanel">
+                            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                            <Setter Property="Margin" Value="3,0"/>
+                            <Setter Property="Height" Value="25"/>
+                        </Style>
+                        <Style TargetType="TextBox">
+                            <Setter Property="VerticalAlignment" Value="Center"/>
+                            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                            <Style.Triggers>
+                                <Trigger Property="Validation.HasError" Value="True">
+                                    <Setter Property="ToolTip"
+                                            Value="{Binding RelativeSource={RelativeSource Self},
+                                                    Path=(Validation.Errors)[0].ErrorContent}" />
+                                    <Setter Property="Foreground" Value="Red" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="VerticalAlignment" Value="Center"/>
+                            <Setter Property="Margin" Value="5,0,0,0"/>
+                        </Style>
+                    </UniformGrid.Resources>
+                    <DockPanel>
+                        <TextBox Text="{Binding Mark}"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBlock Text="Марка"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBox Text="{Binding Type}"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBlock Text="Типоразмер"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBox Text="{Binding AirFlow, Converter={StaticResource NullableValueConverter}}"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBlock Text="Расход воздуха"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBox Text="{Binding AirPressureLoss, Converter={StaticResource NullableValueConverter}}"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBlock Text="Потери давления"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBox Text="{Binding FanSpeed, Converter={StaticResource NullableValueConverter}}"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBlock Text="Частота вращения вентилятора"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBox Text="{Binding ExplosionProofType}"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBlock Text="Тип по взрывозащите"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBox Text="{Binding RatedPower, Converter={StaticResource NullableValueConverter}}"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBlock Text="Номинальная мощность"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBox Text="{Binding EngineSpeed, Converter={StaticResource NullableValueConverter}}"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBlock Text="Частота вращения двигателя"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBox Text="{Binding Count, Converter={StaticResource NullableValueConverter}, ValidatesOnDataErrors=True}"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBlock Text="Количество"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBox Text="{Binding Length}"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBlock Text="Длина"/>
+                    </DockPanel>
+                </UniformGrid>
+                <UniformGrid DockPanel.Dock="Bottom" Height="20" Rows="1" VerticalAlignment="Bottom">
+                    <Button Content="Ок" Name="Ok" Click="Ok_Click"/>
+                    <Button Content="Отмена" Name="Cancel" Click="Cancel_Click"/>
+                </UniformGrid>
+            </DockPanel>
+        </GroupBox>
+    </Grid>
+</Window>

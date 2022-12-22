@@ -80,7 +80,7 @@ namespace MS.Commands.MEP
         /// <returns>Кортеж строк. Если произошла отмена или ошибка, то null</returns>
         private List<(string Naming, string System)> GetNamingAndSystemTuple(int sheetNumber)
         {
-            _excelPath = GetPath(ref _startPath, "Excel Files|*.xlsx", "Выберите файл таблицы Excel", ".xlsx");
+            _excelPath = GetFilePath(ref _startPath, "Excel Files|*.xlsx", "Выберите файл таблицы Excel", ".xlsx");
             if (String.IsNullOrEmpty(_excelPath)) return null;
             List<(string Naming, string System)> namingAndSystemTuple = new List<(string Naming, string System)>();
             using (Excel excel = new Excel(_excelPath, sheetNumber))

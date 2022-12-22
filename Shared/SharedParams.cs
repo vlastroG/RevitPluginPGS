@@ -1,4 +1,6 @@
 ﻿using Autodesk.Revit.DB;
+using Autodesk.Revit.UI;
+using MS.Utilites;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -98,6 +100,11 @@ namespace MS.Shared
         public static Guid ADSK_Mark => Guid.Parse("2204049c-d557-4dfc-8d70-13f19715e46d");
 
         /// <summary>
+        /// Guid параметра ADSK_Количество = "8d057bb3-6ccd-4655-9165-55526691fe3a"
+        /// </summary>
+        public static Guid ADSK_Count => Guid.Parse("8d057bb3-6ccd-4655-9165-55526691fe3a");
+
+        /// <summary>
         /// Guid параметра PGS_АрмКолвоАрмРядов = 9d149e47-87a0-45f7-9237-d47436065c80 (double)
         /// </summary>
         public static Guid PGS_ArmCountRows => Guid.Parse("9d149e47-87a0-45f7-9237-d47436065c80");
@@ -116,6 +123,11 @@ namespace MS.Shared
         /// Guid параметра ADSK_Размер_Диаметр = 9b679ab7-ea2e-49ce-90ab-0549d5aa36ff (double)
         /// </summary>
         public static Guid ADSK_DimensionDiameter => Guid.Parse("9b679ab7-ea2e-49ce-90ab-0549d5aa36ff");
+
+        /// <summary>
+        /// Guid параметра ADSK_Размер_Длина = 748a2515-4cc9-4b74-9a69-339a8d65a212 (double)
+        /// </summary>
+        public static Guid ADSK_DimensionLength => Guid.Parse("748a2515-4cc9-4b74-9a69-339a8d65a212");
 
         /// <summary>
         /// Guid параметра PGS_ИтогАрмСетки = 40f2c9af-2986-4330-a6d9-4c9ae9419342 (double)
@@ -353,6 +365,22 @@ namespace MS.Shared
         /// </summary>
         public static Guid ADSK_SideThickness => Guid.Parse("381b467b-3518-42bb-b183-35169c9bdfb3");
 
+        /// <summary>
+        /// Полный путь к ФОП
+        /// </summary>
+        private static readonly string _filePathADSK
+            = WorkWithPath.AssemblyDirectory + @"\EmbeddedFiles\ФОП2021_PGS_ОВ и ВК(07.06.22).txt";
+
+        /// <summary>
+        /// Возвращает ФОП ADSK в виде объекта
+        /// </summary>
+        /// <param name="uidoc">UI Revit</param>
+        /// <returns>ФОП ADSK объект</returns>
+        public static DefinitionFile GetSharedParameterFileADSK(in UIDocument uidoc)
+        {
+            uidoc.Application.Application.SharedParametersFilename = _filePathADSK;
+            return uidoc.Application.Application.OpenSharedParameterFile();
+        }
 
         /// <summary>
         /// Валидация текущего проекта Revit на наличие общих параметров у заданной категории.
@@ -395,6 +423,108 @@ namespace MS.Shared
                 message = "отсутствуют";
             }
             return message;
+        }
+
+
+        /// <summary>
+        /// Добавляет общий параметр в семейство и устанавливает его значение,
+        /// которое автоматически конвертируется из мертических единиц в имперские.
+        /// </summary>
+        /// <param name="uidoc">Документ семейства, в которое добавляется параметр</param>
+        /// <param name="parameterGroup">Группа параметров в семействе</param>
+        /// <param name="parName">Название параметра</param>
+        /// <param name="isInstance">Если True => экземпляр, False => тип</param>
+        /// <param name="value">Значение параметра</param>
+        /// <returns>True, если параметр успешно добавлен и его значение установлено, иначе False.</returns>
+        public static bool AddParameterWithValue(
+            in DefinitionFile defFile,
+            in Document doc,
+            ForgeTypeId parameterGroup,
+            string parName,
+            bool isInstance,
+            dynamic value)
+        {
+            try
+            {
+                AddSharedParameter(defFile, doc, parameterGroup, parName, isInstance);
+                SetFamilyParameterValue(doc, parName, (object)value);
+            }
+            catch (ArgumentNullException)
+            {
+                return false;
+            }
+            catch (NullReferenceException)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Добавляет общий параметр в файл семейства по имени параметра
+        /// </summary>
+        /// <param name="uidoc">UI файла семейства</param>
+        /// <param name="parameterGroup">Группа параметров в семействе</param>
+        /// <param name="parName">Название параметра</param>
+        /// <param name="isInstance">True => параметр экземпляра, False => параметр типа</param>
+        private static void AddSharedParameter(
+            in DefinitionFile defFile,
+            in Document doc,
+            ForgeTypeId parameterGroup,
+            string parName,
+            bool isInstance)
+        {
+            FamilyManager familyManager = doc.FamilyManager;
+            DefinitionGroups groups = defFile.Groups;
+            ExternalDefinition eDef = null;
+            foreach (var group in groups)
+            {
+                eDef = group.Definitions.FirstOrDefault(d => d.Name.Equals(parName)) as ExternalDefinition;
+                if (eDef != null)
+                    break;
+            }
+            try
+            {
+                familyManager.AddParameter(eDef, parameterGroup, isInstance);
+            }
+            catch (Autodesk.Revit.Exceptions.ArgumentException)
+            {
+            }
+        }
+
+        /// <summary>
+        /// Назначает значению парамтера семейства по его имени.
+        /// Значение автоматически конвертируется из метрических единиц в имперские.
+        /// </summary>
+        /// <param name="doc">Документ семейства</param>
+        /// <param name="parName">Название параметра</param>
+        /// <param name="parValue">Значение параметра</param>
+        /// <exception cref="NullReferenceException">Значение параметра null</exception>
+        private static void SetFamilyParameterValue(in Document doc, string parName, dynamic parValue)
+        {
+            if (parValue is null)
+            {
+                throw new NullReferenceException(nameof(parValue));
+            }
+            var famParameter = doc.FamilyManager.get_Parameter(parName);
+            var value = parValue;
+            try
+            {
+                var paramType = famParameter.GetUnitTypeId();
+                value = UnitUtils.ConvertToInternalUnits(parValue, paramType);
+            }
+            catch (Autodesk.Revit.Exceptions.InvalidOperationException)
+            {
+                value = parValue;
+            }
+            try
+            {
+                doc.FamilyManager.Set(famParameter, value);
+            }
+            catch (Autodesk.Revit.Exceptions.ArgumentException)
+            {
+                return;
+            }
         }
     }
 }
