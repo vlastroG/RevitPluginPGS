@@ -300,6 +300,15 @@ namespace MS
                 "\nПомещения можно выбрать в спецификации и запустить команду, или запустить команду и выбрать их вручную.";
 
 
+            // Info command
+            PushButtonData btnLintelsCreationCmd = new PushButtonData("LintelsCreationCmd", "Создание перемычек", path, "MS.Commands.AR.LintelsCreationCmd");
+            Uri btnLintelsCreationCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            BitmapImage btnLintelsCreationCmdImage = new BitmapImage(btnLintelsCreationCmdImagePath);
+            btnLintelsCreationCmd.LargeImage = btnLintelsCreationCmdImage;
+            btnLintelsCreationCmd.ToolTip = "Создание и корректировка расположения перемычек.";
+
+
+
             //StairReinforcement command
             PushButtonData btnStairRnfrcmtCmd = new PushButtonData("StairReinforcement", "Армирование\nлестниц", path, "MS.Commands.KR.StairReinforcement");
             Uri btnStairRnfrcmtCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\KR\StairRnfrcmt.png");
@@ -527,6 +536,7 @@ namespace MS
             panelAR.AddItem(btnRoomBoardsFinishing);
             panelAR.AddItem(btnMasonryMesh);
             panelAR.AddItem(btnMaterialColors);
+            panelAR.AddItem(btnLintelsCreationCmd);
 
             // KR panel
             panelKR.AddItem(btnStairRnfrcmtCmd);

@@ -132,6 +132,7 @@
     <Compile Include="Commands\AR\DTO\ScheduleFinishWallsCeilingsRowDto.cs" />
     <Compile Include="Commands\AR\DTO\WallTypeFinishingDto.cs" />
     <Compile Include="Commands\AR\Enums\FinWallsHeight.cs" />
+    <Compile Include="Commands\AR\LintelsCreationCmd.cs" />
     <Compile Include="Commands\AR\MasonryMesh.cs" />
     <Compile Include="Commands\AR\MaterialColors.cs" />
     <Compile Include="Commands\AR\Models\Apartment.cs" />
@@ -275,7 +276,6 @@
     <Compile Include="Utilites\Extensions\StringExtension.cs" />
     <Compile Include="Utilites\Extensions\WallExtension.cs" />
     <Compile Include="Utilites\Extensions\IEnumerableExtension.cs" />
-    <Compile Include="Utilites\GetBoundarySegmentElement.cs" />
     <Compile Include="Utilites\Reflection\AttributesHandler.cs" />
     <Compile Include="Utilites\SelectionFilters\MulticategoryInLinkSelectionFilter.cs" />
     <Compile Include="Utilites\SelectionFilters\ElementInLinkSelectionFilter.cs" />
