@@ -30,7 +30,7 @@ namespace MS.Utilites
             //if (!(elem is FamilyInstance)) 
             //    return false;
 
-            BuiltInCategory builtInCategory = (BuiltInCategory)WorkWithParameters.GetCategoryIdAsInteger(elem);
+            BuiltInCategory builtInCategory = (BuiltInCategory)ParametersMethods.GetCategoryIdAsInteger(elem);
 
             if (_addFilterByElementClass)
             {

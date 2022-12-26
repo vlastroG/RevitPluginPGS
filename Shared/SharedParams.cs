@@ -369,7 +369,7 @@ namespace MS.Shared
         /// Полный путь к ФОП
         /// </summary>
         private static readonly string _filePathADSK
-            = WorkWithPath.AssemblyDirectory + @"\EmbeddedFiles\ФОП2021_PGS_ОВ и ВК(07.06.22).txt";
+            = PathMethods.AssemblyDirectory + @"\EmbeddedFiles\ФОП2021_PGS_ОВ и ВК(07.06.22).txt";
 
         /// <summary>
         /// Возвращает ФОП ADSK в виде объекта

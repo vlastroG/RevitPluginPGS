@@ -1,6 +1,6 @@
 ﻿using Autodesk.Revit.DB;
-using MS.Commands.AR.DTO;
-using MS.Commands.AR.Enums;
+using MS.RevitCommands.AR.DTO;
+using MS.RevitCommands.AR.Enums;
 using MS.GUI.ViewModels.Base;
 using System;
 using System.Collections.Generic;
