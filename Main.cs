@@ -179,18 +179,6 @@ namespace MS
                 "и его границы сделаны границей помещений; или если в помещении переменный уровень пола." +
                 "Такие уникальные помещения нужно убрать из расчета во всплывающем окне.";
 
-            // MarkLintelsInOpenings command
-            PushButtonData btnMarkLintelsInOpenings = new PushButtonData("MarkLintelsInOpenings", "Маркировать перемычки\nокон и дверей", path, "MS.Commands.AR.MarkLintelsInOpenings");
-            Uri btnMarkLintelsInOpeningsImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\Beams.png");
-            BitmapImage btnMarkLintelsInOpeningsImage = new BitmapImage(btnMarkLintelsInOpeningsImagePath);
-            btnMarkLintelsInOpenings.LargeImage = btnMarkLintelsInOpeningsImage;
-            btnMarkLintelsInOpenings.ToolTip = "Назначение Марок перемычек в параметры окон и дверей: " +
-                "\'PGS_МаркаПеремычки\' и \'Мрк.МаркаКонструкции\', и назначение массы перемычки " +
-                "(\'ADSK_Масса элемента)\' в \'PGS_МассаПеремычки\' у окна и двери при помощи выпадающего окна.";
-            btnMarkLintelsInOpenings.LongDescription =
-                "В Описании типоразмера родительского семейства перемычки (и только в нем!) " +
-                "должно быть написано \'Перемычка\'." +
-                "Семейство перемычки должно быть выполнено категорией \'Обобщенные модели\'.";
 
             // LintelsSections command
             PushButtonData btnLintelsSections = new PushButtonData("LintelsSections", "Разрезы\nпо перемычкам", path, "MS.Commands.AR.CreateSectionsByLintels");
@@ -525,7 +513,6 @@ namespace MS
             panelAR.AddItem(btnRmArea);
             panelAR.AddItem(btnOpeningsByDuctCmd);
             panelAR.AddItem(btnOpeningsArea);
-            panelAR.AddItem(btnMarkLintelsInOpenings);
             panelAR.AddItem(btnLintelsSections);
             panelAR.AddItem(btnCreateImagesFromSections);
             panelAR.AddItem(btnRoomsFinishingMultiMark);
