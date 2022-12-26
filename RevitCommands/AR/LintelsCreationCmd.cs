@@ -1,7 +1,9 @@
 ﻿using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
+using Autodesk.Revit.UI.Selection;
 using MS.Utilites;
+using MS.Utilites.SelectionFilters;
 using MS.Utilites.WorkWith;
 using System;
 using System.Collections.Generic;
@@ -23,7 +25,7 @@ namespace MS.RevitCommands.AR
             Document doc = commandData.Application.ActiveUIDocument.Document;
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
 
-            Element opening = doc.GetElement(uidoc.Selection.GetElementIds()?.FirstOrDefault());
+            Element opening = GetOpeningTest(uidoc);
 
             if (opening is null)
             {
@@ -37,7 +39,7 @@ namespace MS.RevitCommands.AR
                 return Result.Cancelled;
             }
 
-            var hostWall = GetHostOfCurtainWall(doc, view3d, opening as Wall);
+            var hostWall = GetHostElement(doc, view3d, opening);
             if (!(hostWall is null))
             {
                 var t = new List<ElementId>() { hostWall.Id };
@@ -46,6 +48,24 @@ namespace MS.RevitCommands.AR
                     uidoc.Selection.SetElementIds(new List<ElementId>() { hostWall?.Id });
                 }
             }
+
+            var t1 = GetOpeningWidth(opening);
+            var t2 = GetWallThick(hostWall as Wall);
+            (var left, var right) = GetOpeningSidesDistances(opening, hostWall as Wall);
+            Task.Run(() => MessageBox.Show($"Проем {opening.Id}\nСлева: {left}\nСправа: {right}"));
+            //using (Transaction test = new Transaction(doc))
+            //{
+            //    test.Start("test");
+            //    var curve = Line.CreateBound(GetLocationPoint(opening), GetLocationPoint(opening) + GetElementDirection(opening)) as Curve;
+            //    var plane = SketchPlane.Create(doc, opening.LevelId);
+            //    var twet = doc.Create.NewModelCurve(curve, plane);
+            //    test.Commit();
+            //}
+            var t5 = GetWallHeightOverOpening(opening, hostWall, view3d);
+            var t6 = GetWallName(hostWall as Wall);
+
+
+
             return Result.Succeeded;
             var guid = Guid.NewGuid().ToString();
 
@@ -100,6 +120,37 @@ namespace MS.RevitCommands.AR
         }
 
         /// <summary>
+        /// Возвращает элемент, выбранный пользователем
+        /// </summary>
+        /// <param name="uidoc"></param>
+        /// <returns></returns>
+        private Element GetOpeningTest(in UIDocument uidoc)
+        {
+            SelectionFilterOpenings filter = new SelectionFilterOpenings();
+            Element opening = null;
+            try
+            {
+                Reference openingRef = uidoc.Selection.PickObject(
+                    ObjectType.Element,
+                    filter,
+                    "Выберите проем");
+                opening = uidoc.Document.GetElement(openingRef);
+            }
+            catch (Autodesk.Revit.Exceptions.OperationCanceledException)
+            {
+                return null;
+            }
+            catch (Autodesk.Revit.Exceptions.InvalidOperationException)
+            {
+                MessageBox.Show(
+                    "Перейдите на вид, где можно выбрать элементы",
+                    "Ошибка");
+                return null;
+            }
+            return opening;
+        }
+
+        /// <summary>
         /// Возвращает точку размещения элемента, являющегося стеной или семейством, размещаемым по 1 точке.
         /// Если элемент - стена, возвращается центр осевой линии стены.
         /// Если элемент - экземпляр семейства, то возвращается точка расположения семейства.
@@ -110,7 +161,8 @@ namespace MS.RevitCommands.AR
         {
             if (elem is Wall wall)
             {
-                return ((wall.Location as LocationCurve).Curve as Line).Origin;
+                var curve = (wall.Location as LocationCurve).Curve;
+                return (curve.GetEndPoint(1) + curve.GetEndPoint(0)) / 2;
             }
             else if (elem is FamilyInstance inst)
             {
@@ -130,7 +182,7 @@ namespace MS.RevitCommands.AR
         private double GetOpeningWidth(in Element opening)
         {
             (_, double width) = GeometryMethods.GetWidthAndHeightOfElement(opening);
-            return UnitUtils.ConvertFromInternalUnits(width, UnitTypeId.Millimeters);
+            return Math.Round(UnitUtils.ConvertFromInternalUnits(width, UnitTypeId.Millimeters));
         }
 
         /// <summary>
@@ -138,16 +190,9 @@ namespace MS.RevitCommands.AR
         /// </summary>
         /// <param name="hostWall">Хост стена проема</param>
         /// <returns>Толщина стены в мм</returns>
-        private double GetWallThick(in Element hostWall)
+        private double GetWallThick(in Wall hostWall)
         {
-            if (hostWall is Wall wall)
-            {
-                return UnitUtils.ConvertFromInternalUnits(wall.WallType.get_Parameter(BuiltInParameter.WALL_ATTR_WIDTH_PARAM).AsDouble(), UnitTypeId.Millimeters);
-            }
-            else
-            {
-                throw new ArgumentException(nameof(hostWall));
-            }
+            return Math.Round(UnitUtils.ConvertFromInternalUnits(hostWall.WallType.get_Parameter(BuiltInParameter.WALL_ATTR_WIDTH_PARAM).AsDouble(), UnitTypeId.Millimeters));
         }
 
         /// <summary>
@@ -155,16 +200,9 @@ namespace MS.RevitCommands.AR
         /// </summary>
         /// <param name="hostWall">Хост стена проема</param>
         /// <returns>Название типоразмера стены</returns>
-        private string GetWallName(in Element hostWall)
+        private string GetWallName(in Wall hostWall)
         {
-            if (hostWall is Wall wall)
-            {
-                return wall.Name;
-            }
-            else
-            {
-                throw new ArgumentException(nameof(hostWall));
-            }
+            return hostWall.Name;
         }
 
         /// <summary>
@@ -176,7 +214,7 @@ namespace MS.RevitCommands.AR
         /// <returns>Высота участка стены над проемом в мм</returns>
         private double GetWallHeightOverOpening(in Element opening, in Element hostWall, in View3D view3d)
         {
-            return UnitUtils.ConvertFromInternalUnits(hostWall.get_BoundingBox(view3d).Max.Z - opening.get_BoundingBox(view3d).Max.Z, UnitTypeId.Millimeters);
+            return Math.Round(UnitUtils.ConvertFromInternalUnits(hostWall.get_BoundingBox(view3d).Max.Z - opening.get_BoundingBox(view3d).Max.Z, UnitTypeId.Millimeters));
         }
 
         /// <summary>
@@ -185,7 +223,7 @@ namespace MS.RevitCommands.AR
         /// <param name="opening">Проем</param>
         /// <param name="hostWall">Хост стена проема</param>
         /// <returns>Кортеж расстояний слева и справа от граней проема до торцов стены</returns>
-        private (double leftDistance, double rightDistance) GetDistanceToRightEnd(in Element opening, in Wall hostWall)
+        private (double leftDistance, double rightDistance) GetOpeningSidesDistances(in Element opening, in Wall hostWall)
         {
             (_, double width) = GeometryMethods.GetWidthAndHeightOfElement(opening);
             XYZ openingLocation = GetLocationPoint(opening);
@@ -195,15 +233,16 @@ namespace MS.RevitCommands.AR
                 XYZ lineDirection = line.Direction;
                 XYZ lineStart = line.GetEndPoint(0);
                 XYZ lineEnd = line.GetEndPoint(1);
+                XYZ openingLocationOnLevel = new XYZ(openingLocation.X, openingLocation.Y, lineStart.Z);
                 if (lineDirection.CrossProduct(openingDirection).IsAlmostEqualTo(XYZ.BasisZ))
                 {
-                    return (UnitUtils.ConvertFromInternalUnits(openingLocation.DistanceTo(lineStart) - width / 2, UnitTypeId.Millimeters),
-                        UnitUtils.ConvertFromInternalUnits(openingLocation.DistanceTo(lineEnd) - width / 2, UnitTypeId.Millimeters));
+                    return (Math.Round(UnitUtils.ConvertFromInternalUnits(openingLocationOnLevel.DistanceTo(lineStart) - (width / 2), UnitTypeId.Millimeters)),
+                        Math.Round(UnitUtils.ConvertFromInternalUnits(openingLocationOnLevel.DistanceTo(lineEnd) - (width / 2), UnitTypeId.Millimeters)));
                 }
                 else
                 {
-                    return (UnitUtils.ConvertFromInternalUnits(openingLocation.DistanceTo(lineEnd) - width / 2, UnitTypeId.Millimeters),
-                        UnitUtils.ConvertFromInternalUnits(openingLocation.DistanceTo(lineStart) - width / 2, UnitTypeId.Millimeters));
+                    return (Math.Round(UnitUtils.ConvertFromInternalUnits(openingLocationOnLevel.DistanceTo(lineEnd) - (width / 2), UnitTypeId.Millimeters)),
+                        Math.Round(UnitUtils.ConvertFromInternalUnits(openingLocationOnLevel.DistanceTo(lineStart) - (width / 2), UnitTypeId.Millimeters)));
                 }
             }
             else

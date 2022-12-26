@@ -283,9 +283,9 @@
     <Compile Include="Utilites\SelectionFilters\SelectionFilterEdges.cs" />
     <Compile Include="Utilites\SelectionFilters\SelectionFilterEdgesOfElement.cs" />
     <Compile Include="Utilites\SelectionFilters\SelectionFilterElementsOfCategoryType.cs" />
+    <Compile Include="Utilites\SelectionFilters\SelectionFilterOpenings.cs" />
     <Compile Include="Utilites\SelectionFilters\SelectionFilterPlanarFaces.cs" />
     <Compile Include="Utilites\SelectionFilters\SelectionFilterPlanarFacesOfElement.cs" />
-    <Compile Include="Utilites\SelectionFilters\SelectionFilterRooms.cs" />
     <Compile Include="Utilites\SelectionFilters\SelectionFilterElementsOfCategory.cs" />
     <Compile Include="Utilites\UserInput\UserInput.cs" />
     <Compile Include="Utilites\Extensions\StaticHelpers\DocMethods.cs" />
