@@ -1,6 +1,7 @@
 ﻿using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
+using MS.Utilites;
 using MS.Utilites.WorkWith;
 using System;
 using System.Collections.Generic;
@@ -99,7 +100,9 @@ namespace MS.Commands.AR
         }
 
         /// <summary>
-        /// Возвращает точку размещения элемента, являющегося стеной или семейством, размещаемым по 1 точке
+        /// Возвращает точку размещения элемента, являющегося стеной или семейством, размещаемым по 1 точке.
+        /// Если элемент - стена, возвращается центр осевой линии стены.
+        /// Если элемент - экземпляр семейства, то возвращается точка расположения семейства.
         /// </summary>
         /// <param name="elem">Элемент, расположение которого нужно получить. Wall или FamilyInstance по 1 точке.</param>
         /// <returns>Точка размещения или null, если условия для типа элемента не соблюдены</returns>
@@ -113,7 +116,113 @@ namespace MS.Commands.AR
             {
                 return (inst.Location as LocationPoint).Point;
             }
-            return null;
+            else
+            {
+                throw new ArgumentException(nameof(elem));
+            }
+        }
+
+        /// <summary>
+        /// Возвращает ширину проема в мм
+        /// </summary>
+        /// <param name="opening">Проем, сделанный семейством окна или двери, или витражная стена</param>
+        /// <returns>Ширина проема в мм</returns>
+        private double GetOpeningWidth(in Element opening)
+        {
+            (_, double width) = WorkWithGeometry.GetWidthAndHeightOfElement(opening);
+            return UnitUtils.ConvertFromInternalUnits(width, UnitTypeId.Millimeters);
+        }
+
+        /// <summary>
+        /// Возвращает толщину стены в мм
+        /// </summary>
+        /// <param name="hostWall">Хост стена проема</param>
+        /// <returns>Толщина стены в мм</returns>
+        private double GetWallThick(in Element hostWall)
+        {
+            if (hostWall is Wall wall)
+            {
+                return UnitUtils.ConvertFromInternalUnits(wall.WallType.get_Parameter(BuiltInParameter.WALL_ATTR_WIDTH_PARAM).AsDouble(), UnitTypeId.Millimeters);
+            }
+            else
+            {
+                throw new ArgumentException(nameof(hostWall));
+            }
+        }
+
+        /// <summary>
+        /// Возвращает название типоразмера стены
+        /// </summary>
+        /// <param name="hostWall">Хост стена проема</param>
+        /// <returns>Название типоразмера стены</returns>
+        private string GetWallName(in Element hostWall)
+        {
+            if (hostWall is Wall wall)
+            {
+                return wall.Name;
+            }
+            else
+            {
+                throw new ArgumentException(nameof(hostWall));
+            }
+        }
+
+        /// <summary>
+        /// Возвращает высоту стены над проемом в мм
+        /// </summary>
+        /// <param name="opening">Проем, сделанный окном, дверью или витражом</param>
+        /// <param name="hostWall">Хост стена проема</param>
+        /// <param name="view3d">{3D} вид по умолчанию</param>
+        /// <returns>Высота участка стены над проемом в мм</returns>
+        private double GetWallHeightOverOpening(in Element opening, in Element hostWall, in View3D view3d)
+        {
+            return UnitUtils.ConvertFromInternalUnits(hostWall.get_BoundingBox(view3d).Max.Z - opening.get_BoundingBox(view3d).Max.Z, UnitTypeId.Millimeters);
+        }
+
+        /// <summary>
+        /// Возвращает расстояния от граней проема до торцов станы
+        /// </summary>
+        /// <param name="opening">Проем</param>
+        /// <param name="hostWall">Хост стена проема</param>
+        /// <returns>Кортеж расстояний слева и справа от граней проема до торцов стены</returns>
+        private (double leftDistance, double rightDistance) GetDistanceToRightEnd(in Element opening, in Wall hostWall)
+        {
+            (_, double width) = WorkWithGeometry.GetWidthAndHeightOfElement(opening);
+            XYZ openingLocation = GetLocationPoint(opening);
+            XYZ openingDirection = GetElementDirection(opening);
+            if ((hostWall.Location as LocationCurve).Curve is Line line)
+            {
+                XYZ lineDirection = line.Direction;
+                XYZ lineStart = line.GetEndPoint(0);
+                XYZ lineEnd = line.GetEndPoint(1);
+                if (lineDirection.CrossProduct(openingDirection).IsAlmostEqualTo(XYZ.BasisZ))
+                {
+                    return (UnitUtils.ConvertFromInternalUnits(openingLocation.DistanceTo(lineStart) - width / 2, UnitTypeId.Millimeters),
+                        UnitUtils.ConvertFromInternalUnits(openingLocation.DistanceTo(lineEnd) - width / 2, UnitTypeId.Millimeters));
+                }
+                else
+                {
+                    return (UnitUtils.ConvertFromInternalUnits(openingLocation.DistanceTo(lineEnd) - width / 2, UnitTypeId.Millimeters),
+                        UnitUtils.ConvertFromInternalUnits(openingLocation.DistanceTo(lineStart) - width / 2, UnitTypeId.Millimeters));
+                }
+            }
+            else
+            {
+                return (0, 0);
+            }
+        }
+
+        private XYZ GetElementDirection(in Element opening)
+        {
+            if (opening is FamilyInstance inst)
+            {
+                return inst.FacingOrientation;
+            }
+            else if (opening is Wall wall)
+            {
+                return wall.Orientation;
+            }
+            else throw new ArgumentException(nameof(opening));
         }
 
         /// <summary>
