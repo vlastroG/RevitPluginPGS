@@ -35,7 +35,7 @@ namespace MS.RevitCommands.AR
             View3D view3d = DocMethods.GetView3Default(doc);
             if (view3d is null)
             {
-                Task.Run(() => MessageBox.Show("Не найден {3D} вид по умолчанию!", "Ошибка"));
+                MessageBox.Show("Не найден {3D} вид по умолчанию!", "Ошибка");
                 return Result.Cancelled;
             }
 
