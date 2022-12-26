@@ -1,6 +1,7 @@
 ﻿using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
+using MS.Utilites.WorkWith;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,23 +16,20 @@ namespace MS.Commands.AR
     public class LintelsCreationCmd : IExternalCommand
     {
         private const string _parGuidName = "PGS_GUID";
+
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             Document doc = commandData.Application.ActiveUIDocument.Document;
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
 
-            var opening = doc.GetElement(uidoc.Selection.GetElementIds()?.FirstOrDefault());
+            Element opening = doc.GetElement(uidoc.Selection.GetElementIds()?.FirstOrDefault());
 
             if (opening is null)
             {
                 return Result.Succeeded;
             }
 
-            View3D view3d = new FilteredElementCollector(doc)
-                .OfClass(typeof(View3D))
-                .Cast<View3D>()
-                .FirstOrDefault<View3D>(
-                  e => e.Name.Equals("{3D}"));
+            View3D view3d = WorkWithDoc.GetView3Default(doc);
             if (view3d is null)
             {
                 Task.Run(() => MessageBox.Show("Не найден {3D} вид по умолчанию!", "Ошибка"));
@@ -100,6 +98,30 @@ namespace MS.Commands.AR
             return Result.Succeeded;
         }
 
+        /// <summary>
+        /// Возвращает точку размещения элемента, являющегося стеной или семейством, размещаемым по 1 точке
+        /// </summary>
+        /// <param name="elem">Элемент, расположение которого нужно получить. Wall или FamilyInstance по 1 точке.</param>
+        /// <returns>Точка размещения или null, если условия для типа элемента не соблюдены</returns>
+        private XYZ GetLocationPoint(in Element elem)
+        {
+            if (elem is Wall wall)
+            {
+                return ((wall.Location as LocationCurve).Curve as Line).Origin;
+            }
+            else if (elem is FamilyInstance inst)
+            {
+                return (inst.Location as LocationPoint).Point;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Получает перемычку по Guid
+        /// </summary>
+        /// <param name="doc">Документ, в котором происходит поиск</param>
+        /// <param name="guid">Значение параметра "PGS_GUID" перемычки</param>
+        /// <returns>Найденная перемычка или null</returns>
         private FamilyInstance GetLintelByGuid(in Document doc, string guid)
         {
             return new FilteredElementCollector(doc)
@@ -110,8 +132,43 @@ namespace MS.Commands.AR
                 .FirstOrDefault(l => l.LookupParameter(_parGuidName).AsValueString().Equals(guid)) as FamilyInstance;
         }
 
+        /// <summary>
+        /// Возвращает Хост элемента
+        /// </summary>
+        /// <param name="doc">Документ, в котором расположен вложенный в стену элемент</param>
+        /// <param name="view3d">3D вид по умолчанию</param>
+        /// <param name="embeddedElem">Вложенный в стену элемент. Экземпляр семейства или витраж</param>
+        /// <returns>Хост стена вложенного элемента</returns>
+        private Element GetHostElement(in Document doc, in View3D view3d, in Element embeddedElem)
+        {
+            if (embeddedElem is FamilyInstance inst)
+            {
+                return inst.Host;
+            }
+            else if (embeddedElem is Wall wall)
+            {
+                if (!(wall.CurtainGrid is null))
+                {
+                    return GetHostOfCurtainWall(doc, view3d, wall);
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Получает стену, в которой расположеy витраж
+        /// </summary>
+        /// <param name="doc">Документ, в котором находится стена</param>
+        /// <param name="view3d">3D вид для обработки геометрии</param>
+        /// <param name="curtainWall">Витражная стена</param>
+        /// <returns>Стена, в которой расположен витраж</returns>
         private Element GetHostOfCurtainWall(in Document doc, in View3D view3d, in Wall curtainWall)
         {
+            // Отметка верха витража относительно зависимости снизу (базового уровня стены) + 1 фут
+            var maxProximity = curtainWall.get_Parameter(BuiltInParameter.WALL_BASE_OFFSET).AsDouble() +
+                curtainWall.get_Parameter(BuiltInParameter.WALL_USER_HEIGHT_PARAM).AsDouble()
+                + 1;
+
             ElementFilter wallFilter = new ElementCategoryFilter(BuiltInCategory.OST_Walls);
             ReferenceIntersector referenceIntersector = new ReferenceIntersector(
                 wallFilter,
@@ -121,10 +178,7 @@ namespace MS.Commands.AR
                 FindReferencesInRevitLinks = false
             };
             XYZ direction = XYZ.BasisZ;
-            var wallCurve = (curtainWall.Location as LocationCurve).Curve;
-            var wallStart = wallCurve.GetEndPoint(0);
-            var wallEnd = wallCurve.GetEndPoint(1);
-            XYZ startPoint = (wallStart + wallEnd) / 2;
+            XYZ startPoint = GetLocationPoint(curtainWall);
             var context = referenceIntersector.Find(startPoint, direction);
             var wallsReferences = context.OrderBy(c => c.Proximity).ToList();
             List<Element> elements = new List<Element>();
@@ -138,7 +192,7 @@ namespace MS.Commands.AR
                     return wall;
                 }
                 if (wallsReferences[i].Proximity
-                    > (curtainWall.get_Parameter(BuiltInParameter.WALL_USER_HEIGHT_PARAM).AsDouble() + 1))
+                    > maxProximity)
                 {
                     break;
                 }

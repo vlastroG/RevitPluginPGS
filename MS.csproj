@@ -140,7 +140,6 @@
     <Compile Include="Commands\AR\DTO\RoomDto.cs" />
     <Compile Include="Commands\AR\OpeningByDuctCmd.cs" />
     <Compile Include="Commands\AR\OpeningsArea.cs" />
-    <Compile Include="Commands\AR\MarkLintelsInOpenings.cs" />
     <Compile Include="Commands\AR\RoomBoardsFinishingCommand.cs" />
     <Compile Include="Commands\AR\RoomFinishingScheduleCreationCmd.cs" />
     <Compile Include="Commands\AR\RoomsAreaNew.cs" />
@@ -211,9 +210,6 @@
     <Compile Include="Commands\MEP\SystemsInSpace.cs" />
     <Compile Include="GUI\Windows\AR\FinishingCreation.xaml.cs">
       <DependentUpon>FinishingCreation.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="GUI\Windows\AR\OpeningsLintelsMark.xaml.cs">
-      <DependentUpon>OpeningsLintelsMark.xaml</DependentUpon>
     </Compile>
     <Compile Include="GUI\Windows\AR\RoomsForCalculation.xaml.cs">
       <DependentUpon>RoomsForCalculation.xaml</DependentUpon>
@@ -287,6 +283,7 @@
     <Compile Include="Utilites\SelectionFilters\SelectionFilterRooms.cs" />
     <Compile Include="Utilites\SelectionFilters\SelectionFilterElementsOfCategory.cs" />
     <Compile Include="Utilites\UserInput\UserInput.cs" />
+    <Compile Include="Utilites\WorkWith\WorkWithDoc.cs" />
     <Compile Include="Utilites\WorkWith\WorkWithFamilies.cs" />
     <Compile Include="Utilites\WorkWith\WorkWithGeometry.cs" />
     <Compile Include="Utilites\WorkWith\WorkWithParameters.cs" />
@@ -334,10 +331,6 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="GUI\Windows\AR\FinishingCreation.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="GUI\Windows\AR\OpeningsLintelsMark.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
