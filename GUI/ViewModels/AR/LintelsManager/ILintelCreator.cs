@@ -7,8 +7,16 @@ using System.Threading.Tasks;
 
 namespace MS.GUI.ViewModels.AR.LintelsManager
 {
+    /// <summary>
+    /// Набор базовых методов для класса - конструктора перемычки
+    /// </summary>
     public interface ILintelCreator
     {
-        Lintel GetLintel();
+        /// <summary>
+        /// Получить перемычку с заданным Guid
+        /// </summary>
+        /// <param name="guid">Идентификатор перемычки</param>
+        /// <returns>Перемычка с заданным Guid</returns>
+        Lintel GetLintel(Guid guid);
     }
 }

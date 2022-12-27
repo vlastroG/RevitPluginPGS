@@ -31,6 +31,7 @@ namespace MS.RevitCommands.AR.DTO
         /// <param name="distanceToLeftEnd">Расстояние от левой стороны проема до торца стены в мм</param>
         /// <param name="wallMaterial">Название материала сердцевины стены</param>
         public OpeningDto(
+            Guid guid,
             double width,
             double wallThick,
             double wallHeightOverOpening,
@@ -44,7 +45,7 @@ namespace MS.RevitCommands.AR.DTO
             DistanceToRightEnd = distanceToRightEnd;
             DistanceToLeftEnd = distanceToLeftEnd;
             WallMaterial = wallMaterial;
-            _guid = Guid.NewGuid();
+            _guid = guid;
         }
 
 

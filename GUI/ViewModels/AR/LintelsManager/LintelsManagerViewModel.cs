@@ -15,23 +15,53 @@ using System.Windows.Input;
 
 namespace MS.GUI.ViewModels.AR.LintelsManager
 {
+    /// <summary>
+    /// Модель представления главного окна менеджера перемычек
+    /// </summary>
     public class LintelsManagerViewModel : ViewModelBase
     {
+        /// <summary>
+        /// Конструктор менеджера перемычек по умолчанию
+        /// </summary>
         public LintelsManagerViewModel()
         {
-            Openings.Add(new OpeningDto(1200, 120, 500, 450, 5500, "Кирпич"));
+            Openings.Add(new OpeningDto(Guid.NewGuid(), 1200, 120, 500, 450, 5500, "Кирпич"));
         }
 
+        /// <summary>
+        /// Конструктор окна менеджера перемычек по заданной коллекции Dto проемов
+        /// </summary>
+        /// <param name="openings"></param>
         public LintelsManagerViewModel(ICollection<OpeningDto> openings)
         {
             Openings = new ObservableCollection<OpeningDto>(openings);
         }
 
 
+        /// <summary>
+        /// Обновлять расположение перемычек после нажатия кнопки Ок, или нет
+        /// </summary>
+        private bool _updateLintelsLocation;
+
+        /// <summary>
+        /// Обновлять расположение перемычек после нажатия кнопки Ок, или нет
+        /// </summary>
+        public bool UpdateLintelsLocation { get => _updateLintelsLocation; set => Set(ref _updateLintelsLocation, value); }
+
+
+        /// <summary>
+        /// Список проемов для создания перемычек в проекте
+        /// </summary>
         public ObservableCollection<OpeningDto> Openings { get; } = new ObservableCollection<OpeningDto>();
 
+        /// <summary>
+        /// Выбранный проем
+        /// </summary>
         private OpeningDto _selectedOpening;
 
+        /// <summary>
+        /// Выбранный проем
+        /// </summary>
         public OpeningDto SelectedOpening
         {
             get => _selectedOpening;
@@ -39,13 +69,30 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
         }
 
 
+        #region EditLintelCommand
+
+        /// <summary>
+        /// Команда назначения / редактирования назначенной перемычки проема
+        /// </summary>
         private ICommand _setOrEditLintelCommand;
 
+        /// <summary>
+        /// Команда назначения / редактирования назначенной перемычки проема
+        /// </summary>
         public ICommand SetOrEditLintelCommand
             => _setOrEditLintelCommand = _setOrEditLintelCommand ?? new LambdaCommand(OnSetOrEditLintelCommandExecuted, CanSetOrEditLintelCommandExecute);
 
-        private bool CanSetOrEditLintelCommandExecute(object p) => !(_selectedOpening is null);
+        /// <summary>
+        /// Назначить или отредактировать перемычку можно, только если выбранный проем не null
+        /// </summary>
+        /// <param name="p"></param>
+        /// <returns></returns>
+        private bool CanSetOrEditLintelCommandExecute(object p) => !(SelectedOpening is null);
 
+        /// <summary>
+        /// Действие команды назначения / редактирования перемычки
+        /// </summary>
+        /// <param name="p">Выбранный элемент списка проемов</param>
         private void OnSetOrEditLintelCommandExecuted(object p)
         {
             var lintel = (p as OpeningDto).Lintel;
@@ -66,7 +113,7 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
                             barLintelWindow.ShowDialog();
                             if (barLintelWindow.DialogResult == true)
                             {
-                                SelectedOpening.Lintel = (barLintelWindow.DataContext as LintelBarViewModel).GetLintel();
+                                SelectedOpening.Lintel = (barLintelWindow.DataContext as LintelBarViewModel).GetLintel(SelectedOpening.Guid);
                             }
                             break;
                         case RevitCommands.AR.Enums.LintelType.Block:
@@ -74,7 +121,7 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
                             blockLintelWindow.ShowDialog();
                             if (blockLintelWindow.DialogResult == true)
                             {
-                                SelectedOpening.Lintel = (blockLintelWindow.DataContext as LintelBlockViewModel).GetLintel();
+                                SelectedOpening.Lintel = (blockLintelWindow.DataContext as LintelBlockViewModel).GetLintel(SelectedOpening.Guid);
                             }
                             break;
                         case RevitCommands.AR.Enums.LintelType.Angle:
@@ -82,7 +129,7 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
                             angleLintelWindow.ShowDialog();
                             if (angleLintelWindow.DialogResult == true)
                             {
-                                SelectedOpening.Lintel = (angleLintelWindow.DataContext as LintelAngleViewModel).GetLintel();
+                                SelectedOpening.Lintel = (angleLintelWindow.DataContext as LintelAngleViewModel).GetLintel(SelectedOpening.Guid);
                             }
                             break;
                         default:
@@ -104,7 +151,7 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
                         barLintelWindow.ShowDialog();
                         if (barLintelWindow.DialogResult == true)
                         {
-                            SelectedOpening.Lintel = (barLintelWindow.DataContext as LintelBarViewModel).GetLintel();
+                            SelectedOpening.Lintel = (barLintelWindow.DataContext as LintelBarViewModel).GetLintel(SelectedOpening.Guid);
                         }
                         break;
                     case RevitCommands.AR.Enums.LintelType.Block:
@@ -117,7 +164,7 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
                         blockLintelWindow.ShowDialog();
                         if (blockLintelWindow.DialogResult == true)
                         {
-                            SelectedOpening.Lintel = (blockLintelWindow.DataContext as LintelBlockViewModel).GetLintel();
+                            SelectedOpening.Lintel = (blockLintelWindow.DataContext as LintelBlockViewModel).GetLintel(SelectedOpening.Guid);
                         }
                         break;
                     case RevitCommands.AR.Enums.LintelType.Angle:
@@ -130,7 +177,7 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
                         angleLintelWindow.ShowDialog();
                         if (angleLintelWindow.DialogResult == true)
                         {
-                            SelectedOpening.Lintel = (angleLintelWindow.DataContext as LintelAngleViewModel).GetLintel();
+                            SelectedOpening.Lintel = (angleLintelWindow.DataContext as LintelAngleViewModel).GetLintel(SelectedOpening.Guid);
                         }
                         break;
                     default:
@@ -138,7 +185,35 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
                 }
             }
         }
+        #endregion
 
+        #region
+        /// <summary>
+        /// Команда удаления перемычки из проема
+        /// </summary>
+        private ICommand _deleteLintelCommand;
 
+        /// <summary>
+        /// Команда удаления перемычки из проема
+        /// </summary>
+        public ICommand DeleteLintelCommand
+            => _deleteLintelCommand = _deleteLintelCommand ?? new LambdaCommand(OnDeleteLintelCommandExecuted, CanDeleteLintelCommandExecute);
+
+        /// <summary>
+        /// Удалить перемычку из проема можно, только если выбранный проем не null и его перемычка также не null
+        /// </summary>
+        /// <param name="p"></param>
+        /// <returns></returns>
+        private bool CanDeleteLintelCommandExecute(object p) => !(SelectedOpening?.Lintel is null);
+
+        /// <summary>
+        /// Действие команды удаления перемычки проема
+        /// </summary>
+        /// <param name="p"></param>
+        private void OnDeleteLintelCommandExecuted(object p)
+        {
+            SelectedOpening.Lintel = null;
+        }
+        #endregion
     }
 }

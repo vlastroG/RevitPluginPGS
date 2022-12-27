@@ -9,13 +9,22 @@ using System.Threading.Tasks;
 
 namespace MS.GUI.ViewModels.AR.LintelsManager
 {
+    /// <summary>
+    /// Модель представления окна для редактирования свойств перемычки из бетонных брусков
+    /// </summary>
     public class LintelBlockViewModel : ViewModelBase, ILintelCreator
     {
+        /// <summary>
+        /// Конструктор модели представления окна для редактирования свойств перемычки из бетонных брусков по умолчанию
+        /// </summary>
         public LintelBlockViewModel()
         {
 
         }
 
+        /// <summary>
+        /// Конструктор модели представления окна для редактирования свойств заданной перемычки из бетонных брусков
+        /// </summary>
         public LintelBlockViewModel(BlockLintel blockLintel)
         {
 
@@ -23,9 +32,9 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
 
 
 
-        public Lintel GetLintel()
+        public Lintel GetLintel(Guid guid)
         {
-            return new BlockLintel(Guid.NewGuid());
+            return new BlockLintel(guid);
         }
     }
 }
