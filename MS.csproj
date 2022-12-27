@@ -120,6 +120,18 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GUI\Converters\EnumDescriptionConverter.cs" />
+    <Compile Include="GUI\ViewModels\AR\LintelsManager\ChooseLintelTypeViewModel.cs" />
+    <Compile Include="GUI\ViewModels\AR\LintelsManager\LintelAngleViewModel.cs" />
+    <Compile Include="GUI\ViewModels\AR\LintelsManager\LintelBarViewModel.cs" />
+    <Compile Include="GUI\ViewModels\AR\LintelsManager\LintelBlockViewModel.cs" />
+    <Compile Include="GUI\ViewModels\AR\LintelsManager\LintelsManagerViewModel.cs" />
+    <Compile Include="GUI\Windows\AR\LintelsManager\ChooseLintelTypeView.xaml.cs">
+      <DependentUpon>ChooseLintelTypeView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Windows\AR\LintelsManager\LintelsManagerView.xaml.cs">
+      <DependentUpon>LintelsManagerView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="RevitCommands\AR\ComplexAprtmntNmbr.cs" />
     <Compile Include="RevitCommands\AR\CreateImagesFromSections.cs" />
     <Compile Include="RevitCommands\AR\CreateSectionsByLintels.cs" />
@@ -288,12 +300,12 @@
     <Compile Include="Utilites\SelectionFilters\SelectionFilterPlanarFacesOfElement.cs" />
     <Compile Include="Utilites\SelectionFilters\SelectionFilterElementsOfCategory.cs" />
     <Compile Include="Utilites\UserInput\UserInput.cs" />
-    <Compile Include="Utilites\Extensions\StaticHelpers\DocMethods.cs" />
-    <Compile Include="Utilites\Extensions\StaticHelpers\FamiliesMethods.cs" />
-    <Compile Include="Utilites\Extensions\StaticHelpers\GeometryMethods.cs" />
-    <Compile Include="Utilites\Extensions\StaticHelpers\ParametersMethods.cs" />
-    <Compile Include="Utilites\Extensions\StaticHelpers\PathMethods.cs" />
-    <Compile Include="Utilites\Extensions\StaticHelpers\StringMethods.cs" />
+    <Compile Include="Utilites\StaticHelpers\DocMethods.cs" />
+    <Compile Include="Utilites\StaticHelpers\FamiliesMethods.cs" />
+    <Compile Include="Utilites\StaticHelpers\GeometryMethods.cs" />
+    <Compile Include="Utilites\StaticHelpers\ParametersMethods.cs" />
+    <Compile Include="Utilites\StaticHelpers\PathMethods.cs" />
+    <Compile Include="Utilites\StaticHelpers\StringMethods.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
@@ -336,6 +348,14 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="GUI\Windows\AR\FinishingCreation.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GUI\Windows\AR\LintelsManager\ChooseLintelTypeView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="GUI\Windows\AR\LintelsManager\LintelsManagerView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

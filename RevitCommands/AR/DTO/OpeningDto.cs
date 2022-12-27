@@ -42,6 +42,11 @@ namespace MS.RevitCommands.AR.DTO
 
 
         /// <summary>
+        /// Марка перемычки
+        /// </summary>
+        public string Mark { get; set; }
+
+        /// <summary>
         /// Ширина проема вмм
         /// </summary>
         public double Width { get; }
@@ -65,6 +70,16 @@ namespace MS.RevitCommands.AR.DTO
         /// Расстояние от левой стороны проема до торца стены в мм
         /// </summary>
         public double DistanceToLeftEnd { get; }
+
+        /// <summary>
+        /// Строковое представление расстояния от проема до торца стены справа
+        /// </summary>
+        public string DistanceConditionToRightEnd => DistanceToRightEnd >= 250 ? "≥250" : "<250";
+
+        /// <summary>
+        /// Строковое представление расстояния от проема до торца стены слева
+        /// </summary>
+        public string DistanceConditionToLeftEnd => DistanceToLeftEnd >= 250 ? "≥250" : "<250";
 
         /// <summary>
         /// Название материала сердцевины стены

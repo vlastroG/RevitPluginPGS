@@ -2,6 +2,7 @@
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
+using MS.GUI.Windows.AR.LintelsManager;
 using MS.Utilites;
 using MS.Utilites.SelectionFilters;
 using MS.Utilites.WorkWith;
@@ -24,6 +25,14 @@ namespace MS.RevitCommands.AR
         {
             Document doc = commandData.Application.ActiveUIDocument.Document;
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
+
+            var ui = new LintelsManagerView()
+            {
+                WindowStartupLocation = WindowStartupLocation.CenterScreen
+            };
+            ui.ShowDialog();
+            return Result.Succeeded;
+
 
             Element opening = GetOpeningTest(uidoc);
 
