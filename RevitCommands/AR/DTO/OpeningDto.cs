@@ -8,6 +8,10 @@ using System.Threading.Tasks;
 
 namespace MS.RevitCommands.AR.DTO
 {
+    /// <summary>
+    /// Dto для хранения данных из Revit модели о проеме и его перемычке внутри диалогового окна менеджера перемычек
+    /// с последующим парсингом отредактированного Dto в изменения в модели Revit
+    /// </summary>
     public class OpeningDto : IIdentifiable
     {
         /// <summary>
