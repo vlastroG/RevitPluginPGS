@@ -22,7 +22,7 @@ namespace MS.Utilites.Extensions
         /// <param name="collection">Коллекция для обработки</param>
         /// <param name="entity">Элемент с таким же Guid, но новыми параметрами</param>
         /// <returns></returns>
-        public static bool UpdateEntity<T>(this ObservableCollection<T> collection, T entity) where T : Mechanic, IIdentifiable
+        public static bool UpdateEntity<T>(this ObservableCollection<T> collection, T entity) where T : IIdentifiable
         {
             var entityInCollection = collection.FirstOrDefault(e => e.Guid.Equals(entity.Guid));
             if (entityInCollection != null)

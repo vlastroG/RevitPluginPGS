@@ -12,6 +12,9 @@ using System.Windows.Markup;
 
 namespace MS.GUI.Converters
 {
+    /// <summary>
+    /// Конвертер Enum в строковое значение атрибута Description
+    /// </summary>
     public class EnumToDescriptionConverter : IValueConverter
     {
         private string GetEnumDescription(Enum enumObj)

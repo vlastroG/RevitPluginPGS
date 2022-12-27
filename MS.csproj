@@ -122,12 +122,22 @@
   <ItemGroup>
     <Compile Include="GUI\Converters\EnumDescriptionConverter.cs" />
     <Compile Include="GUI\ViewModels\AR\LintelsManager\ChooseLintelTypeViewModel.cs" />
+    <Compile Include="GUI\ViewModels\AR\LintelsManager\ILintelCreator.cs" />
     <Compile Include="GUI\ViewModels\AR\LintelsManager\LintelAngleViewModel.cs" />
     <Compile Include="GUI\ViewModels\AR\LintelsManager\LintelBarViewModel.cs" />
     <Compile Include="GUI\ViewModels\AR\LintelsManager\LintelBlockViewModel.cs" />
     <Compile Include="GUI\ViewModels\AR\LintelsManager\LintelsManagerViewModel.cs" />
     <Compile Include="GUI\Windows\AR\LintelsManager\ChooseLintelTypeView.xaml.cs">
       <DependentUpon>ChooseLintelTypeView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Windows\AR\LintelsManager\LintelAngleWindow.xaml.cs">
+      <DependentUpon>LintelAngleWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Windows\AR\LintelsManager\LintelBarWindow.xaml.cs">
+      <DependentUpon>LintelBarWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Windows\AR\LintelsManager\LintelBlockWindow.xaml.cs">
+      <DependentUpon>LintelBlockWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="GUI\Windows\AR\LintelsManager\LintelsManagerView.xaml.cs">
       <DependentUpon>LintelsManagerView.xaml</DependentUpon>
@@ -354,6 +364,18 @@
     <Page Include="GUI\Windows\AR\LintelsManager\ChooseLintelTypeView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="GUI\Windows\AR\LintelsManager\LintelAngleWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GUI\Windows\AR\LintelsManager\LintelBarWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GUI\Windows\AR\LintelsManager\LintelBlockWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="GUI\Windows\AR\LintelsManager\LintelsManagerView.xaml">
       <SubType>Designer</SubType>

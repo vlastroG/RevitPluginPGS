@@ -11,6 +11,20 @@
         <vm:LintelsManagerViewModel/>
     </Window.DataContext>
     <Grid>
-        <Button Content="Нажми" Command="{Binding SetLintelCommand}"/>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="7*"/>
+            <RowDefinition Height="1*"/>
+        </Grid.RowDefinitions>
+        <DataGrid ItemsSource="{Binding Openings}"
+                  CanUserAddRows="True"
+                  SelectedItem="{Binding SelectedOpening}">
+        </DataGrid>
+        <DockPanel Grid.Row="1">
+            <DockPanel DockPanel.Dock="Bottom">
+                <Button Content="Добавить/Редактировать перемычку"
+                        Command="{Binding SetOrEditLintelCommand}"
+                        CommandParameter="{Binding SelectedOpening}"/>
+            </DockPanel>
+        </DockPanel>
     </Grid>
 </Window>

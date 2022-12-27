@@ -1,4 +1,5 @@
 ﻿using MS.RevitCommands.AR.Models;
+using MS.RevitCommands.Models.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,12 +8,17 @@ using System.Threading.Tasks;
 
 namespace MS.RevitCommands.AR.DTO
 {
-    public class OpeningDto
+    public class OpeningDto : IIdentifiable
     {
         /// <summary>
         /// Перемычка
         /// </summary>
         private Lintel _lintel;
+
+        /// <summary>
+        /// Идентификатор
+        /// </summary>
+        private Guid _guid;
 
 
         /// <summary>
@@ -38,6 +44,7 @@ namespace MS.RevitCommands.AR.DTO
             DistanceToRightEnd = distanceToRightEnd;
             DistanceToLeftEnd = distanceToLeftEnd;
             WallMaterial = wallMaterial;
+            _guid = Guid.NewGuid();
         }
 
 
@@ -90,6 +97,8 @@ namespace MS.RevitCommands.AR.DTO
         /// Перемычка
         /// </summary>
         public Lintel Lintel { get => _lintel; set { _lintel = value; } }
+
+        public Guid Guid => _guid;
 
         /// <summary>
         /// Проемы равны, если все их параметры равны
