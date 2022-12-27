@@ -24,7 +24,7 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
 
         public Lintel GetLintel()
         {
-            throw new NotImplementedException();
+            return new AngleLintel(Guid.NewGuid());
         }
     }
 }

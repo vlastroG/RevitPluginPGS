@@ -4,9 +4,60 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:MS.GUI.Windows.AR.LintelsManager"
+             xmlns:vm="clr-namespace:MS.GUI.ViewModels.AR.LintelsManager"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="150" d:DesignWidth="300">
+    <Window.DataContext>
+        <vm:LintelBarViewModel/>
+    </Window.DataContext>
     <Grid>
-            
+        <GroupBox Header="Перемычка из арматурных стержней">
+            <DockPanel>
+                <UniformGrid DockPanel.Dock="Top" Margin="5" Rows="2">
+                    <UniformGrid.Resources>
+                        <Style TargetType="DockPanel">
+                            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                            <Setter Property="Margin" Value="3,0"/>
+                            <Setter Property="Height" Value="25"/>
+                        </Style>
+                        <Style TargetType="TextBox">
+                            <Setter Property="VerticalAlignment" Value="Center"/>
+                            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                            <Style.Triggers>
+                                <Trigger Property="Validation.HasError" Value="True">
+                                    <Setter Property="ToolTip"
+                                            Value="{Binding RelativeSource={RelativeSource Self},
+                                                    Path=(Validation.Errors)[0].ErrorContent}" />
+                                    <Setter Property="Foreground" Value="Red" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="VerticalAlignment" Value="Center"/>
+                            <Setter Property="Margin" Value="5,0,0,0"/>
+                        </Style>
+                        <Style TargetType="RowDefinition">
+                            <Setter Property="Height" Value="25"/>
+                        </Style>
+                    </UniformGrid.Resources>
+                    <DockPanel>
+                        <TextBox Text="Property 1"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBlock Text="Property 1"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBox Text="Property 2"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBlock Text="Property 2"/>
+                    </DockPanel>
+                </UniformGrid>
+                <UniformGrid DockPanel.Dock="Bottom" Height="20" Rows="1" VerticalAlignment="Bottom">
+                    <Button Content="Ок" Name="Ok" Click="Ok_Click"/>
+                    <Button Content="Отмена" Name="Cancel" Click="Cancel_Click"/>
+                </UniformGrid>
+            </DockPanel>
+        </GroupBox>
     </Grid>
 </Window>
