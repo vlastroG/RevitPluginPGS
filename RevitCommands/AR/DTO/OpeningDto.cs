@@ -1,4 +1,5 @@
-﻿using MS.RevitCommands.AR.Models;
+﻿using MS.GUI.ViewModels.Base;
+using MS.RevitCommands.AR.Models;
 using MS.RevitCommands.Models.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -12,7 +13,7 @@ namespace MS.RevitCommands.AR.DTO
     /// Dto для хранения данных из Revit модели о проеме и его перемычке внутри диалогового окна менеджера перемычек
     /// с последующим парсингом отредактированного Dto в изменения в модели Revit
     /// </summary>
-    public class OpeningDto : IIdentifiable
+    public class OpeningDto : ViewModelBase, IIdentifiable
     {
         /// <summary>
         /// Перемычка
@@ -101,7 +102,7 @@ namespace MS.RevitCommands.AR.DTO
         /// <summary>
         /// Перемычка
         /// </summary>
-        public Lintel Lintel { get => _lintel; set { _lintel = value; } }
+        public Lintel Lintel { get => _lintel; set => Set(ref _lintel, value); }
 
         public Guid Guid => _guid;
 

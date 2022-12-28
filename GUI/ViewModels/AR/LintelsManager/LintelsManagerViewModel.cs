@@ -25,7 +25,10 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
         /// </summary>
         public LintelsManagerViewModel()
         {
-            Openings.Add(new OpeningDto(Guid.NewGuid(), 1200, 120, 500, 450, 5500, "Кирпич"));
+            Openings.Add(new OpeningDto(Guid.NewGuid(), 1200, 120, 500, 450, 5500, "Кирпич") { Mark = "ПР-1", Lintel = new BarLintel(Guid.NewGuid()) });
+            Openings.Add(new OpeningDto(Guid.NewGuid(), 800, 120, 500, 350, 1300, "ГСБ") { Mark = "ПР-2", Lintel = new BarLintel(Guid.NewGuid()) });
+            Openings.Add(new OpeningDto(Guid.NewGuid(), 1500, 200, 200, 450, 5500, "Бетон") { Mark = "ПР-3", Lintel = new BlockLintel(Guid.NewGuid()) });
+            Openings.Add(new OpeningDto(Guid.NewGuid(), 1800, 120, 500, 450, 5500, "Кирпич") { Mark = "ПР-4", Lintel = new AngleLintel(Guid.NewGuid()) });
         }
 
         /// <summary>
@@ -152,6 +155,7 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
                         if (barLintelWindow.DialogResult == true)
                         {
                             SelectedOpening.Lintel = (barLintelWindow.DataContext as LintelBarViewModel).GetLintel(SelectedOpening.Guid);
+                            Openings.UpdateEntity(SelectedOpening);
                         }
                         break;
                     case RevitCommands.AR.Enums.LintelType.Block:
@@ -165,6 +169,7 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
                         if (blockLintelWindow.DialogResult == true)
                         {
                             SelectedOpening.Lintel = (blockLintelWindow.DataContext as LintelBlockViewModel).GetLintel(SelectedOpening.Guid);
+                            Openings.UpdateEntity(SelectedOpening);
                         }
                         break;
                     case RevitCommands.AR.Enums.LintelType.Angle:
@@ -178,6 +183,7 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
                         if (angleLintelWindow.DialogResult == true)
                         {
                             SelectedOpening.Lintel = (angleLintelWindow.DataContext as LintelAngleViewModel).GetLintel(SelectedOpening.Guid);
+                            Openings.UpdateEntity(SelectedOpening);
                         }
                         break;
                     default:
@@ -213,6 +219,7 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
         private void OnDeleteLintelCommandExecuted(object p)
         {
             SelectedOpening.Lintel = null;
+            Openings.UpdateEntity(SelectedOpening);
         }
         #endregion
     }

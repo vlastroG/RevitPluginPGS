@@ -1,5 +1,6 @@
 ﻿using MS.RevitCommands.AR.Enums;
 using MS.RevitCommands.Models.Interfaces;
+using MS.Utilites.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,5 +46,14 @@ namespace MS.RevitCommands.AR.Models
         /// Тип перемычки
         /// </summary>
         public LintelType LintelType => _lintelType;
+
+        /// <summary>
+        /// Возвращает тип перемычки
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            return LintelType.GetEnumDescription();
+        }
     }
 }

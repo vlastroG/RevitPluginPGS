@@ -291,6 +291,7 @@
     <Compile Include="Utilites\Extensions\CurveArrArrayExtension.cs" />
     <Compile Include="Utilites\Extensions\CurveArrayExtension.cs" />
     <Compile Include="Utilites\Extensions\DictionaryExtension.cs" />
+    <Compile Include="Utilites\Extensions\EnumExtension.cs" />
     <Compile Include="Utilites\Extensions\FaceArrayExtension.cs" />
     <Compile Include="Utilites\Extensions\ObservableCollectionExtension.cs" />
     <Compile Include="Utilites\Extensions\PlanarFaceExtension.cs" />
