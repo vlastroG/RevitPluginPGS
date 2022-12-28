@@ -156,7 +156,7 @@
     <Compile Include="RevitCommands\AR\DTO\WallTypeFinishingDto.cs" />
     <Compile Include="RevitCommands\AR\Enums\FinWallsHeight.cs" />
     <Compile Include="RevitCommands\AR\Enums\LintelType.cs" />
-    <Compile Include="RevitCommands\AR\LintelsCreationCmd.cs" />
+    <Compile Include="RevitCommands\AR\LintelsManagerCmd.cs" />
     <Compile Include="RevitCommands\AR\MasonryMesh.cs" />
     <Compile Include="RevitCommands\AR\MaterialColors.cs" />
     <Compile Include="RevitCommands\AR\Models\Apartment.cs" />

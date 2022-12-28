@@ -289,11 +289,11 @@ namespace MS
 
 
             // Info command
-            PushButtonData btnLintelsCreationCmd = new PushButtonData("LintelsCreationCmd", "Создание перемычек", path, "MS.RevitCommands.AR.LintelsCreationCmd");
-            Uri btnLintelsCreationCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
-            BitmapImage btnLintelsCreationCmdImage = new BitmapImage(btnLintelsCreationCmdImagePath);
-            btnLintelsCreationCmd.LargeImage = btnLintelsCreationCmdImage;
-            btnLintelsCreationCmd.ToolTip = "Создание и корректировка расположения перемычек.";
+            PushButtonData btnLintelsManagerCmd = new PushButtonData("LintelsManagerCmd", "Создание перемычек", path, "MS.RevitCommands.AR.LintelsManagerCmd");
+            Uri btnLintelsManagerCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            BitmapImage btnLintelsManagerCmdImage = new BitmapImage(btnLintelsManagerCmdImagePath);
+            btnLintelsManagerCmd.LargeImage = btnLintelsManagerCmdImage;
+            btnLintelsManagerCmd.ToolTip = "Создание и корректировка расположения перемычек.";
 
 
 
@@ -523,7 +523,7 @@ namespace MS
             panelAR.AddItem(btnRoomBoardsFinishing);
             panelAR.AddItem(btnMasonryMesh);
             panelAR.AddItem(btnMaterialColors);
-            panelAR.AddItem(btnLintelsCreationCmd);
+            panelAR.AddItem(btnLintelsManagerCmd);
 
             // KR panel
             panelKR.AddItem(btnStairRnfrcmtCmd);

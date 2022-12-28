@@ -17,7 +17,7 @@ namespace MS.RevitCommands.AR
 {
     [Transaction(TransactionMode.Manual)]
     [Regeneration(RegenerationOption.Manual)]
-    public class LintelsCreationCmd : IExternalCommand
+    public class LintelsManagerCmd : IExternalCommand
     {
         private const string _parGuidName = "PGS_GUID";
 
