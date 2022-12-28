@@ -2,7 +2,9 @@
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
+using MS.GUI.ViewModels.AR.LintelsManager;
 using MS.GUI.Windows.AR.LintelsManager;
+using MS.RevitCommands.AR.DTO;
 using MS.Utilites;
 using MS.Utilites.SelectionFilters;
 using MS.Utilites.WorkWith;
@@ -19,16 +21,22 @@ namespace MS.RevitCommands.AR
     [Regeneration(RegenerationOption.Manual)]
     public class LintelsManagerCmd : IExternalCommand
     {
-        private const string _parGuidName = "PGS_GUID";
+        private const string _parGuid = "PGS_GUID";
 
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             Document doc = commandData.Application.ActiveUIDocument.Document;
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
 
+
+
+
+            LintelsManagerViewModel vm = new LintelsManagerViewModel();
+
             var ui = new LintelsManagerView()
             {
-                WindowStartupLocation = WindowStartupLocation.CenterScreen
+                WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                DataContext = vm
             };
             ui.ShowDialog();
             return Result.Succeeded;
@@ -61,6 +69,9 @@ namespace MS.RevitCommands.AR
             var t1 = GetOpeningWidth(opening);
             var t2 = GetWallThick(hostWall as Wall);
             (var left, var right) = GetOpeningSidesDistances(opening, hostWall as Wall);
+            var t5 = GetWallHeightOverOpening(opening, hostWall, view3d);
+            var t6 = GetWallName(hostWall as Wall);
+
             Task.Run(() => MessageBox.Show($"Проем {opening.Id}\nСлева: {left}\nСправа: {right}"));
             //using (Transaction test = new Transaction(doc))
             //{
@@ -70,9 +81,6 @@ namespace MS.RevitCommands.AR
             //    var twet = doc.Create.NewModelCurve(curve, plane);
             //    test.Commit();
             //}
-            var t5 = GetWallHeightOverOpening(opening, hostWall, view3d);
-            var t6 = GetWallName(hostWall as Wall);
-
 
 
             return Result.Succeeded;
@@ -83,11 +91,11 @@ namespace MS.RevitCommands.AR
                 trans.Start("Создание перемычек");
                 //opening.LookupParameter("PGS_GUID").Set(guid);
 
-                string openingGuid = opening.LookupParameter(_parGuidName).AsValueString();
+                string openingGuid = opening.LookupParameter(_parGuid).AsValueString();
                 var lintel = GetLintelByGuid(doc, openingGuid);
                 if (lintel is null)
                 {
-                    opening.LookupParameter(_parGuidName).ClearValue();
+                    opening.LookupParameter(_parGuid).ClearValue();
                 }
                 else
                 {
@@ -121,17 +129,65 @@ namespace MS.RevitCommands.AR
                 //    .FirstOrDefault(f => f.Name.Equals(famName)) as FamilySymbol;
 
                 //var lintel = doc.Create.NewFamilyInstance(location, fSymb, (opening as FamilyInstance).Host, Autodesk.Revit.DB.Structure.StructuralType.NonStructural);
-                //lintel.LookupParameter(_parGuidName).Set(guid);
+                //lintel.LookupParameter(_parGuid).Set(guid);
                 trans.Commit();
             }
 
             return Result.Succeeded;
         }
 
+        private Dictionary<Guid, OpeningDto> GetOpeningDtos(in Document doc, in View3D view3d)
+        {
+            Dictionary<Guid, OpeningDto> openingDtos = new Dictionary<Guid, OpeningDto>();
+
+            BuiltInCategory[] famInstCategories = new BuiltInCategory[2] { BuiltInCategory.OST_Doors, BuiltInCategory.OST_Windows };
+            var multiFamInstFilter = new ElementMulticategoryFilter(famInstCategories);
+            var openings = new FilteredElementCollector(doc)
+                .WherePasses(multiFamInstFilter)
+                .WhereElementIsNotElementType()
+                .Cast<FamilyInstance>()
+                .Where(inst => (inst.Host is Wall wall) && (wall.CurtainGrid is null))
+                .Cast<Element>()
+                .ToList();
+            var curtainWalls = new FilteredElementCollector(doc)
+                .OfCategory(BuiltInCategory.OST_Walls)
+                .WhereElementIsNotElementType()
+                .Cast<Wall>()
+                .Where(wall => wall.CurtainGrid is null)
+                .Cast<Element>()
+                .ToList();
+            openings.AddRange(curtainWalls);
+
+            using (Transaction setGuidsTrans = new Transaction(doc))
+            {
+                setGuidsTrans.Start("Назначение Guid проемам");
+                foreach (Element opening in openings)
+                {
+                    Guid guid = Guid.NewGuid();
+                    var guidParam = opening.LookupParameter(_parGuid);
+                    var guidString = guidParam.AsValueString();
+                    if (!(guidString.Length != Guid.Empty.ToString().Length) && !Guid.TryParse(guidString, out guid))
+                    {
+                        guid = Guid.NewGuid();
+                        guidParam.Set(guid.ToString());
+                    }
+                    var hostWall = GetHostElement(doc, view3d, opening);
+                    var width = GetOpeningWidth(opening);
+                    var wallThick = GetWallThick(hostWall as Wall);
+                    var wallHeightOverOpening = GetWallHeightOverOpening(opening, hostWall, view3d);
+
+
+                }
+                setGuidsTrans.Commit();
+            }
+            return openingDtos;
+        }
+
+
         /// <summary>
         /// Возвращает элемент, выбранный пользователем
         /// </summary>
-        /// <param name="uidoc"></param>
+        /// <guidParam name="uidoc"></guidParam>
         /// <returns></returns>
         private Element GetOpeningTest(in UIDocument uidoc)
         {
@@ -164,7 +220,7 @@ namespace MS.RevitCommands.AR
         /// Если элемент - стена, возвращается центр осевой линии стены.
         /// Если элемент - экземпляр семейства, то возвращается точка расположения семейства.
         /// </summary>
-        /// <param name="elem">Элемент, расположение которого нужно получить. Wall или FamilyInstance по 1 точке.</param>
+        /// <guidParam name="elem">Элемент, расположение которого нужно получить. Wall или FamilyInstance по 1 точке.</guidParam>
         /// <returns>Точка размещения или null, если условия для типа элемента не соблюдены</returns>
         private XYZ GetLocationPoint(in Element elem)
         {
@@ -186,7 +242,7 @@ namespace MS.RevitCommands.AR
         /// <summary>
         /// Возвращает ширину проема в мм
         /// </summary>
-        /// <param name="opening">Проем, сделанный семейством окна или двери, или витражная стена</param>
+        /// <guidParam name="opening">Проем, сделанный семейством окна или двери, или витражная стена</guidParam>
         /// <returns>Ширина проема в мм</returns>
         private double GetOpeningWidth(in Element opening)
         {
@@ -197,7 +253,7 @@ namespace MS.RevitCommands.AR
         /// <summary>
         /// Возвращает толщину стены в мм
         /// </summary>
-        /// <param name="hostWall">Хост стена проема</param>
+        /// <guidParam name="hostWall">Хост стена проема</guidParam>
         /// <returns>Толщина стены в мм</returns>
         private double GetWallThick(in Wall hostWall)
         {
@@ -207,7 +263,7 @@ namespace MS.RevitCommands.AR
         /// <summary>
         /// Возвращает название типоразмера стены
         /// </summary>
-        /// <param name="hostWall">Хост стена проема</param>
+        /// <guidParam name="hostWall">Хост стена проема</guidParam>
         /// <returns>Название типоразмера стены</returns>
         private string GetWallName(in Wall hostWall)
         {
@@ -217,9 +273,9 @@ namespace MS.RevitCommands.AR
         /// <summary>
         /// Возвращает высоту стены над проемом в мм
         /// </summary>
-        /// <param name="opening">Проем, сделанный окном, дверью или витражом</param>
-        /// <param name="hostWall">Хост стена проема</param>
-        /// <param name="view3d">{3D} вид по умолчанию</param>
+        /// <guidParam name="opening">Проем, сделанный окном, дверью или витражом</guidParam>
+        /// <guidParam name="hostWall">Хост стена проема</guidParam>
+        /// <guidParam name="view3d">{3D} вид по умолчанию</guidParam>
         /// <returns>Высота участка стены над проемом в мм</returns>
         private double GetWallHeightOverOpening(in Element opening, in Element hostWall, in View3D view3d)
         {
@@ -229,8 +285,8 @@ namespace MS.RevitCommands.AR
         /// <summary>
         /// Возвращает расстояния от граней проема до торцов станы
         /// </summary>
-        /// <param name="opening">Проем</param>
-        /// <param name="hostWall">Хост стена проема</param>
+        /// <guidParam name="opening">Проем</guidParam>
+        /// <guidParam name="hostWall">Хост стена проема</guidParam>
         /// <returns>Кортеж расстояний слева и справа от граней проема до торцов стены</returns>
         private (double leftDistance, double rightDistance) GetOpeningSidesDistances(in Element opening, in Wall hostWall)
         {
@@ -276,8 +332,8 @@ namespace MS.RevitCommands.AR
         /// <summary>
         /// Получает перемычку по Guid
         /// </summary>
-        /// <param name="doc">Документ, в котором происходит поиск</param>
-        /// <param name="guid">Значение параметра "PGS_GUID" перемычки</param>
+        /// <guidParam name="doc">Документ, в котором происходит поиск</guidParam>
+        /// <guidParam name="guid">Значение параметра "PGS_GUID" перемычки</guidParam>
         /// <returns>Найденная перемычка или null</returns>
         private FamilyInstance GetLintelByGuid(in Document doc, string guid)
         {
@@ -285,16 +341,16 @@ namespace MS.RevitCommands.AR
                 .OfCategory(BuiltInCategory.OST_GenericModel)
                 .OfClass(typeof(FamilyInstance))
                 .WhereElementIsNotElementType()
-                .Where(e => e.LookupParameter(_parGuidName).HasValue)
-                .FirstOrDefault(l => l.LookupParameter(_parGuidName).AsValueString().Equals(guid)) as FamilyInstance;
+                .Where(e => e.LookupParameter(_parGuid).HasValue)
+                .FirstOrDefault(l => l.LookupParameter(_parGuid).AsValueString().Equals(guid)) as FamilyInstance;
         }
 
         /// <summary>
         /// Возвращает Хост элемента
         /// </summary>
-        /// <param name="doc">Документ, в котором расположен вложенный в стену элемент</param>
-        /// <param name="view3d">3D вид по умолчанию</param>
-        /// <param name="embeddedElem">Вложенный в стену элемент. Экземпляр семейства или витраж</param>
+        /// <guidParam name="doc">Документ, в котором расположен вложенный в стену элемент</guidParam>
+        /// <guidParam name="view3d">3D вид по умолчанию</guidParam>
+        /// <guidParam name="embeddedElem">Вложенный в стену элемент. Экземпляр семейства или витраж</guidParam>
         /// <returns>Хост стена вложенного элемента</returns>
         private Element GetHostElement(in Document doc, in View3D view3d, in Element embeddedElem)
         {
@@ -313,11 +369,11 @@ namespace MS.RevitCommands.AR
         }
 
         /// <summary>
-        /// Получает стену, в которой расположеy витраж
+        /// Получает стену, в которой расположен витраж
         /// </summary>
-        /// <param name="doc">Документ, в котором находится стена</param>
-        /// <param name="view3d">3D вид для обработки геометрии</param>
-        /// <param name="curtainWall">Витражная стена</param>
+        /// <guidParam name="doc">Документ, в котором находится стена</guidParam>
+        /// <guidParam name="view3d">3D вид для обработки геометрии</guidParam>
+        /// <guidParam name="curtainWall">Витражная стена</guidParam>
         /// <returns>Стена, в которой расположен витраж</returns>
         private Element GetHostOfCurtainWall(in Document doc, in View3D view3d, in Wall curtainWall)
         {

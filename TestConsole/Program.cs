@@ -10,8 +10,12 @@ namespace TestConsole
     {
         static void Main(string[] args)
         {
-            List<string> list = new List<string>() { "12e", "abba", "AbBa", "vdsg", "12E", "VSsg", "vDsg"};
-            var t = list.GroupBy(x => x.Length + x.ToLower());
+            Guid guid = Guid.NewGuid();
+            Console.WriteLine(guid);
+
+            var test = "vgewr";
+            Guid.TryParse(test, out guid);
+            Console.WriteLine(guid);
         }
     }
 }
