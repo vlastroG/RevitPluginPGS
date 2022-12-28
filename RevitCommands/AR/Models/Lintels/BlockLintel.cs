@@ -17,5 +17,35 @@ namespace MS.RevitCommands.AR.Models.Lintels
         /// </summary>
         /// <param name="guid">Идентификатор перемычки</param>
         public BlockLintel(Guid guid) : base(guid, LintelType.Block) { }
+
+        /// <summary>
+        /// Тип 1-го блока
+        /// </summary>
+        public string BlockType_1 { get; set; }
+
+        /// <summary>
+        /// Тип 2-го блока
+        /// </summary>
+        public string BlockType_2 { get; set; }
+
+        /// <summary>
+        /// Тип 3-го блока
+        /// </summary>
+        public string BlockType_3 { get; set; }
+
+        /// <summary>
+        /// Тип 4-го блока
+        /// </summary>
+        public string BlockType_4 { get; set; }
+
+        /// <summary>
+        /// Тип 5-го блока
+        /// </summary>
+        public string BlockType_5 { get; set; }
+
+        /// <summary>
+        /// Тип 6-го блока
+        /// </summary>
+        public string BlockType_6 { get; set; }
     }
 }

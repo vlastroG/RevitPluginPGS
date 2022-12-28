@@ -6,14 +6,14 @@
              xmlns:local="clr-namespace:MS.GUI.Windows.AR.LintelsManager"
              xmlns:vm="clr-namespace:MS.GUI.ViewModels.AR.LintelsManager"
              mc:Ignorable="d" 
-             d:DesignHeight="150" d:DesignWidth="300">
+             d:DesignHeight="250" d:DesignWidth="300">
     <Window.DataContext>
         <vm:LintelBlockViewModel/>
     </Window.DataContext>
     <Grid>
         <GroupBox Header="Перемычка из брусков">
             <DockPanel>
-                <UniformGrid DockPanel.Dock="Top" Margin="5" Rows="2">
+                <UniformGrid DockPanel.Dock="Top" Margin="5" Rows="6">
                     <UniformGrid.Resources>
                         <Style TargetType="DockPanel">
                             <Setter Property="HorizontalAlignment" Value="Stretch"/>
@@ -41,16 +41,40 @@
                         </Style>
                     </UniformGrid.Resources>
                     <DockPanel>
-                        <TextBox Text="Property 1"/>
+                        <TextBox Text="{Binding BlockType_1}"/>
                     </DockPanel>
                     <DockPanel>
-                        <TextBlock Text="Property 1"/>
+                        <TextBlock Text="Тип 1-го блока"/>
                     </DockPanel>
                     <DockPanel>
-                        <TextBox Text="Property 2"/>
+                        <TextBox Text="{Binding BlockType_2}"/>
                     </DockPanel>
                     <DockPanel>
-                        <TextBlock Text="Property 2"/>
+                        <TextBlock Text="Тип 2-го блока"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBox Text="{Binding BlockType_3}"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBlock Text="Тип 3-го блока"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBox Text="{Binding BlockType_4}"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBlock Text="Тип 4-го блока"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBox Text="{Binding BlockType_5}"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBlock Text="Тип 5-го блока"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBox Text="{Binding BlockType_6}"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBlock Text="Тип 6-го блока"/>
                     </DockPanel>
                 </UniformGrid>
                 <UniformGrid DockPanel.Dock="Bottom" Height="20" Rows="1" VerticalAlignment="Bottom">

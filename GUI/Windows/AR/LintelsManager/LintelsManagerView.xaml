@@ -71,11 +71,15 @@
                             </TextBlock>
                     </DataGridTextColumn.Header>
                 </DataGridTextColumn>
-                <DataGridTextColumn Width="200"
+                <DataGridTextColumn Width="*"
                                     Header="Тип стены"
                                     Binding="{Binding WallMaterial}"
                                     IsReadOnly="True"/>
                 <DataGridTextColumn Width="100"
+                                    Header="Уровень"
+                                    Binding="{Binding Level}"
+                                    IsReadOnly="True"/>
+                <DataGridTextColumn Width="75"
                                     Binding="{Binding DistanceConditionToLeftEnd}"
                                     IsReadOnly="True"
                                     CanUserResize="False">
@@ -86,7 +90,7 @@
                             </TextBlock>
                     </DataGridTextColumn.Header>
                 </DataGridTextColumn>
-                <DataGridTextColumn Width="100"
+                <DataGridTextColumn Width="75"
                                     Binding="{Binding DistanceConditionToRightEnd}"
                                     IsReadOnly="True"
                                     CanUserResize="False">
@@ -97,7 +101,7 @@
                             </TextBlock>
                     </DataGridTextColumn.Header>
                 </DataGridTextColumn>
-                <DataGridTextColumn Width ="*"
+                <DataGridTextColumn Width ="220"
                                     Header="Тип перемычки"
                                     Binding="{Binding Lintel}"
                                     IsReadOnly="True"/>

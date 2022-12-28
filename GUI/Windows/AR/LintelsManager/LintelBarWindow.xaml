@@ -6,14 +6,14 @@
              xmlns:local="clr-namespace:MS.GUI.Windows.AR.LintelsManager"
              xmlns:vm="clr-namespace:MS.GUI.ViewModels.AR.LintelsManager"
              mc:Ignorable="d" 
-             d:DesignHeight="150" d:DesignWidth="300">
+             d:DesignHeight="200" d:DesignWidth="300">
     <Window.DataContext>
         <vm:LintelBarViewModel/>
     </Window.DataContext>
     <Grid>
         <GroupBox Header="Перемычка из арматурных стержней">
             <DockPanel>
-                <UniformGrid DockPanel.Dock="Top" Margin="5" Rows="2">
+                <UniformGrid DockPanel.Dock="Top" Margin="5" Rows="4">
                     <UniformGrid.Resources>
                         <Style TargetType="DockPanel">
                             <Setter Property="HorizontalAlignment" Value="Stretch"/>
@@ -41,16 +41,28 @@
                         </Style>
                     </UniformGrid.Resources>
                     <DockPanel>
-                        <TextBox Text="Property 1"/>
+                        <TextBox Text="{Binding BarsDiameter}"/>
                     </DockPanel>
                     <DockPanel>
-                        <TextBlock Text="Property 1"/>
+                        <TextBlock Text="Диаметр стержней"/>
                     </DockPanel>
                     <DockPanel>
-                        <TextBox Text="Property 2"/>
+                        <TextBox Text="{Binding BarsStep}"/>
                     </DockPanel>
                     <DockPanel>
-                        <TextBlock Text="Property 2"/>
+                        <TextBlock Text="Шаг стержней"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBox Text="{Binding SupportLeft}"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBlock Text="Опирание слева"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBox Text="{Binding SupportRight}"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBlock Text="Опирание справа"/>
                     </DockPanel>
                 </UniformGrid>
                 <UniformGrid DockPanel.Dock="Bottom" Height="20" Rows="1" VerticalAlignment="Bottom">

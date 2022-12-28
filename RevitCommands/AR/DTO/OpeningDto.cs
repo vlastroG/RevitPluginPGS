@@ -30,29 +30,39 @@ namespace MS.RevitCommands.AR.DTO
         /// Конструктор проема
         /// </summary>
         /// <param name="width">Ширина проема</param>
+        /// <param name="height">Высота проема</param>
         /// <param name="wallThick">Толщина стены</param>
         /// <param name="wallHeightOverOpening">Высота стены над проемом</param>
         /// <param name="distanceToRightEnd">Расстояние от правой стороны проема до торца стены в мм</param>
         /// <param name="distanceToLeftEnd">Расстояние от левой стороны проема до торца стены в мм</param>
         /// <param name="wallMaterial">Название материала сердцевины стены</param>
+        /// <param name="level">Название уровня, на котором размещен проем</param>
         public OpeningDto(
             Guid guid,
             double width,
+            double height,
             double wallThick,
             double wallHeightOverOpening,
             double distanceToRightEnd,
             double distanceToLeftEnd,
-            string wallMaterial)
+            string wallMaterial,
+            string level)
         {
             Width = width;
+            Height = height;
             WallThick = wallThick;
             WallHeightOverOpening = wallHeightOverOpening;
             DistanceToRightEnd = distanceToRightEnd;
             DistanceToLeftEnd = distanceToLeftEnd;
             WallMaterial = wallMaterial;
+            Level = level;
             _guid = guid;
         }
 
+        /// <summary>
+        /// Уровень, на котором расположени проем
+        /// </summary>
+        public string Level { get; }
 
         /// <summary>
         /// Марка перемычки
@@ -63,6 +73,11 @@ namespace MS.RevitCommands.AR.DTO
         /// Ширина проема вмм
         /// </summary>
         public double Width { get; }
+
+        /// <summary>
+        /// Высота проема вмм
+        /// </summary>
+        public double Height { get; }
 
         /// <summary>
         /// Толщина стены в мм

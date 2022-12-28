@@ -6,14 +6,14 @@
              xmlns:local="clr-namespace:MS.GUI.Windows.AR.LintelsManager"
              xmlns:vm="clr-namespace:MS.GUI.ViewModels.AR.LintelsManager"
              mc:Ignorable="d" 
-             d:DesignHeight="150" d:DesignWidth="300">
+             d:DesignHeight="300" d:DesignWidth="300">
     <Window.DataContext>
         <vm:LintelAngleViewModel/>
     </Window.DataContext>
     <Grid>
         <GroupBox Header="Перемычка из уголков">
             <DockPanel>
-                <UniformGrid DockPanel.Dock="Top" Margin="5" Rows="2">
+                <UniformGrid DockPanel.Dock="Top" Margin="5" Rows="7">
                     <UniformGrid.Resources>
                         <Style TargetType="DockPanel">
                             <Setter Property="HorizontalAlignment" Value="Stretch"/>
@@ -41,16 +41,46 @@
                         </Style>
                     </UniformGrid.Resources>
                     <DockPanel>
-                        <TextBox Text="Property 1"/>
+                        <TextBox Text="{Binding AngleMain}"/>
                     </DockPanel>
                     <DockPanel>
-                        <TextBlock Text="Property 1"/>
+                        <TextBlock Text="Основной уголок"/>
                     </DockPanel>
                     <DockPanel>
-                        <TextBox Text="Property 2"/>
+                        <TextBox Text="{Binding AngleExterior}"/>
                     </DockPanel>
                     <DockPanel>
-                        <TextBlock Text="Property 2"/>
+                        <TextBlock Text="Облицовочный уголок"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBox Text="{Binding AngleSupport}"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBlock Text="Опорный уголок"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBox Text="{Binding Stripe}"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBlock Text="Полоса"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBox Text="{Binding StripeStep}"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBlock Text="Шаг полосы"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBox Text="{Binding SupportLeft}"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBlock Text="Опирание слева"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBox Text="{Binding SupportRight}"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBlock Text="Опирание справа"/>
                     </DockPanel>
                 </UniformGrid>
                 <UniformGrid DockPanel.Dock="Bottom" Height="20" Rows="1" VerticalAlignment="Bottom">

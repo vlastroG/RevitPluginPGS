@@ -36,7 +36,6 @@ namespace MS.RevitCommands.AR.Models
             _lintelType = lintelType;
         }
 
-
         /// <summary>
         /// Идентификатор перемычки
         /// </summary>

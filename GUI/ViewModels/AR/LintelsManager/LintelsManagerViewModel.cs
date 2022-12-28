@@ -25,10 +25,10 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
         /// </summary>
         public LintelsManagerViewModel()
         {
-            Openings.Add(new OpeningDto(Guid.NewGuid(), 1200, 120, 500, 450, 5500, "Кирпич") { Mark = "ПР-1", Lintel = new BarLintel(Guid.NewGuid()) });
-            Openings.Add(new OpeningDto(Guid.NewGuid(), 800, 120, 500, 350, 1300, "ГСБ") { Mark = "ПР-2", Lintel = new BarLintel(Guid.NewGuid()) });
-            Openings.Add(new OpeningDto(Guid.NewGuid(), 1500, 200, 200, 450, 5500, "Бетон") { Mark = "ПР-3", Lintel = new BlockLintel(Guid.NewGuid()) });
-            Openings.Add(new OpeningDto(Guid.NewGuid(), 1800, 120, 500, 450, 5500, "Кирпич") { Mark = "ПР-4", Lintel = new AngleLintel(Guid.NewGuid()) });
+            Openings.Add(new OpeningDto(Guid.NewGuid(), 1200, 2000, 120, 500, 450, 5500, "Кирпич", "Level 1") { Mark = "ПР-1", Lintel = new BarLintel(Guid.NewGuid()) });
+            Openings.Add(new OpeningDto(Guid.NewGuid(), 800, 2000, 120, 500, 350, 1300, "ГСБ", "Level 1") { Mark = "ПР-2", Lintel = new BarLintel(Guid.NewGuid()) });
+            Openings.Add(new OpeningDto(Guid.NewGuid(), 1500, 2000, 200, 200, 450, 5500, "Бетон", "Level 1") { Mark = "ПР-3", Lintel = new BlockLintel(Guid.NewGuid()) });
+            Openings.Add(new OpeningDto(Guid.NewGuid(), 1800, 2000, 120, 500, 450, 5500, "Кирпич", "Level 1") { Mark = "ПР-4", Lintel = new AngleLintel(Guid.NewGuid()) });
         }
 
         /// <summary>
