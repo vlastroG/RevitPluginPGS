@@ -10,12 +10,16 @@ namespace TestConsole
     {
         static void Main(string[] args)
         {
-            Guid guid = Guid.NewGuid();
-            Console.WriteLine(guid);
+            var t = Enumerable.Range(0, 10).Select(i => (i, i * i)).ToDictionary(tuple => tuple.i, tuple => tuple.Item2);
 
-            var test = "vgewr";
-            Guid.TryParse(test, out guid);
-            Console.WriteLine(guid);
+
+
+
+            Console.WriteLine(t.ToString());
+            //.ToList()
+            //.ForEach(t => Console.WriteLine($"Key: {t.Key},\tValue: {t.Value}"));
         }
+
+
     }
 }
