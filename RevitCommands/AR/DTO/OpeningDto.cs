@@ -1,4 +1,5 @@
-﻿using MS.GUI.ViewModels.Base;
+﻿using Autodesk.Revit.DB;
+using MS.GUI.ViewModels.Base;
 using MS.RevitCommands.AR.Models;
 using MS.RevitCommands.Models.Interfaces;
 using System;
@@ -25,6 +26,16 @@ namespace MS.RevitCommands.AR.DTO
         /// </summary>
         private Guid _guid;
 
+        /// <summary>
+        /// Id размещенного в проекте Revit экземпляра семейства перемычки
+        /// </summary>
+        private readonly int _existLintelId = -1;
+
+        /// <summary>
+        /// Удалять ли уже размещенный экземпляр семейства перемычки
+        /// </summary>
+        private bool _existLintelDeleted = false;
+
 
         /// <summary>
         /// Конструктор проема
@@ -46,7 +57,9 @@ namespace MS.RevitCommands.AR.DTO
             double distanceToRightEnd,
             double distanceToLeftEnd,
             string wallMaterial,
-            string level)
+            string level,
+            XYZ location,
+            Lintel lintel = null)
         {
             Width = width;
             Height = height;
@@ -57,7 +70,18 @@ namespace MS.RevitCommands.AR.DTO
             WallMaterial = wallMaterial;
             Level = level;
             _guid = guid;
+            Location = location;
+            _lintel = lintel;
+            if (!(lintel is null))
+            {
+                _existLintelId = lintel.ExistLintelId;
+            }
         }
+
+        /// <summary>
+        /// Точка расположения элемента, образующего проем
+        /// </summary>
+        public XYZ Location { get; }
 
         /// <summary>
         /// Уровень, на котором расположени проем
@@ -117,7 +141,28 @@ namespace MS.RevitCommands.AR.DTO
         /// <summary>
         /// Перемычка
         /// </summary>
-        public Lintel Lintel { get => _lintel; set => Set(ref _lintel, value); }
+        public Lintel Lintel
+        {
+            get => _lintel;
+            set
+            {
+                if ((value is null) && (_existLintelId != -1) && (!_existLintelDeleted))
+                {
+                    _existLintelDeleted = true;
+                }
+                Set(ref _lintel, value);
+            }
+        }
+
+        /// <summary>
+        /// Id размещенного в проекте Revit экземпляра семейства перемычки
+        /// </summary>
+        public int ExistLintelId => _existLintelId;
+
+        /// <summary>
+        /// Удалять ли уже размещенный экземпляр семейства перемычки
+        /// </summary>
+        public bool ExistLintelDeleted => _existLintelDeleted;
 
         public Guid Guid => _guid;
 

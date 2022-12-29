@@ -16,7 +16,7 @@ namespace MS.RevitCommands.AR.Models.Lintels
         /// Конструктор перемычки из уголков по Guid
         /// </summary>
         /// <param name="guid">Идентификатор перемычки</param>
-        public AngleLintel(Guid guid) : base(guid, LintelType.Angle) { }
+        public AngleLintel(Guid guid, int existLintelId = -1) : base(guid, LintelType.Angle, existLintelId) { }
 
         /// <summary>
         /// Опирание слева

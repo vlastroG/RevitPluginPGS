@@ -24,16 +24,22 @@ namespace MS.RevitCommands.AR.Models
         /// </summary>
         private protected readonly LintelType _lintelType;
 
+        /// <summary>
+        /// Id размещенного в проекте экземпляра семейства перемычки
+        /// </summary>
+        private protected int _existLintelId = -1;
+
 
         /// <summary>
         /// Конструктор перемычки по идентификатору и ее типу
         /// </summary>
         /// <param name="guid"></param>
         /// <param name="lintelType"></param>
-        public Lintel(Guid guid, LintelType lintelType)
+        public Lintel(Guid guid, LintelType lintelType, int existLintelId = -1)
         {
             _guid = guid;
             _lintelType = lintelType;
+            _existLintelId = existLintelId;
         }
 
         /// <summary>
@@ -45,6 +51,11 @@ namespace MS.RevitCommands.AR.Models
         /// Тип перемычки
         /// </summary>
         public LintelType LintelType => _lintelType;
+
+        /// <summary>
+        /// Id размещенного в проекте экземпляра семейства перемычки
+        /// </summary>
+        public int ExistLintelId => _existLintelId;
 
         /// <summary>
         /// Возвращает тип перемычки

@@ -5,6 +5,8 @@ using Autodesk.Revit.UI.Selection;
 using MS.GUI.ViewModels.AR.LintelsManager;
 using MS.GUI.Windows.AR.LintelsManager;
 using MS.RevitCommands.AR.DTO;
+using MS.RevitCommands.AR.Models;
+using MS.RevitCommands.AR.Models.Lintels;
 using MS.Utilites;
 using MS.Utilites.SelectionFilters;
 using MS.Utilites.WorkWith;
@@ -21,24 +23,35 @@ namespace MS.RevitCommands.AR
     [Regeneration(RegenerationOption.Manual)]
     public class LintelsManagerCmd : IExternalCommand
     {
+        /// <summary>
+        /// Название параметра "PGS_GUID"
+        /// </summary>
         private const string _parGuid = "PGS_GUID";
 
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             Document doc = commandData.Application.ActiveUIDocument.Document;
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
+            View3D view3d = DocMethods.GetView3Default(doc);
+            if (view3d is null)
+            {
+                MessageBox.Show("Не найден {3D} вид по умолчанию!", "Ошибка");
+                return Result.Cancelled;
+            }
 
+            List<OpeningDto> openings = GetOpeningDtos(doc, view3d);
 
-
-
-            LintelsManagerViewModel vm = new LintelsManagerViewModel();
-
+            LintelsManagerViewModel vm = new LintelsManagerViewModel(openings);
             var ui = new LintelsManagerView()
             {
                 WindowStartupLocation = WindowStartupLocation.CenterScreen,
                 DataContext = vm
             };
             ui.ShowDialog();
+
+            openings = (ui.DataContext as LintelsManagerViewModel).Openings.ToList();
+
+
             return Result.Succeeded;
 
 
@@ -49,12 +62,6 @@ namespace MS.RevitCommands.AR
                 return Result.Succeeded;
             }
 
-            View3D view3d = DocMethods.GetView3Default(doc);
-            if (view3d is null)
-            {
-                MessageBox.Show("Не найден {3D} вид по умолчанию!", "Ошибка");
-                return Result.Cancelled;
-            }
 
             var hostWall = GetHostElement(doc, view3d, opening);
             if (!(hostWall is null))
@@ -66,11 +73,11 @@ namespace MS.RevitCommands.AR
                 }
             }
 
-            var t1 = GetOpeningWidth(opening);
+            var t1 = GetOpeningWidthAndHeight(opening);
             var t2 = GetWallThick(hostWall as Wall);
             (var left, var right) = GetOpeningSidesDistances(opening, hostWall as Wall);
             var t5 = GetWallHeightOverOpening(opening, hostWall, view3d);
-            var t6 = GetWallName(hostWall as Wall);
+            var t6 = GetWallMaterial(hostWall as Wall);
 
             Task.Run(() => MessageBox.Show($"Проем {opening.Id}\nСлева: {left}\nСправа: {right}"));
             //using (Transaction test = new Transaction(doc))
@@ -136,9 +143,9 @@ namespace MS.RevitCommands.AR
             return Result.Succeeded;
         }
 
-        private Dictionary<Guid, OpeningDto> GetOpeningDtos(in Document doc, in View3D view3d)
+        private List<OpeningDto> GetOpeningDtos(in Document doc, in View3D view3d)
         {
-            Dictionary<Guid, OpeningDto> openingDtos = new Dictionary<Guid, OpeningDto>();
+            List<OpeningDto> openingDtos = new List<OpeningDto>();
 
             BuiltInCategory[] famInstCategories = new BuiltInCategory[2] { BuiltInCategory.OST_Doors, BuiltInCategory.OST_Windows };
             var multiFamInstFilter = new ElementMulticategoryFilter(famInstCategories);
@@ -171,18 +178,56 @@ namespace MS.RevitCommands.AR
                         guid = Guid.NewGuid();
                         guidParam.Set(guid.ToString());
                     }
+                    var lintel = GetLintel(doc, guid);
+                    (double height, double width) = GetOpeningWidthAndHeight(opening);
                     var hostWall = GetHostElement(doc, view3d, opening);
-                    var width = GetOpeningWidth(opening);
                     var wallThick = GetWallThick(hostWall as Wall);
                     var wallHeightOverOpening = GetWallHeightOverOpening(opening, hostWall, view3d);
+                    (double distanceLeft, double distanceRight) = GetOpeningSidesDistances(opening, hostWall as Wall);
+                    string wallMaterial = GetWallMaterial(hostWall as Wall);
+                    string levelName = GetElementLevel(opening);
+                    XYZ openingLocation = GetLocationPoint(opening);
 
-
+                    OpeningDto openingDto = new OpeningDto(
+                        guid,
+                        width,
+                        height,
+                        wallThick,
+                        wallHeightOverOpening,
+                        distanceRight,
+                        distanceLeft,
+                        wallMaterial,
+                        levelName,
+                        openingLocation,
+                        lintel);
+                    openingDtos.Add(openingDto);
                 }
                 setGuidsTrans.Commit();
             }
             return openingDtos;
         }
 
+        /// <summary>
+        /// Возвращает название уровня, на котором расположен элемент
+        /// </summary>
+        /// <param name="element">Элемент</param>
+        /// <returns>Название уровня</returns>
+        private string GetElementLevel(in Element element)
+        {
+            var doc = element.Document;
+            return doc.GetElement(element.LevelId).Name;
+        }
+
+        /// <summary>
+        /// Возаращает модель перемычки по заданному экземпляру семейства перемычки
+        /// </summary>
+        /// <param name="lintel">Экземпляр семейства перемычки</param>
+        /// <returns>Модель перемычки</returns>
+        private Lintel GetLintel(in Document doc, Guid guid)
+        {
+            var lintel = GetLintelByGuid(doc, guid.ToString());
+            return new AngleLintel(guid);
+        }
 
         /// <summary>
         /// Возвращает элемент, выбранный пользователем
@@ -244,10 +289,12 @@ namespace MS.RevitCommands.AR
         /// </summary>
         /// <guidParam name="opening">Проем, сделанный семейством окна или двери, или витражная стена</guidParam>
         /// <returns>Ширина проема в мм</returns>
-        private double GetOpeningWidth(in Element opening)
+        private (double height, double width) GetOpeningWidthAndHeight(in Element opening)
         {
-            (_, double width) = GeometryMethods.GetWidthAndHeightOfElement(opening);
-            return Math.Round(UnitUtils.ConvertFromInternalUnits(width, UnitTypeId.Millimeters));
+            (double height, double width) = GeometryMethods.GetWidthAndHeightOfElement(opening);
+            var heightMM = Math.Round(UnitUtils.ConvertFromInternalUnits(height, UnitTypeId.Millimeters));
+            var widthMM = Math.Round(UnitUtils.ConvertFromInternalUnits(width, UnitTypeId.Millimeters));
+            return (heightMM, widthMM);
         }
 
         /// <summary>
@@ -265,7 +312,7 @@ namespace MS.RevitCommands.AR
         /// </summary>
         /// <guidParam name="hostWall">Хост стена проема</guidParam>
         /// <returns>Название типоразмера стены</returns>
-        private string GetWallName(in Wall hostWall)
+        private string GetWallMaterial(in Wall hostWall)
         {
             return hostWall.Name;
         }

@@ -16,7 +16,7 @@ namespace MS.RevitCommands.AR.Models.Lintels
         /// Конструктор перемычки по Guid
         /// </summary>
         /// <param name="guid">Идентификатор перемычки</param>
-        public BarLintel(Guid guid) : base(guid, LintelType.Bar) { }
+        public BarLintel(Guid guid, int existLintelId = -1) : base(guid, LintelType.Bar, existLintelId) { }
 
         /// <summary>
         /// Диаметр арматурных стержней в мм
