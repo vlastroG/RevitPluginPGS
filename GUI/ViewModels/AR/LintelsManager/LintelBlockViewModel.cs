@@ -41,7 +41,7 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
         /// <summary>
         /// Тип 1-го блока
         /// </summary>
-        public string BlockType_1 { get => BlockType_1; set => Set(ref _blockType_1, value); }
+        public string BlockType_1 { get => _blockType_1; set => Set(ref _blockType_1, value); }
 
 
         private string _blockType_2;
@@ -49,7 +49,7 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
         /// <summary>
         /// Тип 2-го блока
         /// </summary>
-        public string BlockType_2 { get => BlockType_2; set => Set(ref _blockType_2, value); }
+        public string BlockType_2 { get => _blockType_2; set => Set(ref _blockType_2, value); }
 
 
         private string _blockType_3;
@@ -57,7 +57,7 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
         /// <summary>
         /// Тип 3-го блока
         /// </summary>
-        public string BlockType_3 { get => BlockType_3; set => Set(ref _blockType_3, value); }
+        public string BlockType_3 { get => _blockType_3; set => Set(ref _blockType_3, value); }
 
 
         private string _blockType_4;
@@ -65,7 +65,7 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
         /// <summary>
         /// Тип 4-го блока
         /// </summary>
-        public string BlockType_4 { get => BlockType_4; set => Set(ref _blockType_4, value); }
+        public string BlockType_4 { get => _blockType_4; set => Set(ref _blockType_4, value); }
 
 
         private string _blockType_5;
@@ -73,7 +73,7 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
         /// <summary>
         /// Тип 5-го блока
         /// </summary>
-        public string BlockType_5 { get => BlockType_5; set => Set(ref _blockType_5, value); }
+        public string BlockType_5 { get => _blockType_5; set => Set(ref _blockType_5, value); }
 
 
         private string _blockType_6;
@@ -81,7 +81,7 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
         /// <summary>
         /// Тип 6-го блока
         /// </summary>
-        public string BlockType_6 { get => BlockType_6; set => Set(ref _blockType_6, value); }
+        public string BlockType_6 { get => _blockType_6; set => Set(ref _blockType_6, value); }
 
 
 

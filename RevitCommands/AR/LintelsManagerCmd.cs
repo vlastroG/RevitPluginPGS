@@ -170,9 +170,14 @@ namespace MS.RevitCommands.AR
                 setGuidsTrans.Start("Назначение Guid проемам");
                 foreach (Element opening in openings)
                 {
+                    var hostWall = GetHostElement(doc, view3d, opening);
+                    if (hostWall is null)
+                    {
+                        continue;
+                    }
                     Guid guid = Guid.NewGuid();
                     var guidParam = opening.LookupParameter(_parGuid);
-                    var guidString = guidParam.AsValueString();
+                    var guidString = guidParam.AsValueString() ?? string.Empty;
                     if (!(guidString.Length != Guid.Empty.ToString().Length) && !Guid.TryParse(guidString, out guid))
                     {
                         guid = Guid.NewGuid();
@@ -180,7 +185,6 @@ namespace MS.RevitCommands.AR
                     }
                     var lintel = GetLintel(doc, guid);
                     (double height, double width) = GetOpeningWidthAndHeight(opening);
-                    var hostWall = GetHostElement(doc, view3d, opening);
                     var wallThick = GetWallThick(hostWall as Wall);
                     var wallHeightOverOpening = GetWallHeightOverOpening(opening, hostWall, view3d);
                     (double distanceLeft, double distanceRight) = GetOpeningSidesDistances(opening, hostWall as Wall);
@@ -221,12 +225,50 @@ namespace MS.RevitCommands.AR
         /// <summary>
         /// Возаращает модель перемычки по заданному экземпляру семейства перемычки
         /// </summary>
-        /// <param name="lintel">Экземпляр семейства перемычки</param>
+        /// <param name="doc">Документ, в котором происходит поиск</param>
+        /// <param name="guid">Значение PGS_Guid параметра перемычки</param>
         /// <returns>Модель перемычки</returns>
         private Lintel GetLintel(in Document doc, Guid guid)
         {
             var lintel = GetLintelByGuid(doc, guid.ToString());
-            return new AngleLintel(guid);
+            if (lintel is null)
+            {
+                return null;
+            }
+            string familyName = lintel.Symbol.Name;
+            switch (familyName)
+            {
+                case "ADSK_Обобщенная модель_Перемычка составная":
+                    return new BlockLintel(guid, lintel.Id.IntegerValue)
+                    {
+                        BlockType_1 = lintel.LookupParameter("Тип 1-го элемента").AsValueString(),
+                        BlockType_2 = lintel.LookupParameter("Тип 2-го элемента").AsValueString(),
+                        BlockType_3 = lintel.LookupParameter("Тип 3-го элемента").AsValueString(),
+                        BlockType_4 = lintel.LookupParameter("Тип 4-го элемента").AsValueString(),
+                        BlockType_5 = lintel.LookupParameter("Тип 5-го элемента").AsValueString(),
+                        BlockType_6 = lintel.LookupParameter("Тип 6-го элемента").AsValueString()
+                    };
+                case "PGS_Перемычка_Стержни_v0.1":
+                    return new BarLintel(guid, lintel.Id.IntegerValue)
+                    {
+                        BarsDiameter = UnitUtils.ConvertFromInternalUnits(lintel.LookupParameter("ADSK_Размер_Диаметр").AsDouble(), UnitTypeId.Millimeters),
+                        BarsStep = UnitUtils.ConvertFromInternalUnits(lintel.LookupParameter("Шаг стержней").AsDouble(), UnitTypeId.Millimeters),
+                        SupportLeft = UnitUtils.ConvertFromInternalUnits(lintel.LookupParameter("Опирание слева").AsDouble(), UnitTypeId.Millimeters),
+                        SupportRight = UnitUtils.ConvertFromInternalUnits(lintel.LookupParameter("Опирание справа").AsDouble(), UnitTypeId.Millimeters),
+                    };
+                case "ADSK_Обобщенная модель_Перемычка из уголков":
+                    return new AngleLintel(guid, lintel.Id.IntegerValue)
+                    {
+                        AngleExterior = lintel.LookupParameter("Уголок для облицовки").AsValueString(),
+                        AngleMain = lintel.LookupParameter("Внутренний уголок").AsValueString(),
+                        AngleSupport = lintel.LookupParameter("Опорные уголки").AsValueString(),
+                        Stripe = lintel.LookupParameter("Полоса").AsValueString(),
+                        StripeStep = UnitUtils.ConvertFromInternalUnits(lintel.LookupParameter("Полоса_Шаг").AsDouble(), UnitTypeId.Millimeters),
+                        SupportLeft = UnitUtils.ConvertFromInternalUnits(lintel.LookupParameter("уголок_опирание_1").AsDouble(), UnitTypeId.Millimeters),
+                        SupportRight = UnitUtils.ConvertFromInternalUnits(lintel.LookupParameter("уголок_опирание_2").AsDouble(), UnitTypeId.Millimeters)
+                    };
+            }
+            return null;
         }
 
         /// <summary>

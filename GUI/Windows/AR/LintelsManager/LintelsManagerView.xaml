@@ -117,11 +117,9 @@
                         Для того, чтобы изменить тип перемычки нужно сначала удалить ее, 
                         а потом добавить.">
                     <Button.Content>
-                        <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
-                            <TextBlock TextAlignment="Right">
-                                    <TextBlock Text="Добавить"/><LineBreak/>Редактировать
-                            </TextBlock>
-                            <TextBlock Text=" перемычку" VerticalAlignment="Center"/>
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <TextBlock Text="Добавить/Редактировать" TextAlignment="Center"/>
+                            <TextBlock Text="перемычку" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                         </StackPanel>
                     </Button.Content>
                 </Button>
@@ -135,11 +133,7 @@
                           VerticalAlignment="Center"
                           HorizontalAlignment="Center"
                           VerticalContentAlignment="Center"
-                          ToolTip="После нажатия кнопки Ок расположения перемычек 
-                          будут скорректированы в соответствии с расположением их проемов. 
-                          ВАЖНО!!! если основа проема изменилась, 
-                          то расположение не будет скорректировано автоматически 
-                          и придется его исправлять вручную!"/>
+                          ToolTip="После нажатия кнопки Ок расположения перемычек&#10; будут скорректированы в соответствии с расположением их проемов. ВАЖНО!!! если основа проема изменилась, то расположение не будет скорректировано автоматически и придется его исправлять вручную!"/>
                 <Button Content="Ок" Name="Ok" Click="Ok_Click"/>
                 <Button Content="Отмена" Name="Cancel" Click="Cancel_Click"/>
             </UniformGrid>
