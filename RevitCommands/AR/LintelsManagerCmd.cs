@@ -7,6 +7,7 @@ using MS.GUI.Windows.AR.LintelsManager;
 using MS.RevitCommands.AR.DTO;
 using MS.RevitCommands.AR.Models;
 using MS.RevitCommands.AR.Models.Lintels;
+using MS.Shared;
 using MS.Utilites;
 using MS.Utilites.SelectionFilters;
 using MS.Utilites.WorkWith;
@@ -23,11 +24,6 @@ namespace MS.RevitCommands.AR
     [Regeneration(RegenerationOption.Manual)]
     public class LintelsManagerCmd : IExternalCommand
     {
-        /// <summary>
-        /// Название параметра "PGS_GUID"
-        /// </summary>
-        private const string _parGuid = "PGS_GUID";
-
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             Document doc = commandData.Application.ActiveUIDocument.Document;
@@ -75,7 +71,7 @@ namespace MS.RevitCommands.AR
 
             var t1 = GetOpeningWidthAndHeight(opening);
             var t2 = GetWallThick(hostWall as Wall);
-            (var left, var right) = GetOpeningSidesDistances(opening, hostWall as Wall);
+            (var left, var right) = GetOpeningSideDistances(opening, hostWall as Wall);
             var t5 = GetWallHeightOverOpening(opening, hostWall, view3d);
             var t6 = GetWallMaterial(hostWall as Wall);
 
@@ -98,11 +94,11 @@ namespace MS.RevitCommands.AR
                 trans.Start("Создание перемычек");
                 //opening.LookupParameter("PGS_GUID").Set(guid);
 
-                string openingGuid = opening.LookupParameter(_parGuid).AsValueString();
+                string openingGuid = opening.get_Parameter(SharedParams.PGS_Guid).AsValueString();
                 var lintel = GetLintelByGuid(doc, openingGuid);
                 if (lintel is null)
                 {
-                    opening.LookupParameter(_parGuid).ClearValue();
+                    opening.get_Parameter(SharedParams.PGS_Guid).ClearValue();
                 }
                 else
                 {
@@ -136,7 +132,7 @@ namespace MS.RevitCommands.AR
                 //    .FirstOrDefault(f => f.Name.Equals(famName)) as FamilySymbol;
 
                 //var lintel = doc.Create.NewFamilyInstance(location, fSymb, (opening as FamilyInstance).Host, Autodesk.Revit.DB.Structure.StructuralType.NonStructural);
-                //lintel.LookupParameter(_parGuid).Set(guid);
+                //lintel.get_Parameter(SharedParams.PGS_Guid).Set(guid);
                 trans.Commit();
             }
 
@@ -160,7 +156,8 @@ namespace MS.RevitCommands.AR
                 .OfCategory(BuiltInCategory.OST_Walls)
                 .WhereElementIsNotElementType()
                 .Cast<Wall>()
-                .Where(wall => wall.CurtainGrid is null)
+                .Where(wall => !(wall.CurtainGrid is null))
+                .Where(wall => (wall.Location as LocationCurve).Curve is Line line)
                 .Cast<Element>()
                 .ToList();
             openings.AddRange(curtainWalls);
@@ -176,18 +173,20 @@ namespace MS.RevitCommands.AR
                         continue;
                     }
                     Guid guid = Guid.NewGuid();
-                    var guidParam = opening.LookupParameter(_parGuid);
+                    var guidParam = opening.get_Parameter(SharedParams.PGS_Guid);
                     var guidString = guidParam.AsValueString() ?? string.Empty;
-                    if (!(guidString.Length != Guid.Empty.ToString().Length) && !Guid.TryParse(guidString, out guid))
+                    bool searchLintel = true;
+                    if ((guidString.Length != Guid.Empty.ToString().Length) || !Guid.TryParse(guidString, out guid))
                     {
                         guid = Guid.NewGuid();
                         guidParam.Set(guid.ToString());
+                        searchLintel = false;
                     }
-                    var lintel = GetLintel(doc, guid);
+                    var lintel = searchLintel ? GetLintel(doc, guid) : null;
                     (double height, double width) = GetOpeningWidthAndHeight(opening);
                     var wallThick = GetWallThick(hostWall as Wall);
                     var wallHeightOverOpening = GetWallHeightOverOpening(opening, hostWall, view3d);
-                    (double distanceLeft, double distanceRight) = GetOpeningSidesDistances(opening, hostWall as Wall);
+                    (double distanceLeft, double distanceRight) = GetOpeningSideDistances(opening, hostWall as Wall);
                     string wallMaterial = GetWallMaterial(hostWall as Wall);
                     string levelName = GetElementLevel(opening);
                     XYZ openingLocation = GetLocationPoint(opening);
@@ -377,7 +376,7 @@ namespace MS.RevitCommands.AR
         /// <guidParam name="opening">Проем</guidParam>
         /// <guidParam name="hostWall">Хост стена проема</guidParam>
         /// <returns>Кортеж расстояний слева и справа от граней проема до торцов стены</returns>
-        private (double leftDistance, double rightDistance) GetOpeningSidesDistances(in Element opening, in Wall hostWall)
+        private (double leftDistance, double rightDistance) GetOpeningSideDistances(in Element opening, in Wall hostWall)
         {
             (_, double width) = GeometryMethods.GetWidthAndHeightOfElement(opening);
             XYZ openingLocation = GetLocationPoint(opening);
@@ -430,8 +429,12 @@ namespace MS.RevitCommands.AR
                 .OfCategory(BuiltInCategory.OST_GenericModel)
                 .OfClass(typeof(FamilyInstance))
                 .WhereElementIsNotElementType()
-                .Where(e => e.LookupParameter(_parGuid).HasValue)
-                .FirstOrDefault(l => l.LookupParameter(_parGuid).AsValueString().Equals(guid)) as FamilyInstance;
+                .FirstOrDefault(e =>
+                {
+                    var parameter = e.get_Parameter(SharedParams.PGS_Guid);
+                    bool hasValue = parameter.HasValue;
+                    return hasValue && parameter.AsValueString().Equals(guid);
+                }) as FamilyInstance;
         }
 
         /// <summary>

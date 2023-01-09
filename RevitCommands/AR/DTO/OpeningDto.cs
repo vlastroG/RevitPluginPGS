@@ -40,6 +40,7 @@ namespace MS.RevitCommands.AR.DTO
         /// <summary>
         /// Конструктор проема
         /// </summary>
+        /// <param name="guid">Guid проема</param>
         /// <param name="width">Ширина проема</param>
         /// <param name="height">Высота проема</param>
         /// <param name="wallThick">Толщина стены</param>
