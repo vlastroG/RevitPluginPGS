@@ -35,6 +35,123 @@ namespace MS.RevitCommands.AR
                 return Result.Cancelled;
             }
 
+            (List<OpeningDto> openings, bool updateLintelsLocations) = ShowLintelsManagerWindow(doc, view3d);
+            if (openings is null)
+            {
+                return Result.Cancelled;
+            }
+
+
+
+            return Result.Succeeded;
+        }
+
+        private void EditLintels(in Document doc, in List<OpeningDto> openings, bool updateLintelsLocations)
+        {
+            foreach (var opening in openings)
+            {
+                using (Transaction trans = new Transaction(doc))
+                {
+                    trans.Start($"Корректировка перемычки {opening.Mark}");
+                    //Описание алгоритма
+                    //
+                    //Перемычка не была назначена до команды (ExistLintelId < 0)		
+                    //			Перемычка была назначена    (Lintel is not null)
+                    //			                             => create Lintel
+                    //		или	Перемычка не была назначена (Lintel is null)
+                    //		                                 => continue
+                    //
+                    //Перемычка была назначена до команды    (ExistLintelId > 0)		
+                    //			Перемычка была удалена и не назначена (ExistLintelDeleted && Lintel is null)
+                    //			                             => delete Lintel;
+                    //		или	Перемычка была удалена и назначена	  (ExistLintelDeleted && Lintel is not null)
+                    //		                                 => delete Lintel then create Lintel;
+                    //				
+                    //				
+                    //  Или		Перемычка не была удалена и не была изменена	!ExistLintelDeleted
+                    //                                       => check and correct only location if updateLintelsLocations
+                    //		или Перемычка не была удалена и была изменена		!ExistLintelDeleted
+                    //		                                 => edit Lintel and correct location if updateLintelsLocations;
+                    if (opening.ExistLintelId <= 0)
+                    {
+                        if (opening.Lintel is null)
+                        {
+                            continue;
+                        }
+                        else
+                        {
+                            // создать перемычку с заданными параметрами
+                        }
+                    }
+                    else
+                    {
+                        if (opening.ExistLintelDeleted)
+                        {
+                            // удалить перемычку по Id
+                            if (!(opening.Lintel is null))
+                            {
+                                // cоздать перемычку с заданными параметрами
+                            }
+                        }
+                        else
+                        {
+                            // скорректировать значения параметров существующей перемычки по Id и,
+                            // если updateLintelsLocations, то скорректировать расположение перемычки
+                        }
+                    }
+
+                    string openingGuid = opening.get_Parameter(SharedParams.PGS_Guid).AsValueString();
+                    var lintel = GetLintelByGuid(doc, openingGuid);
+                    if (lintel is null)
+                    {
+                        opening.get_Parameter(SharedParams.PGS_Guid).ClearValue();
+                    }
+                    else
+                    {
+                        XYZ openingLocation = (opening.Location as LocationPoint).Point;
+                        XYZ lintelLocation = (lintel.Location as LocationPoint).Point;
+                        if (!lintelLocation.IsAlmostEqualTo(openingLocation))
+                        {
+                            var openingHost = (opening as FamilyInstance).Host.Id;
+                            var lintelHost = lintel.Host.Id;
+                            if (!openingHost.Equals(lintelHost))
+                            {
+                                Task.Run(() => MessageBox.Show("Нельзя автоматически поменять основу! " +
+                                    "Сначала нужно вручную перенести перемычку в новую основу и потом снова запустить команду!" +
+                                    $"\n\nId проема: {opening.Id}" +
+                                    $"\nId перемычки: {lintel.Id}"));
+                            }
+                            else
+                            {
+                                ElementTransformUtils.MoveElement(doc, lintel.Id, openingLocation - lintelLocation);
+                            }
+                        }
+                    }
+
+
+                    //XYZ location = (opening.Location as LocationPoint).Point;
+
+                    //string famName = "ADSK_Обобщенная модель_Перемычка из уголков";
+
+                    //FamilySymbol fSymb = new FilteredElementCollector(doc)
+                    //    .OfClass(typeof(FamilySymbol))
+                    //    .FirstOrDefault(f => f.Name.Equals(famName)) as FamilySymbol;
+
+                    //var lintel = doc.Create.NewFamilyInstance(location, fSymb, (opening as FamilyInstance).Host, Autodesk.Revit.DB.Structure.StructuralType.NonStructural);
+                    //lintel.get_Parameter(SharedParams.PGS_Guid).Set(guid);
+                    trans.Commit();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Показывает диалоговое окно менеджера перемычек и возвращает список проемов с перемычками, назначенными пользователем
+        /// </summary>
+        /// <param name="doc">Документ, в котором запускается менеджер перемычек</param>
+        /// <param name="view3d">3D вид по умолчанию</param>
+        /// <returns>Список проемов, или null, если команда отменена</returns>
+        private (List<OpeningDto> openings, bool updateLintelsLocations) ShowLintelsManagerWindow(in Document doc, in View3D view3d)
+        {
             List<OpeningDto> openings = GetOpeningDtos(doc, view3d);
 
             LintelsManagerViewModel vm = new LintelsManagerViewModel(openings);
@@ -44,101 +161,23 @@ namespace MS.RevitCommands.AR
                 DataContext = vm
             };
             ui.ShowDialog();
-
-            openings = (ui.DataContext as LintelsManagerViewModel).Openings.ToList();
-
-
-            return Result.Succeeded;
-
-
-            Element opening = GetOpeningTest(uidoc);
-
-            if (opening is null)
+            if (ui.DialogResult == true)
             {
-                return Result.Succeeded;
+                var viewModel = ui.DataContext as LintelsManagerViewModel;
+                return (viewModel.Openings.ToList(), viewModel.UpdateLintelsLocation);
             }
-
-
-            var hostWall = GetHostElement(doc, view3d, opening);
-            if (!(hostWall is null))
+            else
             {
-                var t = new List<ElementId>() { hostWall.Id };
-                if (t.Count > 0)
-                {
-                    uidoc.Selection.SetElementIds(new List<ElementId>() { hostWall?.Id });
-                }
+                return (null, false);
             }
-
-            var t1 = GetOpeningWidthAndHeight(opening);
-            var t2 = GetWallThick(hostWall as Wall);
-            (var left, var right) = GetOpeningSideDistances(opening, hostWall as Wall);
-            var t5 = GetWallHeightOverOpening(opening, hostWall, view3d);
-            var t6 = GetWallMaterial(hostWall as Wall);
-
-            Task.Run(() => MessageBox.Show($"Проем {opening.Id}\nСлева: {left}\nСправа: {right}"));
-            //using (Transaction test = new Transaction(doc))
-            //{
-            //    test.Start("test");
-            //    var curve = Line.CreateBound(GetLocationPoint(opening), GetLocationPoint(opening) + GetElementDirection(opening)) as Curve;
-            //    var plane = SketchPlane.Create(doc, opening.LevelId);
-            //    var twet = doc.Create.NewModelCurve(curve, plane);
-            //    test.Commit();
-            //}
-
-
-            return Result.Succeeded;
-            var guid = Guid.NewGuid().ToString();
-
-            using (Transaction trans = new Transaction(doc))
-            {
-                trans.Start("Создание перемычек");
-                //opening.LookupParameter("PGS_GUID").Set(guid);
-
-                string openingGuid = opening.get_Parameter(SharedParams.PGS_Guid).AsValueString();
-                var lintel = GetLintelByGuid(doc, openingGuid);
-                if (lintel is null)
-                {
-                    opening.get_Parameter(SharedParams.PGS_Guid).ClearValue();
-                }
-                else
-                {
-                    XYZ openingLocation = (opening.Location as LocationPoint).Point;
-                    XYZ lintelLocation = (lintel.Location as LocationPoint).Point;
-                    if (!lintelLocation.IsAlmostEqualTo(openingLocation))
-                    {
-                        var openingHost = (opening as FamilyInstance).Host.Id;
-                        var lintelHost = lintel.Host.Id;
-                        if (!openingHost.Equals(lintelHost))
-                        {
-                            Task.Run(() => MessageBox.Show("Нельзя автоматически поменять основу! " +
-                                "Сначала нужно вручную перенести перемычку в новую основу и потом снова запустить команду!" +
-                                $"\n\nId проема: {opening.Id}" +
-                                $"\nId перемычки: {lintel.Id}"));
-                        }
-                        else
-                        {
-                            ElementTransformUtils.MoveElement(doc, lintel.Id, openingLocation - lintelLocation);
-                        }
-                    }
-                }
-
-
-                //XYZ location = (opening.Location as LocationPoint).Point;
-
-                //string famName = "ADSK_Обобщенная модель_Перемычка из уголков";
-
-                //FamilySymbol fSymb = new FilteredElementCollector(doc)
-                //    .OfClass(typeof(FamilySymbol))
-                //    .FirstOrDefault(f => f.Name.Equals(famName)) as FamilySymbol;
-
-                //var lintel = doc.Create.NewFamilyInstance(location, fSymb, (opening as FamilyInstance).Host, Autodesk.Revit.DB.Structure.StructuralType.NonStructural);
-                //lintel.get_Parameter(SharedParams.PGS_Guid).Set(guid);
-                trans.Commit();
-            }
-
-            return Result.Succeeded;
         }
 
+        /// <summary>
+        /// Возвращает список проемов с перемычками из текущего документа
+        /// </summary>
+        /// <param name="doc">Текущий документ</param>
+        /// <param name="view3d">3D вид по умолчанию</param>
+        /// <returns>Список проемов с перемычками, уже созданными в проекте</returns>
         private List<OpeningDto> GetOpeningDtos(in Document doc, in View3D view3d)
         {
             List<OpeningDto> openingDtos = new List<OpeningDto>();
