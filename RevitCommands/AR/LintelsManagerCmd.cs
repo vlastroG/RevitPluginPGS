@@ -54,60 +54,67 @@ namespace MS.RevitCommands.AR
                 using (Transaction trans = new Transaction(doc))
                 {
                     trans.Start($"Корректировка перемычки {opening.Mark}");
-                    //Описание алгоритма
-                    //
-                    //Перемычка не была назначена до команды (ExistLintelId < 0)		
-                    //			Перемычка была назначена    (Lintel is not null)
-                    //			                             => create Lintel
-                    //		или	Перемычка не была назначена (Lintel is null)
-                    //		                                 => continue
-                    //
-                    //Перемычка была назначена до команды    (ExistLintelId > 0)		
-                    //			Перемычка была удалена и не назначена (ExistLintelDeleted && Lintel is null)
-                    //			                             => delete Lintel;
-                    //		или	Перемычка была удалена и назначена	  (ExistLintelDeleted && Lintel is not null)
-                    //		                                 => delete Lintel then create Lintel;
-                    //				
-                    //				
-                    //  Или		Перемычка не была удалена и не была изменена	!ExistLintelDeleted
-                    //                                       => check and correct only location if updateLintelsLocations
-                    //		или Перемычка не была удалена и была изменена		!ExistLintelDeleted
-                    //		                                 => edit Lintel and correct location if updateLintelsLocations;
-                    if (opening.ExistLintelId <= 0)
+                    try
                     {
-                        if (opening.Lintel is null)
-                        {
-                            continue;
-                        }
-                        else
-                        {
-                            // создать перемычку с заданными параметрами
-                            CreateLintel(doc, opening);
-                        }
-                    }
-                    else
-                    {
-                        if (opening.ExistLintelDeleted)
-                        {
-                            // удалить перемычку по Id
-                            doc.Delete(new ElementId(opening.ExistLintelId));
 
-                            if (!(opening.Lintel is null))
+
+                        //Описание алгоритма
+                        //
+                        //Перемычка не была назначена до команды (ExistLintelId < 0)		
+                        //			Перемычка была назначена    (Lintel is not null)
+                        //			                             => create Lintel
+                        //		или	Перемычка не была назначена (Lintel is null)
+                        //		                                 => continue
+                        //
+                        //Перемычка была назначена до команды    (ExistLintelId > 0)		
+                        //			Перемычка была удалена и не назначена (ExistLintelDeleted && Lintel is null)
+                        //			                             => delete Lintel;
+                        //		или	Перемычка была удалена и назначена	  (ExistLintelDeleted && Lintel is not null)
+                        //		                                 => delete Lintel then create Lintel;
+                        //				
+                        //				
+                        //  Или		Перемычка не была удалена и не была изменена	!ExistLintelDeleted
+                        //                                       => check and correct only location if updateLintelsLocations
+                        //		или Перемычка не была удалена и была изменена		!ExistLintelDeleted
+                        //		                                 => edit Lintel and correct location if updateLintelsLocations;
+                        if (opening.ExistLintelId <= 0)
+                        {
+                            if (opening.Lintel is null)
                             {
-                                // cоздать перемычку с заданными параметрами
+                                continue;
+                            }
+                            else
+                            {
+                                // создать перемычку с заданными параметрами
                                 CreateLintel(doc, opening);
                             }
                         }
                         else
                         {
-                            // скорректировать значения параметров существующей перемычки по Id и,
-                            // если updateLintelsLocations, то скорректировать расположение перемычки
-                            UpdateLintel(doc, opening, updateLintelsLocations);
+                            if (opening.ExistLintelDeleted)
+                            {
+                                // удалить перемычку по Id
+                                doc.Delete(new ElementId(opening.ExistLintelId));
+
+                                if (!(opening.Lintel is null))
+                                {
+                                    // cоздать перемычку с заданными параметрами
+                                    CreateLintel(doc, opening);
+                                }
+                            }
+                            else
+                            {
+                                // скорректировать значения параметров существующей перемычки по Id и,
+                                // если updateLintelsLocations, то скорректировать расположение перемычки
+                                UpdateLintel(doc, opening, updateLintelsLocations);
+                            }
                         }
                     }
-
-
-
+                    catch (Exception)
+                    {
+                        // добавить заполнение списка полученных ошибок и их последующий вывод
+                        trans.RollBack();
+                    }
 
                     trans.Commit();
                 }
@@ -150,15 +157,14 @@ namespace MS.RevitCommands.AR
         /// <param name="updateLintelsLocations">Обновлять расположение перемычек в соответствии с расположением проема, или нет</param>
         private void UpdateLintel(in Document doc, in OpeningDto openingDto, bool updateLintelsLocations)
         {
-            string openingGuid = opening.get_Parameter(SharedParams.PGS_Guid).AsValueString();
-            var lintel = GetLintelByGuid(doc, openingGuid);
+            var lintel = doc.GetElement(new ElementId(openingDto.ExistLintelId));
             if (lintel is null)
             {
-                opening.get_Parameter(SharedParams.PGS_Guid).ClearValue();
+                throw new NullReferenceException(nameof(openingDto));
             }
             else
             {
-                XYZ openingLocation = (opening.Location as LocationPoint).Point;
+                XYZ openingLocation = openingDto.Location;
                 XYZ lintelLocation = (lintel.Location as LocationPoint).Point;
                 if (!lintelLocation.IsAlmostEqualTo(openingLocation))
                 {
@@ -309,6 +315,7 @@ namespace MS.RevitCommands.AR
                         distanceLeft,
                         wallMaterial,
                         levelName,
+                        hostWall.Id.IntegerValue,
                         openingLocation,
                         lintel);
                     openingDtos.Add(openingDto);

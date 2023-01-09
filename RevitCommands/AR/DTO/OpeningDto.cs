@@ -36,6 +36,11 @@ namespace MS.RevitCommands.AR.DTO
         /// </summary>
         private bool _existLintelDeleted = false;
 
+        /// <summary>
+        /// Id стены, в которой размещен проем
+        /// </summary>
+        private readonly int _hostWallId;
+
 
         /// <summary>
         /// Конструктор проема
@@ -59,6 +64,7 @@ namespace MS.RevitCommands.AR.DTO
             double distanceToLeftEnd,
             string wallMaterial,
             string level,
+            int hostWallId,
             XYZ location,
             Lintel lintel = null)
         {
@@ -77,7 +83,13 @@ namespace MS.RevitCommands.AR.DTO
             {
                 _existLintelId = lintel.ExistLintelId;
             }
+            _hostWallId = hostWallId;
         }
+
+        /// <summary>
+        /// Id стены, в которой размещен проем
+        /// </summary>
+        public int HostWallId => _hostWallId;
 
         /// <summary>
         /// Точка расположения элемента, образующего проем
