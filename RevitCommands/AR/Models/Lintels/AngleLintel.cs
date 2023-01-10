@@ -22,43 +22,43 @@ namespace MS.RevitCommands.AR.Models.Lintels
         /// <summary>
         /// Опирание слева
         /// </summary>
-        [Description("")]
+        [Description("уголок_опирание_1")]
         public double SupportLeft { get; set; }
 
         /// <summary>
         /// Опирание справа
         /// </summary>
-        [Description("")]
+        [Description("уголок_опирание_2")]
         public double SupportRight { get; set; }
 
         /// <summary>
         /// Шаг полосы
         /// </summary>
-        [Description("")]
+        [Description("Полоса_Шаг")]
         public double StripeStep { get; set; }
 
         /// <summary>
         /// Основной уголок
         /// </summary>
-        [Description("")]
+        [Description("Внутренний уголок")]
         public string AngleMain { get; set; }
 
         /// <summary>
         /// Уголок для облицовки
         /// </summary>
-        [Description("")]
+        [Description("Уголок для облицовки")]
         public string AngleExterior { get; set; }
 
         /// <summary>
         /// Опорный уголок
         /// </summary>
-        [Description("")]
+        [Description("Опорные уголки")]
         public string AngleSupport { get; set; }
 
         /// <summary>
         /// Полоса
         /// </summary>
-        [Description("")]
+        [Description("Полоса")]
         public string Stripe { get; set; }
     }
 }

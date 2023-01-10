@@ -286,6 +286,7 @@
     <Compile Include="Utilites\Extensions\CeilingExtension.cs" />
     <Compile Include="Utilites\Extensions\ConnectorSetExtension.cs" />
     <Compile Include="Utilites\Extensions\CurveLoopExtension.cs" />
+    <Compile Include="Utilites\Extensions\ElementExtension.cs" />
     <Compile Include="Utilites\Extensions\ElementSetExtension.cs" />
     <Compile Include="Utilites\Extensions\CurveExtension.cs" />
     <Compile Include="Utilites\Extensions\CurveArrArrayExtension.cs" />

@@ -22,25 +22,25 @@ namespace MS.RevitCommands.AR.Models.Lintels
         /// <summary>
         /// Диаметр арматурных стержней в мм
         /// </summary>
-        [Description("")]
+        [Description("ADSK_Размер_Диаметр")]
         public double BarsDiameter { get; set; }
 
         /// <summary>
         /// Опирание слева в мм
         /// </summary>
-        [Description("")]
+        [Description("Опирание слева")]
         public double SupportLeft { get; set; }
 
         /// <summary>
         /// Опирание справа в мм
         /// </summary>
-        [Description("")]
+        [Description("Опирание справа")]
         public double SupportRight { get; set; }
 
         /// <summary>
         /// Шаг стержней в мм
         /// </summary>
-        [Description("")]
+        [Description("Шаг стержней")]
         public double BarsStep { get; set; }
     }
 }

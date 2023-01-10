@@ -9,6 +9,7 @@ using MS.RevitCommands.AR.Models;
 using MS.RevitCommands.AR.Models.Lintels;
 using MS.Shared;
 using MS.Utilites;
+using MS.Utilites.Extensions;
 using MS.Utilites.SelectionFilters;
 using MS.Utilites.WorkWith;
 using System;
@@ -27,6 +28,40 @@ namespace MS.RevitCommands.AR
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             Document doc = commandData.Application.ActiveUIDocument.Document;
+
+            var elId = commandData.Application.ActiveUIDocument.Selection.GetElementIds().FirstOrDefault();
+            var el = doc.GetElement(elId);
+            var lintelAngle = new AngleLintel(new Guid())
+            {
+                AngleExterior = "100х5",
+                AngleMain = "100х10",
+                AngleSupport = "100х10",
+                Stripe = "5x50",
+                StripeStep = 400,
+                SupportLeft = 240,
+                SupportRight = 240
+            };
+
+            using (Transaction trans = new Transaction(doc))
+            {
+                var dictionary = lintelAngle.GetParametersValues();
+                trans.Start("Test");
+                foreach (var par in dictionary)
+                {
+                    el.SetParameterValueByName(par.Key, (object)par.Value);
+                }
+                trans.Commit();
+            }
+
+
+
+
+
+
+
+
+
+            return Result.Succeeded;
             View3D view3d = DocMethods.GetView3Default(doc);
             if (view3d is null)
             {
@@ -256,16 +291,16 @@ namespace MS.RevitCommands.AR
         private void CreateLintelBar(in Document doc, in OpeningDto openingDto)
         {
 
-            XYZ location = (opening.Location as LocationPoint).Point;
+            //XYZ location = (opening.Location as LocationPoint).Point;
 
-            string famName = "ADSK_Обобщенная модель_Перемычка из уголков";
+            //string famName = "ADSK_Обобщенная модель_Перемычка из уголков";
 
-            FamilySymbol fSymb = new FilteredElementCollector(doc)
-                .OfClass(typeof(FamilySymbol))
-                .FirstOrDefault(f => f.Name.Equals(famName)) as FamilySymbol;
+            //FamilySymbol fSymb = new FilteredElementCollector(doc)
+            //    .OfClass(typeof(FamilySymbol))
+            //    .FirstOrDefault(f => f.Name.Equals(famName)) as FamilySymbol;
 
-            var lintel = doc.Create.NewFamilyInstance(location, fSymb, (opening as FamilyInstance).Host, Autodesk.Revit.DB.Structure.StructuralType.NonStructural);
-            lintel.get_Parameter(SharedParams.PGS_Guid).Set(guid);
+            //var lintel = doc.Create.NewFamilyInstance(location, fSymb, (opening as FamilyInstance).Host, Autodesk.Revit.DB.Structure.StructuralType.NonStructural);
+            //lintel.get_Parameter(SharedParams.PGS_Guid).Set(guid);
         }
 
         /// <summary>
