@@ -4,7 +4,9 @@ using MS.RevitCommands.AR.Models;
 using MS.RevitCommands.Models.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -99,8 +101,8 @@ namespace MS.RevitCommands.AR.DTO
         /// <summary>
         /// Id стены, в которой размещен проем
         /// </summary>
-        public int HostWallId => _hostWallId;  
-        
+        public int HostWallId => _hostWallId;
+
         /// <summary>
         /// Id проема
         /// </summary>
@@ -119,17 +121,26 @@ namespace MS.RevitCommands.AR.DTO
         /// <summary>
         /// Марка перемычки
         /// </summary>
-        public string Mark { get; set; }
+        [Description("PGS_МаркаПеремычки")]
+        public string Mark { get; set; } = string.Empty;
 
         /// <summary>
-        /// Ширина проема вмм
+        /// Ширина проема в мм
         /// </summary>
+        [Description("Ширина проема")]
         public double Width { get; }
 
         /// <summary>
         /// Высота проема вмм
         /// </summary>
+        [Description("Отметка перемычки")]
         public double Height { get; }
+
+        /// <summary>
+        /// Отметка от уровня
+        /// </summary>
+        [Description("Отметка от уровня")]
+        public double LevelOffset => 0;
 
         /// <summary>
         /// Толщина стены в мм
@@ -226,6 +237,33 @@ namespace MS.RevitCommands.AR.DTO
                     DistanceToRightEnd.GetHashCode() +
                     DistanceToLeftEnd.GetHashCode() +
                     WallMaterial.GetHashCode();
+        }
+
+
+        /// <summary>
+        /// Возвращает словарь названий параметров перемычки и их значений
+        /// </summary>
+        /// <returns>Словарь значений атрибутов Description свойств класса и значений этих свойств</returns>
+        public virtual Dictionary<string, dynamic> GetParametersValues()
+        {
+            Dictionary<string, dynamic> parameters = new Dictionary<string, dynamic>();
+
+            PropertyInfo[] properties = GetType().GetProperties();
+            foreach (PropertyInfo property in properties)
+            {
+                var description = ((DescriptionAttribute)property
+                    .GetCustomAttribute(typeof(DescriptionAttribute)))?.Description;
+                if (!(description is null))
+                {
+                    var value = property.GetValue(this);
+                    if (!(value is null))
+                    {
+                        parameters.Add(description, value);
+                    }
+                }
+            }
+
+            return parameters;
         }
     }
 }

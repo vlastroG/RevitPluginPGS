@@ -25,43 +25,25 @@ namespace MS.RevitCommands.AR
     [Regeneration(RegenerationOption.Manual)]
     public class LintelsManagerCmd : IExternalCommand
     {
+        /// <summary>
+        /// Название самейства перемычки из уголков  =  "ADSK_Обобщенная модель_Перемычка из уголков"
+        /// </summary>
+        private readonly string _familyLintelAngleName = "ADSK_Обобщенная модель_Перемычка из уголков";
+
+        /// <summary>
+        /// Название семейства перемычки из брусков =  "ADSK_Обобщенная модель_Перемычка составная"
+        /// </summary>
+        private readonly string _familyLintelBlockName = "ADSK_Обобщенная модель_Перемычка составная";
+
+        /// <summary>
+        /// Название семейства перемычки из стержней =  "PGS_Перемычка_Стержни_v0.1"
+        /// </summary>
+        private readonly string _familyLintelBarName = "PGS_Перемычка_Стержни_v0.1";
+
+
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             Document doc = commandData.Application.ActiveUIDocument.Document;
-
-            var elId = commandData.Application.ActiveUIDocument.Selection.GetElementIds().FirstOrDefault();
-            var el = doc.GetElement(elId);
-            var lintelAngle = new AngleLintel(new Guid())
-            {
-                AngleExterior = "100х5",
-                AngleMain = "100х10",
-                AngleSupport = "100х10",
-                Stripe = "5x50",
-                StripeStep = 400,
-                SupportLeft = 240,
-                SupportRight = 240
-            };
-
-            using (Transaction trans = new Transaction(doc))
-            {
-                var dictionary = lintelAngle.GetParametersValues();
-                trans.Start("Test");
-                foreach (var par in dictionary)
-                {
-                    el.SetParameterValueByName(par.Key, (object)par.Value);
-                }
-                trans.Commit();
-            }
-
-
-
-
-
-
-
-
-
-            return Result.Succeeded;
             View3D view3d = DocMethods.GetView3Default(doc);
             if (view3d is null)
             {
@@ -84,16 +66,14 @@ namespace MS.RevitCommands.AR
 
         private void EditLintels(in Document doc, in List<OpeningDto> openings, bool updateLintelsLocations)
         {
-            foreach (var opening in openings)
+            using (Transaction trans = new Transaction(doc))
             {
-                using (Transaction trans = new Transaction(doc))
+                trans.Start($"Корректировка перемычек");
+                foreach (var opening in openings)
                 {
-                    trans.Start($"Корректировка перемычки {opening.Mark}");
                     try
                     {
-
-
-                        //Описание алгоритма
+                        //Описание алгоритма корректировки перемычек
                         //
                         //Перемычка не была назначена до команды (ExistLintelId < 0)		
                         //			Перемычка была назначена    (Lintel is not null)
@@ -148,11 +128,10 @@ namespace MS.RevitCommands.AR
                     catch (Exception)
                     {
                         // добавить заполнение списка полученных ошибок и их последующий вывод
-                        trans.RollBack();
                     }
 
-                    trans.Commit();
                 }
+                trans.Commit();
             }
         }
 
@@ -199,14 +178,15 @@ namespace MS.RevitCommands.AR
             }
             else
             {
-                switch (openingDto.Lintel.LintelType)
+                var parLintelDictionary = openingDto.Lintel.GetParametersValues();
+                foreach (var keyValuePair in parLintelDictionary)
                 {
-                    case Enums.LintelType.Bar:
-                        break;
-                    case Enums.LintelType.Block:
-                        break;
-                    case Enums.LintelType.Angle:
-                        break;
+                    lintel.SetParameterValueByName(keyValuePair.Key, (object)keyValuePair.Value);
+                }
+                var parOpeningDictionary = openingDto.GetParametersValues();
+                foreach (var keyValuePair in parOpeningDictionary)
+                {
+                    lintel.SetParameterValueByName(keyValuePair.Key, (object)keyValuePair.Value);
                 }
                 if (updateLintelsLocations)
                 {
@@ -231,37 +211,6 @@ namespace MS.RevitCommands.AR
             }
         }
 
-
-        /// <summary>
-        /// Обновляет значения параметров перемычки из арматурных стержней
-        /// </summary>
-        /// <param name="lintelRevit">Экземпляр семейства перемычки в модели Revit</param>
-        /// <param name="lintelDto">Dto перемычки</param>
-        private void UpdateLintelBar(in FamilyInstance lintelRevit, in BarLintel lintelDto)
-        {
-
-        }
-
-        /// <summary>
-        /// Обновляет значения параметров перемычки из арматурных стержней
-        /// </summary>
-        /// <param name="lintelRevit">Экземпляр семейства перемычки в модели Revit</param>
-        /// <param name="lintelDto">Dto перемычки</param>
-        private void UpdateLintelBlock(in FamilyInstance lintelRevit, in BlockLintel lintelDto)
-        {
-
-        }
-
-        /// <summary>
-        /// Обновляет значения параметров перемычки из арматурных стержней
-        /// </summary>
-        /// <param name="lintelRevit">Экземпляр семейства перемычки в модели Revit</param>
-        /// <param name="lintelDto">Dto перемычки</param>
-        private void UpdateLintelAngle(in FamilyInstance lintelRevit, in AngleLintel lintelDto)
-        {
-
-        }
-
         /// <summary>
         /// Создает заданную перемычку по проему
         /// </summary>
@@ -269,58 +218,45 @@ namespace MS.RevitCommands.AR
         /// <param name="openingDto">Проем, для которого создается перемычка</param>
         private void CreateLintel(in Document doc, in OpeningDto openingDto)
         {
+            string famName = string.Empty;
             switch (openingDto.Lintel.LintelType)
             {
                 case Enums.LintelType.Bar:
-                    CreateLintelBar(doc, openingDto);
+                    famName = _familyLintelBarName;
                     break;
                 case Enums.LintelType.Block:
-                    CreateLintelBlock(doc, openingDto);
+                    famName = _familyLintelBlockName;
                     break;
                 case Enums.LintelType.Angle:
-                    CreateLintelAngle(doc, openingDto);
+                    famName = _familyLintelAngleName;
                     break;
+                default:
+                    return;
             }
-        }
 
-        /// <summary>
-        /// Создает заданную для проема перемычку из стержней
-        /// </summary>
-        /// <param name="doc">Документ, в котором создается перемычка</param>
-        /// <param name="openingDto">Проем, для которого создается перемычка</param>
-        private void CreateLintelBar(in Document doc, in OpeningDto openingDto)
-        {
+            FamilySymbol fSymb = new FilteredElementCollector(doc)
+                .OfClass(typeof(FamilySymbol))
+                .FirstOrDefault(f => f.Name.Equals(famName)) as FamilySymbol;
 
-            //XYZ location = (opening.Location as LocationPoint).Point;
+            var lintel = doc.Create.NewFamilyInstance(
+                openingDto.Location,
+                fSymb,
+                doc.GetElement(new ElementId(openingDto.HostWallId)),
+                Autodesk.Revit.DB.Structure.StructuralType.NonStructural);
 
-            //string famName = "ADSK_Обобщенная модель_Перемычка из уголков";
+            var parLintelDictionary = openingDto.Lintel.GetParametersValues();
+            foreach (var keyValuePair in parLintelDictionary)
+            {
+                lintel.SetParameterValueByName(keyValuePair.Key, (object)keyValuePair.Value);
+            }
 
-            //FamilySymbol fSymb = new FilteredElementCollector(doc)
-            //    .OfClass(typeof(FamilySymbol))
-            //    .FirstOrDefault(f => f.Name.Equals(famName)) as FamilySymbol;
+            var parOpeningDictionary = openingDto.GetParametersValues();
+            foreach (var keyValuePair in parOpeningDictionary)
+            {
+                lintel.SetParameterValueByName(keyValuePair.Key, (object)keyValuePair.Value);
+            }
 
-            //var lintel = doc.Create.NewFamilyInstance(location, fSymb, (opening as FamilyInstance).Host, Autodesk.Revit.DB.Structure.StructuralType.NonStructural);
-            //lintel.get_Parameter(SharedParams.PGS_Guid).Set(guid);
-        }
-
-        /// <summary>
-        /// Создает заданную для проема перемычку из брусков
-        /// </summary>
-        /// <param name="doc">Документ, в котором создается перемычка</param>
-        /// <param name="openingDto">Проем, для которого создается перемычка</param>
-        private void CreateLintelBlock(in Document doc, in OpeningDto openingDto)
-        {
-
-        }
-
-        /// <summary>
-        /// Создает заданную для проема перемычку из уголков
-        /// </summary>
-        /// <param name="doc">Документ, в котором создается перемычка</param>
-        /// <param name="openingDto">Проем, для которого создается перемычка</param>
-        private void CreateLintelAngle(in Document doc, in OpeningDto openingDto)
-        {
-
+            lintel.get_Parameter(SharedParams.PGS_Guid).Set(openingDto.Guid.ToString());
         }
 
 
@@ -395,7 +331,10 @@ namespace MS.RevitCommands.AR
                         hostWall.Id.IntegerValue,
                         opening.Id.IntegerValue,
                         openingLocation,
-                        lintel);
+                        lintel)
+                    {
+                        Mark = lintel?.Mark
+                    };
                     openingDtos.Add(openingDto);
                 }
                 setGuidsTrans.Commit();
@@ -438,7 +377,8 @@ namespace MS.RevitCommands.AR
                         BlockType_3 = lintel.LookupParameter("Тип 3-го элемента").AsValueString(),
                         BlockType_4 = lintel.LookupParameter("Тип 4-го элемента").AsValueString(),
                         BlockType_5 = lintel.LookupParameter("Тип 5-го элемента").AsValueString(),
-                        BlockType_6 = lintel.LookupParameter("Тип 6-го элемента").AsValueString()
+                        BlockType_6 = lintel.LookupParameter("Тип 6-го элемента").AsValueString(),
+                        Mark = lintel.get_Parameter(SharedParams.PGS_MarkLintel).AsValueString()
                     };
                 case "PGS_Перемычка_Стержни_v0.1":
                     return new BarLintel(guid, lintel.Id.IntegerValue)
@@ -447,6 +387,7 @@ namespace MS.RevitCommands.AR
                         BarsStep = UnitUtils.ConvertFromInternalUnits(lintel.LookupParameter("Шаг стержней").AsDouble(), UnitTypeId.Millimeters),
                         SupportLeft = UnitUtils.ConvertFromInternalUnits(lintel.LookupParameter("Опирание слева").AsDouble(), UnitTypeId.Millimeters),
                         SupportRight = UnitUtils.ConvertFromInternalUnits(lintel.LookupParameter("Опирание справа").AsDouble(), UnitTypeId.Millimeters),
+                        Mark = lintel.get_Parameter(SharedParams.PGS_MarkLintel).AsValueString()
                     };
                 case "ADSK_Обобщенная модель_Перемычка из уголков":
                     return new AngleLintel(guid, lintel.Id.IntegerValue)
@@ -457,7 +398,8 @@ namespace MS.RevitCommands.AR
                         Stripe = lintel.LookupParameter("Полоса").AsValueString(),
                         StripeStep = UnitUtils.ConvertFromInternalUnits(lintel.LookupParameter("Полоса_Шаг").AsDouble(), UnitTypeId.Millimeters),
                         SupportLeft = UnitUtils.ConvertFromInternalUnits(lintel.LookupParameter("уголок_опирание_1").AsDouble(), UnitTypeId.Millimeters),
-                        SupportRight = UnitUtils.ConvertFromInternalUnits(lintel.LookupParameter("уголок_опирание_2").AsDouble(), UnitTypeId.Millimeters)
+                        SupportRight = UnitUtils.ConvertFromInternalUnits(lintel.LookupParameter("уголок_опирание_2").AsDouble(), UnitTypeId.Millimeters),
+                        Mark = lintel.get_Parameter(SharedParams.PGS_MarkLintel).AsValueString()
                     };
             }
             return null;
@@ -526,6 +468,14 @@ namespace MS.RevitCommands.AR
         private (double height, double width) GetOpeningWidthAndHeight(in Element opening)
         {
             (double height, double width) = GeometryMethods.GetWidthAndHeightOfElement(opening);
+            if (opening is Wall wall)
+            {
+                height += wall.get_Parameter(BuiltInParameter.WALL_BASE_OFFSET).AsDouble();
+            }
+            else
+            {
+                height += opening.get_Parameter(BuiltInParameter.INSTANCE_SILL_HEIGHT_PARAM).AsDouble();
+            }
             var heightMM = Math.Round(UnitUtils.ConvertFromInternalUnits(height, UnitTypeId.Millimeters));
             var widthMM = Math.Round(UnitUtils.ConvertFromInternalUnits(width, UnitTypeId.Millimeters));
             return (heightMM, widthMM);

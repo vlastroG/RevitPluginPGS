@@ -50,6 +50,11 @@ namespace MS.RevitCommands.AR.Models
         public Guid Guid => _guid;
 
         /// <summary>
+        /// Марка перемычки
+        /// </summary>
+        public string Mark { get; set; }
+
+        /// <summary>
         /// Тип перемычки
         /// </summary>
         public LintelType LintelType => _lintelType;
@@ -70,7 +75,7 @@ namespace MS.RevitCommands.AR.Models
 
 
         /// <summary>
-        /// Возвращает словарь названий параметров и их значений
+        /// Возвращает словарь названий параметров перемычки и их значений
         /// </summary>
         /// <returns>Словарь значений атрибутов Description свойств класса и значений этих свойств</returns>
         public virtual Dictionary<string, dynamic> GetParametersValues()
