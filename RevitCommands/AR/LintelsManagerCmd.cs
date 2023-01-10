@@ -157,32 +157,74 @@ namespace MS.RevitCommands.AR
         /// <param name="updateLintelsLocations">Обновлять расположение перемычек в соответствии с расположением проема, или нет</param>
         private void UpdateLintel(in Document doc, in OpeningDto openingDto, bool updateLintelsLocations)
         {
-            var lintel = doc.GetElement(new ElementId(openingDto.ExistLintelId));
+            var lintel = doc.GetElement(new ElementId(openingDto.ExistLintelId)) as FamilyInstance;
             if (lintel is null)
             {
                 throw new NullReferenceException(nameof(openingDto));
             }
             else
             {
-                XYZ openingLocation = openingDto.Location;
-                XYZ lintelLocation = (lintel.Location as LocationPoint).Point;
-                if (!lintelLocation.IsAlmostEqualTo(openingLocation))
+                switch (openingDto.Lintel.LintelType)
                 {
-                    var openingHost = (opening as FamilyInstance).Host.Id;
-                    var lintelHost = lintel.Host.Id;
-                    if (!openingHost.Equals(lintelHost))
+                    case Enums.LintelType.Bar:
+                        break;
+                    case Enums.LintelType.Block:
+                        break;
+                    case Enums.LintelType.Angle:
+                        break;
+                }
+                if (updateLintelsLocations)
+                {
+                    XYZ openingLocation = openingDto.Location;
+                    XYZ lintelLocation = (lintel.Location as LocationPoint).Point;
+                    if (!lintelLocation.IsAlmostEqualTo(openingLocation))
                     {
-                        Task.Run(() => MessageBox.Show("Нельзя автоматически поменять основу! " +
-                            "Сначала нужно вручную перенести перемычку в новую основу и потом снова запустить команду!" +
-                            $"\n\nId проема: {opening.Id}" +
-                            $"\nId перемычки: {lintel.Id}"));
-                    }
-                    else
-                    {
-                        ElementTransformUtils.MoveElement(doc, lintel.Id, openingLocation - lintelLocation);
+                        var openingHost = openingDto.HostWallId;
+                        var lintelHost = lintel.Host.Id;
+                        if (!openingHost.Equals(lintelHost))
+                        {
+                            Task.Run(() => MessageBox.Show("Нельзя автоматически поменять основу! " +
+                                "Сначала нужно вручную перенести перемычку в новую основу и потом снова запустить команду!" +
+                                $"\nId перемычки: {lintel.Id}"));
+                        }
+                        else
+                        {
+                            ElementTransformUtils.MoveElement(doc, lintel.Id, openingLocation - lintelLocation);
+                        }
                     }
                 }
             }
+        }
+
+
+        /// <summary>
+        /// Обновляет значения параметров перемычки из арматурных стержней
+        /// </summary>
+        /// <param name="lintelRevit">Экземпляр семейства перемычки в модели Revit</param>
+        /// <param name="lintelDto">Dto перемычки</param>
+        private void UpdateLintelBar(in FamilyInstance lintelRevit, in BarLintel lintelDto)
+        {
+
+        }
+
+        /// <summary>
+        /// Обновляет значения параметров перемычки из арматурных стержней
+        /// </summary>
+        /// <param name="lintelRevit">Экземпляр семейства перемычки в модели Revit</param>
+        /// <param name="lintelDto">Dto перемычки</param>
+        private void UpdateLintelBlock(in FamilyInstance lintelRevit, in BlockLintel lintelDto)
+        {
+
+        }
+
+        /// <summary>
+        /// Обновляет значения параметров перемычки из арматурных стержней
+        /// </summary>
+        /// <param name="lintelRevit">Экземпляр семейства перемычки в модели Revit</param>
+        /// <param name="lintelDto">Dto перемычки</param>
+        private void UpdateLintelAngle(in FamilyInstance lintelRevit, in AngleLintel lintelDto)
+        {
+
         }
 
         /// <summary>
@@ -316,6 +358,7 @@ namespace MS.RevitCommands.AR
                         wallMaterial,
                         levelName,
                         hostWall.Id.IntegerValue,
+                        opening.Id.IntegerValue,
                         openingLocation,
                         lintel);
                     openingDtos.Add(openingDto);

@@ -3,7 +3,9 @@ using MS.RevitCommands.Models.Interfaces;
 using MS.Utilites.Extensions;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -64,6 +66,33 @@ namespace MS.RevitCommands.AR.Models
         public override string ToString()
         {
             return LintelType.GetEnumDescription();
+        }
+
+
+        /// <summary>
+        /// Возвращает словарь названий параметров и их значений
+        /// </summary>
+        /// <returns>Словарь значений атрибутов Description свойств класса и значений этих свойств</returns>
+        public virtual Dictionary<string, dynamic> GetParametersValues()
+        {
+            Dictionary<string, dynamic> parameters = new Dictionary<string, dynamic>();
+
+            PropertyInfo[] properties = GetType().GetProperties();
+            foreach (PropertyInfo property in properties)
+            {
+                var description = ((DescriptionAttribute)property
+                    .GetCustomAttribute(typeof(DescriptionAttribute)))?.Description;
+                if (!(description is null))
+                {
+                    var value = property.GetValue(this);
+                    if (!(value is null))
+                    {
+                        parameters.Add(description, value);
+                    }
+                }
+            }
+
+            return parameters;
         }
     }
 }

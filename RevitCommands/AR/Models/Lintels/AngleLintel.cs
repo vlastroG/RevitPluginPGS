@@ -1,6 +1,7 @@
 ﻿using MS.RevitCommands.AR.Enums;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,36 +22,43 @@ namespace MS.RevitCommands.AR.Models.Lintels
         /// <summary>
         /// Опирание слева
         /// </summary>
+        [Description("")]
         public double SupportLeft { get; set; }
 
         /// <summary>
         /// Опирание справа
         /// </summary>
+        [Description("")]
         public double SupportRight { get; set; }
 
         /// <summary>
         /// Шаг полосы
         /// </summary>
+        [Description("")]
         public double StripeStep { get; set; }
 
         /// <summary>
         /// Основной уголок
         /// </summary>
+        [Description("")]
         public string AngleMain { get; set; }
 
         /// <summary>
         /// Уголок для облицовки
         /// </summary>
+        [Description("")]
         public string AngleExterior { get; set; }
 
         /// <summary>
         /// Опорный уголок
         /// </summary>
+        [Description("")]
         public string AngleSupport { get; set; }
 
         /// <summary>
         /// Полоса
         /// </summary>
+        [Description("")]
         public string Stripe { get; set; }
     }
 }

@@ -41,6 +41,10 @@ namespace MS.RevitCommands.AR.DTO
         /// </summary>
         private readonly int _hostWallId;
 
+        /// <summary>
+        /// Id проема
+        /// </summary>
+        private readonly int _openingId;
 
         /// <summary>
         /// Конструктор проема
@@ -54,6 +58,10 @@ namespace MS.RevitCommands.AR.DTO
         /// <param name="distanceToLeftEnd">Расстояние от левой стороны проема до торца стены в мм</param>
         /// <param name="wallMaterial">Название материала сердцевины стены</param>
         /// <param name="level">Название уровня, на котором размещен проем</param>
+        /// <param name="hostWallId">Id стены, в которой размещен проем</param>
+        /// <param name="openingId">Id проема</param>
+        /// <param name="location">Точка расположения проема</param>
+        /// <param name="lintel">Перемычка проема</param>
         public OpeningDto(
             Guid guid,
             double width,
@@ -65,6 +73,7 @@ namespace MS.RevitCommands.AR.DTO
             string wallMaterial,
             string level,
             int hostWallId,
+            int openingId,
             XYZ location,
             Lintel lintel = null)
         {
@@ -84,12 +93,18 @@ namespace MS.RevitCommands.AR.DTO
                 _existLintelId = lintel.ExistLintelId;
             }
             _hostWallId = hostWallId;
+            _openingId = openingId;
         }
 
         /// <summary>
         /// Id стены, в которой размещен проем
         /// </summary>
-        public int HostWallId => _hostWallId;
+        public int HostWallId => _hostWallId;  
+        
+        /// <summary>
+        /// Id проема
+        /// </summary>
+        public int OpeningId => _openingId;
 
         /// <summary>
         /// Точка расположения элемента, образующего проем

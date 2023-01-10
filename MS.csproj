@@ -354,7 +354,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Images\Content\" />
-    <Folder Include="RevitCommands\MEP\Services\" />
     <Folder Include="RevitCommands\SS\" />
   </ItemGroup>
   <ItemGroup>
