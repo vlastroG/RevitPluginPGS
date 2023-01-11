@@ -1,5 +1,6 @@
 ﻿using Microsoft.Win32;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Windows;
@@ -16,6 +17,20 @@ namespace MS.Utilites
                 UriBuilder uri = new UriBuilder(codeBase);
                 string path = Uri.UnescapeDataString(uri.Path);
                 return Path.GetDirectoryName(path);
+            }
+        }
+
+        /// <summary>
+        /// Открывает файл по заданному пути в программе по умолчанию
+        /// </summary>
+        /// <param name="path"></param>
+        public static void OpenWithDefaultProgram(string path)
+        {
+            using (Process fileopener = new Process())
+            {
+                fileopener.StartInfo.FileName = "explorer";
+                fileopener.StartInfo.Arguments = "\"" + path + "\"";
+                fileopener.Start();
             }
         }
 
