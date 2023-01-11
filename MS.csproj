@@ -142,6 +142,7 @@
     <Compile Include="GUI\Windows\AR\LintelsManager\LintelsManagerView.xaml.cs">
       <DependentUpon>LintelsManagerView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Logging\Logger.cs" />
     <Compile Include="RevitCommands\AR\ComplexAprtmntNmbr.cs" />
     <Compile Include="RevitCommands\AR\CreateImagesFromSections.cs" />
     <Compile Include="RevitCommands\AR\CreateSectionsByLintels.cs" />

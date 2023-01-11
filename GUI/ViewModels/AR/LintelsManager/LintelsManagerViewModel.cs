@@ -152,7 +152,6 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
                         if (barLintelWindow.DialogResult == true)
                         {
                             SelectedOpening.Lintel = (barLintelWindow.DataContext as LintelBarViewModel).GetLintel(SelectedOpening.Guid);
-                            Openings.UpdateEntity(SelectedOpening);
                         }
                         break;
                     case RevitCommands.AR.Enums.LintelType.Block:
@@ -166,7 +165,6 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
                         if (blockLintelWindow.DialogResult == true)
                         {
                             SelectedOpening.Lintel = (blockLintelWindow.DataContext as LintelBlockViewModel).GetLintel(SelectedOpening.Guid);
-                            Openings.UpdateEntity(SelectedOpening);
                         }
                         break;
                     case RevitCommands.AR.Enums.LintelType.Angle:
@@ -180,7 +178,6 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
                         if (angleLintelWindow.DialogResult == true)
                         {
                             SelectedOpening.Lintel = (angleLintelWindow.DataContext as LintelAngleViewModel).GetLintel(SelectedOpening.Guid);
-                            Openings.UpdateEntity(SelectedOpening);
                         }
                         break;
                     default:
@@ -216,7 +213,6 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
         private void OnDeleteLintelCommandExecuted(object p)
         {
             SelectedOpening.Lintel = null;
-            Openings.UpdateEntity(SelectedOpening);
         }
         #endregion
     }
