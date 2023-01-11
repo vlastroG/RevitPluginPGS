@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:MS.GUI.Windows.AR.LintelsManager"
              xmlns:vm="clr-namespace:MS.GUI.ViewModels.AR.LintelsManager"
              mc:Ignorable="d" 
-             d:DesignHeight="200" d:DesignWidth="300">
+             d:DesignHeight="200" d:DesignWidth="300" Height="200" Width="300" MinHeight="200" MinWidth="300">
     <Window.DataContext>
         <vm:LintelBarViewModel/>
     </Window.DataContext>
