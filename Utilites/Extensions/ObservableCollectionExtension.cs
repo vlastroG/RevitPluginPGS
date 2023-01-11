@@ -24,12 +24,14 @@ namespace MS.Utilites.Extensions
         /// <returns></returns>
         public static bool UpdateEntity<T>(this ObservableCollection<T> collection, T entity) where T : IIdentifiable
         {
-            var entityInCollection = collection.FirstOrDefault(e => e.Guid.Equals(entity.Guid));
-            if (entityInCollection != null)
+            var count = collection.Count;
+            for (int i = 0; i < count; i++)
             {
-                var index = collection.IndexOf(entityInCollection);
-                collection[index] = entity;
-                return true;
+                if (collection[i].Guid.Equals(entity.Guid))
+                {
+                    collection[i] = entity;
+                    return true;
+                }
             }
             return false;
         }
@@ -43,12 +45,15 @@ namespace MS.Utilites.Extensions
         /// <returns>True, если объект успешно удален</returns>
         public static bool DeleteEntity<T>(this ObservableCollection<T> collection, Guid guid) where T : IIdentifiable
         {
-            var entityInCollection = collection.FirstOrDefault(e => e.Guid.Equals(guid));
-            if (entityInCollection != null)
+            var count = collection.Count;
+            for (int i = 0; i < count; i++)
             {
-                var index = collection.IndexOf(entityInCollection);
-                collection.RemoveAt(index);
-                return true;
+                var entityInCollection = collection.FirstOrDefault(e => e.Guid.Equals(guid));
+                if (collection[i].Guid.Equals(guid))
+                {
+                    collection.RemoveAt(i);
+                    return true;
+                }
             }
             return false;
         }

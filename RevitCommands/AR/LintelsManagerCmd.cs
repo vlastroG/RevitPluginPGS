@@ -4,6 +4,7 @@ using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
 using MS.GUI.ViewModels.AR.LintelsManager;
 using MS.GUI.Windows.AR.LintelsManager;
+using MS.Logging;
 using MS.RevitCommands.AR.DTO;
 using MS.RevitCommands.AR.Models;
 using MS.RevitCommands.AR.Models.Lintels;
@@ -87,6 +88,8 @@ namespace MS.RevitCommands.AR
                  .FirstOrDefault(f => f.Name.Equals(_familyLintelBarName)) as Family;
             _FamilySymbolBar = doc.GetElement(familyBar.GetFamilySymbolIds().First()) as FamilySymbol;
 
+            List<string> exceptions = new List<string>();
+
             using (Transaction trans = new Transaction(doc))
             {
                 trans.Start($"Корректировка перемычек");
@@ -146,13 +149,19 @@ namespace MS.RevitCommands.AR
                             }
                         }
                     }
-                    catch (Exception)
+                    catch (Exception e)
                     {
-                        // добавить заполнение списка полученных ошибок и их последующий вывод
+                        // Логгирование
+                        exceptions.Add($"Проем: {opening.ToLongString()}");
+                        exceptions.Add($"Информация об ошибкe: {e.Message}");
+                        exceptions.Add(string.Empty);
                     }
-
                 }
                 trans.Commit();
+            }
+            if (exceptions.Count != 0)
+            {
+                Logger.WriteLog("Менеджер перемычек", exceptions.ToArray(), true);
             }
 
             _FamilySymbolAngle = null;

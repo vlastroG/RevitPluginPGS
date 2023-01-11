@@ -217,12 +217,7 @@ namespace MS.RevitCommands.AR.DTO
                 return false;
             }
             OpeningDto dto = obj as OpeningDto;
-            return (Width == dto.Width)
-                && (WallThick == dto.WallThick)
-                && (WallHeightOverOpening == dto.WallHeightOverOpening)
-                && (DistanceToRightEnd == dto.DistanceToRightEnd)
-                && (DistanceToLeftEnd == dto.DistanceToLeftEnd)
-                && WallMaterial.Equals(dto.WallMaterial);
+            return Guid.Equals(dto.Guid);
         }
 
         /// <summary>
@@ -237,6 +232,27 @@ namespace MS.RevitCommands.AR.DTO
                     DistanceToRightEnd.GetHashCode() +
                     DistanceToLeftEnd.GetHashCode() +
                     WallMaterial.GetHashCode();
+        }
+
+        /// <summary>
+        /// Возвращает описание проема с перемычкой для записи в лог
+        /// </summary>
+        /// <returns>Сообщение для логгирования</returns>
+        public string ToLongString()
+        {
+            StringBuilder sb = new StringBuilder();
+            if (Lintel is null) return $"Id: {OpeningId}";
+
+            var parValues = Lintel.GetParametersValues();
+            foreach (var item in parValues)
+            {
+                sb.Append(item.Key);
+                sb.Append(": ");
+                sb.Append(item.Value);
+                sb.Append(", ");
+            }
+            sb.Remove(sb.Length - 2, 2);
+            return $"Id: {OpeningId}, Перемычка: {Lintel?.Mark}, {sb}";
         }
 
 
