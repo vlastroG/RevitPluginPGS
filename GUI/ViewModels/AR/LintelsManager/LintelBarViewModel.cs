@@ -19,7 +19,10 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
         /// </summary>
         public LintelBarViewModel()
         {
-
+            _barsDiameter = 12;
+            _barsStep = 60;
+            _supportLeft = 250;
+            _supportRight = 250;
         }
 
         /// <summary>

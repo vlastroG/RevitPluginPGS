@@ -19,7 +19,7 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
         /// </summary>
         public LintelBlockViewModel()
         {
-
+            _blockType_1 = "2ПБ 26-4";
         }
 
         /// <summary>

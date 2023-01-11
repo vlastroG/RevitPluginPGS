@@ -19,7 +19,13 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
         /// </summary>
         public LintelAngleViewModel()
         {
-
+            _supportLeft = 250;
+            _supportRight = 250;
+            _stripe = "5x50";
+            _stripeStep = 500;
+            _angleMain = "75x5";
+            _angleExterior = "75x5";
+            _angleSupport = "100x10";
         }
 
         /// <summary>
