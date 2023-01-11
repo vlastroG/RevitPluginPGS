@@ -129,7 +129,7 @@
                         ToolTip="Если в списке удалить перемычку из проема, в модели она также удалится. 
                         Если нужно изменить уже назначенный тип перемычки, то сначала нужно удалить перемычку."/>
                 <CheckBox IsChecked="{Binding UpdateLintelsLocation}"
-                          Content="Скорректировать&#10;расположения"
+                          Content="Скорректировать&#10;расположения в плане"
                           VerticalAlignment="Center"
                           HorizontalAlignment="Center"
                           VerticalContentAlignment="Center"

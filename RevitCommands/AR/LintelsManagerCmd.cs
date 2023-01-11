@@ -40,6 +40,12 @@ namespace MS.RevitCommands.AR
         /// </summary>
         private readonly string _familyLintelBarName = "PGS_Перемычка_Стержни_v0.1";
 
+        private FamilySymbol _FamilySymbolAngle { get; set; }
+
+        private FamilySymbol _FamilySymbolBlock { get; set; }
+
+        private FamilySymbol _FamilySymbolBar { get; set; }
+
 
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
@@ -66,6 +72,21 @@ namespace MS.RevitCommands.AR
 
         private void EditLintels(in Document doc, in List<OpeningDto> openings, bool updateLintelsLocations)
         {
+            var familyAngle = new FilteredElementCollector(doc)
+                 .OfClass(typeof(Family))
+                 .FirstOrDefault(f => f.Name.Equals(_familyLintelAngleName)) as Family;
+            _FamilySymbolAngle = doc.GetElement(familyAngle.GetFamilySymbolIds().First()) as FamilySymbol;
+
+            var familyBlock = new FilteredElementCollector(doc)
+                 .OfClass(typeof(Family))
+                 .FirstOrDefault(f => f.Name.Equals(_familyLintelBlockName)) as Family;
+            _FamilySymbolBlock = doc.GetElement(familyBlock.GetFamilySymbolIds().First()) as FamilySymbol;
+
+            var familyBar = new FilteredElementCollector(doc)
+                 .OfClass(typeof(Family))
+                 .FirstOrDefault(f => f.Name.Equals(_familyLintelBarName)) as Family;
+            _FamilySymbolBar = doc.GetElement(familyBar.GetFamilySymbolIds().First()) as FamilySymbol;
+
             using (Transaction trans = new Transaction(doc))
             {
                 trans.Start($"Корректировка перемычек");
@@ -133,6 +154,10 @@ namespace MS.RevitCommands.AR
                 }
                 trans.Commit();
             }
+
+            _FamilySymbolAngle = null;
+            _FamilySymbolBar = null;
+            _FamilySymbolBlock = null;
         }
 
         /// <summary>
@@ -178,16 +203,6 @@ namespace MS.RevitCommands.AR
             }
             else
             {
-                var parLintelDictionary = openingDto.Lintel.GetParametersValues();
-                foreach (var keyValuePair in parLintelDictionary)
-                {
-                    lintel.SetParameterValueByName(keyValuePair.Key, (object)keyValuePair.Value);
-                }
-                var parOpeningDictionary = openingDto.GetParametersValues();
-                foreach (var keyValuePair in parOpeningDictionary)
-                {
-                    lintel.SetParameterValueByName(keyValuePair.Key, (object)keyValuePair.Value);
-                }
                 if (updateLintelsLocations)
                 {
                     XYZ openingLocation = openingDto.Location;
@@ -195,8 +210,8 @@ namespace MS.RevitCommands.AR
                     if (!lintelLocation.IsAlmostEqualTo(openingLocation))
                     {
                         var openingHost = openingDto.HostWallId;
-                        var lintelHost = lintel.Host.Id;
-                        if (!openingHost.Equals(lintelHost))
+                        var lintelHost = lintel.Host.Id.IntegerValue;
+                        if (openingHost != lintelHost)
                         {
                             Task.Run(() => MessageBox.Show("Нельзя автоматически поменять основу! " +
                                 "Сначала нужно вручную перенести перемычку в новую основу и потом снова запустить команду!" +
@@ -208,6 +223,16 @@ namespace MS.RevitCommands.AR
                         }
                     }
                 }
+                var parLintelDictionary = openingDto.Lintel.GetParametersValues();
+                foreach (var keyValuePair in parLintelDictionary)
+                {
+                    lintel.SetParameterValueByName(keyValuePair.Key, (object)keyValuePair.Value);
+                }
+                var parOpeningDictionary = openingDto.GetParametersValues();
+                foreach (var keyValuePair in parOpeningDictionary)
+                {
+                    lintel.SetParameterValueByName(keyValuePair.Key, (object)keyValuePair.Value);
+                }
             }
         }
 
@@ -218,25 +243,21 @@ namespace MS.RevitCommands.AR
         /// <param name="openingDto">Проем, для которого создается перемычка</param>
         private void CreateLintel(in Document doc, in OpeningDto openingDto)
         {
-            string famName = string.Empty;
+            FamilySymbol fSymb = null;
             switch (openingDto.Lintel.LintelType)
             {
                 case Enums.LintelType.Bar:
-                    famName = _familyLintelBarName;
+                    fSymb = _FamilySymbolBar;
                     break;
                 case Enums.LintelType.Block:
-                    famName = _familyLintelBlockName;
+                    fSymb = _FamilySymbolBlock;
                     break;
                 case Enums.LintelType.Angle:
-                    famName = _familyLintelAngleName;
+                    fSymb = _FamilySymbolAngle;
                     break;
                 default:
                     return;
             }
-
-            FamilySymbol fSymb = new FilteredElementCollector(doc)
-                .OfClass(typeof(FamilySymbol))
-                .FirstOrDefault(f => f.Name.Equals(famName)) as FamilySymbol;
 
             var lintel = doc.Create.NewFamilyInstance(
                 openingDto.Location,
@@ -366,7 +387,7 @@ namespace MS.RevitCommands.AR
             {
                 return null;
             }
-            string familyName = lintel.Symbol.Name;
+            string familyName = lintel.Symbol.FamilyName;
             switch (familyName)
             {
                 case "ADSK_Обобщенная модель_Перемычка составная":
