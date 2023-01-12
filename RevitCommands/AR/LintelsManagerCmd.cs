@@ -52,6 +52,8 @@ namespace MS.RevitCommands.AR
 
         private FamilySymbol _FamilySymbolBar { get; set; }
 
+        private readonly string _assemblyDir = PathMethods.AssemblyDirectory;
+
 
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
@@ -72,29 +74,87 @@ namespace MS.RevitCommands.AR
 
             EditLintels(doc, openings, updateLintelsLocations);
 
-
-
             return Result.Succeeded;
         }
 
+        private FamilySymbol FindOrLoadFamily(in Document doc, string familyName)
+        {
+            var lintelFamSymb = new FilteredElementCollector(doc)
+                .OfClass(typeof(FamilySymbol))
+                .WhereElementIsElementType()
+                .Cast<FamilySymbol>()
+                .FirstOrDefault(ft => ft.FamilyName == familyName);
+            if (lintelFamSymb == null)
+            {
+                bool isSuccess;
+                var @familyPath = _assemblyDir + $@"\EmbeddedFamilies\{familyName}.rfa";
+                using (Transaction loadFamily = new Transaction(doc))
+                {
+                    loadFamily.Start("Loaded clash family");
+                    isSuccess = doc.LoadFamily(familyPath);
+                    loadFamily.Commit();
+                }
+                if (!isSuccess)
+                {
+                    throw new InvalidOperationException($"Семейство не загрузилось: {familyPath}");
+                }
+                lintelFamSymb = new FilteredElementCollector(doc)
+                    .OfClass(typeof(FamilySymbol))
+                    .WhereElementIsElementType()
+                    .Cast<FamilySymbol>()
+                    .FirstOrDefault(ft => ft.FamilyName == familyName);
+                if (lintelFamSymb == null)
+                {
+                    throw new InvalidOperationException(
+                        "Семейство перемычки загрузилось, но его нельзя найти в проекте!");
+                }
+            }
+            return lintelFamSymb;
+        }
+
+        /// <summary>
+        /// Логика корректировки параметров перемычек в модели Revit в соответствии с переданными данными
+        /// </summary>
+        /// <param name="doc">Документ, в котором происходит корректировка перемычек</param>
+        /// <param name="openings">Список проемов</param>
+        /// <param name="updateLintelsLocations">True, если обновлять расположение перемычек в плане</param>
         private void EditLintels(in Document doc, in List<OpeningDto> openings, bool updateLintelsLocations)
         {
-            var familyAngle = new FilteredElementCollector(doc)
-                 .OfClass(typeof(Family))
-                 .FirstOrDefault(f => f.Name.Equals(_familyLintelAngleName)) as Family;
-            _FamilySymbolAngle = doc.GetElement(familyAngle.GetFamilySymbolIds().First()) as FamilySymbol;
-
-            var familyBlock = new FilteredElementCollector(doc)
-                 .OfClass(typeof(Family))
-                 .FirstOrDefault(f => f.Name.Equals(_familyLintelBlockName)) as Family;
-            _FamilySymbolBlock = doc.GetElement(familyBlock.GetFamilySymbolIds().First()) as FamilySymbol;
-
-            var familyBar = new FilteredElementCollector(doc)
-                 .OfClass(typeof(Family))
-                 .FirstOrDefault(f => f.Name.Equals(_familyLintelBarName)) as Family;
-            _FamilySymbolBar = doc.GetElement(familyBar.GetFamilySymbolIds().First()) as FamilySymbol;
-
             List<string> exceptions = new List<string>();
+
+            try
+            {
+                _FamilySymbolBar = FindOrLoadFamily(doc, _familyLintelBarName);
+            }
+            catch (Exception e)
+            {
+                exceptions.Add(e.Message);
+                exceptions.Add(string.Empty);
+            }
+            try
+            {
+                _FamilySymbolAngle = FindOrLoadFamily(doc, _familyLintelAngleName);
+            }
+            catch (Exception e)
+            {
+                exceptions.Add(e.Message);
+                exceptions.Add(string.Empty);
+            }
+            try
+            {
+                _FamilySymbolBlock = FindOrLoadFamily(doc, _familyLintelBlockName);
+            }
+            catch (Exception e)
+            {
+                exceptions.Add(e.Message);
+                exceptions.Add(string.Empty);
+            }
+            if (exceptions.Count != 0)
+            {
+                Logger.WriteLog(_commandName, exceptions.ToArray(), true);
+                return;
+            }
+
 
             using (Transaction trans = new Transaction(doc))
             {
@@ -285,17 +345,27 @@ namespace MS.RevitCommands.AR
                         }
                     }
                 }
-                lintel.get_Parameter(BuiltInParameter.INSTANCE_ELEVATION_PARAM).Set(0);
-                var parLintelDictionary = openingDto.Lintel.GetParametersValues();
-                foreach (var keyValuePair in parLintelDictionary)
-                {
-                    lintel.SetParameterValueByName(keyValuePair.Key, (object)keyValuePair.Value);
-                }
-                var parOpeningDictionary = openingDto.GetParametersValues();
-                foreach (var keyValuePair in parOpeningDictionary)
-                {
-                    lintel.SetParameterValueByName(keyValuePair.Key, (object)keyValuePair.Value);
-                }
+                SetLintelParameters(lintel, openingDto);
+            }
+        }
+
+        /// <summary>
+        /// Назначает значения параметрам семейства перемычки по Dto проема
+        /// </summary>
+        /// <param name="lintel">Экземпляр семейства перемычки</param>
+        /// <param name="openingDto">Dto проема</param>
+        private void SetLintelParameters(in Element lintel, in OpeningDto openingDto)
+        {
+            lintel.get_Parameter(BuiltInParameter.INSTANCE_ELEVATION_PARAM).Set(0);
+            var parLintelDictionary = openingDto.Lintel.GetParametersValues();
+            foreach (var keyValuePair in parLintelDictionary)
+            {
+                lintel.SetParameterValueByName(keyValuePair.Key, (object)keyValuePair.Value);
+            }
+            var parOpeningDictionary = openingDto.GetParametersValues();
+            foreach (var keyValuePair in parOpeningDictionary)
+            {
+                lintel.SetParameterValueByName(keyValuePair.Key, (object)keyValuePair.Value);
             }
         }
 
@@ -328,17 +398,7 @@ namespace MS.RevitCommands.AR
                 doc.GetElement(new ElementId(openingDto.HostWallId)),
                 Autodesk.Revit.DB.Structure.StructuralType.NonStructural);
 
-            var parLintelDictionary = openingDto.Lintel.GetParametersValues();
-            foreach (var keyValuePair in parLintelDictionary)
-            {
-                lintel.SetParameterValueByName(keyValuePair.Key, (object)keyValuePair.Value);
-            }
-
-            var parOpeningDictionary = openingDto.GetParametersValues();
-            foreach (var keyValuePair in parOpeningDictionary)
-            {
-                lintel.SetParameterValueByName(keyValuePair.Key, (object)keyValuePair.Value);
-            }
+            SetLintelParameters(lintel, openingDto);
 
             lintel.get_Parameter(SharedParams.PGS_Guid).Set(openingDto.Guid.ToString());
         }
