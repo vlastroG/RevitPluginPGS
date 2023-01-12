@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -33,6 +34,11 @@ namespace MS.GUI.Windows.AR.LintelsManager
         private void Ok_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = true;
+        }
+
+        private void GoTo3D_clicked(object sender, RoutedEventArgs e)
+        {
+            DialogResult = false;
         }
     }
 }

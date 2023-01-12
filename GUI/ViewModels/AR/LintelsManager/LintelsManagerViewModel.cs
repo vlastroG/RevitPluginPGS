@@ -48,6 +48,11 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
         /// </summary>
         public bool UpdateLintelsLocation { get => _updateLintelsLocation; set => Set(ref _updateLintelsLocation, value); }
 
+        /// <summary>
+        /// Переходить к выбранному проему на 3D виде
+        /// </summary>
+        public bool GoToSelectedOpeningView3D { get; private set; }
+
 
         /// <summary>
         /// Список проемов для создания перемычек в проекте
@@ -214,6 +219,60 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
         {
             SelectedOpening.Lintel = null;
         }
+        #endregion
+
+
+        #region GoToOpeningView3D command
+        /// <summary>
+        /// Команда перехода к 3D обрезке выбранного проема
+        /// </summary>
+        private ICommand _goToOpeningView3DCommand;
+
+        /// <summary>
+        /// Команда перехода к 3D обрезке выбранного проема
+        /// </summary>
+        public ICommand GoToOpeningView3DCommand
+            => _goToOpeningView3DCommand = _goToOpeningView3DCommand ?? new LambdaCommand(OnGoToOpeningView3DExecuted, CanGoToOpeningView3DExecute);
+
+        /// <summary>
+        /// Перейти к 3D обрезке выбранного проема можно только если выбран проем
+        /// </summary>
+        /// <param name="p"></param>
+        /// <returns></returns>
+        private bool CanGoToOpeningView3DExecute(object p) => !(SelectedOpening is null);
+
+        /// <summary>
+        /// Команда перехода к 3D обрезке выбранного проема
+        /// </summary>
+        /// <param name="p"></param>
+        private void OnGoToOpeningView3DExecuted(object p) { GoToSelectedOpeningView3D = true; }
+        #endregion
+
+
+        #region UnsetGoToOpeningView3DCommand
+        /// <summary>
+        /// Сбросить значение свойства <seealso cref="GoToSelectedOpeningView3D">GoToSelectedOpeningView3D</seealso>
+        /// </summary>
+        private ICommand _unsetGoToOpeningView3DCommand;
+
+        /// <summary>
+        /// Сбросить значение свойства <seealso cref="GoToSelectedOpeningView3D">GoToSelectedOpeningView3D</seealso>
+        /// </summary>
+        public ICommand UnsetGoToOpeningView3DCommand
+            => _unsetGoToOpeningView3DCommand = _unsetGoToOpeningView3DCommand ?? new LambdaCommand(OnUnsetGoToView3DCommandExecute, CanUnsetGoToOpeningView3DCommandExecute);
+
+        /// <summary>
+        /// Команду можно выполнить всегда
+        /// </summary>
+        /// <param name="p"></param>
+        /// <returns></returns>
+        private bool CanUnsetGoToOpeningView3DCommandExecute(object p) => true;
+
+        /// <summary>
+        /// Сбрасывание значения свойства <seealso cref="GoToSelectedOpeningView3D">GoToSelectedOpeningView3D</seealso> на false
+        /// </summary>
+        /// <param name="p"></param>
+        private void OnUnsetGoToView3DCommandExecute(object p) { GoToSelectedOpeningView3D = false; }
         #endregion
     }
 }

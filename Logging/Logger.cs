@@ -29,5 +29,16 @@ namespace MS.Logging
                 PathMethods.OpenWithDefaultProgram(logFile);
             }
         }
+
+        /// <summary>
+        /// Записывает массив строк в текстовый лог файл с заданным названием, прибавляя дату
+        /// </summary>
+        /// <param name="logName">Название (префикс) лог файла</param>
+        /// <param name="logMessage">Сообщение для логгирования</param>
+        /// <param name="openLog">True, если открывать лог файл, False, если нет</param>
+        public static void WriteLog(string logName, string logMessage, bool openLog)
+        {
+            WriteLog(logName, new string[] { logMessage }, openLog);
+        }
     }
 }

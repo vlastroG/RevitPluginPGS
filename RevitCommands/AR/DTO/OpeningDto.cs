@@ -139,7 +139,6 @@ namespace MS.RevitCommands.AR.DTO
         /// <summary>
         /// Отметка от уровня
         /// </summary>
-        [Description("Отметка от уровня")]
         public double LevelOffset => 0;
 
         /// <summary>

@@ -134,8 +134,18 @@
                           HorizontalAlignment="Center"
                           VerticalContentAlignment="Center"
                           ToolTip="После нажатия кнопки Ок расположения перемычек&#10; будут скорректированы в соответствии с расположением их проемов. ВАЖНО!!! если основа проема изменилась, то расположение не будет скорректировано автоматически и придется его исправлять вручную!"/>
-                <Button Content="Ок" Name="Ok" Click="Ok_Click"/>
-                <Button Content="Отмена" Name="Cancel" Click="Cancel_Click"/>
+                <Button Content="Перейти к&#10;3D обрезке проема"
+                        HorizontalContentAlignment="Center"
+                        Click="GoTo3D_clicked"
+                        Command="{Binding GoToOpeningView3DCommand}"/>
+                <Button Content="Ок" 
+                        Name="Ok" 
+                        Click="Ok_Click"
+                        Command="{Binding UnsetGoToOpeningView3DCommand}"/>
+                <Button Content="Отмена" 
+                        Name="Cancel" 
+                        Click="Cancel_Click"
+                        Command="{Binding UnsetGoToOpeningView3DCommand}"/>
             </UniformGrid>
         </DockPanel>
     </Grid>

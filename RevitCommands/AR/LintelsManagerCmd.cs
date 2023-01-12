@@ -27,6 +27,11 @@ namespace MS.RevitCommands.AR
     public class LintelsManagerCmd : IExternalCommand
     {
         /// <summary>
+        /// Менеджер перемычек
+        /// </summary>
+        public readonly string _commandName = "Менеджер перемычек";
+
+        /// <summary>
         /// Название самейства перемычки из уголков  =  "ADSK_Обобщенная модель_Перемычка из уголков"
         /// </summary>
         private readonly string _familyLintelAngleName = "ADSK_Обобщенная модель_Перемычка из уголков";
@@ -51,6 +56,7 @@ namespace MS.RevitCommands.AR
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             Document doc = commandData.Application.ActiveUIDocument.Document;
+            UIDocument uidoc = commandData.Application.ActiveUIDocument;
             View3D view3d = DocMethods.GetView3Default(doc);
             if (view3d is null)
             {
@@ -58,7 +64,7 @@ namespace MS.RevitCommands.AR
                 return Result.Cancelled;
             }
 
-            (List<OpeningDto> openings, bool updateLintelsLocations) = ShowLintelsManagerWindow(doc, view3d);
+            (List<OpeningDto> openings, bool updateLintelsLocations) = ShowLintelsManagerWindow(uidoc, view3d);
             if (openings is null)
             {
                 return Result.Cancelled;
@@ -161,7 +167,7 @@ namespace MS.RevitCommands.AR
             }
             if (exceptions.Count != 0)
             {
-                Logger.WriteLog("Менеджер перемычек", exceptions.ToArray(), true);
+                Logger.WriteLog(_commandName, exceptions.ToArray(), true);
             }
 
             _FamilySymbolAngle = null;
@@ -175,9 +181,9 @@ namespace MS.RevitCommands.AR
         /// <param name="doc">Документ, в котором запускается менеджер перемычек</param>
         /// <param name="view3d">3D вид по умолчанию</param>
         /// <returns>Список проемов, или null, если команда отменена</returns>
-        private (List<OpeningDto> openings, bool updateLintelsLocations) ShowLintelsManagerWindow(in Document doc, in View3D view3d)
+        private (List<OpeningDto> openings, bool updateLintelsLocations) ShowLintelsManagerWindow(in UIDocument uidoc, in View3D view3d)
         {
-            List<OpeningDto> openings = GetOpeningDtos(doc, view3d);
+            List<OpeningDto> openings = GetOpeningDtos(uidoc.Document, view3d);
 
             LintelsManagerViewModel vm = new LintelsManagerViewModel(openings);
             var ui = new LintelsManagerView()
@@ -186,9 +192,56 @@ namespace MS.RevitCommands.AR
                 DataContext = vm
             };
             ui.ShowDialog();
+
+            LintelsManagerViewModel viewModel = null;
+            try
+            {
+                viewModel = ui.DataContext as LintelsManagerViewModel;
+            }
+            catch (Exception e)
+            {
+                Logger.WriteLog(_commandName, e.Message, true);
+                return (null, false);
+            }
+
+            while ((ui.DialogResult == false) && viewModel.GoToSelectedOpeningView3D)
+            {
+                BoundingBoxXYZ bBox = null;
+                var openingId = new ElementId(viewModel.SelectedOpening.OpeningId);
+                using (Transaction goTo3DTrans = new Transaction(uidoc.Document))
+                {
+                    goTo3DTrans.Start($"Переход к элементу {openingId}");
+                    var selectedOpening = uidoc.Document.GetElement(openingId);
+                    bBox = selectedOpening.get_BoundingBox(view3d);
+                    XYZ min = bBox.Min;
+                    XYZ max = bBox.Max;
+                    XYZ origin = (min + max) / 2;
+                    bBox.Max = max + (max - origin).Normalize().Multiply(2);
+                    bBox.Min = min + (min - origin).Normalize().Multiply(2);
+                    view3d.SetSectionBox(bBox);
+                    view3d.SetOrientation(new ViewOrientation3D(new XYZ(), new XYZ(1, 1, 2), new XYZ(1, 1, -1)));
+                    goTo3DTrans.Commit();
+                }
+                uidoc.ActiveView = view3d;
+                var openViews = uidoc.GetOpenUIViews();
+                foreach (var openView in openViews)
+                {
+                    if (openView.ViewId == uidoc.ActiveView.Id)
+                    {
+                        openView.ZoomToFit();
+                        break;
+                    }
+                }
+                ui = new LintelsManagerView()
+                {
+                    WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                    DataContext = viewModel
+                };
+                ui.ShowDialog();
+            }
+
             if (ui.DialogResult == true)
             {
-                var viewModel = ui.DataContext as LintelsManagerViewModel;
                 return (viewModel.Openings.ToList(), viewModel.UpdateLintelsLocation);
             }
             else
@@ -232,6 +285,7 @@ namespace MS.RevitCommands.AR
                         }
                     }
                 }
+                lintel.get_Parameter(BuiltInParameter.INSTANCE_ELEVATION_PARAM).Set(0);
                 var parLintelDictionary = openingDto.Lintel.GetParametersValues();
                 foreach (var keyValuePair in parLintelDictionary)
                 {
