@@ -148,10 +148,11 @@
     <Compile Include="RevitCommands\AR\CreateSectionsByLintels.cs" />
     <Compile Include="RevitCommands\AR\DTO\FinishingCreationCmd\WallDto.cs" />
     <Compile Include="RevitCommands\AR\DTO\LintelMultiMarkDto.cs" />
+    <Compile Include="RevitCommands\AR\DTO\LintelsManager\SimilarOpeningsDto.cs" />
     <Compile Include="RevitCommands\AR\DTO\MarkWithCountDto.cs" />
     <Compile Include="RevitCommands\AR\DTO\MultiNameRoomsDto.cs" />
     <Compile Include="RevitCommands\AR\DTO\NameWithNumbersDto.cs" />
-    <Compile Include="RevitCommands\AR\DTO\OpeningDto.cs" />
+    <Compile Include="RevitCommands\AR\DTO\LintelsManager\OpeningDto.cs" />
     <Compile Include="RevitCommands\AR\DTO\RoomFinishingDto.cs" />
     <Compile Include="RevitCommands\AR\DTO\ScheduleFinishWallsCeilingsRowDto.cs" />
     <Compile Include="RevitCommands\AR\DTO\WallTypeFinishingDto.cs" />
