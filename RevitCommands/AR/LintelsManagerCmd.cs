@@ -90,7 +90,7 @@ namespace MS.RevitCommands.AR
                 var @familyPath = _assemblyDir + $@"\EmbeddedFamilies\{familyName}.rfa";
                 using (Transaction loadFamily = new Transaction(doc))
                 {
-                    loadFamily.Start("Loaded clash family");
+                    loadFamily.Start("Загрузка перемычки");
                     isSuccess = doc.LoadFamily(familyPath);
                     loadFamily.Commit();
                 }
@@ -128,7 +128,7 @@ namespace MS.RevitCommands.AR
             }
             catch (Exception e)
             {
-                exceptions.Add(e.Message);
+                exceptions.Add($"{e.Message}\n{e.Source}");
                 exceptions.Add(string.Empty);
             }
             try
@@ -137,7 +137,7 @@ namespace MS.RevitCommands.AR
             }
             catch (Exception e)
             {
-                exceptions.Add(e.Message);
+                exceptions.Add($"{e.Message}\n{e.Source}");
                 exceptions.Add(string.Empty);
             }
             try
@@ -146,7 +146,7 @@ namespace MS.RevitCommands.AR
             }
             catch (Exception e)
             {
-                exceptions.Add(e.Message);
+                exceptions.Add($"{e.Message}\n{e.Source}");
                 exceptions.Add(string.Empty);
             }
             if (exceptions.Count != 0)
@@ -219,7 +219,7 @@ namespace MS.RevitCommands.AR
                     {
                         // Логгирование
                         exceptions.Add($"Проем: {opening.ToLongString()}");
-                        exceptions.Add($"Информация об ошибкe: {e.Message}");
+                        exceptions.Add($"Информация об ошибкe: {e.Message}\n{e.Source}");
                         exceptions.Add(string.Empty);
                     }
                 }
@@ -391,7 +391,10 @@ namespace MS.RevitCommands.AR
                 default:
                     return;
             }
-
+            if (!fSymb.IsActive)
+            {
+                fSymb.Activate();
+            }
             var lintel = doc.Create.NewFamilyInstance(
                 openingDto.Location,
                 fSymb,
