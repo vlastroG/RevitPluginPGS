@@ -6,6 +6,7 @@ using MS.GUI.ViewModels.AR.LintelsManager;
 using MS.GUI.Windows.AR.LintelsManager;
 using MS.Logging;
 using MS.RevitCommands.AR.DTO;
+using MS.RevitCommands.AR.DTO.LintelsManager;
 using MS.RevitCommands.AR.Models;
 using MS.RevitCommands.AR.Models.Lintels;
 using MS.Shared;
@@ -238,75 +239,94 @@ namespace MS.RevitCommands.AR
         /// <summary>
         /// Показывает диалоговое окно менеджера перемычек и возвращает список проемов с перемычками, назначенными пользователем
         /// </summary>
-        /// <param name="doc">Документ, в котором запускается менеджер перемычек</param>
+        /// <param name="uidoc">Документ, в котором запускается менеджер перемычек</param>
         /// <param name="view3d">3D вид по умолчанию</param>
         /// <returns>Список проемов, или null, если команда отменена</returns>
         private (List<OpeningDto> openings, bool updateLintelsLocations) ShowLintelsManagerWindow(in UIDocument uidoc, in View3D view3d)
         {
             List<OpeningDto> openings = GetOpeningDtos(uidoc.Document, view3d);
-
-            LintelsManagerViewModel vm = new LintelsManagerViewModel(openings);
-            var ui = new LintelsManagerView()
+            List<SimilarOpeningsDto> similarOpeningsDto = GetSimilarOpeningsDtos(openings);
+            SimilarOpeningsViewModel similarsVM = new SimilarOpeningsViewModel(similarOpeningsDto);
+            var similarsUI = new OpeningsSimilarView()
             {
                 WindowStartupLocation = WindowStartupLocation.CenterScreen,
-                DataContext = vm
+                DataContext = similarsVM
             };
-            ui.ShowDialog();
+            similarsUI.ShowDialog();
+            OpeningsInstancesView instancesUI = null;
 
-            LintelsManagerViewModel viewModel = null;
-            try
+            while ((similarsUI.DialogResult == false) && similarsVM.GoToSelectedOpeningView3D)
             {
-                viewModel = ui.DataContext as LintelsManagerViewModel;
-            }
-            catch (Exception e)
-            {
-                Logger.WriteLog(_commandName, e.Message, true);
-                return (null, false);
-            }
+                bool showInstancesView = true;
+                OpeningDto openingDto = null;
+                var instancesVM = new OpeningsInstancesViewModel((similarsVM.SelectedOpening as SimilarOpeningsDto).Openings);
+                instancesVM.SelectedOpening = openingDto;
+                while (showInstancesView)
+                {
+                    GoTo3DView(uidoc, view3d, openingDto);
 
-            while ((ui.DialogResult == false) && viewModel.GoToSelectedOpeningView3D)
-            {
-                BoundingBoxXYZ bBox = null;
-                var openingId = new ElementId(viewModel.SelectedOpening.OpeningId);
-                using (Transaction goTo3DTrans = new Transaction(uidoc.Document))
-                {
-                    goTo3DTrans.Start($"Переход к элементу {openingId}");
-                    var selectedOpening = uidoc.Document.GetElement(openingId);
-                    bBox = selectedOpening.get_BoundingBox(view3d);
-                    XYZ min = bBox.Min;
-                    XYZ max = bBox.Max;
-                    XYZ origin = (min + max) / 2;
-                    bBox.Max = max + (max - origin).Normalize().Multiply(2);
-                    bBox.Min = min + (min - origin).Normalize().Multiply(2);
-                    view3d.SetSectionBox(bBox);
-                    view3d.SetOrientation(new ViewOrientation3D(new XYZ(), new XYZ(1, 1, 2), new XYZ(1, 1, -1)));
-                    goTo3DTrans.Commit();
-                }
-                uidoc.ActiveView = view3d;
-                var openViews = uidoc.GetOpenUIViews();
-                foreach (var openView in openViews)
-                {
-                    if (openView.ViewId == uidoc.ActiveView.Id)
+                    instancesUI = new OpeningsInstancesView()
                     {
-                        openView.ZoomToFit();
-                        break;
-                    }
+                        WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                        DataContext = instancesVM
+                    };
+                    instancesUI.ShowDialog();
+                    showInstancesView = (instancesUI.DialogResult == false) && instancesVM.GoToSelectedOpeningView3D;
+                    openingDto = instancesVM.SelectedOpening;
                 }
-                ui = new LintelsManagerView()
+                similarsUI = new OpeningsSimilarView()
                 {
                     WindowStartupLocation = WindowStartupLocation.CenterScreen,
-                    DataContext = viewModel
+                    DataContext = similarsVM
                 };
-                ui.ShowDialog();
+                similarsUI.ShowDialog();
             }
 
-            if (ui.DialogResult == true)
+
+            if (similarsUI.DialogResult == true)
             {
-                return (viewModel.Openings.ToList(), viewModel.UpdateLintelsLocation);
+                return (similarsVM.Openings.ToList(), similarsVM.UpdateLintelsLocation);
             }
             else
             {
                 return (null, false);
+            }
+        }
+
+        /// <summary>
+        /// Переход к 3D обрезке заданного проема
+        /// </summary>
+        /// <param name="uidoc">Документ Revit, в котором расположен проем</param>
+        /// <param name="view3d">3D вид, на котором показывается 3D подрезка по заданному проему</param>
+        /// <param name="openingDto">Заданный проем</param>
+        private void GoTo3DView(in UIDocument uidoc, in View3D view3d, in OpeningDto openingDto)
+        {
+            var openingId = new ElementId(openingDto.OpeningId);
+            BoundingBoxXYZ bBox = null;
+
+            using (Transaction goTo3DTrans = new Transaction(uidoc.Document))
+            {
+                goTo3DTrans.Start($"Переход к элементу {openingId}");
+                var selectedOpening = uidoc.Document.GetElement(openingId);
+                bBox = selectedOpening.get_BoundingBox(view3d);
+                XYZ min = bBox.Min;
+                XYZ max = bBox.Max;
+                XYZ origin = (min + max) / 2;
+                bBox.Max = max + (max - origin).Normalize().Multiply(2);
+                bBox.Min = min + (min - origin).Normalize().Multiply(2);
+                view3d.SetSectionBox(bBox);
+                view3d.SetOrientation(new ViewOrientation3D(new XYZ(), new XYZ(1, 1, 2), new XYZ(1, 1, -1)));
+                goTo3DTrans.Commit();
+            }
+            uidoc.ActiveView = view3d;
+            var openViews = uidoc.GetOpenUIViews();
+            foreach (var openView in openViews)
+            {
+                if (openView.ViewId == uidoc.ActiveView.Id)
+                {
+                    openView.ZoomToFit();
+                    break;
+                }
             }
         }
 
@@ -406,6 +426,48 @@ namespace MS.RevitCommands.AR
             lintel.get_Parameter(SharedParams.PGS_Guid).Set(openingDto.Guid.ToString());
         }
 
+        //var consolidatedChildren =
+        //    children
+        //        .GroupBy(c => new
+        //        {
+        //            c.School,
+        //            c.Friend,
+        //            c.FavoriteColor,
+        //        })
+        //        .Select(gcs => new ConsolidatedChild()
+        //        {
+        //            School = gcs.Key.School,
+        //            Friend = gcs.Key.Friend,
+        //            FavoriteColor = gcs.Key.FavoriteColor,
+        //            Children = gcs.ToList(),
+        //        });
+        private List<SimilarOpeningsDto> GetSimilarOpeningsDtos(in List<OpeningDto> openingDtos)
+        {
+            return openingDtos.GroupBy(
+                opening => new
+                {
+                    opening.Width,
+                    opening.WallThick,
+                    opening.WallHeightOverOpening,
+                    opening.DistanceConditionToLeftEnd,
+                    opening.DistanceConditionToRightEnd,
+                    opening.WallMaterial,
+                    opening.Level
+                })
+                .Select(groupOpenings => new SimilarOpeningsDto(
+                    Guid.NewGuid(),
+                    groupOpenings.Key.Width,
+                    groupOpenings.Key.WallThick,
+                    groupOpenings.Key.WallHeightOverOpening,
+                    groupOpenings.Key.WallMaterial,
+                    groupOpenings.Key.Level,
+                    groupOpenings.Key.DistanceConditionToLeftEnd,
+                    groupOpenings.Key.DistanceConditionToRightEnd,
+                    groupOpenings.ToList()
+                 ))
+                .ToList();
+        }
+
 
         /// <summary>
         /// Возвращает список проемов с перемычками из текущего документа
@@ -468,13 +530,13 @@ namespace MS.RevitCommands.AR
                     OpeningDto openingDto = new OpeningDto(
                         guid,
                         width,
-                        height,
                         wallThick,
                         wallHeightOverOpening,
                         distanceRight,
                         distanceLeft,
                         wallMaterial,
                         levelName,
+                        height,
                         hostWall.Id.IntegerValue,
                         opening.Id.IntegerValue,
                         openingLocation,

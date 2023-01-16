@@ -18,12 +18,12 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
     /// <summary>
     /// Модель представления главного окна менеджера перемычек
     /// </summary>
-    public class LintelsManagerViewModel : ViewModelBase
+    public class OpeningsInstancesViewModel : ViewModelBase
     {
         /// <summary>
         /// Конструктор менеджера перемычек по умолчанию
         /// </summary>
-        public LintelsManagerViewModel()
+        public OpeningsInstancesViewModel()
         {
 
         }
@@ -32,7 +32,7 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
         /// Конструктор окна менеджера перемычек по заданной коллекции Dto проемов
         /// </summary>
         /// <param name="openings"></param>
-        public LintelsManagerViewModel(ICollection<OpeningDto> openings)
+        public OpeningsInstancesViewModel(ICollection<OpeningDto> openings)
         {
             Openings = new ObservableCollection<OpeningDto>(openings);
         }
@@ -51,7 +51,7 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
         /// <summary>
         /// Переходить к выбранному проему на 3D виде
         /// </summary>
-        public bool GoToSelectedOpeningView3D { get; private set; }
+        public bool GoToSelectedOpeningView3D { get; private protected set; }
 
 
         /// <summary>

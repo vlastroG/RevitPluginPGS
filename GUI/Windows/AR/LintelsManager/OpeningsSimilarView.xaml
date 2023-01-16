@@ -1,4 +1,4 @@
-﻿<Window x:Class="MS.GUI.Windows.AR.LintelsManager.LintelsManagerView"
+﻿<Window x:Class="MS.GUI.Windows.AR.LintelsManager.OpeningsSimilarView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -9,7 +9,7 @@
              d:DesignHeight="600" d:DesignWidth="1000" MinHeight="200" MinWidth="500"
         Title="Менеджер перемычек">
     <Window.DataContext>
-        <vm:LintelsManagerViewModel/>
+        <vm:SimilarOpeningsViewModel/>
     </Window.DataContext>
     <Grid>
         <Grid.Resources>
@@ -37,6 +37,10 @@
                 </Style>
             </DataGrid.Resources>
             <DataGrid.Columns>
+                <DataGridTextColumn Width="60"
+                                    Header="Кол-во&#10;экз."
+                                    Binding="{Binding OpeningsCount}"
+                                    IsReadOnly="True"/>
                 <DataGridTextColumn Width="60"
                                     Header="Марка"
                                     Binding="{Binding Mark}">
@@ -101,7 +105,7 @@
                             </TextBlock>
                     </DataGridTextColumn.Header>
                 </DataGridTextColumn>
-                <DataGridTextColumn Width ="220"
+                <DataGridTextColumn Width ="200"
                                     Header="Тип перемычки"
                                     Binding="{Binding Lintel}"
                                     IsReadOnly="True"/>
@@ -119,11 +123,11 @@
                     <Button.Content>
                         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                             <TextBlock Text="Добавить/Редактировать" TextAlignment="Center"/>
-                            <TextBlock Text="перемычку" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                            <TextBlock Text="перемычку в экземплярах" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                         </StackPanel>
                     </Button.Content>
                 </Button>
-                <Button Content="Удалить перемычку"
+                <Button Content="Удалить перемычку&#10;у экземпляров"
                         Command="{Binding DeleteLintelCommand}"
                         CommandParameter="{Binding SelectedOpening}"
                         ToolTip="Если в списке удалить перемычку из проема, в модели она также удалится. 
@@ -134,18 +138,18 @@
                           HorizontalAlignment="Center"
                           VerticalContentAlignment="Center"
                           ToolTip="После нажатия кнопки Ок расположения перемычек&#10; будут скорректированы в соответствии с расположением их проемов. ВАЖНО!!! если основа проема изменилась, то расположение не будет скорректировано автоматически и придется его исправлять вручную!"/>
-                <Button Content="Перейти к&#10;3D обрезке проема"
+                <Button Content="Редактировать перемычки&#10;по экземплярам"
                         HorizontalContentAlignment="Center"
-                        Click="GoTo3D_clicked"
-                        Command="{Binding GoToOpeningView3DCommand}"/>
+                        Click="EditInstances_Clicked"
+                        Command="{Binding EditOpenings}"/>
                 <Button Content="Ок" 
                         Name="Ok" 
                         Click="Ok_Click"
-                        Command="{Binding UnsetGoToOpeningView3DCommand}"/>
+                        Command="{Binding UnsetEditSelectedSimilarOpeningCommand}"/>
                 <Button Content="Отмена" 
                         Name="Cancel" 
                         Click="Cancel_Click"
-                        Command="{Binding UnsetGoToOpeningView3DCommand}"/>
+                        Command="{Binding UnsetEditSelectedSimilarOpeningCommand}"/>
             </UniformGrid>
         </DockPanel>
     </Grid>

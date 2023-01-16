@@ -17,11 +17,11 @@ using System.Windows.Shapes;
 namespace MS.GUI.Windows.AR.LintelsManager
 {
     /// <summary>
-    /// Interaction logic for LintelsManagerView.xaml
+    /// Interaction logic for OpeningsInstancesView.xaml
     /// </summary>
-    public partial class LintelsManagerView : Window
+    public partial class OpeningsInstancesView : Window
     {
-        public LintelsManagerView()
+        public OpeningsInstancesView()
         {
             InitializeComponent();
         }

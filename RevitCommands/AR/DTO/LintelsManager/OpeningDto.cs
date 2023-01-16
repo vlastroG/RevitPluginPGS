@@ -21,7 +21,7 @@ namespace MS.RevitCommands.AR.DTO
         /// <summary>
         /// Перемычка
         /// </summary>
-        private Lintel _lintel;
+        private protected Lintel _lintel;
 
         /// <summary>
         /// Идентификатор
@@ -67,16 +67,16 @@ namespace MS.RevitCommands.AR.DTO
         public OpeningDto(
             Guid guid,
             double width,
-            double height,
             double wallThick,
             double wallHeightOverOpening,
             double distanceToRightEnd,
             double distanceToLeftEnd,
             string wallMaterial,
             string level,
-            int hostWallId,
-            int openingId,
-            XYZ location,
+            double height = 0,
+            int hostWallId = -1,
+            int openingId = -1,
+            XYZ location = null,
             Lintel lintel = null)
         {
             Width = width;
@@ -122,7 +122,7 @@ namespace MS.RevitCommands.AR.DTO
         /// Марка перемычки
         /// </summary>
         [Description("PGS_МаркаПеремычки")]
-        public string Mark { get; set; } = string.Empty;
+        public virtual string Mark { get; set; } = string.Empty;
 
         /// <summary>
         /// Ширина проема в мм
@@ -164,12 +164,12 @@ namespace MS.RevitCommands.AR.DTO
         /// <summary>
         /// Строковое представление расстояния от проема до торца стены справа
         /// </summary>
-        public string DistanceConditionToRightEnd => DistanceToRightEnd >= 250 ? "≥250" : "<250";
+        public virtual string DistanceConditionToRightEnd { get => DistanceToRightEnd >= 250 ? "≥250" : "<250"; private protected set { } }
 
         /// <summary>
         /// Строковое представление расстояния от проема до торца стены слева
         /// </summary>
-        public string DistanceConditionToLeftEnd => DistanceToLeftEnd >= 250 ? "≥250" : "<250";
+        public virtual string DistanceConditionToLeftEnd { get => DistanceToLeftEnd >= 250 ? "≥250" : "<250"; private protected set { } }
 
         /// <summary>
         /// Название материала сердцевины стены
@@ -179,7 +179,7 @@ namespace MS.RevitCommands.AR.DTO
         /// <summary>
         /// Перемычка
         /// </summary>
-        public Lintel Lintel
+        public virtual Lintel Lintel
         {
             get => _lintel;
             set

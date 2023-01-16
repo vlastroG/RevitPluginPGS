@@ -126,7 +126,8 @@
     <Compile Include="GUI\ViewModels\AR\LintelsManager\LintelAngleViewModel.cs" />
     <Compile Include="GUI\ViewModels\AR\LintelsManager\LintelBarViewModel.cs" />
     <Compile Include="GUI\ViewModels\AR\LintelsManager\LintelBlockViewModel.cs" />
-    <Compile Include="GUI\ViewModels\AR\LintelsManager\LintelsManagerViewModel.cs" />
+    <Compile Include="GUI\ViewModels\AR\LintelsManager\OpeningsInstancesViewModel.cs" />
+    <Compile Include="GUI\ViewModels\AR\LintelsManager\SimilarOpeningsViewModel.cs" />
     <Compile Include="GUI\Windows\AR\LintelsManager\ChooseLintelTypeView.xaml.cs">
       <DependentUpon>ChooseLintelTypeView.xaml</DependentUpon>
     </Compile>
@@ -139,8 +140,11 @@
     <Compile Include="GUI\Windows\AR\LintelsManager\LintelBlockWindow.xaml.cs">
       <DependentUpon>LintelBlockWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="GUI\Windows\AR\LintelsManager\LintelsManagerView.xaml.cs">
-      <DependentUpon>LintelsManagerView.xaml</DependentUpon>
+    <Compile Include="GUI\Windows\AR\LintelsManager\OpeningsInstancesView.xaml.cs">
+      <DependentUpon>OpeningsInstancesView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Windows\AR\LintelsManager\OpeningsSimilarView.xaml.cs">
+      <DependentUpon>OpeningsSimilarView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Logging\Logger.cs" />
     <Compile Include="RevitCommands\AR\ComplexAprtmntNmbr.cs" />
@@ -389,7 +393,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="GUI\Windows\AR\LintelsManager\LintelsManagerView.xaml">
+    <Page Include="GUI\Windows\AR\LintelsManager\OpeningsInstancesView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="GUI\Windows\AR\LintelsManager\OpeningsSimilarView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
