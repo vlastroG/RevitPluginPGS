@@ -38,7 +38,7 @@ namespace MS.GUI.Windows.AR.LintelsManager
 
         private void GoTo3D_clicked(object sender, RoutedEventArgs e)
         {
-            DialogResult = false;
+            DialogResult = true;
         }
     }
 }

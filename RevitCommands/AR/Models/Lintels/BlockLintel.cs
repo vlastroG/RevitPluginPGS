@@ -54,5 +54,24 @@ namespace MS.RevitCommands.AR.Models.Lintels
         /// </summary>
         [Description("Тип 6-го элемента")]
         public string BlockType_6 { get; set; } = "2ПБ 26-4";
+
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is null))
+            {
+                return (obj is BlockLintel lintelOther)
+                    && (BlockType_1 == lintelOther.BlockType_1)
+                    && (BlockType_2 == lintelOther.BlockType_2)
+                    && (BlockType_3 == lintelOther.BlockType_3)
+                    && (BlockType_4 == lintelOther.BlockType_4)
+                    && (BlockType_5 == lintelOther.BlockType_5)
+                    && (BlockType_6 == lintelOther.BlockType_6);
+            }
+            else
+            {
+                return false;
+            }
+        }
     }
 }

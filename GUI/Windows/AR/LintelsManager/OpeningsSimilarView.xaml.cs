@@ -38,10 +38,7 @@ namespace MS.GUI.Windows.AR.LintelsManager
 
         private void EditInstances_Clicked(object sender, RoutedEventArgs e)
         {
-            if ((DataContext as SimilarOpeningsViewModel).GoToSelectedOpeningView3D)
-            {
-                DialogResult = false;
-            }
+            DialogResult = true;
         }
     }
 }

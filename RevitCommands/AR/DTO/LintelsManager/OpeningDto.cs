@@ -184,7 +184,7 @@ namespace MS.RevitCommands.AR.DTO
             get => _lintel;
             set
             {
-                if ((value is null) && (_existLintelId != -1) && (!_existLintelDeleted))
+                if (((value is null) || (value.LintelType != _lintel?.LintelType)) && (_existLintelId != -1) && (!_existLintelDeleted))
                 {
                     _existLintelDeleted = true;
                 }

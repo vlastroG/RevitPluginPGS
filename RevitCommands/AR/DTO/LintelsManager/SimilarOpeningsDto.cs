@@ -46,7 +46,7 @@ namespace MS.RevitCommands.AR.DTO.LintelsManager
             string level,
             string distanceConditionToLeftEnd,
             string distanceConditionToRightEnd,
-            List<OpeningDto> openings = null,
+            List<OpeningDto> openings,
             double distanceToRightEnd = 0,
             double distanceToLeftEnd = 0
             ) : base(guid,
@@ -75,7 +75,6 @@ namespace MS.RevitCommands.AR.DTO.LintelsManager
                     throw new ArgumentException($"Переданные в конструктор проемы не одинаковые!");
                 }
             }
-
         }
 
         public override string DistanceConditionToLeftEnd { get; private protected set; }
@@ -90,7 +89,10 @@ namespace MS.RevitCommands.AR.DTO.LintelsManager
                 base.Mark = value;
                 foreach (var opening in Openings)
                 {
-                    opening.Mark = Mark;
+                    if (!opening.Mark.Equals(Mark))
+                    {
+                        opening.Mark = Mark;
+                    }
                 }
             }
         }
@@ -103,7 +105,10 @@ namespace MS.RevitCommands.AR.DTO.LintelsManager
                 base.Lintel = value;
                 foreach (var opening in Openings)
                 {
-                    opening.Lintel = Lintel;
+                    if (!opening.Lintel.Equals(Lintel))
+                    {
+                        opening.Lintel = Lintel;
+                    }
                 }
             }
         }

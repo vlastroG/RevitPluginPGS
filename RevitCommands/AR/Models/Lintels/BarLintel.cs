@@ -42,5 +42,22 @@ namespace MS.RevitCommands.AR.Models.Lintels
         /// </summary>
         [Description("Шаг стержней")]
         public double BarsStep { get; set; } = 60;
+
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is null))
+            {
+                return (obj is BarLintel lintelOther)
+                    && (BarsDiameter == lintelOther.BarsDiameter)
+                    && (BarsStep == lintelOther.BarsStep)
+                    && (SupportLeft == lintelOther.SupportLeft)
+                    && (SupportRight == lintelOther.SupportRight);
+            }
+            else
+            {
+                return false;
+            }
+        }
     }
 }

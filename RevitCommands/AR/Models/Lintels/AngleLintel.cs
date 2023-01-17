@@ -60,5 +60,26 @@ namespace MS.RevitCommands.AR.Models.Lintels
         /// </summary>
         [Description("Полоса")]
         public string Stripe { get; set; } = "5x50";
+
+
+
+        public bool Equals(object obj)
+        {
+            if (!(obj is null))
+            {
+                return (obj is AngleLintel lintelOther)
+                    && (AngleExterior == lintelOther.AngleExterior)
+                    && (AngleMain == lintelOther.AngleMain)
+                    && (AngleSupport == lintelOther.AngleSupport)
+                    && (Stripe == lintelOther.Stripe)
+                    && (StripeStep == lintelOther.StripeStep)
+                    && (SupportLeft == lintelOther.SupportLeft)
+                    && (SupportRight == lintelOther.SupportRight);
+            }
+            else
+            {
+                return false;
+            }
+        }
     }
 }

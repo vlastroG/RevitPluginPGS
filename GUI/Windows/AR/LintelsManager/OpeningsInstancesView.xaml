@@ -7,7 +7,7 @@
              xmlns:vm="clr-namespace:MS.GUI.ViewModels.AR.LintelsManager"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="1000" MinHeight="200" MinWidth="500"
-        Title="Менеджер перемычек">
+        Title="Редактирование перемычек в одинаковых проемах">
     <Window.DataContext>
         <vm:OpeningsInstancesViewModel/>
     </Window.DataContext>
@@ -80,7 +80,7 @@
                                     Binding="{Binding Level}"
                                     IsReadOnly="True"/>
                 <DataGridTextColumn Width="75"
-                                    Binding="{Binding DistanceConditionToLeftEnd}"
+                                    Binding="{Binding DistanceToLeftEnd}"
                                     IsReadOnly="True"
                                     CanUserResize="False">
                     <DataGridTextColumn.Header>
@@ -91,7 +91,7 @@
                     </DataGridTextColumn.Header>
                 </DataGridTextColumn>
                 <DataGridTextColumn Width="75"
-                                    Binding="{Binding DistanceConditionToRightEnd}"
+                                    Binding="{Binding DistanceToRightEnd}"
                                     IsReadOnly="True"
                                     CanUserResize="False">
                     <DataGridTextColumn.Header>

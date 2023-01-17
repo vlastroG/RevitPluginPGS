@@ -220,7 +220,7 @@ namespace MS.RevitCommands.AR
                     {
                         // Логгирование
                         exceptions.Add($"Проем: {opening.ToLongString()}");
-                        exceptions.Add($"Информация об ошибкe: {e.Message}\n{e.Source}");
+                        exceptions.Add($"Информация об ошибкe: {e.Message}\n{e.StackTrace}");
                         exceptions.Add(string.Empty);
                     }
                 }
@@ -253,26 +253,25 @@ namespace MS.RevitCommands.AR
                 DataContext = similarsVM
             };
             similarsUI.ShowDialog();
-            OpeningsInstancesView instancesUI = null;
 
-            while ((similarsUI.DialogResult == false) && similarsVM.GoToSelectedOpeningView3D)
+            while ((similarsUI.DialogResult == true) && similarsVM.EditSelectedSimilarOpening)
             {
-                bool showInstancesView = true;
-                OpeningDto openingDto = null;
                 var instancesVM = new OpeningsInstancesViewModel((similarsVM.SelectedOpening as SimilarOpeningsDto).Openings);
-                instancesVM.SelectedOpening = openingDto;
-                while (showInstancesView)
+                var instancesUI = new OpeningsInstancesView()
                 {
-                    GoTo3DView(uidoc, view3d, openingDto);
-
+                    WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                    DataContext = instancesVM
+                };
+                instancesUI.ShowDialog();
+                while ((instancesUI.DialogResult == true) && instancesVM.GoToSelectedOpeningView3D)
+                {
+                    GoTo3DView(uidoc, view3d, instancesVM.SelectedOpening);
                     instancesUI = new OpeningsInstancesView()
                     {
                         WindowStartupLocation = WindowStartupLocation.CenterScreen,
                         DataContext = instancesVM
                     };
                     instancesUI.ShowDialog();
-                    showInstancesView = (instancesUI.DialogResult == false) && instancesVM.GoToSelectedOpeningView3D;
-                    openingDto = instancesVM.SelectedOpening;
                 }
                 similarsUI = new OpeningsSimilarView()
                 {
@@ -285,7 +284,7 @@ namespace MS.RevitCommands.AR
 
             if (similarsUI.DialogResult == true)
             {
-                return (similarsVM.Openings.ToList(), similarsVM.UpdateLintelsLocation);
+                return (openings, similarsVM.UpdateLintelsLocation);
             }
             else
             {
@@ -426,24 +425,9 @@ namespace MS.RevitCommands.AR
             lintel.get_Parameter(SharedParams.PGS_Guid).Set(openingDto.Guid.ToString());
         }
 
-        //var consolidatedChildren =
-        //    children
-        //        .GroupBy(c => new
-        //        {
-        //            c.School,
-        //            c.Friend,
-        //            c.FavoriteColor,
-        //        })
-        //        .Select(gcs => new ConsolidatedChild()
-        //        {
-        //            School = gcs.Key.School,
-        //            Friend = gcs.Key.Friend,
-        //            FavoriteColor = gcs.Key.FavoriteColor,
-        //            Children = gcs.ToList(),
-        //        });
         private List<SimilarOpeningsDto> GetSimilarOpeningsDtos(in List<OpeningDto> openingDtos)
         {
-            return openingDtos.GroupBy(
+            var similarOpenings = openingDtos.GroupBy(
                 opening => new
                 {
                     opening.Width,
@@ -466,6 +450,45 @@ namespace MS.RevitCommands.AR
                     groupOpenings.ToList()
                  ))
                 .ToList();
+
+            foreach (var similarOpening in similarOpenings)
+            {
+                var openings = similarOpening.Openings;
+                var openingFirst = openings?.FirstOrDefault();
+                var lintel = openingFirst?.Lintel;
+                var mark = openingFirst?.Mark;
+                bool lintelsEqual = true;
+                bool marksEqual = true;
+                foreach (var opening in openings)
+                {
+                    if (lintel is null)
+                    {
+                        marksEqual = false;
+                        lintelsEqual = false;
+                        break;
+                    }
+                    if (lintel.Equals(opening?.Lintel))
+                    {
+                        marksEqual &= opening.Mark == mark;
+                        continue;
+                    }
+                    else
+                    {
+                        lintelsEqual = false;
+                        marksEqual = false;
+                        break;
+                    }
+                }
+                if (lintelsEqual)
+                {
+                    similarOpening.Lintel = lintel;
+                }
+                if (marksEqual)
+                {
+                    similarOpening.Mark = mark;
+                }
+            }
+            return similarOpenings;
         }
 
 
