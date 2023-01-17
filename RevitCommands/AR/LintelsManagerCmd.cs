@@ -59,6 +59,10 @@ namespace MS.RevitCommands.AR
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             Document doc = commandData.Application.ActiveUIDocument.Document;
+            if (!ValidateSharedParams(doc))
+            {
+                return Result.Cancelled;
+            }
             UIDocument uidoc = commandData.Application.ActiveUIDocument;
             View3D view3d = DocMethods.GetView3Default(doc);
             if (view3d is null)
@@ -301,6 +305,7 @@ namespace MS.RevitCommands.AR
         private void GoTo3DView(in UIDocument uidoc, in View3D view3d, in OpeningDto openingDto)
         {
             var openingId = new ElementId(openingDto.OpeningId);
+            uidoc.Selection.SetElementIds(new ElementId[0]);
             BoundingBoxXYZ bBox = null;
 
             using (Transaction goTo3DTrans = new Transaction(uidoc.Document))
@@ -327,6 +332,7 @@ namespace MS.RevitCommands.AR
                     break;
                 }
             }
+            uidoc.Selection.SetElementIds(new ElementId[] { openingId });
         }
 
         /// <summary>
@@ -491,6 +497,36 @@ namespace MS.RevitCommands.AR
             return similarOpenings;
         }
 
+        /// <summary>
+        /// Валидация проекта Revit на наличие необходимых общих параметров
+        /// </summary>
+        /// <param name="doc">Документ Revit</param>
+        /// <returns>True, если все общие параметры присутствуют, иначе false</returns>
+        private bool ValidateSharedParams(in Document doc)
+        {
+            Guid[] _sharedParamsForElements = new Guid[] {
+            SharedParams.PGS_Guid,
+            };
+            BuiltInCategory[] categories = new BuiltInCategory[]
+            {
+                BuiltInCategory.OST_Walls,
+                BuiltInCategory.OST_Doors,
+                BuiltInCategory.OST_Windows
+            };
+            if (!SharedParams.IsCategoryOfDocContainsSharedParams(
+                doc,
+                categories,
+                _sharedParamsForElements))
+            {
+                MessageBox.Show(
+                    "В текущем проекте не у всех категорий из:" +
+                    "\n\"Стены\", \"Двери\", \"Окна\"" +
+                    "\nприсутствует параметр \"PGS_Guid\"!",
+                    "Ошибка");
+                return false;
+            }
+            return true;
+        }
 
         /// <summary>
         /// Возвращает список проемов с перемычками из текущего документа
@@ -637,36 +673,6 @@ namespace MS.RevitCommands.AR
             return null;
         }
 
-        /// <summary>
-        /// Возвращает элемент, выбранный пользователем
-        /// </summary>
-        /// <guidParam name="uidoc"></guidParam>
-        /// <returns></returns>
-        private Element GetOpeningTest(in UIDocument uidoc)
-        {
-            SelectionFilterOpenings filter = new SelectionFilterOpenings();
-            Element opening = null;
-            try
-            {
-                Reference openingRef = uidoc.Selection.PickObject(
-                    ObjectType.Element,
-                    filter,
-                    "Выберите проем");
-                opening = uidoc.Document.GetElement(openingRef);
-            }
-            catch (Autodesk.Revit.Exceptions.OperationCanceledException)
-            {
-                return null;
-            }
-            catch (Autodesk.Revit.Exceptions.InvalidOperationException)
-            {
-                MessageBox.Show(
-                    "Перейдите на вид, где можно выбрать элементы",
-                    "Ошибка");
-                return null;
-            }
-            return opening;
-        }
 
         /// <summary>
         /// Возвращает точку размещения элемента, являющегося стеной или семейством, размещаемым по 1 точке.

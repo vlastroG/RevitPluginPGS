@@ -394,7 +394,7 @@ namespace MS.Shared
         /// <param name="category">Категория Revit.</param>
         /// <param name="sharedParamsGuids">Массив Guid необходимых общих параметров для заданной категории.</param>
         /// <returns>True, если все параметры из массива присутствуют у категории, иначе False.</returns>
-        public static bool IsCategoryOfDocContainsSharedParams(Document doc, BuiltInCategory category, Guid[] sharedParamsGuids)
+        public static bool IsCategoryOfDocContainsSharedParams(in Document doc, BuiltInCategory category, Guid[] sharedParamsGuids)
         {
             ElementId categoryId = Category.GetCategory(doc, category).Id;
             bool containsAll = true;
@@ -415,6 +415,27 @@ namespace MS.Shared
                 }
             }
             return containsAll;
+        }
+
+        /// <summary>
+        /// Валидация текущего проекта Revit на наличие общих параметров у заданных категорий.
+        /// </summary>
+        /// <param name="doc">Документ Revit.</param>
+        /// <param name="categories">Категории Revit.</param>
+        /// <param name="sharedParamsGuids">Массив Guid необходимых общих параметров для заданной категории.</param>
+        /// <returns>True, если все параметры из массива присутствуют у категории, иначе False.</returns>
+        public static bool IsCategoryOfDocContainsSharedParams(in Document doc, BuiltInCategory[] categories, Guid[] sharedParamsGuids)
+        {
+            bool result = true;
+            foreach (var category in categories)
+            {
+                result &= IsCategoryOfDocContainsSharedParams(doc, category, sharedParamsGuids);
+                if (!result)
+                {
+                    return false;
+                }
+            }
+            return result;
         }
 
         public static string CreateErrorMessage(out string message, in List<ElementId> elements)
