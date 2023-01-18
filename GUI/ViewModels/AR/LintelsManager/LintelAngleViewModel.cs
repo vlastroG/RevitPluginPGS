@@ -22,10 +22,17 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
             _supportLeft = 250;
             _supportRight = 250;
             _stripe = "5x50";
-            _stripeStep = 500;
+            _stripeStep = 300;
             _angleMain = "75x5";
             _angleExterior = "75x5";
             _angleSupport = "100x10";
+            _stripeOffset = 20;
+            _supportAngleLeftVisible = false;
+            _supportAngleRightVisible = false;
+            _angleFirstVisible = false;
+            _angleShelvesInside = false;
+            _insulationThickness = 0;
+            _windowQuarter = 0;
         }
 
         /// <summary>
@@ -41,10 +48,13 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
             _angleMain = angleLintel.AngleMain;
             _angleExterior = angleLintel.AngleExterior;
             _angleSupport = angleLintel.AngleSupport;
-            _supportAngleLeftVisible = 0;
-            _supportAngleRightVisible = 0;
-            _angleFirstVisible = 0;
-            _angleShelvesInside = 0;
+            _supportAngleLeftVisible = angleLintel.SupportAngleLeftVisible;
+            _supportAngleRightVisible = angleLintel.SupportAngleRightVisible;
+            _angleFirstVisible = angleLintel.AngleFirstVisible;
+            _angleShelvesInside = angleLintel.AngleShelvesInside;
+            _insulationThickness = angleLintel.InsulationThickness;
+            _windowQuarter = angleLintel.WindowQuarter;
+            _stripeOffset = angleLintel.StripeOffset;
         }
 
 
@@ -105,36 +115,36 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
         public string Stripe { get => _stripe; set => Set(ref _stripe, value); }
 
 
-        private int _supportAngleLeftVisible;
+        private bool _supportAngleLeftVisible;
         /// <summary>
         /// Видимость_опорный_уголок_1
         /// </summary>
-        public int SupportAngleLeftVisible
+        public bool SupportAngleLeftVisible
         {
             get => _supportAngleLeftVisible;
             set => Set(ref _supportAngleLeftVisible, value);
         }
 
 
-        private int _supportAngleRightVisible;
+        private bool _supportAngleRightVisible;
         /// <summary>
         /// Видимость_опорный_уголок_2
         /// </summary>
-        public int SupportAngleRightVisible { get => _supportAngleRightVisible; set => Set(ref _supportAngleRightVisible, value); }
+        public bool SupportAngleRightVisible { get => _supportAngleRightVisible; set => Set(ref _supportAngleRightVisible, value); }
 
 
-        private int _angleFirstVisible;
+        private bool _angleFirstVisible;
         /// <summary>
         /// Вкл_Видимость_1_уголок
         /// </summary>
-        public int AngleFirstVisible { get => _angleFirstVisible; set => Set(ref _angleFirstVisible, value); }
+        public bool AngleFirstVisible { get => _angleFirstVisible; set => Set(ref _angleFirstVisible, value); }
 
 
-        private int _angleShelvesInside;
+        private bool _angleShelvesInside;
         /// <summary>
         /// Уголок_Полки внутрь
         /// </summary>
-        public int AngleShelvesInside { get => _angleShelvesInside; set => Set(ref _angleShelvesInside, value); }
+        public bool AngleShelvesInside { get => _angleShelvesInside; set => Set(ref _angleShelvesInside, value); }
 
 
         private double _windowQuarter;
@@ -151,17 +161,31 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
         public double InsulationThickness { get => _insulationThickness; set => Set(ref _insulationThickness, value); }
 
 
+        private double _stripeOffset;
+        /// <summary>
+        /// Толщина утеплителя
+        /// </summary>
+        public double StripeOffset { get => _stripeOffset; set => Set(ref _stripeOffset, value); }
+
+
         public Lintel GetLintel(Guid guid)
         {
             return new AngleLintel(guid)
             {
                 SupportLeft = _supportLeft,
                 SupportRight = _supportRight,
+                Stripe = _stripe,
                 StripeStep = _stripeStep,
                 AngleMain = _angleMain,
                 AngleExterior = _angleExterior,
                 AngleSupport = _angleSupport,
-                Stripe = _stripe
+                SupportAngleLeftVisible = _supportAngleLeftVisible,
+                SupportAngleRightVisible = _supportAngleRightVisible,
+                AngleFirstVisible = _angleFirstVisible,
+                AngleShelvesInside = _angleShelvesInside,
+                InsulationThickness = _insulationThickness,
+                WindowQuarter = _windowQuarter,
+                StripeOffset = _stripeOffset
             };
         }
     }

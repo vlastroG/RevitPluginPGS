@@ -32,7 +32,7 @@ namespace MS.Utilites.Extensions
             var storageType = elParameter.StorageType;
             try
             {
-                if ((storageType == StorageType.Integer) || (storageType == StorageType.Double))
+                if (storageType == StorageType.Double)
                 {
                     var parType = elParameter.GetUnitTypeId();
                     value = UnitUtils.ConvertToInternalUnits(value, parType);
@@ -40,6 +40,17 @@ namespace MS.Utilites.Extensions
                 else if (storageType == StorageType.ElementId)
                 {
                     value = new ElementId((int)value);
+                }
+                else if (storageType == StorageType.Integer)
+                {
+                    if (value is bool boolean)
+                    {
+                        value = boolean ? 1 : 0;
+                    }
+                    else
+                    {
+                        value = (int)value;
+                    }
                 }
             }
             catch (Autodesk.Revit.Exceptions.InvalidOperationException)

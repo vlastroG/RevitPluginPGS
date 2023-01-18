@@ -47,12 +47,24 @@ namespace MS.RevitCommands.AR
         /// </summary>
         private readonly string _familyLintelBarName = "PGS_Перемычка_Стержни_v0.1";
 
-        private FamilySymbol _FamilySymbolAngle { get; set; }
+        /// <summary>
+        /// Типоразмер семейства перемычки из уголков
+        /// </summary>
+        private FamilySymbol FamilySymbolAngle { get; set; }
 
-        private FamilySymbol _FamilySymbolBlock { get; set; }
+        /// <summary>
+        /// Типоразмер семейства перемычки из брусков
+        /// </summary>
+        private FamilySymbol FamilySymbolBlock { get; set; }
 
-        private FamilySymbol _FamilySymbolBar { get; set; }
+        /// <summary>
+        /// Типоразмер семейства перемычки из стержней
+        /// </summary>
+        private FamilySymbol FamilySymbolBar { get; set; }
 
+        /// <summary>
+        /// Путь к папке, где расположена сборка
+        /// </summary>
         private readonly string _assemblyDir = PathMethods.AssemblyDirectory;
 
 
@@ -82,6 +94,13 @@ namespace MS.RevitCommands.AR
             return Result.Succeeded;
         }
 
+        /// <summary>
+        /// Находит семейство перемычки в проекте, или загружает его
+        /// </summary>
+        /// <param name="doc">Документ, в котором происходит поиск семейства</param>
+        /// <param name="familyName">Название семейства</param>
+        /// <returns>Типоразмер семейства, найденный, или загруженный в проект</returns>
+        /// <exception cref="InvalidOperationException"></exception>
         private FamilySymbol FindOrLoadFamily(in Document doc, string familyName)
         {
             var lintelFamSymb = new FilteredElementCollector(doc)
@@ -129,7 +148,7 @@ namespace MS.RevitCommands.AR
 
             try
             {
-                _FamilySymbolBar = FindOrLoadFamily(doc, _familyLintelBarName);
+                FamilySymbolBar = FindOrLoadFamily(doc, _familyLintelBarName);
             }
             catch (Exception e)
             {
@@ -138,7 +157,7 @@ namespace MS.RevitCommands.AR
             }
             try
             {
-                _FamilySymbolAngle = FindOrLoadFamily(doc, _familyLintelAngleName);
+                FamilySymbolAngle = FindOrLoadFamily(doc, _familyLintelAngleName);
             }
             catch (Exception e)
             {
@@ -147,7 +166,7 @@ namespace MS.RevitCommands.AR
             }
             try
             {
-                _FamilySymbolBlock = FindOrLoadFamily(doc, _familyLintelBlockName);
+                FamilySymbolBlock = FindOrLoadFamily(doc, _familyLintelBlockName);
             }
             catch (Exception e)
             {
@@ -235,9 +254,9 @@ namespace MS.RevitCommands.AR
                 Logger.WriteLog(_commandName, exceptions.ToArray(), true);
             }
 
-            _FamilySymbolAngle = null;
-            _FamilySymbolBar = null;
-            _FamilySymbolBlock = null;
+            FamilySymbolAngle = null;
+            FamilySymbolBar = null;
+            FamilySymbolBlock = null;
         }
 
         /// <summary>
@@ -306,13 +325,12 @@ namespace MS.RevitCommands.AR
         {
             var openingId = new ElementId(openingDto.OpeningId);
             uidoc.Selection.SetElementIds(new ElementId[0]);
-            BoundingBoxXYZ bBox = null;
 
             using (Transaction goTo3DTrans = new Transaction(uidoc.Document))
             {
                 goTo3DTrans.Start($"Переход к элементу {openingId}");
                 var selectedOpening = uidoc.Document.GetElement(openingId);
-                bBox = selectedOpening.get_BoundingBox(view3d);
+                BoundingBoxXYZ bBox = selectedOpening.get_BoundingBox(view3d);
                 XYZ min = bBox.Min;
                 XYZ max = bBox.Max;
                 XYZ origin = (min + max) / 2;
@@ -343,8 +361,7 @@ namespace MS.RevitCommands.AR
         /// <param name="updateLintelsLocations">Обновлять расположение перемычек в соответствии с расположением проема, или нет</param>
         private void UpdateLintel(in Document doc, in OpeningDto openingDto, bool updateLintelsLocations)
         {
-            var lintel = doc.GetElement(new ElementId(openingDto.ExistLintelId)) as FamilyInstance;
-            if (lintel is null)
+            if (!(doc.GetElement(new ElementId(openingDto.ExistLintelId)) is FamilyInstance lintel))
             {
                 throw new NullReferenceException(nameof(openingDto));
             }
@@ -401,17 +418,17 @@ namespace MS.RevitCommands.AR
         /// <param name="openingDto">Проем, для которого создается перемычка</param>
         private void CreateLintel(in Document doc, in OpeningDto openingDto)
         {
-            FamilySymbol fSymb = null;
+            FamilySymbol fSymb;
             switch (openingDto.Lintel.LintelType)
             {
                 case Enums.LintelType.Bar:
-                    fSymb = _FamilySymbolBar;
+                    fSymb = FamilySymbolBar;
                     break;
                 case Enums.LintelType.Block:
-                    fSymb = _FamilySymbolBlock;
+                    fSymb = FamilySymbolBlock;
                     break;
                 case Enums.LintelType.Angle:
-                    fSymb = _FamilySymbolAngle;
+                    fSymb = FamilySymbolAngle;
                     break;
                 default:
                     return;
@@ -431,6 +448,11 @@ namespace MS.RevitCommands.AR
             lintel.get_Parameter(SharedParams.PGS_Guid).Set(openingDto.Guid.ToString());
         }
 
+        /// <summary>
+        /// Возвращает список Dto проемов с одинаковыми габаритами
+        /// </summary>
+        /// <param name="openingDtos">Список Dto проемов</param>
+        /// <returns></returns>
         private List<SimilarOpeningsDto> GetSimilarOpeningsDtos(in List<OpeningDto> openingDtos)
         {
             var similarOpenings = openingDtos.GroupBy(
@@ -635,40 +657,18 @@ namespace MS.RevitCommands.AR
                 return null;
             }
             string familyName = lintel.Symbol.FamilyName;
-            switch (familyName)
+
+            if (familyName.Equals(_familyLintelBlockName))
             {
-                case "ADSK_Обобщенная модель_Перемычка составная":
-                    return new BlockLintel(guid, lintel.Id.IntegerValue)
-                    {
-                        BlockType_1 = lintel.LookupParameter("Тип 1-го элемента").AsValueString(),
-                        BlockType_2 = lintel.LookupParameter("Тип 2-го элемента").AsValueString(),
-                        BlockType_3 = lintel.LookupParameter("Тип 3-го элемента").AsValueString(),
-                        BlockType_4 = lintel.LookupParameter("Тип 4-го элемента").AsValueString(),
-                        BlockType_5 = lintel.LookupParameter("Тип 5-го элемента").AsValueString(),
-                        BlockType_6 = lintel.LookupParameter("Тип 6-го элемента").AsValueString(),
-                        Mark = lintel.get_Parameter(SharedParams.PGS_MarkLintel).AsValueString()
-                    };
-                case "PGS_Перемычка_Стержни_v0.1":
-                    return new BarLintel(guid, lintel.Id.IntegerValue)
-                    {
-                        BarsDiameter = UnitUtils.ConvertFromInternalUnits(lintel.LookupParameter("ADSK_Размер_Диаметр").AsDouble(), UnitTypeId.Millimeters),
-                        BarsStep = UnitUtils.ConvertFromInternalUnits(lintel.LookupParameter("Шаг стержней").AsDouble(), UnitTypeId.Millimeters),
-                        SupportLeft = UnitUtils.ConvertFromInternalUnits(lintel.LookupParameter("Опирание слева").AsDouble(), UnitTypeId.Millimeters),
-                        SupportRight = UnitUtils.ConvertFromInternalUnits(lintel.LookupParameter("Опирание справа").AsDouble(), UnitTypeId.Millimeters),
-                        Mark = lintel.get_Parameter(SharedParams.PGS_MarkLintel).AsValueString()
-                    };
-                case "ADSK_Обобщенная модель_Перемычка из уголков":
-                    return new AngleLintel(guid, lintel.Id.IntegerValue)
-                    {
-                        AngleExterior = lintel.LookupParameter("Уголок для облицовки").AsValueString(),
-                        AngleMain = lintel.LookupParameter("Внутренний уголок").AsValueString(),
-                        AngleSupport = lintel.LookupParameter("Опорные уголки").AsValueString(),
-                        Stripe = lintel.LookupParameter("Полоса").AsValueString(),
-                        StripeStep = UnitUtils.ConvertFromInternalUnits(lintel.LookupParameter("Полоса_Шаг").AsDouble(), UnitTypeId.Millimeters),
-                        SupportLeft = UnitUtils.ConvertFromInternalUnits(lintel.LookupParameter("уголок_опирание_1").AsDouble(), UnitTypeId.Millimeters),
-                        SupportRight = UnitUtils.ConvertFromInternalUnits(lintel.LookupParameter("уголок_опирание_2").AsDouble(), UnitTypeId.Millimeters),
-                        Mark = lintel.get_Parameter(SharedParams.PGS_MarkLintel).AsValueString()
-                    };
+                return new BlockLintel(guid, lintel);
+            }
+            if (familyName.Equals(_familyLintelBarName))
+            {
+                return new BarLintel(guid, lintel);
+            }
+            if (familyName.Equals(_familyLintelAngleName))
+            {
+                return new AngleLintel(guid, lintel);
             }
             return null;
         }
@@ -679,7 +679,7 @@ namespace MS.RevitCommands.AR
         /// Если элемент - стена, возвращается центр осевой линии стены.
         /// Если элемент - экземпляр семейства, то возвращается точка расположения семейства.
         /// </summary>
-        /// <guidParam name="elem">Элемент, расположение которого нужно получить. Wall или FamilyInstance по 1 точке.</guidParam>
+        /// <param name="elem">Элемент, расположение которого нужно получить. Wall или FamilyInstance по 1 точке.</param>
         /// <returns>Точка размещения или null, если условия для типа элемента не соблюдены</returns>
         private XYZ GetLocationPoint(in Element elem)
         {
@@ -701,7 +701,7 @@ namespace MS.RevitCommands.AR
         /// <summary>
         /// Возвращает ширину проема в мм
         /// </summary>
-        /// <guidParam name="opening">Проем, сделанный семейством окна или двери, или витражная стена</guidParam>
+        /// <param name="opening">Проем, сделанный семейством окна или двери, или витражная стена</param>
         /// <returns>Ширина проема в мм</returns>
         private (double height, double width) GetOpeningWidthAndHeight(in Element opening)
         {
@@ -722,7 +722,7 @@ namespace MS.RevitCommands.AR
         /// <summary>
         /// Возвращает толщину стены в мм
         /// </summary>
-        /// <guidParam name="hostWall">Хост стена проема</guidParam>
+        /// <param name="hostWall">Хост стена проема</param>
         /// <returns>Толщина стены в мм</returns>
         private double GetWallThick(in Wall hostWall)
         {
@@ -732,7 +732,7 @@ namespace MS.RevitCommands.AR
         /// <summary>
         /// Возвращает название типоразмера стены
         /// </summary>
-        /// <guidParam name="hostWall">Хост стена проема</guidParam>
+        /// <param name="hostWall">Хост стена проема</param>
         /// <returns>Название типоразмера стены</returns>
         private string GetWallMaterial(in Wall hostWall)
         {
@@ -742,9 +742,9 @@ namespace MS.RevitCommands.AR
         /// <summary>
         /// Возвращает высоту стены над проемом в мм
         /// </summary>
-        /// <guidParam name="opening">Проем, сделанный окном, дверью или витражом</guidParam>
-        /// <guidParam name="hostWall">Хост стена проема</guidParam>
-        /// <guidParam name="view3d">{3D} вид по умолчанию</guidParam>
+        /// <param name="opening">Проем, сделанный окном, дверью или витражом</param>
+        /// <param name="hostWall">Хост стена проема</param>
+        /// <param name="view3d">{3D} вид по умолчанию</param>
         /// <returns>Высота участка стены над проемом в мм</returns>
         private double GetWallHeightOverOpening(in Element opening, in Element hostWall, in View3D view3d)
         {
@@ -754,8 +754,8 @@ namespace MS.RevitCommands.AR
         /// <summary>
         /// Возвращает расстояния от граней проема до торцов станы
         /// </summary>
-        /// <guidParam name="opening">Проем</guidParam>
-        /// <guidParam name="hostWall">Хост стена проема</guidParam>
+        /// <param name="opening">Проем</param>
+        /// <param name="hostWall">Хост стена проема</param>
         /// <returns>Кортеж расстояний слева и справа от граней проема до торцов стены</returns>
         private (double leftDistance, double rightDistance) GetOpeningSideDistances(in Element opening, in Wall hostWall)
         {
@@ -785,6 +785,12 @@ namespace MS.RevitCommands.AR
             }
         }
 
+        /// <summary>
+        /// Возвращает нормаль к передней плоскости проема
+        /// </summary>
+        /// <param name="opening"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
         private XYZ GetElementDirection(in Element opening)
         {
             if (opening is FamilyInstance inst)
@@ -801,8 +807,8 @@ namespace MS.RevitCommands.AR
         /// <summary>
         /// Получает перемычку по Guid
         /// </summary>
-        /// <guidParam name="doc">Документ, в котором происходит поиск</guidParam>
-        /// <guidParam name="guid">Значение параметра "PGS_GUID" перемычки</guidParam>
+        /// <param name="doc">Документ, в котором происходит поиск</param>
+        /// <param name="guid">Значение параметра "PGS_GUID" перемычки</param>
         /// <returns>Найденная перемычка или null</returns>
         private FamilyInstance GetLintelByGuid(in Document doc, string guid)
         {
@@ -821,9 +827,9 @@ namespace MS.RevitCommands.AR
         /// <summary>
         /// Возвращает Хост элемента
         /// </summary>
-        /// <guidParam name="doc">Документ, в котором расположен вложенный в стену элемент</guidParam>
-        /// <guidParam name="view3d">3D вид по умолчанию</guidParam>
-        /// <guidParam name="embeddedElem">Вложенный в стену элемент. Экземпляр семейства или витраж</guidParam>
+        /// <param name="doc">Документ, в котором расположен вложенный в стену элемент</param>
+        /// <param name="view3d">3D вид по умолчанию</param>
+        /// <param name="embeddedElem">Вложенный в стену элемент. Экземпляр семейства или витраж</param>
         /// <returns>Хост стена вложенного элемента</returns>
         private Element GetHostElement(in Document doc, in View3D view3d, in Element embeddedElem)
         {
@@ -844,9 +850,9 @@ namespace MS.RevitCommands.AR
         /// <summary>
         /// Получает стену, в которой расположен витраж
         /// </summary>
-        /// <guidParam name="doc">Документ, в котором находится стена</guidParam>
-        /// <guidParam name="view3d">3D вид для обработки геометрии</guidParam>
-        /// <guidParam name="curtainWall">Витражная стена</guidParam>
+        /// <param name="doc">Документ, в котором находится стена</param>
+        /// <param name="view3d">3D вид для обработки геометрии</param>
+        /// <param name="curtainWall">Витражная стена</param>
         /// <returns>Стена, в которой расположен витраж</returns>
         private Element GetHostOfCurtainWall(in Document doc, in View3D view3d, in Wall curtainWall)
         {
@@ -856,13 +862,14 @@ namespace MS.RevitCommands.AR
                 + 1;
 
             ElementFilter wallFilter = new ElementCategoryFilter(BuiltInCategory.OST_Walls);
-            ReferenceIntersector referenceIntersector = new ReferenceIntersector(
+            ReferenceIntersector referenceIntersector =
+                new ReferenceIntersector(
                 wallFilter,
                 FindReferenceTarget.Element,
                 view3d)
-            {
-                FindReferencesInRevitLinks = false
-            };
+                {
+                    FindReferencesInRevitLinks = false
+                };
             XYZ direction = XYZ.BasisZ;
             XYZ startPoint = GetLocationPoint(curtainWall);
             var context = referenceIntersector.Find(startPoint, direction);

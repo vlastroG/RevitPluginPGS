@@ -121,7 +121,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GUI\Converters\EnumDescriptionConverter.cs" />
-    <Compile Include="GUI\Converters\IntToBoolConverter.cs" />
     <Compile Include="GUI\ViewModels\AR\LintelsManager\ChooseLintelTypeViewModel.cs" />
     <Compile Include="GUI\ViewModels\AR\LintelsManager\ILintelCreator.cs" />
     <Compile Include="GUI\ViewModels\AR\LintelsManager\LintelAngleViewModel.cs" />
@@ -338,10 +337,10 @@
     <EmbeddedResource Include="EmbeddedFamilies\PGS_Перемычка_Стержни_v0.1.rfa">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="EmbeddedFamilies\PGS_Обобщенная модель_Перемычка металлическая.rfa">
+    <EmbeddedResource Include="EmbeddedFamilies\PGS_Обобщенная модель_Перемычка составная.rfa">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
-    <EmbeddedResource Include="EmbeddedFamilies\PGS_Обобщенная модель_Перемычка составная.rfa">
+    <EmbeddedResource Include="EmbeddedFamilies\PGS_Обобщенная модель_Перемычка металлическая.rfa">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <None Include="packages.config" />

@@ -10,11 +10,11 @@ namespace TestConsole
     {
         static void Main(string[] args)
         {
-            var t = Enumerable.Range(0, 10).Select(i => (i, i * i)).ToDictionary(tuple => tuple.i, tuple => tuple.Item2);
 
-
-
-
+            bool t = false;
+            Console.WriteLine(t);
+            List<string> list = new List<string>();
+            list.Add("aty8o");
             Console.WriteLine(t.ToString());
             //.ToList()
             //.ForEach(t => Console.WriteLine($"Key: {t.Key},\tValue: {t.Value}"));

@@ -114,7 +114,10 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
                     switch (vm.SelectedLintelType)
                     {
                         case RevitCommands.AR.Enums.LintelType.Bar:
-                            LintelBarWindow barLintelWindow = new LintelBarWindow() { WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen };
+                            LintelBarWindow barLintelWindow = new LintelBarWindow()
+                            {
+                                WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen
+                            };
                             barLintelWindow.ShowDialog();
                             if (barLintelWindow.DialogResult == true)
                             {
@@ -122,7 +125,10 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
                             }
                             break;
                         case RevitCommands.AR.Enums.LintelType.Block:
-                            LintelBlockWindow blockLintelWindow = new LintelBlockWindow() { WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen };
+                            LintelBlockWindow blockLintelWindow = new LintelBlockWindow()
+                            {
+                                WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen
+                            };
                             blockLintelWindow.ShowDialog();
                             if (blockLintelWindow.DialogResult == true)
                             {
@@ -130,7 +136,10 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
                             }
                             break;
                         case RevitCommands.AR.Enums.LintelType.Angle:
-                            LintelAngleWindow angleLintelWindow = new LintelAngleWindow() { WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen };
+                            LintelAngleWindow angleLintelWindow = new LintelAngleWindow()
+                            {
+                                WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen
+                            };
                             angleLintelWindow.ShowDialog();
                             if (angleLintelWindow.DialogResult == true)
                             {

@@ -5,19 +5,15 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:MS.GUI.Windows.AR.LintelsManager"
              xmlns:vm="clr-namespace:MS.GUI.ViewModels.AR.LintelsManager"
-             xmlns:converters="clr-namespace:MS.GUI.Converters"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="300" Width="320" Height="450" MinWidth="320" MinHeight="450">
+             d:DesignHeight="450" d:DesignWidth="300" Width="340" Height="450" MinWidth="340" MinHeight="450">
     <Window.DataContext>
         <vm:LintelAngleViewModel/>
     </Window.DataContext>
-    <Window.Resources>
-        <converters:IntToBoolConverter x:Key="IntToBoolConverter"/>
-    </Window.Resources>
     <Grid>
         <GroupBox Header="Перемычка из уголков">
             <DockPanel>
-                <UniformGrid DockPanel.Dock="Top" Margin="5" Rows="13">
+                <UniformGrid DockPanel.Dock="Top" Margin="5" Rows="14">
                     <UniformGrid.Resources>
                         <Style TargetType="DockPanel">
                             <Setter Property="HorizontalAlignment" Value="Stretch"/>
@@ -73,6 +69,12 @@
                         <TextBlock Text="Полоса"/>
                     </DockPanel>
                     <DockPanel>
+                        <TextBox Text="{Binding StripeOffset}"/>
+                    </DockPanel>
+                    <DockPanel>
+                        <TextBlock Text="Полоса отступ от обушка"/>
+                    </DockPanel>
+                    <DockPanel>
                         <TextBox Text="{Binding StripeStep}"/>
                     </DockPanel>
                     <DockPanel>
@@ -91,29 +93,25 @@
                         <TextBlock Text="Опирание справа"/>
                     </DockPanel>
                     <DockPanel>
-                        <CheckBox IsChecked="{Binding SupportAngleLeftVisible,
-                            Converter={StaticResource IntToBoolConverter}}"/>
+                        <CheckBox IsChecked="{Binding SupportAngleLeftVisible}"/>
                     </DockPanel>
                     <DockPanel>
                         <TextBlock Text="Опорный уголок слева"/>
                     </DockPanel>
                     <DockPanel>
-                        <CheckBox IsChecked="{Binding SupportAngleRightVisible,
-                            Converter={StaticResource IntToBoolConverter}}"/>
+                        <CheckBox IsChecked="{Binding SupportAngleRightVisible}"/>
                     </DockPanel>
                     <DockPanel>
                         <TextBlock Text="Опорный уголок справа"/>
                     </DockPanel>
                     <DockPanel>
-                        <CheckBox IsChecked="{Binding AngleFirstVisible,
-                            Converter={StaticResource IntToBoolConverter}}"/>
+                        <CheckBox IsChecked="{Binding AngleFirstVisible}"/>
                     </DockPanel>
                     <DockPanel>
                         <TextBlock Text="Видимость 1-го уголка"/>
                     </DockPanel>
                     <DockPanel>
-                        <CheckBox IsChecked="{Binding AngleShelvesInside,
-                            Converter={StaticResource IntToBoolConverter}}"/>
+                        <CheckBox IsChecked="{Binding AngleShelvesInside}"/>
                     </DockPanel>
                     <DockPanel>
                         <TextBlock Text="Полки внутрь"/>

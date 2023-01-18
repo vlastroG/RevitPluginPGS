@@ -19,7 +19,6 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
         /// </summary>
         public LintelBlockViewModel()
         {
-            _blockType_1 = "2ПБ 26-4";
         }
 
         /// <summary>
@@ -33,12 +32,14 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
             _blockType_4 = blockLintel.BlockType_4;
             _blockType_5 = blockLintel.BlockType_5;
             _blockType_6 = blockLintel.BlockType_6;
-            _gostName = 1;
-            _firstBlockWithQuarter = 0;
+            _angleSupport = blockLintel.AngleSupport;
+            _windowQuarter = blockLintel.WindowQuarter;
+            _insulationThickness = blockLintel.InsulationThickness;
+            _firstBlockWithQuarter = blockLintel.FirstBlockWithQuarter;
         }
 
 
-        private string _blockType_1;
+        private string _blockType_1 = "2ПБ 26-4";
 
         /// <summary>
         /// Тип 1-го блока
@@ -86,13 +87,6 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
         public string BlockType_6 { get => _blockType_6; set => Set(ref _blockType_6, value); }
 
 
-        private int _gostName;
-        /// <summary>
-        /// Обозначение бруска ГОСТ/Серия
-        /// </summary>
-        public int GOSTName { get => _gostName; set => Set(ref _gostName, value); }
-
-
         private double _windowQuarter;
         /// <summary>
         /// Размер четверти
@@ -107,11 +101,11 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
         public double InsulationThickness { get => _insulationThickness; set => Set(ref _insulationThickness, value); }
 
 
-        private int _firstBlockWithQuarter;
+        private bool _firstBlockWithQuarter;
         /// <summary>
         /// 1-й элемент перемычки с четвертью
         /// </summary>
-        public int FirstBlockWithQuarter { get => _firstBlockWithQuarter; set => Set(ref _firstBlockWithQuarter, value); }
+        public bool FirstBlockWithQuarter { get => _firstBlockWithQuarter; set => Set(ref _firstBlockWithQuarter, value); }
 
 
         private double _angleSupport;
@@ -131,7 +125,11 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
                 BlockType_3 = _blockType_3,
                 BlockType_4 = _blockType_4,
                 BlockType_5 = _blockType_5,
-                BlockType_6 = _blockType_6
+                BlockType_6 = _blockType_6,
+                AngleSupport = _angleSupport,
+                WindowQuarter = _windowQuarter,
+                InsulationThickness = _insulationThickness,
+                FirstBlockWithQuarter = _firstBlockWithQuarter
             };
         }
     }
