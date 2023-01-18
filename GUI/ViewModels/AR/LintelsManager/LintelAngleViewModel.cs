@@ -41,6 +41,10 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
             _angleMain = angleLintel.AngleMain;
             _angleExterior = angleLintel.AngleExterior;
             _angleSupport = angleLintel.AngleSupport;
+            _supportAngleLeftVisible = 0;
+            _supportAngleRightVisible = 0;
+            _angleFirstVisible = 0;
+            _angleShelvesInside = 0;
         }
 
 
@@ -100,6 +104,51 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
         /// </summary>
         public string Stripe { get => _stripe; set => Set(ref _stripe, value); }
 
+
+        private int _supportAngleLeftVisible;
+        /// <summary>
+        /// Видимость_опорный_уголок_1
+        /// </summary>
+        public int SupportAngleLeftVisible
+        {
+            get => _supportAngleLeftVisible;
+            set => Set(ref _supportAngleLeftVisible, value);
+        }
+
+
+        private int _supportAngleRightVisible;
+        /// <summary>
+        /// Видимость_опорный_уголок_2
+        /// </summary>
+        public int SupportAngleRightVisible { get => _supportAngleRightVisible; set => Set(ref _supportAngleRightVisible, value); }
+
+
+        private int _angleFirstVisible;
+        /// <summary>
+        /// Вкл_Видимость_1_уголок
+        /// </summary>
+        public int AngleFirstVisible { get => _angleFirstVisible; set => Set(ref _angleFirstVisible, value); }
+
+
+        private int _angleShelvesInside;
+        /// <summary>
+        /// Уголок_Полки внутрь
+        /// </summary>
+        public int AngleShelvesInside { get => _angleShelvesInside; set => Set(ref _angleShelvesInside, value); }
+
+
+        private double _windowQuarter;
+        /// <summary>
+        /// Размер четверти
+        /// </summary>
+        public double WindowQuarter { get => _windowQuarter; set => Set(ref _windowQuarter, value); }
+
+
+        private double _insulationThickness;
+        /// <summary>
+        /// Толщина утеплителя
+        /// </summary>
+        public double InsulationThickness { get => _insulationThickness; set => Set(ref _insulationThickness, value); }
 
 
         public Lintel GetLintel(Guid guid)

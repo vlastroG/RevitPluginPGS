@@ -61,9 +61,44 @@ namespace MS.RevitCommands.AR.Models.Lintels
         [Description("Полоса")]
         public string Stripe { get; set; } = "5x50";
 
+        /// <summary>
+        /// Видимость опорного уголка слева
+        /// </summary>
+        [Description("Видимость_опорный_уголок_1")]
+        public int SupportAngleLeftVisible { get; set; } = 0;
+
+        /// <summary>
+        /// Видимость опорного уголка справа
+        /// </summary>
+        [Description("Видимость_опорный_уголок_2")]
+        public int SupportAngleRightVisible { get; set; } = 0;
+
+        /// <summary>
+        /// Видимость первого уголка
+        /// </summary>
+        [Description("Вкл_Видимость_1_уголок")]
+        public int AngleFirstVisible { get; set; } = 0;
+
+        /// <summary>
+        /// Полки уголков внутрь
+        /// </summary>
+        [Description("Уголок_Полки внутрь")]
+        public int AngleShelvesInside { get; set; } = 0;
+
+        /// <summary>
+        /// Размер четверти в мм
+        /// </summary>
+        [Description("Размер четверти")]
+        public double WindowQuarter { get; set; } = 0;
+
+        /// <summary>
+        /// Толщина утеплителя в мм
+        /// </summary>
+        [Description("Толщина утеплителя")]
+        public double InsulationThickness { get; set; } = 0;
 
 
-        public bool Equals(object obj)
+        public override bool Equals(object obj)
         {
             if (!(obj is null))
             {
@@ -74,7 +109,13 @@ namespace MS.RevitCommands.AR.Models.Lintels
                     && (Stripe == lintelOther.Stripe)
                     && (StripeStep == lintelOther.StripeStep)
                     && (SupportLeft == lintelOther.SupportLeft)
-                    && (SupportRight == lintelOther.SupportRight);
+                    && (SupportRight == lintelOther.SupportRight)
+                    && (SupportAngleLeftVisible == lintelOther.SupportAngleLeftVisible)
+                    && (SupportAngleRightVisible == lintelOther.SupportAngleRightVisible)
+                    && (AngleFirstVisible == lintelOther.AngleFirstVisible)
+                    && (AngleShelvesInside == lintelOther.AngleShelvesInside)
+                    && (WindowQuarter == lintelOther.WindowQuarter)
+                    && (InsulationThickness == lintelOther.InsulationThickness);
             }
             else
             {

@@ -53,7 +53,37 @@ namespace MS.RevitCommands.AR.Models.Lintels
         /// Тип 6-го блока
         /// </summary>
         [Description("Тип 6-го элемента")]
-        public string BlockType_6 { get; set; } = "2ПБ 26-4";
+        public string BlockType_6 { get; set; } = "5ПБ 18-27";
+
+        /// <summary>
+        /// Обозначение бруска ГОСТ/Серия
+        /// </summary>
+        [Description("Обозначение бруска ГОСТ/Серия")]
+        public int GOSTName { get; set; } = 0;
+
+        /// <summary>
+        /// Размер четверти в мм
+        /// </summary>
+        [Description("Размер четверти")]
+        public double WindowQuarter { get; set; } = 0;
+
+        /// <summary>
+        /// Толщина утеплителя в мм
+        /// </summary>
+        [Description("Толщина утеплителя")]
+        public double InsulationThickness { get; set; } = 0;
+
+        /// <summary>
+        /// 1-й элемент перемычки с четвертью
+        /// </summary>
+        [Description("1-й элемент перемычки с четвертью")]
+        public int FirstBlockWithQuarter { get; set; } = 0;
+
+        /// <summary>
+        /// Уголок_Опирание
+        /// </summary>
+        [Description("Уголок_Опирание")]
+        public double AngleSupport { get; set; } = 250;
 
 
         public override bool Equals(object obj)
@@ -66,7 +96,11 @@ namespace MS.RevitCommands.AR.Models.Lintels
                     && (BlockType_3 == lintelOther.BlockType_3)
                     && (BlockType_4 == lintelOther.BlockType_4)
                     && (BlockType_5 == lintelOther.BlockType_5)
-                    && (BlockType_6 == lintelOther.BlockType_6);
+                    && (BlockType_6 == lintelOther.BlockType_6)
+                    && (WindowQuarter == lintelOther.WindowQuarter)
+                    && (InsulationThickness == lintelOther.InsulationThickness)
+                    && (FirstBlockWithQuarter == lintelOther.FirstBlockWithQuarter)
+                    && (AngleSupport == lintelOther.AngleSupport);
             }
             else
             {

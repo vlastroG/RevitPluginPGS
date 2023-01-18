@@ -33,14 +33,14 @@ namespace MS.RevitCommands.AR
         public readonly string _commandName = "Менеджер перемычек";
 
         /// <summary>
-        /// Название самейства перемычки из уголков  =  "ADSK_Обобщенная модель_Перемычка из уголков"
+        /// Название самейства перемычки из уголков  =  "PGS_Обобщенная модель_Перемычка металлическая"
         /// </summary>
-        private readonly string _familyLintelAngleName = "ADSK_Обобщенная модель_Перемычка из уголков";
+        private readonly string _familyLintelAngleName = "PGS_Обобщенная модель_Перемычка металлическая";
 
         /// <summary>
-        /// Название семейства перемычки из брусков =  "ADSK_Обобщенная модель_Перемычка составная"
+        /// Название семейства перемычки из брусков =  "PGS_Обобщенная модель_Перемычка составная"
         /// </summary>
-        private readonly string _familyLintelBlockName = "ADSK_Обобщенная модель_Перемычка составная";
+        private readonly string _familyLintelBlockName = "PGS_Обобщенная модель_Перемычка составная";
 
         /// <summary>
         /// Название семейства перемычки из стержней =  "PGS_Перемычка_Стержни_v0.1"

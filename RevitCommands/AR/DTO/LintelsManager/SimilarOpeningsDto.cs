@@ -105,7 +105,7 @@ namespace MS.RevitCommands.AR.DTO.LintelsManager
                 base.Lintel = value;
                 foreach (var opening in Openings)
                 {
-                    if (!opening.Lintel.Equals(Lintel))
+                    if ((opening.Lintel is null) || !opening.Lintel.Equals(Lintel))
                     {
                         opening.Lintel = Lintel;
                     }
