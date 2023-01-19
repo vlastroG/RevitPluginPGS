@@ -89,7 +89,7 @@ namespace MS.RevitCommands.AR.DTO.LintelsManager
                 base.Mark = value;
                 foreach (var opening in Openings)
                 {
-                    if (!opening.Mark.Equals(Mark))
+                    if ((opening.Mark is null) || !opening.Mark.Equals(Mark))
                     {
                         opening.Mark = Mark;
                     }

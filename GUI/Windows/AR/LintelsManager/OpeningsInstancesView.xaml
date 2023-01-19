@@ -19,12 +19,15 @@
             <RowDefinition Height="40"/>
         </Grid.RowDefinitions>
         <DataGrid ItemsSource="{Binding Openings}"
-                  CanUserAddRows="True"
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False"
                   SelectedItem="{Binding SelectedOpening}"
                   IsSynchronizedWithCurrentItem="True"
                   AutoGenerateColumns="False"
                   EnableRowVirtualization="True"
+                  EnableColumnVirtualization="True"
                   VirtualizingPanel.IsVirtualizingWhenGrouping="True"
+                  VirtualizingPanel.VirtualizationMode="Recycling"
                   VirtualizingPanel.IsVirtualizing="True"
                   ScrollViewer.CanContentScroll="True">
             <DataGrid.Resources>

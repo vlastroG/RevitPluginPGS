@@ -23,13 +23,13 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
             _supportRight = 250;
             _stripe = "5x50";
             _stripeStep = 300;
-            _angleMain = "75x5";
-            _angleExterior = "75x5";
-            _angleSupport = "100x10";
+            _angleMain = "63x5";
+            _angleExterior = "63x5";
+            _angleSupport = "75x5";
             _stripeOffset = 20;
             _supportAngleLeftVisible = false;
             _supportAngleRightVisible = false;
-            _angleFirstVisible = false;
+            _angleFirstVisible = true;
             _angleShelvesInside = false;
             _insulationThickness = 0;
             _windowQuarter = 0;

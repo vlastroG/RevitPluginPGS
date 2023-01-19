@@ -85,19 +85,19 @@ namespace MS.RevitCommands.AR.Models.Lintels
         /// Основной уголок
         /// </summary>
         [Description(_angleMain)]
-        public string AngleMain { get; set; } = "75x5";
+        public string AngleMain { get; set; } = "63x5";
 
         /// <summary>
         /// Уголок для облицовки
         /// </summary>
         [Description(_angleExterior)]
-        public string AngleExterior { get; set; } = "75x5";
+        public string AngleExterior { get; set; } = "63x5";
 
         /// <summary>
         /// Опорный уголок
         /// </summary>
         [Description(_angleSupport)]
-        public string AngleSupport { get; set; } = "100x10";
+        public string AngleSupport { get; set; } = "75x5";
 
         /// <summary>
         /// Полоса
@@ -121,7 +121,7 @@ namespace MS.RevitCommands.AR.Models.Lintels
         /// Видимость первого уголка
         /// </summary>
         [Description(_angleFirstVisible)]
-        public bool AngleFirstVisible { get; set; } = false;
+        public bool AngleFirstVisible { get; set; } = true;
 
         /// <summary>
         /// Полки уголков внутрь

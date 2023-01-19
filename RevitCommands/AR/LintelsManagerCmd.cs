@@ -83,6 +83,11 @@ namespace MS.RevitCommands.AR
                 return Result.Cancelled;
             }
 
+            if (!LoadFamilies(doc))
+            {
+                return Result.Cancelled;
+            }
+
             (List<OpeningDto> openings, bool updateLintelsLocations) = ShowLintelsManagerWindow(uidoc, view3d);
             if (openings is null)
             {
@@ -92,6 +97,50 @@ namespace MS.RevitCommands.AR
             EditLintels(doc, openings, updateLintelsLocations);
 
             return Result.Succeeded;
+        }
+
+        /// <summary>
+        /// Загружает семейства перемычек в проект
+        /// </summary>
+        /// <param name="doc"></param>
+        /// <returns></returns>
+        private bool LoadFamilies(in Document doc)
+        {
+            List<string> exceptions = new List<string>();
+
+            try
+            {
+                FamilySymbolBar = FindOrLoadFamily(doc, _familyLintelBarName);
+            }
+            catch (Exception e)
+            {
+                exceptions.Add($"{e.Message}\n{e.StackTrace}");
+                exceptions.Add(string.Empty);
+            }
+            try
+            {
+                FamilySymbolAngle = FindOrLoadFamily(doc, _familyLintelAngleName);
+            }
+            catch (Exception e)
+            {
+                exceptions.Add($"{e.Message}\n{e.StackTrace}");
+                exceptions.Add(string.Empty);
+            }
+            try
+            {
+                FamilySymbolBlock = FindOrLoadFamily(doc, _familyLintelBlockName);
+            }
+            catch (Exception e)
+            {
+                exceptions.Add($"{e.Message}\n{e.StackTrace}");
+                exceptions.Add(string.Empty);
+            }
+            if (exceptions.Count != 0)
+            {
+                Logger.WriteLog(_commandName, exceptions.ToArray(), true);
+                return false;
+            }
+            return true;
         }
 
         /// <summary>
@@ -145,39 +194,6 @@ namespace MS.RevitCommands.AR
         private void EditLintels(in Document doc, in List<OpeningDto> openings, bool updateLintelsLocations)
         {
             List<string> exceptions = new List<string>();
-
-            try
-            {
-                FamilySymbolBar = FindOrLoadFamily(doc, _familyLintelBarName);
-            }
-            catch (Exception e)
-            {
-                exceptions.Add($"{e.Message}\n{e.Source}");
-                exceptions.Add(string.Empty);
-            }
-            try
-            {
-                FamilySymbolAngle = FindOrLoadFamily(doc, _familyLintelAngleName);
-            }
-            catch (Exception e)
-            {
-                exceptions.Add($"{e.Message}\n{e.Source}");
-                exceptions.Add(string.Empty);
-            }
-            try
-            {
-                FamilySymbolBlock = FindOrLoadFamily(doc, _familyLintelBlockName);
-            }
-            catch (Exception e)
-            {
-                exceptions.Add($"{e.Message}\n{e.Source}");
-                exceptions.Add(string.Empty);
-            }
-            if (exceptions.Count != 0)
-            {
-                Logger.WriteLog(_commandName, exceptions.ToArray(), true);
-                return;
-            }
 
 
             using (Transaction trans = new Transaction(doc))
@@ -819,7 +835,7 @@ namespace MS.RevitCommands.AR
                 .FirstOrDefault(e =>
                 {
                     var parameter = e.get_Parameter(SharedParams.PGS_Guid);
-                    bool hasValue = parameter.HasValue;
+                    bool hasValue = !(parameter is null) && parameter.HasValue;
                     return hasValue && parameter.AsValueString().Equals(guid);
                 }) as FamilyInstance;
         }
