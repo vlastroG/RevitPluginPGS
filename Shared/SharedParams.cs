@@ -10,9 +10,9 @@ namespace MS.Shared
     public static class SharedParams
     {
         /// <summary>
-        /// Guid параметра PGS_GUID = ae171be0-1fbc-4513-b1d5-e627fe1ceae6 (string)
+        /// Guid параметра PGS_GUID = fd0d1d8a-2bff-43f6-b430-5b4387718761 (string)
         /// </summary>
-        public static Guid PGS_Guid => Guid.Parse("ae171be0-1fbc-4513-b1d5-e627fe1ceae6");
+        public static Guid PGS_Guid => Guid.Parse("fd0d1d8a-2bff-43f6-b430-5b4387718761");
 
         /// <summary>
         /// Guid параметра PGS_МаркаПеремычки = aee96840-3b85-4cb6-a93e-85acee0be8c7 (string)
