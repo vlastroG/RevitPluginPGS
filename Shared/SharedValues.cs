@@ -13,6 +13,11 @@
         public static readonly string LintelDescription = "Перемычка";
 
         /// <summary>
+        /// "перемычка"
+        /// </summary>
+        public static readonly string LintelDescriptionInLowercase = "перемычка";
+
+        /// <summary>
         /// Префикс марки перемычки "ПР-"
         /// </summary>
         public static readonly string LintelMarkPrefix = "ПР-";

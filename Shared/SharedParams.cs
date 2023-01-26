@@ -10,6 +10,11 @@ namespace MS.Shared
     public static class SharedParams
     {
         /// <summary>
+        /// Guid параметра PGS_GUID = fd0d1d8a-2bff-43f6-b430-5b4387718761 (string)
+        /// </summary>
+        public static Guid PGS_Guid => Guid.Parse("fd0d1d8a-2bff-43f6-b430-5b4387718761");
+
+        /// <summary>
         /// Guid параметра PGS_МаркаПеремычки = aee96840-3b85-4cb6-a93e-85acee0be8c7 (string)
         /// </summary>
         public static Guid PGS_MarkLintel => Guid.Parse("aee96840-3b85-4cb6-a93e-85acee0be8c7");
@@ -369,7 +374,7 @@ namespace MS.Shared
         /// Полный путь к ФОП
         /// </summary>
         private static readonly string _filePathADSK
-            = WorkWithPath.AssemblyDirectory + @"\EmbeddedFiles\ФОП2021_PGS_ОВ и ВК(07.06.22).txt";
+            = PathMethods.AssemblyDirectory + @"\EmbeddedFiles\ФОП2021_PGS_ОВ и ВК(07.06.22).txt";
 
         /// <summary>
         /// Возвращает ФОП ADSK в виде объекта
@@ -389,7 +394,7 @@ namespace MS.Shared
         /// <param name="category">Категория Revit.</param>
         /// <param name="sharedParamsGuids">Массив Guid необходимых общих параметров для заданной категории.</param>
         /// <returns>True, если все параметры из массива присутствуют у категории, иначе False.</returns>
-        public static bool IsCategoryOfDocContainsSharedParams(Document doc, BuiltInCategory category, Guid[] sharedParamsGuids)
+        public static bool IsCategoryOfDocContainsSharedParams(in Document doc, BuiltInCategory category, Guid[] sharedParamsGuids)
         {
             ElementId categoryId = Category.GetCategory(doc, category).Id;
             bool containsAll = true;
@@ -410,6 +415,27 @@ namespace MS.Shared
                 }
             }
             return containsAll;
+        }
+
+        /// <summary>
+        /// Валидация текущего проекта Revit на наличие общих параметров у заданных категорий.
+        /// </summary>
+        /// <param name="doc">Документ Revit.</param>
+        /// <param name="categories">Категории Revit.</param>
+        /// <param name="sharedParamsGuids">Массив Guid необходимых общих параметров для заданной категории.</param>
+        /// <returns>True, если все параметры из массива присутствуют у категории, иначе False.</returns>
+        public static bool IsCategoryOfDocContainsSharedParams(in Document doc, BuiltInCategory[] categories, Guid[] sharedParamsGuids)
+        {
+            bool result = true;
+            foreach (var category in categories)
+            {
+                result &= IsCategoryOfDocContainsSharedParams(doc, category, sharedParamsGuids);
+                if (!result)
+                {
+                    return false;
+                }
+            }
+            return result;
         }
 
         public static string CreateErrorMessage(out string message, in List<ElementId> elements)

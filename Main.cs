@@ -32,7 +32,7 @@ namespace MS
             // Create Ribbon tab
             var path = Assembly.GetExecutingAssembly().Location;
 
-            var assembly_dir = WorkWithPath.AssemblyDirectory;
+            var assembly_dir = PathMethods.AssemblyDirectory;
 
             // Создание вкладки в ленте
             application.CreateRibbonTab("PGS-BIM");
@@ -56,14 +56,14 @@ namespace MS
             btnInfo.ToolTip = "Alt-символы Revit.";
 
             // Test command
-            PushButtonData btnElementInViews = new PushButtonData("ElementInViewsViewModel", "Элемент\nна видах", path, "MS.Commands.General.ElementInViewsCmd");
+            PushButtonData btnElementInViews = new PushButtonData("ElementInViewsViewModel", "Элемент\nна видах", path, "MS.RevitCommands.General.ElementInViewsCmd");
             Uri btnElementInViewsImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
             BitmapImage btnElementInViewsImage = new BitmapImage(btnElementInViewsImagePath);
             btnElementInViews.LargeImage = btnElementInViewsImage;
             btnElementInViews.ToolTip = "Перейти на вид (лист), на котором есть размеры по выбранному элементу.";
 
             // ClashReport command
-            PushButtonData btnClashReport = new PushButtonData("ClashReport", "Clashes\nimport", path, "MS.Commands.BIM.ClashReportImport");
+            PushButtonData btnClashReport = new PushButtonData("ClashReport", "Clashes\nimport", path, "MS.RevitCommands.BIM.ClashReportImport");
             Uri btnClashReportImagePath = new Uri(assembly_dir + @"\Images\Icons\BIM\Clashes.png");
             BitmapImage btnClashReportImage = new BitmapImage(btnClashReportImagePath);
             btnClashReport.LargeImage = btnClashReportImage;
@@ -77,7 +77,7 @@ namespace MS
                 $"\nclashresult записывается в 'ADSK_Примечание'";
 
             // PolyLineLength command
-            PushButtonData btnPolyLineLength = new PushButtonData("PolyLineLength", "Длина\nполилинии", path, "MS.Commands.General.PolyLineLength");
+            PushButtonData btnPolyLineLength = new PushButtonData("PolyLineLength", "Длина\nполилинии", path, "MS.RevitCommands.General.PolyLineLength");
             Uri btnPolyLineLengthImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Sigma.png");
             BitmapImage btnPolyLineLengthImage = new BitmapImage(btnPolyLineLengthImagePath);
             btnPolyLineLength.LargeImage = btnPolyLineLengthImage;
@@ -102,7 +102,7 @@ namespace MS
                 "В последствии можно изменить категорию в настройках, нажав на треуголник под панелью General.";
 
             // SelectionSettings command
-            PushButtonData btnSelectionSettings = new PushButtonData("SelectionSettings", "Настройка\nкатегории", path, "MS.Commands.General.SelectorSettingsCmd");
+            PushButtonData btnSelectionSettings = new PushButtonData("SelectionSettings", "Настройка\nкатегории", path, "MS.RevitCommands.General.SelectorSettingsCmd");
             Uri btnSelectionSettingsImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Settings.png");
             BitmapImage btnSelectionSettingsImage = new BitmapImage(btnSelectionSettingsImagePath);
             btnSelectionSettings.LargeImage = btnSelectionSettingsImage;
@@ -113,7 +113,7 @@ namespace MS
                 "Доступны все категории Revit, даже группы.";
 
             // MasonryMesh command
-            PushButtonData btnMasonryMesh = new PushButtonData("MasonryMesh", "Кладочная\nсетка", path, "MS.Commands.AR.MasonryMesh");
+            PushButtonData btnMasonryMesh = new PushButtonData("MasonryMesh", "Кладочная\nсетка", path, "MS.RevitCommands.AR.MasonryMesh");
             Uri btnMasonryMeshImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\MasonryMesh.png");
             BitmapImage btnMasonryMeshImage = new BitmapImage(btnMasonryMeshImagePath);
             btnMasonryMesh.LargeImage = btnMasonryMeshImage;
@@ -134,7 +134,7 @@ namespace MS
                 "\n\tПример: Ø6 А240, м.п.";
 
             // RoomsAreaPGS command
-            PushButtonData btnRmArea = new PushButtonData("RoomsAreaNew", "Квартирография\nPGS_temp", path, "MS.Commands.AR.RoomsAreaNew");
+            PushButtonData btnRmArea = new PushButtonData("RoomsAreaNew", "Квартирография\nPGS_temp", path, "MS.RevitCommands.AR.RoomsAreaNew");
             Uri btnRmAreaImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\RoomsArea.png");
             BitmapImage btnRmAreaImage = new BitmapImage(btnRmAreaImagePath);
             btnRmArea.LargeImage = btnRmAreaImage;
@@ -149,7 +149,7 @@ namespace MS
                 "\'ADSK_Площадь квартиры жилая\', \'ADSK_Площадь квартиры\' и \'ADSK_Площадь квартиры общая\'.";
 
             // ComplexApartmentNumber command
-            PushButtonData btnCmplxAprtNum = new PushButtonData("ComplexAprtmntNmbr", "Составные номера\nквартир", path, "MS.Commands.AR.ComplexAprtmntNmbr");
+            PushButtonData btnCmplxAprtNum = new PushButtonData("ComplexAprtmntNmbr", "Составные номера\nквартир", path, "MS.RevitCommands.AR.ComplexAprtmntNmbr");
             Uri btnCmplxAprtNumImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\Bricks.png");
             BitmapImage btnCmplxAprtNumImage = new BitmapImage(btnCmplxAprtNumImagePath);
             btnCmplxAprtNum.LargeImage = btnCmplxAprtNumImage;
@@ -159,7 +159,7 @@ namespace MS
                 " Полученное значение будет записано в параметр \'Комментарии\'";
 
             // OpeningsByDuct command
-            PushButtonData btnOpeningsByDuctCmd = new PushButtonData("OpeningByDuct", "Проем по\nвоздуховоду", path, "MS.Commands.AR.OpeningByDuctCmd");
+            PushButtonData btnOpeningsByDuctCmd = new PushButtonData("OpeningByDuct", "Проем по\nвоздуховоду", path, "MS.RevitCommands.AR.OpeningByDuctCmd");
             Uri btnOpeningsByDuctCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
             BitmapImage btnOpeningsByDuctCmdImage = new BitmapImage(btnOpeningsByDuctCmdImagePath);
             btnOpeningsByDuctCmd.LargeImage = btnOpeningsByDuctCmdImage;
@@ -167,7 +167,7 @@ namespace MS
             btnOpeningsByDuctCmd.LongDescription = "";
 
             // OpeningsArea command
-            PushButtonData btnOpeningsArea = new PushButtonData("OpeningsArea", "Площадь проемов\nв помещениях", path, "MS.Commands.AR.OpeningsArea");
+            PushButtonData btnOpeningsArea = new PushButtonData("OpeningsArea", "Площадь проемов\nв помещениях", path, "MS.RevitCommands.AR.OpeningsArea");
             Uri btnOpeningsAreaImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\BalconyDoor.png");
             BitmapImage btnOpeningsAreaImage = new BitmapImage(btnOpeningsAreaImagePath);
             btnOpeningsArea.LargeImage = btnOpeningsAreaImage;
@@ -179,21 +179,9 @@ namespace MS
                 "и его границы сделаны границей помещений; или если в помещении переменный уровень пола." +
                 "Такие уникальные помещения нужно убрать из расчета во всплывающем окне.";
 
-            // MarkLintelsInOpenings command
-            PushButtonData btnMarkLintelsInOpenings = new PushButtonData("MarkLintelsInOpenings", "Маркировать перемычки\nокон и дверей", path, "MS.Commands.AR.MarkLintelsInOpenings");
-            Uri btnMarkLintelsInOpeningsImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\Beams.png");
-            BitmapImage btnMarkLintelsInOpeningsImage = new BitmapImage(btnMarkLintelsInOpeningsImagePath);
-            btnMarkLintelsInOpenings.LargeImage = btnMarkLintelsInOpeningsImage;
-            btnMarkLintelsInOpenings.ToolTip = "Назначение Марок перемычек в параметры окон и дверей: " +
-                "\'PGS_МаркаПеремычки\' и \'Мрк.МаркаКонструкции\', и назначение массы перемычки " +
-                "(\'ADSK_Масса элемента)\' в \'PGS_МассаПеремычки\' у окна и двери при помощи выпадающего окна.";
-            btnMarkLintelsInOpenings.LongDescription =
-                "В Описании типоразмера родительского семейства перемычки (и только в нем!) " +
-                "должно быть написано \'Перемычка\'." +
-                "Семейство перемычки должно быть выполнено категорией \'Обобщенные модели\'.";
 
             // LintelsSections command
-            PushButtonData btnLintelsSections = new PushButtonData("LintelsSections", "Разрезы\nпо перемычкам", path, "MS.Commands.AR.CreateSectionsByLintels");
+            PushButtonData btnLintelsSections = new PushButtonData("LintelsSections", "Разрезы\nпо перемычкам", path, "MS.RevitCommands.AR.CreateSectionsByLintels");
             Uri btnLintelsSectionsImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\Section.png");
             BitmapImage btnLintelsSectionsImage = new BitmapImage(btnLintelsSectionsImagePath);
             btnLintelsSections.LargeImage = btnLintelsSectionsImage;
@@ -211,7 +199,7 @@ namespace MS
                 "т.к. впоследствии при формировании изображений у них будет отличаться масштаб.";
 
             // CreateImagesFromSections command
-            PushButtonData btnCreateImagesFromSections = new PushButtonData("CreateImagesFromSections", "Ведомость\nперемычек", path, "MS.Commands.AR.CreateImagesFromSections");
+            PushButtonData btnCreateImagesFromSections = new PushButtonData("CreateImagesFromSections", "Ведомость\nперемычек", path, "MS.RevitCommands.AR.CreateImagesFromSections");
             Uri btnCreateImagesFromSectionsImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\TableLintels.png");
             BitmapImage btnCreateImagesFromSectionsImage = new BitmapImage(btnCreateImagesFromSectionsImagePath);
             btnCreateImagesFromSections.LargeImage = btnCreateImagesFromSectionsImage;
@@ -224,7 +212,7 @@ namespace MS
                 "с одинаковым поперечным сечением.";
 
             // RoomsFinishingMultiMark command
-            PushButtonData btnRoomsFinishingMultiMark = new PushButtonData("RoomsFinishingMultiMark", "Помещения\nс одинаковой отделкой", path, "MS.Commands.AR.RoomsFinishingMultiMark");
+            PushButtonData btnRoomsFinishingMultiMark = new PushButtonData("RoomsFinishingMultiMark", "Помещения\nс одинаковой отделкой", path, "MS.RevitCommands.AR.RoomsFinishingMultiMark");
             Uri btnRoomsFinishingMultiMarkImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\Equal.png");
             BitmapImage btnRoomsFinishingMultiMarkImage = new BitmapImage(btnRoomsFinishingMultiMarkImagePath);
             btnRoomsFinishingMultiMark.LargeImage = btnRoomsFinishingMultiMarkImage;
@@ -236,7 +224,7 @@ namespace MS
                 "Параметры для многострочных марок не должны быть в этих ключевых спецификациях.";
 
             // RoomsFinCreationCommand
-            PushButtonData btnRmFinCreation = new PushButtonData("RoomsFinishing", "Отделка\nпомещений", path, "MS.Commands.AR.RoomsFinishingCreation");
+            PushButtonData btnRmFinCreation = new PushButtonData("RoomsFinishing", "Отделка\nпомещений", path, "MS.RevitCommands.AR.RoomsFinishingCreation");
             Uri btnRmFinCreationImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\RoomsFinishing.png");
             BitmapImage btnRmFinCreationImage = new BitmapImage(btnRmFinCreationImagePath);
             btnRmFinCreation.LargeImage = btnRmFinCreationImage;
@@ -255,7 +243,7 @@ namespace MS
 
 
             // MaterialColorsCommand
-            PushButtonData btnMaterialColors = new PushButtonData("MaterialColors", "Обновить\nцвета", path, "MS.Commands.AR.MaterialColors");
+            PushButtonData btnMaterialColors = new PushButtonData("MaterialColors", "Обновить\nцвета", path, "MS.RevitCommands.AR.MaterialColors");
             Uri btnMaterialColorsImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\MaterialColors.png");
             BitmapImage btnMaterialColorsImage = new BitmapImage(btnMaterialColorsImagePath);
             btnMaterialColors.LargeImage = btnMaterialColorsImage;
@@ -267,7 +255,7 @@ namespace MS
                 "Лишние изображения из проекта не удаляются.";
 
             // RoomBoardsFinishingCommand
-            PushButtonData btnRoomBoardsFinishing = new PushButtonData("RoomBoardsFinishing", "Откосы\nи плинтусы\n(Beta)", path, "MS.Commands.AR.RoomBoardsFinishingCommand");
+            PushButtonData btnRoomBoardsFinishing = new PushButtonData("RoomBoardsFinishing", "Откосы\nи плинтусы\n(Beta)", path, "MS.RevitCommands.AR.RoomBoardsFinishingCommand");
             Uri btnRoomBoardsFinishingImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\Plinth.png");
             BitmapImage btnRoomBoardsFinishingImage = new BitmapImage(btnRoomBoardsFinishingImagePath);
             btnRoomBoardsFinishing.LargeImage = btnRoomBoardsFinishingImage;
@@ -288,7 +276,7 @@ namespace MS
                 "или запустить команду и выбрать необходимые на виде помещения.";
 
             // RoomFinishingScheduleCreationCmd
-            PushButtonData btnRoomFinishingScheduleCreationCmd = new PushButtonData("RoomFinishingScheduleCreationCmd", "Ведомость\nотделки (beta)", path, "MS.Commands.AR.RoomFinishingScheduleCreationCmd");
+            PushButtonData btnRoomFinishingScheduleCreationCmd = new PushButtonData("RoomFinishingScheduleCreationCmd", "Ведомость\nотделки (beta)", path, "MS.RevitCommands.AR.RoomFinishingScheduleCreationCmd");
             Uri btnRoomFinishingScheduleCreationCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\TableFinishing.png");
             BitmapImage btnRoomFinishingScheduleCreationCmdImage = new BitmapImage(btnRoomFinishingScheduleCreationCmdImagePath);
             btnRoomFinishingScheduleCreationCmd.LargeImage = btnRoomFinishingScheduleCreationCmdImage;
@@ -300,8 +288,17 @@ namespace MS
                 "\nПомещения можно выбрать в спецификации и запустить команду, или запустить команду и выбрать их вручную.";
 
 
+            // Info command
+            PushButtonData btnLintelsManagerCmd = new PushButtonData("LintelsManagerCmd", "Создание перемычек", path, "MS.RevitCommands.AR.LintelsManagerCmd");
+            Uri btnLintelsManagerCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            BitmapImage btnLintelsManagerCmdImage = new BitmapImage(btnLintelsManagerCmdImagePath);
+            btnLintelsManagerCmd.LargeImage = btnLintelsManagerCmdImage;
+            btnLintelsManagerCmd.ToolTip = "Создание и корректировка расположения перемычек.";
+
+
+
             //StairReinforcement command
-            PushButtonData btnStairRnfrcmtCmd = new PushButtonData("StairReinforcement", "Армирование\nлестниц", path, "MS.Commands.KR.StairReinforcement");
+            PushButtonData btnStairRnfrcmtCmd = new PushButtonData("StairReinforcement", "Армирование\nлестниц", path, "MS.RevitCommands.KR.StairReinforcement");
             Uri btnStairRnfrcmtCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\KR\StairRnfrcmt.png");
             BitmapImage btnStairRnfrcmtCmdImage = new BitmapImage(btnStairRnfrcmtCmdImagePath);
             btnStairRnfrcmtCmd.LargeImage = btnStairRnfrcmtCmdImage;
@@ -316,7 +313,7 @@ namespace MS
                 "PilesMarkRange",
                 "Маркировка\nсвай",
                 path,
-                "MS.Commands.KR.PilesMarkRange");
+                "MS.RevitCommands.KR.PilesMarkRange");
             Uri btnPilesMarkRangeCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\KR\PilesMachine.png");
             BitmapImage btnPilesMarkRangeCmdImage = new BitmapImage(btnPilesMarkRangeCmdImagePath);
             btnPilesMarkRangeCmd.LargeImage = btnPilesMarkRangeCmdImage;
@@ -331,7 +328,7 @@ namespace MS
                 "OpeningByMEP",
                 "Проемы\nпо инженерке",
                 path,
-                "MS.Commands.KR.OpeningByMEPCmd");
+                "MS.RevitCommands.KR.OpeningByMEPCmd");
             Uri btnOpeningByMEPCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
             BitmapImage btnOpeningByMEPCmdImage = new BitmapImage(btnOpeningByMEPCmdImagePath);
             btnOpeningByMEPCmd.LargeImage = btnOpeningByMEPCmdImage;
@@ -345,7 +342,7 @@ namespace MS
                 "SettingsKR",
                 "Настройки",
                 path,
-                "MS.Commands.KR.ChangeSettingsCmd");
+                "MS.RevitCommands.KR.ChangeSettingsCmd");
             Uri btnChangeSettingsKRCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
             BitmapImage btnChangeSettingsKRCmdImage = new BitmapImage(btnChangeSettingsKRCmdImagePath);
             btnChangeSettingsKRCmd.LargeImage = btnChangeSettingsKRCmdImage;
@@ -354,7 +351,7 @@ namespace MS
 
 
             // ОВиК арматура трубопроводов и оборудование в помещениях command
-            PushButtonData btnPipelineFittings = new PushButtonData("PipelineFittings", "Инженерные элементы\nв пространствах", path, "MS.Commands.MEP.PipelineFittings");
+            PushButtonData btnPipelineFittings = new PushButtonData("PipelineFittings", "Инженерные элементы\nв пространствах", path, "MS.RevitCommands.MEP.PipelineFittings");
             Uri btnPipelineFittingsImagePath = new Uri(assembly_dir + @"\Images\Icons\MEP\WaterPump.png");
             BitmapImage btnPipelineFittingsImage = new BitmapImage(btnPipelineFittingsImagePath);
             btnPipelineFittings.LargeImage = btnPipelineFittingsImage;
@@ -370,7 +367,7 @@ namespace MS
 
 
             // ОВиК системы в пространствах command
-            PushButtonData btnSystemsInSpace = new PushButtonData("SystemsInSpace", "Системы\nв пространствах", path, "MS.Commands.MEP.SystemsInSpace");
+            PushButtonData btnSystemsInSpace = new PushButtonData("SystemsInSpace", "Системы\nв пространствах", path, "MS.RevitCommands.MEP.SystemsInSpace");
             Uri btnSystemsInSpaceImagePath = new Uri(assembly_dir + @"\Images\Icons\MEP\Ventilation.png");
             BitmapImage btnSystemsInSpaceImage = new BitmapImage(btnSystemsInSpaceImagePath);
             btnSystemsInSpace.LargeImage = btnSystemsInSpaceImage;
@@ -384,7 +381,7 @@ namespace MS
             btnSystemsInSpace.SetContextualHelp(new ContextualHelp(ContextualHelpType.Url, @"https://google.com"));
 
             // ОВиК конструктор установок
-            PushButtonData btnDuctEquipmentCtorCmd = new PushButtonData("DuctEquipmentConstructor", "Конструктор\nустановок", path, "MS.Commands.MEP.DuctEquipmentConstructorCmd");
+            PushButtonData btnDuctEquipmentCtorCmd = new PushButtonData("DuctEquipmentConstructor", "Конструктор\nустановок", path, "MS.RevitCommands.MEP.DuctEquipmentConstructorCmd");
             Uri btnDuctEquipmentCtorCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
             BitmapImage btnDuctEquipmentCtorCmdImage = new BitmapImage(btnDuctEquipmentCtorCmdImagePath);
             btnDuctEquipmentCtorCmd.LargeImage = btnDuctEquipmentCtorCmdImage;
@@ -395,7 +392,7 @@ namespace MS
 
 
             // ОВиК толщины воздуховодов command
-            PushButtonData btnDuctsThicknessCmd = new PushButtonData("DuctsThicknessCmd", "Толщины\nвоздуховодов", path, "MS.Commands.MEP.DuctsThicknessCmd");
+            PushButtonData btnDuctsThicknessCmd = new PushButtonData("DuctsThicknessCmd", "Толщины\nвоздуховодов", path, "MS.RevitCommands.MEP.DuctsThicknessCmd");
             Uri btnDuctsThicknessCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\MEP\Thickness.png");
             BitmapImage btnDuctsThicknessCmdImage = new BitmapImage(btnDuctsThicknessCmdImagePath);
             btnDuctsThicknessCmd.LargeImage = btnDuctsThicknessCmdImage;
@@ -424,7 +421,7 @@ namespace MS
                 "\n\t\t(1000+)\t\t-\t0.9";
 
             // ОВиК корректировка имени системы command
-            PushButtonData btnSystemNameCorrectCmd = new PushButtonData("SystemNameCorrectCmd", "Формирование\nспецификации", path, "MS.Commands.MEP.SystemNameCorrectCmd");
+            PushButtonData btnSystemNameCorrectCmd = new PushButtonData("SystemNameCorrectCmd", "Формирование\nспецификации", path, "MS.RevitCommands.MEP.SystemNameCorrectCmd");
             Uri btnSystemNameCorrectCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\MEP\UpdateTable.png");
             BitmapImage btnSystemNameCorrectCmdImage = new BitmapImage(btnSystemNameCorrectCmdImagePath);
             btnSystemNameCorrectCmd.LargeImage = btnSystemNameCorrectCmdImage;
@@ -470,7 +467,7 @@ namespace MS
                 "\n5 - Материалы изоляции трубопроводов";
 
             // ОВиК корректировка имени системы command
-            PushButtonData btnEquipmentInSystemCmd = new PushButtonData("EquipmentInSystemCmd", "Оборудование\nв системах", path, "MS.Commands.MEP.EquipmentInSystemCmd");
+            PushButtonData btnEquipmentInSystemCmd = new PushButtonData("EquipmentInSystemCmd", "Оборудование\nв системах", path, "MS.RevitCommands.MEP.EquipmentInSystemCmd");
             Uri btnEquipmentInSystemCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\MEP\SystemEquipment.png");
             BitmapImage btnEquipmentInSystemCmdImage = new BitmapImage(btnEquipmentInSystemCmdImagePath);
             btnEquipmentInSystemCmd.LargeImage = btnEquipmentInSystemCmdImage;
@@ -516,7 +513,6 @@ namespace MS
             panelAR.AddItem(btnRmArea);
             panelAR.AddItem(btnOpeningsByDuctCmd);
             panelAR.AddItem(btnOpeningsArea);
-            panelAR.AddItem(btnMarkLintelsInOpenings);
             panelAR.AddItem(btnLintelsSections);
             panelAR.AddItem(btnCreateImagesFromSections);
             panelAR.AddItem(btnRoomsFinishingMultiMark);
@@ -527,6 +523,7 @@ namespace MS
             panelAR.AddItem(btnRoomBoardsFinishing);
             panelAR.AddItem(btnMasonryMesh);
             panelAR.AddItem(btnMaterialColors);
+            panelAR.AddItem(btnLintelsManagerCmd);
 
             // KR panel
             panelKR.AddItem(btnStairRnfrcmtCmd);

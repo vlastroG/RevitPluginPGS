@@ -7,6 +7,9 @@ using System.Windows.Data;
 
 namespace MS.GUI.Converters
 {
+    /// <summary>
+    /// Конвертер для изменения bool значения на противоположное
+    /// </summary>
     [ValueConversion(typeof(bool), typeof(bool))]
     public class InverseBooleanConverter : IValueConverter
     {

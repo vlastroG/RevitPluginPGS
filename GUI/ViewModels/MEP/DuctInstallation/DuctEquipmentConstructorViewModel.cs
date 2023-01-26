@@ -1,8 +1,8 @@
-﻿using MS.Commands.MEP.Mechanic;
-using MS.Commands.MEP.Mechanic.Impl;
-using MS.Commands.MEP.Models;
-using MS.Commands.MEP.Models.Installation;
-using MS.Commands.MEP.Models.Symbolic;
+﻿using MS.RevitCommands.MEP.Mechanic;
+using MS.RevitCommands.MEP.Mechanic.Impl;
+using MS.RevitCommands.MEP.Models;
+using MS.RevitCommands.MEP.Models.Installation;
+using MS.RevitCommands.MEP.Models.Symbolic;
 using MS.GUI.CommandsBase;
 using MS.GUI.ViewModels.Base;
 using MS.GUI.Windows.MEP;
@@ -468,7 +468,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// </summary>
         private void SerializeViewModel()
         {
-            var filePath = WorkWithPath.GetFilePath(
+            var filePath = PathMethods.GetFilePath(
                 ref @_serializationStartPath,
                 "Json файлы (*.json)|*.json|Текстовые файлы (*.txt)|*.txt",
                 "Перейдите в папку и напишите название файла без расширения",
@@ -488,7 +488,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
         /// <returns>Десериализованный объект установки</returns>
         private DuctEquipmentConstructorViewModel DeserializeViewModel()
         {
-            var filePath = $@"{WorkWithPath.GetFilePath(
+            var filePath = $@"{PathMethods.GetFilePath(
                 ref @_serializationStartPath,
                 "Json файлы (*.json)|*.json|Текстовые файлы (*.txt)|*.txt",
                 "Выберите Json файл с вентиляционной установкой",
@@ -662,7 +662,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
             {
                 switch (vm.EquipmentType)
                 {
-                    case Commands.MEP.Enums.EquipmentType.Fan:
+                    case RevitCommands.MEP.Enums.EquipmentType.Fan:
                         FanView fanView = new FanView() { WindowStartupLocation = WindowStartupLocation.CenterOwner };
                         fanView.ShowDialog();
                         if (fanView.DialogResult == true)
@@ -670,7 +670,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
                             Mechanics.Add((fanView.DataContext as FanViewModel).GetFan());
                         }
                         break;
-                    case Commands.MEP.Enums.EquipmentType.AirCooler:
+                    case RevitCommands.MEP.Enums.EquipmentType.AirCooler:
                         CoolerView coolerView = new CoolerView() { WindowStartupLocation = WindowStartupLocation.CenterOwner };
                         coolerView.ShowDialog();
                         if (coolerView.DialogResult == true)
@@ -678,7 +678,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
                             Mechanics.Add((coolerView.DataContext as CoolerViewModel).GetCooler());
                         }
                         break;
-                    case Commands.MEP.Enums.EquipmentType.AirHeater:
+                    case RevitCommands.MEP.Enums.EquipmentType.AirHeater:
                         HeaterView heaterView = new HeaterView() { WindowStartupLocation = WindowStartupLocation.CenterOwner };
                         heaterView.ShowDialog();
                         if (heaterView.DialogResult == true)
@@ -686,7 +686,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
                             Mechanics.Add((heaterView.DataContext as HeaterViewModel).GetHeater());
                         }
                         break;
-                    case Commands.MEP.Enums.EquipmentType.Filter:
+                    case RevitCommands.MEP.Enums.EquipmentType.Filter:
                         FilterView filterView = new FilterView() { WindowStartupLocation = WindowStartupLocation.CenterOwner };
                         filterView.ShowDialog();
                         if (filterView.DialogResult == true)
@@ -731,7 +731,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
             var mechanic = (Mechanic)p;
             switch (mechanic.EquipmentType)
             {
-                case Commands.MEP.Enums.EquipmentType.Fan:
+                case RevitCommands.MEP.Enums.EquipmentType.Fan:
                     FanViewModel fanVM = new FanViewModel((Fan)mechanic);
                     FanView fanView = new FanView() { DataContext = fanVM, WindowStartupLocation = WindowStartupLocation.CenterOwner };
                     fanView.ShowDialog();
@@ -740,7 +740,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
                         Mechanics.UpdateEntity((fanView.DataContext as FanViewModel).GetFan(mechanic.Guid));
                     }
                     break;
-                case Commands.MEP.Enums.EquipmentType.AirCooler:
+                case RevitCommands.MEP.Enums.EquipmentType.AirCooler:
                     CoolerViewModel coolerVM = new CoolerViewModel((Cooler)mechanic);
                     CoolerView coolerView = new CoolerView() { DataContext = coolerVM, WindowStartupLocation = WindowStartupLocation.CenterOwner };
                     coolerView.ShowDialog();
@@ -749,7 +749,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
                         Mechanics.UpdateEntity((coolerView.DataContext as CoolerViewModel).GetCooler(mechanic.Guid));
                     }
                     break;
-                case Commands.MEP.Enums.EquipmentType.AirHeater:
+                case RevitCommands.MEP.Enums.EquipmentType.AirHeater:
                     HeaterViewModel heaterVM = new HeaterViewModel((Heater)mechanic);
                     HeaterView heaterView = new HeaterView() { DataContext = heaterVM, WindowStartupLocation = WindowStartupLocation.CenterOwner };
                     heaterView.ShowDialog();
@@ -758,7 +758,7 @@ namespace MS.GUI.ViewModels.MEP.DuctInstallation
                         Mechanics.UpdateEntity((heaterView.DataContext as HeaterViewModel).GetHeater(mechanic.Guid));
                     }
                     break;
-                case Commands.MEP.Enums.EquipmentType.Filter:
+                case RevitCommands.MEP.Enums.EquipmentType.Filter:
                     FilterViewModel filterVM = new FilterViewModel((Filter)mechanic);
                     FilterView filterView = new FilterView() { DataContext = filterVM, WindowStartupLocation = WindowStartupLocation.CenterOwner };
                     filterView.ShowDialog();

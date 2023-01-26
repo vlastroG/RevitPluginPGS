@@ -7,6 +7,9 @@ using System.Windows.Data;
 
 namespace MS.GUI.Converters
 {
+    /// <summary>
+    /// Конвертер для преобразования пустых строк в null и обратно
+    /// </summary>
     public class NullableValueConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
