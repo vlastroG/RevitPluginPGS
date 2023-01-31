@@ -10,14 +10,6 @@ namespace TestConsole
     {
         static void Main(string[] args)
         {
-
-            bool t = false;
-            Console.WriteLine(t);
-            List<string> list = new List<string>();
-            list.Add("aty8o");
-            Console.WriteLine(t.ToString());
-            //.ToList()
-            //.ForEach(t => Console.WriteLine($"Key: {t.Key},\tValue: {t.Value}"));
         }
 
 
