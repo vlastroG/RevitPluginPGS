@@ -55,9 +55,9 @@ namespace MS
             btnInfo.LargeImage = btnInfoImage;
             btnInfo.ToolTip = "Alt-символы Revit.";
 
-            // Test command
+            // ElementInViews command
             PushButtonData btnElementInViews = new PushButtonData("ElementInViewsViewModel", "Элемент\nна видах", path, "MS.RevitCommands.General.ElementInViewsCmd");
-            Uri btnElementInViewsImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            Uri btnElementInViewsImagePath = new Uri(assembly_dir + @"\Images\Icons\General\View.png");
             BitmapImage btnElementInViewsImage = new BitmapImage(btnElementInViewsImagePath);
             btnElementInViews.LargeImage = btnElementInViewsImage;
             btnElementInViews.ToolTip = "Перейти на вид (лист), на котором есть размеры по выбранному элементу.";
@@ -160,7 +160,7 @@ namespace MS
 
             // OpeningsByDuct command
             PushButtonData btnOpeningsByDuctCmd = new PushButtonData("OpeningByDuct", "Проем по\nвоздуховоду", path, "MS.RevitCommands.AR.OpeningByDuctCmd");
-            Uri btnOpeningsByDuctCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            Uri btnOpeningsByDuctCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\KR\Hole.png");
             BitmapImage btnOpeningsByDuctCmdImage = new BitmapImage(btnOpeningsByDuctCmdImagePath);
             btnOpeningsByDuctCmd.LargeImage = btnOpeningsByDuctCmdImage;
             btnOpeningsByDuctCmd.ToolTip = "Проем по воздуховоду";
@@ -255,7 +255,7 @@ namespace MS
                 "Лишние изображения из проекта не удаляются.";
 
             // RoomBoardsFinishingCommand
-            PushButtonData btnRoomBoardsFinishing = new PushButtonData("RoomBoardsFinishing", "Откосы\nи плинтусы\n(Beta)", path, "MS.RevitCommands.AR.RoomBoardsFinishingCommand");
+            PushButtonData btnRoomBoardsFinishing = new PushButtonData("RoomBoardsFinishing", "Откосы\nи плинтусы", path, "MS.RevitCommands.AR.RoomBoardsFinishingCommand");
             Uri btnRoomBoardsFinishingImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\Plinth.png");
             BitmapImage btnRoomBoardsFinishingImage = new BitmapImage(btnRoomBoardsFinishingImagePath);
             btnRoomBoardsFinishing.LargeImage = btnRoomBoardsFinishingImage;
@@ -276,7 +276,7 @@ namespace MS
                 "или запустить команду и выбрать необходимые на виде помещения.";
 
             // RoomFinishingScheduleCreationCmd
-            PushButtonData btnRoomFinishingScheduleCreationCmd = new PushButtonData("RoomFinishingScheduleCreationCmd", "Ведомость\nотделки (beta)", path, "MS.RevitCommands.AR.RoomFinishingScheduleCreationCmd");
+            PushButtonData btnRoomFinishingScheduleCreationCmd = new PushButtonData("RoomFinishingScheduleCreationCmd", "Ведомость\nотделки", path, "MS.RevitCommands.AR.RoomFinishingScheduleCreationCmd");
             Uri btnRoomFinishingScheduleCreationCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\TableFinishing.png");
             BitmapImage btnRoomFinishingScheduleCreationCmdImage = new BitmapImage(btnRoomFinishingScheduleCreationCmdImagePath);
             btnRoomFinishingScheduleCreationCmd.LargeImage = btnRoomFinishingScheduleCreationCmdImage;
@@ -288,9 +288,9 @@ namespace MS
                 "\nПомещения можно выбрать в спецификации и запустить команду, или запустить команду и выбрать их вручную.";
 
 
-            // Info command
-            PushButtonData btnLintelsManagerCmd = new PushButtonData("LintelsManagerCmd", "Создание перемычек", path, "MS.RevitCommands.AR.LintelsManagerCmd");
-            Uri btnLintelsManagerCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            // LintelsManager command
+            PushButtonData btnLintelsManagerCmd = new PushButtonData("LintelsManagerCmd", "Менеджер перемычек", path, "MS.RevitCommands.AR.LintelsManagerCmd");
+            Uri btnLintelsManagerCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\AR\Beams.png");
             BitmapImage btnLintelsManagerCmdImage = new BitmapImage(btnLintelsManagerCmdImagePath);
             btnLintelsManagerCmd.LargeImage = btnLintelsManagerCmdImage;
             btnLintelsManagerCmd.ToolTip = "Создание и корректировка расположения перемычек.";
@@ -331,7 +331,7 @@ namespace MS
                 "Проемы\nпо инженерке",
                 path,
                 "MS.RevitCommands.KR.OpeningByMEPCmd");
-            Uri btnOpeningByMEPCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            Uri btnOpeningByMEPCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\KR\Hole.png");
             BitmapImage btnOpeningByMEPCmdImage = new BitmapImage(btnOpeningByMEPCmdImagePath);
             btnOpeningByMEPCmd.LargeImage = btnOpeningByMEPCmdImage;
             btnOpeningByMEPCmd.ToolTip = "Размещение проемов по воздуховодам и трубам";
@@ -345,7 +345,7 @@ namespace MS
                 "Настройки",
                 path,
                 "MS.RevitCommands.KR.ChangeSettingsCmd");
-            Uri btnChangeSettingsKRCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            Uri btnChangeSettingsKRCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Settings.png");
             BitmapImage btnChangeSettingsKRCmdImage = new BitmapImage(btnChangeSettingsKRCmdImagePath);
             btnChangeSettingsKRCmd.LargeImage = btnChangeSettingsKRCmdImage;
             btnChangeSettingsKRCmd.ToolTip = "Настройка размещения проемов по воздуховодам и трубам";
@@ -384,7 +384,7 @@ namespace MS
 
             // ОВиК конструктор установок
             PushButtonData btnDuctEquipmentCtorCmd = new PushButtonData("DuctEquipmentConstructor", "Конструктор\nустановок", path, "MS.RevitCommands.MEP.DuctEquipmentConstructorCmd");
-            Uri btnDuctEquipmentCtorCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\General\Info.png");
+            Uri btnDuctEquipmentCtorCmdImagePath = new Uri(assembly_dir + @"\Images\Icons\MEP\Tools.png");
             BitmapImage btnDuctEquipmentCtorCmdImage = new BitmapImage(btnDuctEquipmentCtorCmdImagePath);
             btnDuctEquipmentCtorCmd.LargeImage = btnDuctEquipmentCtorCmdImage;
             btnDuctEquipmentCtorCmd.ToolTip = "Конструктор семейств вентиляционных установок";
@@ -514,18 +514,18 @@ namespace MS
             // AR panel
             panelAR.AddItem(btnRmArea);
             panelAR.AddItem(btnOpeningsByDuctCmd);
-            panelAR.AddItem(btnOpeningsArea);
             panelAR.AddItem(btnLintelsSections);
             panelAR.AddItem(btnCreateImagesFromSections);
             panelAR.AddItem(btnRoomsFinishingMultiMark);
             panelAR.AddItem(btnRmFinCreation);
             panelAR.AddItem(btnRoomFinishingScheduleCreationCmd);
+            panelAR.AddItem(btnLintelsManagerCmd);
             panelAR.AddSlideOut();
+            panelAR.AddItem(btnOpeningsArea);
             panelAR.AddItem(btnCmplxAprtNum);
             panelAR.AddItem(btnRoomBoardsFinishing);
             panelAR.AddItem(btnMasonryMesh);
             panelAR.AddItem(btnMaterialColors);
-            panelAR.AddItem(btnLintelsManagerCmd);
 
             // KR panel
             panelKR.AddItem(btnStairRnfrcmtCmd);
