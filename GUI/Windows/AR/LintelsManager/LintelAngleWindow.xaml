@@ -108,7 +108,7 @@
                         <CheckBox IsChecked="{Binding AngleFirstVisible}"/>
                     </DockPanel>
                     <DockPanel>
-                        <TextBlock Text="Видимость 1-го уголка"/>
+                        <TextBlock Text="Только 1 уголок"/>
                     </DockPanel>
                     <DockPanel>
                         <CheckBox IsChecked="{Binding AngleShelvesInside}"/>

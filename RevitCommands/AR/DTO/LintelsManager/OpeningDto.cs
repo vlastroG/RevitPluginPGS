@@ -77,7 +77,8 @@ namespace MS.RevitCommands.AR.DTO
             int hostWallId = -1,
             int openingId = -1,
             XYZ location = null,
-            Lintel lintel = null)
+            Lintel lintel = null,
+            XYZ direction = null)
         {
             Width = width;
             Height = height;
@@ -90,6 +91,7 @@ namespace MS.RevitCommands.AR.DTO
             _guid = guid;
             Location = location;
             _lintel = lintel;
+            Direction = direction;
             if (!(lintel is null))
             {
                 _existLintelId = lintel.ExistLintelId;
@@ -112,6 +114,11 @@ namespace MS.RevitCommands.AR.DTO
         /// Точка расположения элемента, образующего проем
         /// </summary>
         public XYZ Location { get; }
+
+        /// <summary>
+        /// Нормаль к лицевой поверхности проема
+        /// </summary>
+        public XYZ Direction { get; }
 
         /// <summary>
         /// Уровень, на котором расположени проем

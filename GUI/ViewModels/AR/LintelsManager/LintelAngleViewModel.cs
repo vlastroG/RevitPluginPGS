@@ -29,7 +29,7 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
             _stripeOffset = 20;
             _supportAngleLeftVisible = false;
             _supportAngleRightVisible = false;
-            _angleFirstVisible = true;
+            _angleFirstVisible = false;
             _angleShelvesInside = false;
             _insulationThickness = 0;
             _windowQuarter = 0;
@@ -136,6 +136,7 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
         private bool _angleFirstVisible;
         /// <summary>
         /// Вкл_Видимость_1_уголок
+        /// Если включить, будет виден только 1 уголок из 2-х
         /// </summary>
         public bool AngleFirstVisible { get => _angleFirstVisible; set => Set(ref _angleFirstVisible, value); }
 

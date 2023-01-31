@@ -294,6 +294,8 @@ namespace MS
             BitmapImage btnLintelsManagerCmdImage = new BitmapImage(btnLintelsManagerCmdImagePath);
             btnLintelsManagerCmd.LargeImage = btnLintelsManagerCmdImage;
             btnLintelsManagerCmd.ToolTip = "Создание и корректировка расположения перемычек.";
+            btnLintelsManagerCmd.LongDescription = 
+                "Для корректного расположения перемычек необходимо, чтобы наружные грани стен были именно наружными гранями относительно помещения.";
 
 
 

@@ -118,10 +118,10 @@ namespace MS.RevitCommands.AR.Models.Lintels
         public bool SupportAngleRightVisible { get; set; } = false;
 
         /// <summary>
-        /// Видимость первого уголка
+        /// Если включить, будет виден только 1 уголок из 2-х
         /// </summary>
         [Description(_angleFirstVisible)]
-        public bool AngleFirstVisible { get; set; } = true;
+        public bool AngleFirstVisible { get; set; } = false;
 
         /// <summary>
         /// Полки уголков внутрь

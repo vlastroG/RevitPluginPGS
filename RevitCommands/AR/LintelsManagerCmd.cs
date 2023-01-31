@@ -456,6 +456,7 @@ namespace MS.RevitCommands.AR
             var lintel = doc.Create.NewFamilyInstance(
                 openingDto.Location,
                 fSymb,
+                openingDto.Direction,
                 doc.GetElement(new ElementId(openingDto.HostWallId)),
                 Autodesk.Revit.DB.Structure.StructuralType.NonStructural);
 
@@ -558,7 +559,7 @@ namespace MS.RevitCommands.AR
             {
                 MessageBox.Show(
                     "В текущем проекте не у всех категорий из:" +
-                    "\n\"Стены\", \"Двери\", \"Окна\"" +
+                    "\n\"Стены\", \"Двери\", \"Окна\", \"Обобщенные модели\"" +
                     "\nприсутствует параметр \"PGS_Guid\"!",
                     "Ошибка");
                 return false;
@@ -619,7 +620,7 @@ namespace MS.RevitCommands.AR
                     (double height, double width) = GetOpeningWidthAndHeight(opening);
                     var wallThick = GetWallThick(hostWall as Wall);
                     var wallHeightOverOpening = GetWallHeightOverOpening(opening, hostWall, view3d);
-                    (double distanceLeft, double distanceRight) = GetOpeningSideDistances(opening, hostWall as Wall);
+                    (double distanceLeft, double distanceRight, XYZ direction) = GetOpeningSideDistances(opening, hostWall as Wall);
                     string wallMaterial = GetWallMaterial(hostWall as Wall);
                     string levelName = GetElementLevel(opening);
                     XYZ openingLocation = GetLocationPoint(opening);
@@ -637,7 +638,8 @@ namespace MS.RevitCommands.AR
                         hostWall.Id.IntegerValue,
                         opening.Id.IntegerValue,
                         openingLocation,
-                        lintel)
+                        lintel,
+                        direction)
                     {
                         Mark = lintel?.Mark
                     };
@@ -773,7 +775,7 @@ namespace MS.RevitCommands.AR
         /// <param name="opening">Проем</param>
         /// <param name="hostWall">Хост стена проема</param>
         /// <returns>Кортеж расстояний слева и справа от граней проема до торцов стены</returns>
-        private (double leftDistance, double rightDistance) GetOpeningSideDistances(in Element opening, in Wall hostWall)
+        private (double leftDistance, double rightDistance, XYZ direction) GetOpeningSideDistances(in Element opening, in Wall hostWall)
         {
             (_, double width) = GeometryMethods.GetWidthAndHeightOfElement(opening);
             XYZ openingLocation = GetLocationPoint(opening);
@@ -787,17 +789,19 @@ namespace MS.RevitCommands.AR
                 if (lineDirection.CrossProduct(openingDirection).IsAlmostEqualTo(XYZ.BasisZ))
                 {
                     return (Math.Round(UnitUtils.ConvertFromInternalUnits(openingLocationOnLevel.DistanceTo(lineStart) - (width / 2), UnitTypeId.Millimeters)),
-                        Math.Round(UnitUtils.ConvertFromInternalUnits(openingLocationOnLevel.DistanceTo(lineEnd) - (width / 2), UnitTypeId.Millimeters)));
+                        Math.Round(UnitUtils.ConvertFromInternalUnits(openingLocationOnLevel.DistanceTo(lineEnd) - (width / 2), UnitTypeId.Millimeters)),
+                        openingDirection);
                 }
                 else
                 {
                     return (Math.Round(UnitUtils.ConvertFromInternalUnits(openingLocationOnLevel.DistanceTo(lineEnd) - (width / 2), UnitTypeId.Millimeters)),
-                        Math.Round(UnitUtils.ConvertFromInternalUnits(openingLocationOnLevel.DistanceTo(lineStart) - (width / 2), UnitTypeId.Millimeters)));
+                        Math.Round(UnitUtils.ConvertFromInternalUnits(openingLocationOnLevel.DistanceTo(lineStart) - (width / 2), UnitTypeId.Millimeters)),
+                        openingDirection);
                 }
             }
             else
             {
-                return (0, 0);
+                return (0, 0, openingDirection);
             }
         }
 
