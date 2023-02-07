@@ -3,9 +3,19 @@
     public static class SharedValues
     {
         /// <summary>
+        /// Название временной папки - "pgsbim_temp"
+        /// </summary>
+        public static readonly string TempDirName = "pgsbim_temp";
+
+        /// <summary>
         /// Значение параметра "Описание" в типе семейств перемычек - "Перемычка"
         /// </summary>
         public static readonly string LintelDescription = "Перемычка";
+
+        /// <summary>
+        /// "перемычка"
+        /// </summary>
+        public static readonly string LintelDescriptionInLowercase = "перемычка";
 
         /// <summary>
         /// Префикс марки перемычки "ПР-"

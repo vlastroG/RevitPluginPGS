@@ -1,0 +1,154 @@
+﻿<Window x:Class="MS.GUI.Windows.AR.LintelsManager.OpeningsInstancesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:vm="clr-namespace:MS.GUI.ViewModels.AR.LintelsManager"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="1000" MinHeight="200" MinWidth="500"
+        Title="Редактирование перемычек в одинаковых проемах">
+    <Window.DataContext>
+        <vm:OpeningsInstancesViewModel/>
+    </Window.DataContext>
+    <Grid>
+        <Grid.Resources>
+        </Grid.Resources>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="40"/>
+        </Grid.RowDefinitions>
+        <DataGrid ItemsSource="{Binding Openings}"
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False"
+                  SelectedItem="{Binding SelectedOpening}"
+                  IsSynchronizedWithCurrentItem="True"
+                  AutoGenerateColumns="False"
+                  EnableRowVirtualization="True"
+                  EnableColumnVirtualization="True"
+                  VirtualizingPanel.IsVirtualizingWhenGrouping="True"
+                  VirtualizingPanel.VirtualizationMode="Recycling"
+                  VirtualizingPanel.IsVirtualizing="True"
+                  ScrollViewer.CanContentScroll="True">
+            <DataGrid.Resources>
+                <Style TargetType="DataGridCell">
+                    <Setter Property="TextBlock.TextAlignment" Value="Center"/>
+                </Style>
+                <Style TargetType="DataGridColumnHeader">
+                    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                    <Setter Property="Height" Value="40"/>
+                </Style>
+            </DataGrid.Resources>
+            <DataGrid.Columns>
+                <DataGridTextColumn Width="60"
+                                    Header="Марка"
+                                    Binding="{Binding Mark}">
+                </DataGridTextColumn>
+                <DataGridTextColumn Width="60"
+                                    Binding="{Binding Width}"
+                                    CanUserResize="False"
+                                    IsReadOnly="True">
+                    <DataGridTextColumn.Header>
+                        <TextBlock TextAlignment="Center">
+                                    <TextBlock>Ширина<LineBreak/>проема</TextBlock>
+                            </TextBlock>
+                    </DataGridTextColumn.Header>
+                </DataGridTextColumn>
+                <DataGridTextColumn Width="60"
+                                    Binding="{Binding WallThick}"
+                                    IsReadOnly="True"
+                                    CanUserResize="False">
+                    <DataGridTextColumn.Header>
+                        <TextBlock TextAlignment="Center">
+                                    <TextBlock>Толщина<LineBreak/>стены</TextBlock>
+                            </TextBlock>
+                    </DataGridTextColumn.Header>
+                </DataGridTextColumn>
+                <DataGridTextColumn Width="100"
+                                    Binding="{Binding WallHeightOverOpening}"
+                                    IsReadOnly="True"
+                                    CanUserResize="False">
+                    <DataGridTextColumn.Header>
+                        <TextBlock TextAlignment="Center">
+                                    <TextBlock>Высота стены<LineBreak/>над проемом</TextBlock>
+                            </TextBlock>
+                    </DataGridTextColumn.Header>
+                </DataGridTextColumn>
+                <DataGridTextColumn Width="*"
+                                    Header="Тип стены"
+                                    Binding="{Binding WallMaterial}"
+                                    IsReadOnly="True"/>
+                <DataGridTextColumn Width="100"
+                                    Header="Уровень"
+                                    Binding="{Binding Level}"
+                                    IsReadOnly="True"/>
+                <DataGridTextColumn Width="75"
+                                    Binding="{Binding DistanceToLeftEnd}"
+                                    IsReadOnly="True"
+                                    CanUserResize="False">
+                    <DataGridTextColumn.Header>
+                        <TextBlock TextAlignment="Center"
+                                   ToolTip="Расстояние от левой стороны проема до левого торца стены">
+                                    <TextBlock>Расстояние<LineBreak/>слева</TextBlock>
+                            </TextBlock>
+                    </DataGridTextColumn.Header>
+                </DataGridTextColumn>
+                <DataGridTextColumn Width="75"
+                                    Binding="{Binding DistanceToRightEnd}"
+                                    IsReadOnly="True"
+                                    CanUserResize="False">
+                    <DataGridTextColumn.Header>
+                        <TextBlock TextAlignment="Center"
+                                   ToolTip="Расстояние от правой стороны проема до правого торца стены">
+                                    <TextBlock>Расстояние<LineBreak/>справа</TextBlock>
+                            </TextBlock>
+                    </DataGridTextColumn.Header>
+                </DataGridTextColumn>
+                <DataGridTextColumn Width ="220"
+                                    Header="Тип перемычки"
+                                    Binding="{Binding Lintel}"
+                                    IsReadOnly="True"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        <DockPanel Grid.Row="1">
+            <UniformGrid DockPanel.Dock="Bottom" Rows="1">
+                <Button Command="{Binding SetOrEditLintelCommand}"
+                        CommandParameter="{Binding SelectedOpening}"
+                        HorizontalContentAlignment="Center"
+                        VerticalContentAlignment="Center"
+                        ToolTip="Если скорректировать уже созданную перемычку, то она пересоздастся. 
+                        Для того, чтобы изменить тип перемычки нужно сначала удалить ее, 
+                        а потом добавить.">
+                    <Button.Content>
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <TextBlock Text="Добавить/Редактировать" TextAlignment="Center"/>
+                            <TextBlock Text="перемычку" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Button.Content>
+                </Button>
+                <Button Content="Удалить перемычку"
+                        Command="{Binding DeleteLintelCommand}"
+                        CommandParameter="{Binding SelectedOpening}"
+                        ToolTip="Если в списке удалить перемычку из проема, в модели она также удалится. 
+                        Если нужно изменить уже назначенный тип перемычки, то сначала нужно удалить перемычку."/>
+                <CheckBox IsChecked="{Binding UpdateLintelsLocation}"
+                          Content="Скорректировать&#10;расположения в плане"
+                          VerticalAlignment="Center"
+                          HorizontalAlignment="Center"
+                          VerticalContentAlignment="Center"
+                          ToolTip="После нажатия кнопки Ок расположения перемычек&#10; будут скорректированы в соответствии с расположением их проемов. ВАЖНО!!! если основа проема изменилась, то расположение не будет скорректировано автоматически и придется его исправлять вручную!"/>
+                <Button Content="Перейти к&#10;3D обрезке проема"
+                        HorizontalContentAlignment="Center"
+                        Click="GoTo3D_clicked"
+                        Command="{Binding GoToOpeningView3DCommand}"/>
+                <Button Content="Ок" 
+                        Name="Ok" 
+                        Click="Ok_Click"
+                        Command="{Binding UnsetGoToOpeningView3DCommand}"/>
+                <Button Content="Отмена" 
+                        Name="Cancel" 
+                        Click="Cancel_Click"
+                        Command="{Binding UnsetGoToOpeningView3DCommand}"/>
+            </UniformGrid>
+        </DockPanel>
+    </Grid>
+</Window>

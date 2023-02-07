@@ -51,6 +51,7 @@ namespace MS.Utilites.Extensions
             if (ceilingSolid == null) return null;
             var faces = ceilingSolid.Faces;
             XYZ roomPoint;
+            double scale = 0.1;
             foreach (var face in faces)
             {
                 PlanarFace planarFace;
@@ -58,9 +59,9 @@ namespace MS.Utilites.Extensions
                 {
                     planarFace = face1;
                     XYZ normal = planarFace.FaceNormal;
-                    if (Math.Round(normal.Z, 5) == 0)
+                    if (Math.Round(normal.Z, 5) == 0 && (face1.GetEdgesAsCurveLoops().First().GetExactLength() > 1))
                     {
-                        roomPoint = planarFace.Origin + planarFace.YVector + normal.Negate() + XYZ.BasisZ.Negate();
+                        roomPoint = planarFace.Origin + planarFace.YVector.Multiply(scale) + normal.Negate().Multiply(scale) + XYZ.BasisZ.Negate();
                         return roomPoint;
                     }
                 }

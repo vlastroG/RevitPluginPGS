@@ -1,5 +1,17 @@
-﻿string test = "к1 18";
-var t = test.Split(',');
-var filepath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), @"Autodesk\Revit\Addins\2022\MS.dll");
-bool exists = File.Exists(filepath);
-var b = 9;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace TestConsole
+{
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+        }
+
+
+    }
+}

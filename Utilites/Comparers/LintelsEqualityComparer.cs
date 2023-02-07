@@ -42,21 +42,21 @@ namespace MS.Utilites.Comparers
         public int GetHashCode(FamilyInstance lintel)
         {
             // "Описание" типоразмера семейства
-            string symbolDescription = WorkWithFamilies.GetSymbolDescription(lintel);
+            string symbolDescription = FamiliesMethods.GetSymbolDescription(lintel);
 
             // "ADSK_Толщина стены" из семейства перемычки или из внешнего семейства (окно/дверь)
-            double wallWidth = Math.Round(WorkWithFamilies.GetWallWidth(lintel) * SharedValues.FootToMillimeters, 0);
+            double wallWidth = Math.Round(FamiliesMethods.GetWallWidth(lintel) * SharedValues.FootToMillimeters, 0);
 
             StringBuilder sb = new StringBuilder();
             // "ADSK_Наименование" вложенных экземпляров семейств в семействе перемычки
-            var adskNames = WorkWithFamilies.GetSubComponentsAdskNames(lintel);
+            var adskNames = FamiliesMethods.GetSubComponentsAdskNames(lintel);
             foreach (var adskName in adskNames)
             {
                 sb.Append(adskName);
             }
 
             // Ширина перемычки
-            double widthOfLintel = Math.Round(WorkWithFamilies.GetMaxWidthOfLintel(lintel) * SharedValues.FootToMillimeters, 0);
+            double widthOfLintel = Math.Round(FamiliesMethods.GetMaxWidthOfLintel(lintel) * SharedValues.FootToMillimeters, 0);
 
             if (AddLevel)
             {
