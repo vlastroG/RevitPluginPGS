@@ -11,6 +11,9 @@ using System.Windows.Input;
 
 namespace MS.GUI.ViewModels.AR.LintelsManager
 {
+    /// <summary>
+    /// Главное окно менеджера перемычек
+    /// </summary>
     public class SimilarOpeningsViewModel : OpeningsInstancesViewModel
     {
         public SimilarOpeningsViewModel()

@@ -17,7 +17,7 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="40"/>
         </Grid.RowDefinitions>
-        <DataGrid ItemsSource="{Binding Openings}"
+        <DataGrid ItemsSource="{Binding OpeningsView}"
                   CanUserAddRows="False"
                   CanUserDeleteRows="False"
                   SelectedItem="{Binding SelectedOpening}"
@@ -140,6 +140,14 @@
                         HorizontalContentAlignment="Center"
                         Click="GoTo3D_clicked"
                         Command="{Binding GoToOpeningView3DCommand}"/>
+                <StackPanel Orientation="Vertical" Margin="1" VerticalAlignment="Bottom">
+                    <TextBlock Text="Поиск:"></TextBlock>
+                    <TextBox Text="{Binding OpeningsFilter, UpdateSourceTrigger=PropertyChanged}" 
+                           VerticalAlignment="Stretch" 
+                           HorizontalAlignment="Stretch"
+                           Height="20"
+                           TextAlignment="Left"></TextBox>
+                </StackPanel>
                 <Button Content="Ок" 
                         Name="Ok" 
                         Click="Ok_Click"

@@ -8,15 +8,17 @@ using MS.Utilites.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Data;
 using System.Windows.Input;
 
 namespace MS.GUI.ViewModels.AR.LintelsManager
 {
     /// <summary>
-    /// Модель представления главного окна менеджера перемычек
+    /// Модель представления окна менеджера перемычек для редактирования перемычек по экземплярам проемов
     /// </summary>
     public class OpeningsInstancesViewModel : ViewModelBase
     {
@@ -35,6 +37,67 @@ namespace MS.GUI.ViewModels.AR.LintelsManager
         public OpeningsInstancesViewModel(ICollection<OpeningDto> openings)
         {
             Openings = new ObservableCollection<OpeningDto>(openings);
+            _OpeningsViewSource = new CollectionViewSource
+            {
+                Source = openings,
+                SortDescriptions =
+                {
+                    new SortDescription(nameof(OpeningDto.Level), ListSortDirection.Ascending),
+                    new SortDescription(nameof(OpeningDto.WallMaterial), ListSortDirection.Descending),
+                    new SortDescription(nameof(OpeningDto.Width), ListSortDirection.Ascending),
+                    new SortDescription(nameof(OpeningDto.WallThick), ListSortDirection.Ascending),
+                    new SortDescription(nameof(OpeningDto.WallHeightOverOpening), ListSortDirection.Ascending),
+                    new SortDescription(nameof(OpeningDto.DistanceToLeftEnd), ListSortDirection.Ascending),
+                    new SortDescription(nameof(OpeningDto.DistanceToRightEnd), ListSortDirection.Ascending),
+                }
+            };
+            _OpeningsViewSource.Filter += OnOpeningsFilter;
+        }
+
+
+        /// <summary>
+        /// Строка фильтрации проемов
+        /// </summary>
+        private protected string _OpeningsFilter;
+
+        /// <summary>
+        /// Коллекция для фильтрации во ViewModel
+        /// </summary>
+        private protected readonly CollectionViewSource _OpeningsViewSource;
+
+        /// <summary>
+        /// Проемы с фильтрацией
+        /// </summary>
+        public ICollectionView OpeningsView => _OpeningsViewSource?.View;
+
+        /// <summary>
+        /// Строка для фильтрации проемов
+        /// </summary>
+        public string OpeningsFilter
+        {
+            get => _OpeningsFilter;
+            set
+            {
+                if (Set(ref _OpeningsFilter, value))
+                {
+                    _OpeningsViewSource.View.Refresh();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Все проемы, в свойстве <seealso cref="OpeningDto.LongName"/> НЕ будет содержаться значение <see cref="OpeningsFilter"/>, не будут пропускаться фильтром.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="E"></param>
+        private void OnOpeningsFilter(object sender, FilterEventArgs E)
+        {
+            if (!(E.Item is OpeningDto opening) || string.IsNullOrWhiteSpace(OpeningsFilter)) return;
+
+            if (!opening.LongName.Contains(OpeningsFilter))
+            {
+                E.Accepted = false;
+            }
         }
 
 
