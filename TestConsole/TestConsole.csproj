@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{BEF75E59-1B3D-49E9-B48B-BBEBA5FB59C6}</ProjectGuid>
+    <ProjectGuid>{B23561A2-8C8E-4651-857A-A618C555D815}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>TestConsole</RootNamespace>
     <AssemblyName>TestConsole</AssemblyName>
@@ -43,7 +43,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Extension.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

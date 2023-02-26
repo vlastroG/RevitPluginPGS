@@ -101,6 +101,29 @@ namespace MS.RevitCommands.AR.DTO
         }
 
         /// <summary>
+        /// Строковое представление всех свойств перемычки, доступных пользователю
+        /// </summary>
+        public string LongName
+        {
+            get
+            {
+                return
+                    Mark + ' ' +
+                    Width + ' ' +
+                    WallThick + ' ' +
+                    Height + ' ' +
+                    WallMaterial + ' ' +
+                    Level + ' ' +
+                    DistanceConditionToLeftEnd + ' ' +
+                    DistanceToLeftEnd + ' ' +
+                    DistanceConditionToRightEnd + ' ' +
+                    DistanceToRightEnd + ' ' +
+                    Lintel
+                    ;
+            }
+        }
+
+        /// <summary>
         /// Id стены, в которой размещен проем
         /// </summary>
         public int HostWallId => _hostWallId;
